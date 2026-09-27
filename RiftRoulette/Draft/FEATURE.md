@@ -19,7 +19,8 @@ and `Reset` keeps each player's team.
 
 Note board: `RedrawBoards` draws `DraftService.WelcomeNote` (`draft.note`)
 under the welcome board whenever it is not empty. It moves with the welcome
-board (watch spot) and is redrawn with it.
+board (watch spot) and is redrawn with it. The note is currently empty, so
+none is drawn.
 
 ## Files
 

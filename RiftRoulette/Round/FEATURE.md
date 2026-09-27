@@ -9,7 +9,8 @@ the master plan (Stage 11). One code path; the mode (Clean for lifecycle,
 Debug for admin) changes only logging. Since Stage 13a the round also
 reports its result to the match loop. Since Stage 13i players wait at a
 watch spot above the rift (`WatchSpot`) instead of the fixed `draft` spot,
-restrained (`Modules/Restraint`) until they are moved into the rift.
+restrained (`Modules/Restraint`) until they are moved into the rift, where
+each fighter is healed to full health.
 
 ## Files
 
@@ -58,7 +59,7 @@ GameLoop/MatchService (Stage 13a) ─┐
                                    ├─> RoundFlow.RunRound / CancelRound
 /rift_start, /rift_cancel (Debug) ─┘
       └─> RiftService.RunRift / CancelRift (order, gamerules, watch, cleanup)
-            └─ steps ─> RoundFlow.MoveTeamsToRift  (pick or 1v1 fighter + TeamNum; release restraint; MovementService)
+            └─ steps ─> RoundFlow.MoveTeamsToRift  (pick or 1v1 fighter + TeamNum; release restraint; MovementService; heal to full)
                      ├> RoundFlow.ReturnPlayersToDraft (WatchSpot.SendUp above NextSide, boards follow)
                      └> MatchService.OnRoundEnded (score + banner; no-op outside a match)
 ```

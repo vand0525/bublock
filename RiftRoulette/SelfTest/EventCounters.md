@@ -16,11 +16,13 @@ whether a hook still fires after a game update.
 | `player_hero_changed` | `Draft/DraftPlugin` |
 | `player_respawned` | `RandomMode/RandomPlugin` |
 | `game_frame` | `GameLoop/GameLoopPlugin.OnGameFrame` |
-| `modify_currency`, `soul_blocked_<Source>` | `GameLoop/GameLoopPlugin.OnModifyCurrency` (every call; each blocked gain by `ECurrencySource`, not in `GameDependencies.Events`) |
+| `modify_currency`, `soul_blocked_<Source>`, `ability_blocked_<Currency>_<Source>` | `GameLoop/GameLoopPlugin.OnModifyCurrency` (every call; each blocked gold or ability-point / unlock gain by `ECurrencySource`, not in `GameDependencies.Events`) |
+| `take_damage`, `damage_blocked_restrained` | `GameLoop/GameLoopPlugin.OnTakeDamage` (every hit; each hit blocked because the victim is restrained up top, not in `GameDependencies.Events`) |
 
 ## Invariants
 
 - Static state, reset by every load / hot reload (new load context).
 - Game-thread only; no locking.
 - Names checked by the self-test must match `GameDependencies.Events`;
-  extra diagnostic names (`soul_blocked_*`) are only counted.
+  extra diagnostic names (`soul_blocked_*`, `ability_blocked_*`, `damage_blocked_restrained`)
+  are only counted.

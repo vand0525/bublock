@@ -15,7 +15,13 @@ public static class RestraintService
 
   // Disarmed also blocks reloading, so players would start rounds on an empty magazine.
   public static readonly EModifierState[] States =
-    [EModifierState.Silenced, EModifierState.ItemsDisabled, EModifierState.ShootingDisabled, EModifierState.MeleeDisabled];
+  [
+    EModifierState.Silenced,
+    EModifierState.ItemsDisabled,
+    EModifierState.ShootingDisabled,
+    EModifierState.MeleeDisabled,
+    EModifierState.IgnoredByNpcTargeting
+  ];
 
   private static readonly Logger Log = BublockLog.For("Restraint");
 
@@ -26,6 +32,12 @@ public static class RestraintService
   public static int Count => Restrained.Count;
 
   public static bool IsRestrained(ulong steamId) => Restrained.Contains(steamId);
+
+  // Runs on every damage event, so it bails out before any entity lookup when nobody is restrained.
+  public static bool IsRestrainedPawn(CBaseEntity? entity) =>
+    Restrained.Count > 0 &&
+    entity?.As<CCitadelPlayerPawn>()?.Controller is { } player &&
+    Restrained.Contains(player.PlayerSteamId);
 
   public static bool Restrain(CCitadelPlayerController player, ExecutionMode mode = ExecutionMode.Clean)
   {

@@ -7,4 +7,7 @@ Unit tests for `RiftRoulette/GameLoop/SoulRule`.
 - `ECheats`, `EStartingAmount` and `EItemSale` gold passes.
 - Without a match nothing is blocked.
 - Spending and losses (0 or negative amounts) pass.
-- Other currencies (ability points) pass.
+- Ability point and unlock gains from level-ups and the starting grant are
+  blocked during a match when ranks come from the build (Random, 1v1).
+- They pass in Draft mode, without a match, from `ECheats`, and when spent.
+- Other currencies (item enhancements) pass.

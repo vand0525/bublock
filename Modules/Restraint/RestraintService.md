@@ -1,7 +1,7 @@
 # RestraintService
 
 Keeps chosen players silenced and unable to use items, shoot or melee until
-they are released (Stage 13h). They can still reload. Game agnostic: the caller decides who is restrained
+they are released (Stage 13h), and ignored by NPC targeting. They can still reload. Game agnostic: the caller decides who is restrained
 (Rift Roulette restrains everyone sent up top, see `Round/WatchSpot`).
 
 ## State
@@ -19,6 +19,7 @@ they are released (Stage 13h). They can still reload. Game agnostic: the caller 
 | `Forget(steamId)` | Drops the Steam ID without touching a pawn (disconnect). |
 | `Sustain()` | Called every simulating frame by `RestraintPlugin.OnGameFrame`. Sets the states on every live restrained pawn; every `ModifierCheckTicks` (32) frames re-adds any missing modifier. No-op when nobody is restrained. |
 | `AddModifier(pawn, name, seconds)` | `pawn.AddModifier(name, kv)` with `duration` set in a `KeyValues3`; true if the game returned a modifier. Also used by `/status_add`. |
+| `IsRestrainedPawn(entity)` | True when the entity is a hero pawn (`As<CCitadelPlayerPawn>()`, null for anything else) whose controller is restrained. Returns false before any lookup when nobody is restrained: consumers call it from their damage hook, which runs on every hit. |
 | `IsRestrained(steamId)` / `Count` / `Describe()` | Queries; `Describe` lists each restrained player and which restraint modifiers are active. |
 
 ## What it applies
@@ -30,6 +31,12 @@ they are released (Stage 13h). They can still reload. Game agnostic: the caller 
   `ItemsDisabled` (14; blocks item actives, which silence alone does not),
   `ShootingDisabled` (62), `MeleeDisabled`. Items, shooting and melee have
   no modifier of their own here, so the states are the only blocks.
+- `IgnoredByNpcTargeting` (33), so NPCs (troopers, and hopefully deployed
+  turrets such as McGinnis's) don't aim at restrained players. Whether
+  turrets honor it is still to be confirmed in game.
+- No damage: the module does not block damage itself; the consumer's
+  `OnTakeDamage` hook uses `IsRestrainedPawn` (Rift Roulette:
+  `GameLoop/GameLoopPlugin`).
 - No disarm: `modifier_citadel_disarmed` / `EModifierState.Disarmed` also
   block reloading, so players started rounds on an empty magazine
   (playtest 2026-09-27). `ShootingDisabled` blocks the gun and leaves

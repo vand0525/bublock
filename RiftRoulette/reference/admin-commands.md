@@ -501,8 +501,10 @@ screen through the Hud module. Added in Stage 13a.
 Since Stage 13d the match also starts and ends by itself
 (`AutoStartService`, on by default): the 2nd human player to connect
 starts it (Clean mode) and a disconnect that leaves fewer than 2 ends it,
-followed 3 s later by a `Waiting for players` banner. It is also checked
-3 s after every DLL load. Turn it off with `/match_auto off` to run
+followed 3 s later by a `Waiting for players: ...` chat line. A lone
+player who joins gets the same chat line (`Match starts when 1 more player
+joins`), repeated every 30 s while they wait (chat, not a banner). It is also
+checked 3 s after every DLL load. Turn it off with `/match_auto off` to run
 matches by hand.
 
 #### /match_start
@@ -511,7 +513,7 @@ matches by hand.
 - **Who:** admin
 - **Calls:** `MatchService.Start` → in Random mode `RandomModeService.BeginMatch`, then each intermission `RandomModeService.PrepareRound` → after each intermission `RoundFlow.RunRound` (the lifecycle path)
 - **Mode:** Debug (the loop and its rounds log in detail)
-- **Side effects:** resets the score; in Random mode (the default) balances teams once and, at the start of every intermission, swaps every player to a new random hero with a top build; banner `Match starting` / `Round 1 in 10s` (1v1: `1v1` / the pairing); then, forever until `/match_end`: countdown (Random mode: 3 s in, each player sees `<Hero>` / `<build> - 12,345 souls`; 3 s before the round, everyone sees `Round N` / the score, or the pairing in 1v1), start the next rift round (no banner), score the result when it ends (banner `Sapphire 1 - 0 Amber` / `Sapphire took the rift`). If the new rift does not spawn but one is already on the map (left by a cancelled round), that rift is used. A captured rift gives 1 point to the team of the first new rift trooper; tied, cancelled, and timed-out rounds give none. Master log: match started, each round result, match ended
+- **Side effects:** resets the score; in Random mode (the default) balances teams once and, at the start of every intermission, swaps every player to a new random hero with a top build; banner `Match starting` / `Round 1 in 5s` (1v1: `1v1` / the pairing); then, forever until `/match_end`: countdown (Random mode: 3 s in, each player sees `<Hero>` / `<build> - 12,345 souls`; 3 s before the round, everyone sees `Round N` / the score, or the pairing in 1v1), start the next rift round (no banner), score the result when it ends (banner `Sapphire 1 - 0 Amber` / `Sapphire took the rift`). If the new rift does not spawn but one is already on the map (left by a cancelled round), that rift is used. A captured rift gives 1 point to the team of the first new rift trooper; tied, cancelled, and timed-out rounds give none. Master log: match started, each round result, match ended
 - **Notes:** refuses while a match or a rift is running. Players who die during a round respawn at the watch spot above the rift still being fought, silenced and unable to use items, shoot or melee (they can reload), and are out until the next round. Draft mode: picks carry over; players can `/pick` or `/unpick` during the intermission. Random mode: teams stay; players dead at the start of an intermission get their new hero on respawn. `/rift_start` during a countdown makes the loop wait for that rift instead of starting another
 
 #### /match_end
@@ -546,7 +548,7 @@ matches by hand.
 - **Who:** admin
 - **Calls:** `MatchService.SetIntermission`
 - **Mode:** Debug
-- **Side effects:** sets the seconds between rounds (5-120, default 10, which is also the betting window); applies from the next countdown; lost on plugin reload
+- **Side effects:** sets the seconds between rounds (5-120, default 5; betting opens here and stays open 10 s into the round); applies from the next countdown; lost on plugin reload
 
 #### /match_mode <random|draft|duel|1v1>
 
@@ -743,7 +745,7 @@ Added in Stage 13b.
 - **Who:** admin
 - **Calls:** `HeroBuildCatalog.TryParseHero` / `BuildsFor`, `LoadoutService.Swap` (→ `Apply`)
 - **Mode:** Debug (per-ability and per-item detail in `loadout-*.log`)
-- **Side effects:** swaps the player in that slot to the hero (enum name like `inferno` or game name like `Infernus`), then 1 s later resets the hero, sets level 36, applies the build's ability order, grants the build's first 9 items in order (every required item plus one random item per optional group; Monster Rounds, Cultist Sacrifice and Golden Goose Egg skipped; upgrades replace their components; the most expensive items dropped while the total is over 20,000 souls; imbues applied), sets souls to 0, and heals to full. `build` is 1-3; 0 or omitted picks one at random
+- **Side effects:** swaps the player in that slot to the hero (enum name like `inferno` or game name like `Infernus`), then 1 s later plans the build's first 9 items in order (every required item plus one random item per optional group; Monster Rounds, Cultist Sacrifice and Golden Goose Egg skipped; upgrades replace their components; the most expensive items dropped while the total is over 20,000 souls), resets the hero, sets the level a real hero has at that item value (Deadlock's soul table: for example 18,000 souls is level 24 with 4 unlocks and 20 ability points), applies the build's ability order only as far as those unlocks and points pay for (tiers cost 1, 2, 5; it stops at the first step that does not fit), grants the items with imbues, sets souls, ability points and unlocks to 0, and heals to full. The `Loadout applied` line in `loadout-*.log` shows `Level`, `Boons`, `Unlocks`, `Points`, `PointsLeft`, `Steps` / `StepsTotal` and the ranks set. `build` is 1-3; 0 or omitted picks one at random
 - **Notes:** test tool. Errors: empty slot, unknown hero, no builds, bad build number, dead player. In Draft mode, Draft's hero enforcement switches a player without a matching pick back to their pick or Skyrunner, so use it in Random mode or on a player whose pick is that hero
 
 #### /loadout_copy <from> <to>
@@ -784,7 +786,7 @@ everyone it sends up top and releases the fighters it moves into the rift.
 - **Who:** admin
 - **Calls:** `RestraintService.Restrain`
 - **Mode:** Debug
-- **Side effects:** silences, blocks item actives, shooting and melee for the player (game modifier `modifier_citadel_silenced` plus the `Silenced`, `ItemsDisabled`, `ShootingDisabled`, `MeleeDisabled` states set every frame) until released; reloading still works (no disarm, which also blocks reloading); survives death and hero swaps
+- **Side effects:** silences, blocks item actives, shooting and melee for the player (game modifier `modifier_citadel_silenced` plus the `Silenced`, `ItemsDisabled`, `ShootingDisabled`, `MeleeDisabled`, `IgnoredByNpcTargeting` states set every frame) until released; while restrained the player takes no damage (`GameLoopPlugin.OnTakeDamage`); reloading still works (no disarm, which also blocks reloading); survives death and hero swaps
 - **Notes:** error for an empty slot; replies `was already restrained` if so
 
 #### /restrain_release <slot>

@@ -22,7 +22,7 @@ public static class DraftService
 
   public const string DuelModeReply = "1v1 mode - pick a hero from the hero menu; the admin copies one build onto both players.";
 
-  public const string WelcomeNote = "MY BAD BOMER AND TIMEBUCKET\nI DIDNT MEAN TO CRASH IT";
+  public const string WelcomeNote = "";
 
   public static string NoDraftReply => MatchConfig.IsDuel ? DuelModeReply : RandomModeReply;
 

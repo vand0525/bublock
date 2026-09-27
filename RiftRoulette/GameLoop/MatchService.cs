@@ -16,7 +16,7 @@ namespace RiftRoulette.GameLoop;
 
 public static class MatchService
 {
-  public const int DefaultIntermissionSeconds = 10;
+  public const int DefaultIntermissionSeconds = 5;
   public const int MinIntermissionSeconds = 5;
   public const int MaxIntermissionSeconds = 120;
 
@@ -30,6 +30,7 @@ public static class MatchService
   private static IHandle? _countdown;
   private static IHandle? _finalCountdown;
   private static IHandle? _buildBanner;
+  private static IHandle? _bettingClose;
 
   public static MatchState State { get; } = new();
 
@@ -318,9 +319,19 @@ public static class MatchService
     }
 
     State.BeginRound();
-    BettingService.Close(mode);
+
+    var round = State.Round;
+    _bettingClose = _timer!.Once(BettingService.LingerSeconds.Seconds(), () => CloseBetting(round, mode));
 
     log.Info("Round started Round={Round} Side={Side}", State.Round, RiftSides.Name(side));
+  }
+
+  private static void CloseBetting(int round, ExecutionMode mode)
+  {
+    _bettingClose = null;
+
+    if (State.Phase == MatchPhase.InRound && State.Round == round)
+      BettingService.Close(mode);
   }
 
   public static (string Title, string Description) ModeBanner(HeroMode heroMode) =>
@@ -353,8 +364,10 @@ public static class MatchService
     _countdown?.Cancel();
     _finalCountdown?.Cancel();
     _buildBanner?.Cancel();
+    _bettingClose?.Cancel();
     _countdown = null;
     _finalCountdown = null;
     _buildBanner = null;
+    _bettingClose = null;
   }
 }

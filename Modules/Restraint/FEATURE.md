@@ -4,7 +4,10 @@
 
 Reusable, game-agnostic "can't fight" state: silence, item block, shooting
 block and a melee block that stay on a player until released, through death
-and hero swaps. Reloading still works (no disarm).
+and hero swaps. Reloading still works (no disarm). Restrained players are
+also ignored by NPC targeting, and `IsRestrainedPawn` lets the consumer's
+damage hook make them take no damage (Rift Roulette blocks all damage to
+players waiting up top).
 Uses the game's real silence modifier so its status icon shows. Added in
 Stage 13h.
 
@@ -17,6 +20,7 @@ Stage 13h.
 | `RestraintService.Forget(steamId)` | `RestraintService.md` |
 | `RestraintService.Sustain()` | `RestraintService.md` |
 | `RestraintService.AddModifier(pawn, name, seconds)` | `RestraintService.md` |
+| `RestraintService.IsRestrainedPawn(entity)` | `RestraintService.md` |
 
 ## State
 

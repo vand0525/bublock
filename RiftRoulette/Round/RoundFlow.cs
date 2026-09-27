@@ -33,12 +33,28 @@ public static class RoundFlow
 
     var movedSapphire = TeleportToFightSpots(sapphirePlayers, sapphire, mode);
     var movedAmber = TeleportToFightSpots(amberPlayers, amber, mode);
+    var healed = sapphirePlayers.Concat(amberPlayers).Count(player => HealToFull(player, mode));
 
     Log.WithMode(mode).Debug(
-      "Teams moved to rift starts Side={Side} Sapphire={Sapphire} Amber={Amber}",
+      "Teams moved to rift starts Side={Side} Sapphire={Sapphire} Amber={Amber} Healed={Healed}",
       RiftSides.Name(side),
       movedSapphire,
-      movedAmber);
+      movedAmber,
+      healed);
+  }
+
+  private static bool HealToFull(CCitadelPlayerController player, ExecutionMode mode)
+  {
+    var pawn = player.GetHeroPawn();
+
+    if (pawn == null || !pawn.IsAlive)
+      return false;
+
+    var before = pawn.Health;
+    pawn.Heal(pawn.GetMaxHealth());
+
+    Log.WithMode(mode).Debug(player.ToPlayerRef(), "Healed to full Health={Health} MaxHealth={MaxHealth}", before, pawn.GetMaxHealth());
+    return true;
   }
 
   public static int ReturnPlayersToDraft(ExecutionMode mode = ExecutionMode.Clean)

@@ -52,7 +52,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Movement (`Modules/Movement`) | Named locations, teleports, camera angle | `Teleport`, `CCitadelUserMsg_SetClientCameraAngles` | `dw_mv_tp`, `dw_mv_angle` |
 | Hud (`Modules/Hud`) | Banners | `HudAnnounce` | `dw_hud_announce` |
 | Loadout (`Modules/Loadout`) | Give a stored build, copy a hero | `AddItem`, `ImbueItem`, `ItemInfo`, `FindAbilityByName`, `UpgradeBits`, `ResetHero`, `Level`, currencies | `dw_loadout_give <slot> <hero>` |
-| Restraint (`Modules/Restraint`) | Silence / no items / no shooting / no melee up top | `modifier_citadel_silenced`, `EModifierState` values, `OnGameFrame` | `dw_restrain <slot>`, `dw_restrain_list` |
+| Restraint (`Modules/Restraint`) | Silence / no items / no shooting / no melee up top; NPCs ignore restrained players and they take no damage | `modifier_citadel_silenced`, `EModifierState` values, `OnGameFrame`, `OnTakeDamage` (GameLoop, `HookResult.Stop`) | `dw_restrain <slot>`, `dw_restrain_list`; self-test counter `damage_blocked_restrained` |
 | Queue (`Modules/Queue`) | Player queue | none | `/queue` in 1v1 mode |
 | CleanSlate (`CleanSlate.dll`) | Removes bosses / shops / powerups, disables shop triggers, spawn convars | designer names in `CleanSlateService`, spawn convars | `dw_cleanup_run` |
 | DevTools (`DevTools.dll`) | Entity inspection, log path | `Entities.All`, `ByDesignerName`, `SubclassVData` | `dw_ent_find koth` |
@@ -87,11 +87,13 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Round never ends on capture | `npc_trooper` renamed or capture no longer spawns troopers | `dw_ent_diff` after a capture | update `RiftService` capture detection |
 | Heroes get no / few items | item class names renamed / removed | self-test Items FAIL; `loadout-*.log` `Unknown=` / `Failed=`; patch-check Items HIT | `fetch-builds.py`, rebuild |
 | Abilities not levelled | ability names changed or upgrade bits changed | `loadout-*.log` Trace `missing ability` | `fetch-builds.py`; check `UpgradeBits` in `/tmp/dwapi.cs` |
+| Loadout level or ranks look wrong for the build's value | boon / point thresholds or tier costs changed | `loadout-*.log` `Loadout applied` `Level=` `Points=` `Ranks=` vs the hero panel; wiki soul table | update `Modules/Loadout/Progression.cs` and `LoadoutPlanner.UpgradeCosts`, then `ProgressionTests` |
 | Random mode never gives some hero / new hero missing | new hero id not in enum or builds | patch-check Heroes HIT; self-test Heroes WARN | update `lib/`, `fetch-builds.py` |
 | Joining fails / players stuck in hero select | `Heroes.Skyrunner` removed or not selectable | patch-check `Skyrunner`; `lobby-*.log` | pick another lobby hero in `LobbyService` / `DraftService` |
 | Players fall from the watch spot | skybox floor moved or removed | self-test Map floor WARN (compare to baseline); `watch-*.log` rescues | new map dump; move the watch anchors; `check-spots.py` |
 | Players spawn in walls at rift starts | map geometry changed | `/spots_walk sapphire|amber`; `check-spots.py` | new map dump, move anchors / `spots.json` |
 | Players can shoot / cast up top | modifier or state renamed / renumbered | self-test live Restraint FAIL; `restraint` Trace `refused` | new names from the schema DB / enum |
+| Players take damage up top (turrets, troopers) | `OnTakeDamage` no longer fires or `Stop` no longer blocks | self-test Events `take_damage` = 0 after a fight; `damage_blocked_restrained` stays 0 | check `OnTakeDamage` / `TakeDamageEvent` in `/tmp/dwapi.cs`; fallback state `EModifierState.NoIncomingDamage` (142) in `RestraintService.States` |
 | Bosses, shops or urn back on the map | CleanSlate names or crate convars changed | self-test Entities WARN; convar FAIL; `probe-*.log` counts | `dw_ent_find boss` / `shop`; update `CleanSlateService` |
 | Settings not applied (team size, respawn, duplicates) | convar renamed / removed / hidden | self-test Convars FAIL; `Convar missing` warning in master log | new name from `cvarlist.md` upstream |
 | Banner or camera angle missing | protobuf message changed | `dw_hud_announce`, `dw_mv_angle` | check the message in the new `lib/` |
@@ -156,17 +158,18 @@ Map dump counts (build 6698): `info_koth_spawn_location` 2, `info_super_trooper_
 
 ### Modifiers and states
 
-`modifier_citadel_silenced`; `EModifierState.Silenced` (15), `ItemsDisabled` (14), `ShootingDisabled` (62), `MeleeDisabled` (106). Never `Disarmed` (12). `Modules/Restraint/RestraintService.cs`.
+`modifier_citadel_silenced`; `EModifierState.Silenced` (15), `ItemsDisabled` (14), `ShootingDisabled` (62), `MeleeDisabled` (106), `IgnoredByNpcTargeting` (33). Never `Disarmed` (12). `Modules/Restraint/RestraintService.cs`.
 
 ### Events and hooks
 
-`player_spawn` (Lobby, Duel, Random), `player_death` (Lobby, Stats, stream camera), `player_used_ability` (stream camera: `Abilityname`, `Player`, `Caster`), `player_respawned` (Duel, Random), `player_hero_changed` (Draft); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnLoad`, `OnStartupServer`.
+`player_spawn` (Lobby, Duel, Random), `player_death` (Lobby, Stats, stream camera), `player_used_ability` (stream camera: `Abilityname`, `Player`, `Caster`), `player_respawned` (Duel, Random), `player_hero_changed` (Draft); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnLoad`, `OnStartupServer`.
 
 ### Enums and hero data
 
 - `Heroes.Skyrunner` is the lobby hero (`LobbyService`, `DraftService`); draft pools in `Draft/DraftPools.cs`.
 - `hero-builds.json` (38 heroes, 161 items, 154 abilities), banned items in `Modules/Loadout/LoadoutPlanner.cs`.
-- `EAbilitySlot.Signature1..4`, `ECurrencyType.EGold` / `EAbilityPoints` / `EAbilityUnlocks`, `ECurrencySource.ECheats` / `EStartingAmount` / `EItemSale` (the sources `GameLoop/SoulRule` lets through), `ImbueResult.Success`.
+- `EAbilitySlot.Signature1..4`, `ECurrencyType.EGold` / `EAbilityPoints` / `EAbilityUnlocks`, `ECurrencySource.ECheats` / `EStartingAmount` / `EItemSale` (the sources `GameLoop/SoulRule` lets through for gold; for ability points and unlocks only `ECheats` passes in Random and 1v1 matches), `ImbueResult.Success`.
+- Level table: 36 soul thresholds, unlock rows and 32 points in `Modules/Loadout/Progression.cs`, from the wiki's [Data:SoulUnlockData.json](https://deadlock.wiki/index.php?title=Data:SoulUnlockData.json&action=raw) (+600 each). Upgrade tier costs 1 / 2 / 5 in `LoadoutPlanner.UpgradeCosts`. An economy patch that moves boons or points needs both updated (`ProgressionTests` pins the current values).
 - Teams: Amber 2, Sapphire 3, spectator 1.
 - Big teamfight ults: 17 ability class names in `Lobby/BigUlts.cs` (each hero's `signature4` from `assets.deadlock-api.com/v2/heroes`, 2026-09-27). Heroes get reworked; re-check after a hero patch.
 - Observer: `ObserverMode_t.InEye` (player view) and `Roaming` (free cam); client command `spec_player <slot>` (`clientcmd_can_execute`) as the follow fallback; client command `spec_mode 4` (`clientcmd_can_execute`) puts the client in fly cam before every park (the server mode alone does not). Never `IsValidObserverTarget` (rejects team 3).

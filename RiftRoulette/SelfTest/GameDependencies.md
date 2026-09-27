@@ -20,6 +20,9 @@ by `SelfTestTests`.
 - `Events`: counter names `EventCounters` tracks. `player_used_ability`
   feeds the stream camera's big-ult top-down (`Lobby/StreamCam`); a zero
   count after abilities were cast means the server does not fire it.
+  `take_damage` guards the up-top damage block
+  (`GameLoop/GameLoopPlugin.OnTakeDamage`); zero after a fight means the
+  hook stopped firing and waiting players can be hurt again.
 - `RiftPointName` = `info_koth_spawn_location`, `RiftPointTolerance` = 100
   units (a map rift point must be this close to `RiftSides.Position`).
 

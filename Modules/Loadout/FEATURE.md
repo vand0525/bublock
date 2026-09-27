@@ -13,13 +13,21 @@ takes the slot); a loadout's items may be worth at most 20,000 souls (the
 most expensive items are dropped, keeping at least 6). The median planned
 value of all builds is the informational baseline.
 
+Budgeted power (2026-09-27): a stored build's level, boons and ability ranks
+match a real hero at the same net worth. The items' soul value goes through
+`Progression.ForSouls` (Deadlock's level table), and the build's ability
+order is applied only as far as that level's unlocks and points pay for
+(`LoadoutPlanner.AbilityPrefix`). Both ability wallets are left at 0.
+Copies (`ApplySnapshot`) stay exact.
+
 ## Public operations
 
 | Op | Doc |
 |---|---|
 | `HeroBuildCatalog.Default` / `Heroes` / `BuildsFor` / `DisplayName` / `ComponentsOf` / `CostOf` / `PlannedValue` / `BaselineValue` / `TryParseHero` | `HeroBuildCatalog.md` |
 | `HeroBuildData.Parse` | `HeroBuildData.md` |
-| `LoadoutPlanner.ItemOrder` / `FirstSlots` / `Value` / `CapValue` / `AbilityBits` / `BitsFor` | `LoadoutPlanner.md` |
+| `LoadoutPlanner.ItemOrder` / `FirstSlots` / `Value` / `CapValue` / `AbilityBits` / `AbilityPrefix` / `BitsFor` | `LoadoutPlanner.md` |
+| `Progression.ForSouls` / `Max` / `MaxLevel` | `Progression.md` |
 | `LoadoutService.Apply` / `Swap` / `Capture` / `ApplySnapshot` / `SwapSnapshot` | `LoadoutService.md` |
 | `LoadoutSnapshot`, `SnapshotAbility`, `SnapshotItem`, `SnapshotResult` | `LoadoutSnapshot.md` |
 
@@ -39,7 +47,8 @@ The lazily loaded `HeroBuildCatalog.Default` (read-only, one per DLL load).
 |---|---|
 | `HeroBuildData.cs` | JSON records and parser (pure) |
 | `HeroBuildCatalog.cs` | Embedded data and lookups |
-| `LoadoutPlanner.cs` | Item slot and ability bit planning (pure) |
+| `LoadoutPlanner.cs` | Item slot and ability bit planning, including the budgeted ability prefix (pure) |
+| `Progression.cs` | Deadlock level table: boons, unlocks and ability points per soul count (pure) |
 | `LoadoutSnapshot.cs` | Exact hero-state records for copying (Stage 13g) |
 | `LoadoutService.cs` | Apply a build to a pawn; swap hero, then apply; capture / apply / swap a snapshot |
 | `LoadoutPlugin.cs` | `/loadout_give`, `/loadout_copy`, `/loadout_list`, `/loadout_info` |
@@ -64,4 +73,4 @@ The lazily loaded `HeroBuildCatalog.Default` (read-only, one per DLL load).
 
 - `RiftRoulette.dll` imports both projitems.
 - `Tests/Modules.Tests` imports `Loadout.projitems` (`LoadoutPlannerTests`,
-  `HeroBuildCatalogTests`).
+  `ProgressionTests`, `HeroBuildCatalogTests`).

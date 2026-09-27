@@ -11,9 +11,21 @@ public static class SoulRule
     ECurrencySource.EItemSale
   ];
 
-  public static bool ShouldBlock(ECurrencyType type, ECurrencySource source, int amount, bool matchRunning) =>
-    matchRunning
-    && type == ECurrencyType.EGold
-    && amount > 0
-    && !AllowedSources.Contains(source);
+  public static bool ShouldBlock(
+    ECurrencyType type,
+    ECurrencySource source,
+    int amount,
+    bool matchRunning,
+    bool ranksFromBuild = false)
+  {
+    if (!matchRunning || amount <= 0)
+      return false;
+
+    return type switch
+    {
+      ECurrencyType.EGold => !AllowedSources.Contains(source),
+      ECurrencyType.EAbilityPoints or ECurrencyType.EAbilityUnlocks => ranksFromBuild && source != ECurrencySource.ECheats,
+      _ => false
+    };
+  }
 }

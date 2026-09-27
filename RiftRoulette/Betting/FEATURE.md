@@ -32,7 +32,8 @@ DLL load, reset at every match start. Chips last one match.
 ## Lifecycle vs commands
 
 - `GameLoop/MatchService`: `Reset` in `Start`, `Open` at the start of every
-  intermission (after the round is prepared), `Close` when a round starts,
+  intermission (after the round is prepared), `Close` 10 s into the round
+  (`LingerSeconds`; the intermission is only 5 s),
   `OnRoundEnded` with the scoring team, `EndMatch` in `End` (refunds).
 - `Stats/StatsService.RecordDeath`: `OnKill` for every credited kill.
 - `Draft/DraftService.RedrawBoards`: `RefreshBoard` with the stats boards,

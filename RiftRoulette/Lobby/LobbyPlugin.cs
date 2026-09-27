@@ -1,6 +1,7 @@
 using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Draft;
+using RiftRoulette.GameLoop;
 using RiftRoulette.Round;
 using RiftRoulette.SelfTest;
 
@@ -25,6 +26,7 @@ public class LobbyPlugin : DeadworksPluginBase
     }
 
     Timer.Every(StreamCam.TickSeconds.Seconds(), () => StreamCam.Tick(Timer));
+    Timer.Every(AutoStartService.WaitingReminderSeconds.Seconds(), () => AutoStartService.RemindWaiting());
   }
 
   public override void OnStartupServer()

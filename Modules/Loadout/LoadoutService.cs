@@ -5,7 +5,6 @@ using ITimer = DeadworksManaged.Api.ITimer;
 namespace Bublock.Modules.Loadout;
 
 public sealed record LoadoutOptions(
-  int Level = 36,
   int Gold = 0,
   int Slots = LoadoutPlanner.DefaultSlots,
   int MaxValue = LoadoutService.DefaultMaxValue);
@@ -18,7 +17,9 @@ public sealed record LoadoutResult(
   int AbilitiesMissing,
   IReadOnlyList<string> Unknown,
   int Value,
-  IReadOnlyList<string> ItemsCapped);
+  IReadOnlyList<string> ItemsCapped,
+  ProgressionLevel Progression,
+  AbilityPlan AbilityPlan);
 
 public static class LoadoutService
 {
@@ -53,28 +54,6 @@ public static class LoadoutService
     var log = Log.WithMode(mode);
     var who = pawn.Controller?.ToPlayerRef();
 
-    pawn.ResetHero();
-    pawn.Level = options.Level;
-    pawn.ModifyCurrency(ECurrencyType.EGold, 0, ECurrencySource.ECheats, silent: true);
-
-    var abilitiesSet = 0;
-    var abilitiesMissing = 0;
-
-    foreach (var (name, bits) in LoadoutPlanner.AbilityBits(build.Abilities ?? []))
-    {
-      var ability = pawn.AbilityComponent.FindAbilityByName(name);
-
-      if (ability == null)
-      {
-        abilitiesMissing++;
-        Trace(log, who, "Ability not on hero Ability={Ability}", name);
-        continue;
-      }
-
-      ability.UpgradeBits |= bits;
-      abilitiesSet++;
-    }
-
     var unknown = new List<string>();
     var slots = LoadoutPlanner.FirstSlots(
       LoadoutPlanner.ItemOrder(build, rng),
@@ -104,6 +83,31 @@ public static class LoadoutService
         catalog.BaselineValue);
     }
 
+    var progression = Progression.ForSouls(value);
+    var plan = LoadoutPlanner.AbilityPrefix(build.Abilities ?? [], progression.Unlocks, progression.AbilityPoints);
+
+    pawn.ResetHero();
+    pawn.Level = progression.Level;
+    pawn.ModifyCurrency(ECurrencyType.EGold, 0, ECurrencySource.ECheats, silent: true);
+
+    var abilitiesSet = 0;
+    var abilitiesMissing = 0;
+
+    foreach (var (name, bits) in plan.Bits)
+    {
+      var ability = pawn.AbilityComponent.FindAbilityByName(name);
+
+      if (ability == null)
+      {
+        abilitiesMissing++;
+        Trace(log, who, "Ability not on hero Ability={Ability}", name);
+        continue;
+      }
+
+      ability.UpgradeBits = bits;
+      abilitiesSet++;
+    }
+
     var added = 0;
     var failed = 0;
     var imbued = 0;
@@ -126,19 +130,25 @@ public static class LoadoutService
     }
 
     pawn.SetCurrency(ECurrencyType.EGold, options.Gold);
+    pawn.SetCurrency(ECurrencyType.EAbilityPoints, 0);
+    pawn.SetCurrency(ECurrencyType.EAbilityUnlocks, 0);
     pawn.Heal(pawn.GetMaxHealth());
 
-    var result = new LoadoutResult(added, failed, imbued, abilitiesSet, abilitiesMissing, unknown, value, capped);
+    var result = new LoadoutResult(
+      added, failed, imbued, abilitiesSet, abilitiesMissing, unknown, value, capped, progression, plan);
 
     Info(
       log,
       who,
       "Loadout applied Hero={Hero} Build={Build} BuildId={BuildId} Items={Items} Failed={Failed} Imbued={Imbued} " +
       "Abilities={Abilities} AbilitiesMissing={AbilitiesMissing} Unknown={Unknown} Value={Value} Baseline={Baseline} " +
-      "Capped={Capped} Level={Level} Gold={Gold}",
+      "Capped={Capped} Level={Level} Boons={Boons} Unlocks={Unlocks} Points={Points} PointsLeft={PointsLeft} " +
+      "Steps={Steps} StepsTotal={StepsTotal} Ranks={Ranks} Gold={Gold}",
       pawn.HeroID, build.Name, build.BuildId, added, failed, imbued,
       abilitiesSet, abilitiesMissing, string.Join(",", unknown), value, catalog.BaselineValue,
-      capped.Count, options.Level, options.Gold);
+      capped.Count, progression.Level, progression.Boons, progression.Unlocks, progression.AbilityPoints,
+      progression.AbilityPoints - plan.PointsUsed, plan.StepsTaken, plan.StepsTotal,
+      string.Join(",", plan.Bits.Select(entry => $"{entry.Ability}:{Convert.ToString(entry.Bits, 2)}")), options.Gold);
 
     if (unknown.Count > 0 || failed > 0)
       log.Warn("Loadout incomplete BuildId={BuildId} Failed={Failed} Unknown={Unknown}", build.BuildId, failed, string.Join(",", unknown));

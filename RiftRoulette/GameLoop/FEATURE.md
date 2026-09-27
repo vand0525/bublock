@@ -89,7 +89,7 @@ See `MatchService.md` and `MatchState.md`. Catalogued in
 ## State
 
 `MatchService.State` (one per DLL load), the intermission length (default
-10 s, also the betting window), the kept `ITimer`, two countdown handles, and `MatchConfig` (resets
+5 s; betting stays open 10 s into each round), the kept `ITimer`, two countdown handles, and `MatchConfig` (resets
 to random / continuous on every DLL load), and `AutoStartService.Enabled`
 (on after every DLL load).
 

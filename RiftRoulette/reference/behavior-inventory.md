@@ -258,7 +258,7 @@ The target command list. **Status:** `archive` = renames an archive command
 | `/match_end` | — | GameLoop | `MatchService.End` | Stop the loop, cancel a running round, final score banner, draft reset | new | 13a |
 | `/match_auto <on\|off>` | — | GameLoop | `AutoStartService.SetEnabled` / `Check` | Turn match auto-start (2+ players) / auto-end (under 2) on or off | new | 13d |
 | `/match_status` | — | GameLoop | `MatchService.DescribeMatch` | Match phase, round, score, ties, auto-start, intermission, rift phase (1v1: king and streak leaderboard) | new | 13a |
-| `/match_intermission <seconds>` | — | GameLoop | `MatchService.SetIntermission` | Seconds between rounds (5-120, default 10) | new | 13a |
+| `/match_intermission <seconds>` | — | GameLoop | `MatchService.SetIntermission` | Seconds between rounds (5-120, default 5) | new | 13a |
 | `/match_mode <random\|draft\|duel\|1v1>` | — | GameLoop | `MatchService.SetHeroMode` | Hero mode between matches (default random; `1v1` = duel since 13g); lobby reset | new | 13b |
 | `/match_format <continuous>` | — | GameLoop | `MatchService.SetFormat` | Match format between matches (only continuous for now) | new | 13b |
 | `/match_config` | — | GameLoop | `MatchService.DescribeConfig` | Current mode, format, allowed values, intermission | new | 13b |

@@ -16,7 +16,7 @@ caller of `Start` (`GameLoopPlugin`) and is kept for the whole match.
    1v1 mode `DuelService.PrepareRound` (both players reset to the copied
    build with 0 souls). Then `BettingService.Open` (Random mode: betting
    opens and everyone gets a chat line with their chips). The default
-   intermission is `DefaultIntermissionSeconds` (10 s).
+   intermission is `DefaultIntermissionSeconds` (5 s).
    - Random mode, `BuildBannerDelaySeconds` (3 s) in: each player gets
      `<Hero>` / `<build> - 12,345 souls` (`RandomModeService.AnnounceBuilds`;
      a loadout that lands later shows its banner when applied). When the
@@ -26,7 +26,11 @@ caller of `Start` (`GameLoopPlugin`) and is kept for the whole match.
      (1v1: `Round X` / `<King> vs <Challenger>`).
    - At N s `StartRound` runs `RoundFlow.RunRound(timer, mode)` (the
      lifecycle path, Clean when called by the loop). No banner. Once the
-     round started, `BettingService.Close`.
+     round started, `BettingService.Close` is scheduled
+     `BettingService.LingerSeconds` (10 s) later, so bets can still come in
+     at the start of the round; the close is skipped if that round already
+     ended (the round end closes and settles), and `CancelCountdown`
+     cancels it.
 3. Round end: `RiftService` calls `RoundFlow`'s `RoundEnded` step, which
    calls `OnRoundEnded`. Score applied, banner `Sapphire 1 - 0 Amber` /
    `Sapphire took the rift` (1v1 mode: no team score; the streak
@@ -48,7 +52,7 @@ round countdown); no debug-style text.
 | `SetFormat(format, mode)` | Refuses during a match. Sets `MatchConfig.Format`, logs | reply line |
 | `DescribeConfig()` | Config line, then the allowed modes (with `1v1 = duel`) / formats and intermission | 2 lines |
 | `OnRoundEnded(result, mode)` | Ignored when idle. 1v1 mode: only `DuelService.RecordResult` (streak, best streak, loser to the back of the queue, boards), logs with king and streak (feature + master), the 1v1 banner, next round; no `State.Apply`, `SetRounds`, or `RecordRound`. Otherwise: `State.Apply`; `BalanceService.RecordRound(pointTo)`; `StatsService.SetRounds` (board round counts); `BettingService.OnRoundEnded(pointTo)` (bets paid, lost, or refunded on no point); Warning if `finished` had no known team; logs (feature + master); score banner; schedules the next round | — |
-| `SetIntermission(seconds, mode)` | 5 to 120 s (default 10); applies from the next countdown | `bool` |
+| `SetIntermission(seconds, mode)` | 5 to 120 s (default 5); applies from the next countdown | `bool` |
 | `DescribeMatch()` | Phase, round, score and ties (1v1: `King=<name> xN`), auto-start on/off (`AutoStartService.Enabled`); config, intermission, rift phase, next side; 1v1 adds the `DuelService.DescribeStreaks()` lines | 2+ lines |
 | `DescribeScore()` | `Round X: Sapphire a - b Amber (ties t)`; 1v1: `Round X` then the streak leaderboard lines; idle: `No match is running.` | lines |
 

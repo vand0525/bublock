@@ -140,8 +140,9 @@ Assume the git repo is rooted at `Bublock/`.
   in an intermission sub the bench player in; never give a bench player a
   pick without evening the teams.
 - Betting (Random mode, `Betting/BettingService`): 100 starting chips, 100
-  per credited kill, all-in bets on the next round during the intermission
-  (default 10 s, `MatchService.DefaultIntermissionSeconds`), a win doubles
+  per credited kill, all-in bets on the next round from the start of the
+  intermission (default 5 s, `MatchService.DefaultIntermissionSeconds`)
+  until 10 s into the round (`BettingService.LingerSeconds`), a win doubles
   the stake, no result refunds. Fighters bet only on their own team. Bets
   come from chat lines that are exactly `sapphire` / `amber`
   (`BettingPlugin.OnChatMessage`) or `/bet`. Betting messages are chat
@@ -160,7 +161,9 @@ Assume the git repo is rooted at `Bublock/`.
   load. A disconnect never starts a match (it crashed the server with the
   leaving controller still listed); never start a match inside
   `OnClientFullConnect` (the hero swaps are lost). `/match_auto off` hands
-  control back to `/match_start` / `/match_end`.
+  control back to `/match_start` / `/match_end`. A lone player waiting for
+  a match always gets told why: a chat line (never a banner; banners go by
+  too fast) on join and every 30 s (`AutoStartService.RemindWaiting`).
 - Stage 13f: the server takes 13 connections (12 shown); the 13th is an
   admin-only seat on the spectator side (`Lobby/AdminSeat`, console
   `dw_seat_spec` / `dw_seat_play`). Admins are seated on every connect.
@@ -177,10 +180,13 @@ Assume the git repo is rooted at `Bublock/`.
   off" checks `MatchConfig.UsesDraft`, not `IsRandom`.
 - Stage 13h: every player the game sends up top is restrained
   (`Modules/Restraint`: real modifier `modifier_citadel_silenced` plus
-  `Silenced` / `ItemsDisabled` / `ShootingDisabled` / `MeleeDisabled`
-  states set every frame) until `RoundFlow.MoveTeamsToRift` releases them.
-  Never use disarm (`modifier_citadel_disarmed` / `Disarmed`): it also
-  blocks reloading.
+  `Silenced` / `ItemsDisabled` / `ShootingDisabled` / `MeleeDisabled` /
+  `IgnoredByNpcTargeting` states set every frame) until
+  `RoundFlow.MoveTeamsToRift` releases them and heals them to full.
+  Restrained players take no damage (`GameLoopPlugin.OnTakeDamage` returns
+  `Stop` when `RestraintService.IsRestrainedPawn`), so leftover turrets and
+  troopers can't hurt anyone up top. Never use disarm
+  (`modifier_citadel_disarmed` / `Disarmed`): it also blocks reloading.
 - Stage 13i: "up top" is `Round/WatchSpot`, above the rift being fought
   (running) or the next one (idle), per `WatchSpotRule`. Never teleport to
   the fixed `draft` spot; call `WatchSpot.SendUp` (teleport + restrain).

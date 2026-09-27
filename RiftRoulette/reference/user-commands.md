@@ -123,7 +123,7 @@ below work.
 - **Calls:** `BettingService.TryBet` → `BetBook.Place`
 - **Mode:** Clean; logged in `betting-*.log`
 - **Side effects:** bets all your chips on that team for the next round; typing the other team before the round starts moves the bet. Players in the coming round's fight may only bet on their own team; the player sitting out may bet on either. Chat reply: `Bet 300 chips on Amber.` At round end: `You won 600 chips (now 600).`, `You lost 300 chips (now 0).`, or `No result - your 300 chips are back.` (tie, cancel, match end). The betting board updates
-- **Notes:** new 2026-09-27. Everyone starts a match with 100 chips and earns 100 per kill. Betting is open during the intermission (10 s) and closes when the round starts (`Betting is closed - it opens again between rounds.`); with 0 chips: `No chips - get a kill.` A plain team-name chat message outside a Random match is ignored; `/bet` then replies that betting is only open during a Random mode match
+- **Notes:** new 2026-09-27. Everyone starts a match with 100 chips and earns 100 per kill. Betting opens at the start of the intermission (5 s) and closes 10 s into the round (`Betting is closed - it opens again after this round.`); with 0 chips: `No chips - get a kill.` A plain team-name chat message outside a Random match is ignored; `/bet` then replies that betting is only open during a Random mode match
 
 ### /chips
 

@@ -405,6 +405,13 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **To confirm in game:** whether the server fires `player_used_ability` (self-test Events count; `lobby-*.log` `Ability name seen for the first time`), whether its `Abilityname` matches the `signature4` names, and whether teleporting a `Roaming` observer pawn moves the camera (`spec_overview`; `spectate-*.log` `Parked ... After=`).
 - **Link / path:** `Bublock/Modules/Spectate/SpectateService.cs`, `Bublock/RiftRoulette/Lobby/StreamCam.cs`, `Bublock/RiftRoulette/Lobby/BigUlts.cs`
 
+### 2026-09-27 — Blocking damage and NPC targeting (OnTakeDamage)
+
+- **Why hard / useful:** Deployables that outlive the round (McGinnis turrets) shot players waiting up top. Neither the hook nor the state is in the workspace docs.
+- **Verified fact (decompiled API):** `PluginBase.OnTakeDamage(TakeDamageEvent args)` returns `HookResult` (`Continue` 0, `Stop` 1, `Handled` 2); returning `Stop` blocks the hit, as it does for `OnModifyCurrency`. `TakeDamageEvent` has `Entity` (the victim, `CBaseEntity`) and `Info` (`CTakeDamageInfo`: `Attacker`, `Inflictor`, `Ability`, `Originator`, `Damage`, `DamageType`, `DamageFlags`). `entity.As<CCitadelPlayerPawn>()` returns null for non-heroes (`As<T>` checks `Is<T>()`), and `CCitadelPlayerPawn.Controller` gives the player. `EModifierState` also has `IgnoredByNpcTargeting` (33), `Invulnerable` (19), `NoIncomingDamage` (142), `TechUntargetableByEnemies` (22), `InvisibleToEnemy` (31), `OutOfGame` (26).
+- **To confirm in game:** that `Stop` blocks turret damage (self-test counter `damage_blocked_restrained`), and whether turrets honor `IgnoredByNpcTargeting`.
+- **Link / path:** `Bublock/RiftRoulette/GameLoop/GameLoopPlugin.cs`, `Bublock/Modules/Restraint/RestraintService.cs`
+
 ### 2026-09-27 — Reading player chat (OnChatMessage)
 
 - **Why hard / useful:** Lets players act by typing a plain word (betting: `sapphire` / `amber`) instead of a slash command. Not in the workspace docs.
@@ -421,3 +428,12 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Sequence used:** `spec_mode 4`, teleport with no angles 0.25 s later, then the angle at 0.5 s and 1.0 s (like a hero pawn: teleport first, set the angle after). Re-check the park every 6 s (roaming, no target, near the spot) and redo it if it did not hold.
 - **To confirm in game:** that pitch 89 holds with the delayed angle. Fallback: write the observer's view angle field with `SchemaAccessor<T>` (field name to verify first).
 - **Link / path:** `Bublock/Modules/Spectate/SpectateService.cs`, `Bublock/RiftRoulette/Lobby/StreamCam.cs`
+
+### 2026-09-27 — Level, boons and ability points per soul count
+
+- **Why hard / useful:** A loadout has to give the level and ability ranks a real hero has at the same net worth. The managed API has no level table, no boon field, and no "spend a point on this ability" call; the wiki page renders the numbers as images.
+- **Verified fact:** The raw table is [Data:SoulUnlockData.json](https://deadlock.wiki/index.php?title=Data:SoulUnlockData.json&action=raw) (read by `Module:SoulUnlock`). Its `RequiredSouls` are souls above the 600 starting gold; the displayed threshold is that + 600. 36 rows: 600, 800, 1,100, 1,500, 2,000, 2,600, 3,200, 3,800, then 4,500 ... 49,200. Every row after the first is a boon (`PowerIncrease`, 35 total). Rows 600, 1,100, 2,000 and 3,800 each give an ability unlock (the ultimate only with the fourth); every other row gives one ability point (32 total). Tiers cost 1, 2 and 5 points (8 per ability, so 32 maxes all four). Examples: 18,000 souls is level 24 with 20 points; 20,000 is level 25 with 21 points. Past the table, `citadel_player_gold_per_level_postmax` (2,000) adds HUD "levels" with no boons.
+- **Verified fact (decompiled API):** `pawn.Level` writes `m_nLevel` only (no point grant). `CCitadelBaseAbility.UpgradeBits` set calls native `SetUpgradeBits` and deducts no currency. `ECurrencyType.EAbilityPoints` (1) and `EAbilityUnlocks` (2) are separate wallets; the game's own grants arrive as `ELevelUp`, `EStartingAmount` (`ResetHero`) and spends as `EAbilityPurchase`, all through `OnModifyCurrency`. Events: `PlayerAbilityUpgradedEvent`, `AbilityLevelChangedEvent` (`abilitylevel`).
+- **Used as:** `Modules/Loadout/Progression` (table), `LoadoutPlanner.AbilityPrefix` (build order walked against the unlock and point budgets), `LoadoutService.Apply` (level from the item value, prefix bits, both wallets 0), `GameLoop/SoulRule` (ability gains blocked in Random and 1v1 matches).
+- **To confirm in game:** partial masks (`0b11`, `0b111`) show the right tiers; the boon stats follow `Level` after the `ECheats` recalc; the `ability_blocked_*` self-test counters show which sources the game sends.
+- **Link / path:** `Bublock/Modules/Loadout/Progression.cs`, `Bublock/Modules/Loadout/LoadoutPlanner.cs`, `Bublock/Modules/Loadout/LoadoutService.cs`

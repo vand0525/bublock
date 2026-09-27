@@ -8,7 +8,7 @@ closed flag; sends the chat lines and draws the leaderboard board. Log:
 
 - `Book`: the `BetBook` (chips and open bets), one per DLL load; a
   reload resets it.
-- `IsOpen`: bets accepted (the intermission).
+- `IsOpen`: bets accepted (the intermission and the first `LingerSeconds`, 10 s, of the round).
 - `Active`: Random mode and a match running.
 
 ## Operations
@@ -16,8 +16,8 @@ closed flag; sends the chat lines and draws the leaderboard board. Log:
 | Op | Behavior |
 |---|---|
 | `Reset(mode)` | `MatchService.Start`: clears the book (everyone back to 100), closes betting, redraws the board |
-| `Open(mode)` | `MatchService.ScheduleNextRound`, after the round is prepared. When `Active`: opens betting and sends every participant with chips and no open bet one chat line: `Bet on the next round: type sapphire or amber. You have 300 chips; a win doubles them.` Players with an assignment for the coming round get `type <their team> to bet on your team`. Returns how many were told |
-| `Close(mode)` | `MatchService.StartRound` once the round started: closes betting, logs the bets and total staked |
+| `Open(mode)` | `MatchService.ScheduleNextRound`, after the round is prepared. When `Active`: opens betting and sends every participant with chips and no open bet one chat line: `Bet on the next round: type sapphire or amber (open until 10s into the round). You have 300 chips; a win doubles them.` Players with an assignment for the coming round get `type <their team> to bet on your team`. Returns how many were told |
+| `Close(mode)` | `MatchService`, `LingerSeconds` (10 s) after the round started (skipped when that round already ended): closes betting, logs the bets and total staked. Bets placed before it count for the round being fought. Refusal after it: `Betting is closed - it opens again after this round.` |
 | `TryBet(player, text, mode)` | Null when `text` is not a team name. Otherwise a reply: not `Active`, a spectator (seated admin), or closed each get a refusal; else `BetBook.Place` with the allowed teams and the reply `Bet 300 chips on Amber.`, `Bet moved: ...`, `No chips - get a kill.`, or `You're fighting for Sapphire - you can only bet on your team.` Logs every attempt; redraws the board on a placed or moved bet |
 | `OnKill(killerId, mode)` | `StatsService.RecordDeath` on a credited kill, when `Active`: +100 chips, redraw |
 | `OnRoundEnded(winner, mode)` | `MatchService.OnRoundEnded` (Random mode) with the team that scored, or null: closes betting and settles. Each bettor still connected gets `You won 600 chips (now 600).`, `You lost 300 chips (now 0).`, or `No result - your 300 chips are back.` |

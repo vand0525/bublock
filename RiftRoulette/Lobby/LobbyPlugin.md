@@ -9,7 +9,7 @@ lifecycle, server setup, and the lobby commands. Ops live on
 | Hook | Does |
 |---|---|
 | `OnLoad(isReload: true)` | `LobbyService.ApplyServerConvars()` (a hot reload skips `OnStartupServer`; keeps `maxplayers 13` and the buying convar right after an upload), then `AdminSeat.Restore()` (an admin still on the observer pawn goes back into the seat) |
-| `OnLoad` (every load) | `Timer.Every(StreamCam.TickSeconds, StreamCam.Tick)`: the stream camera check every 2 s (timers die on hot reload, so it starts here) |
+| `OnLoad` (every load) | `Timer.Every(StreamCam.TickSeconds, StreamCam.Tick)`: the stream camera check every 2 s, and `Timer.Every(AutoStartService.WaitingReminderSeconds, RemindWaiting)`: the waiting chat line every 30 s while a lone player waits for a match (timers die on hot reload, so both start here) |
 | `OnStartupServer` | `LobbyService.ApplyServerConvars()` |
 | `OnClientConnect` | Returns `AccessService.AllowConnect(SteamId, Name) && AdminSeat.AllowConnect(SteamId, Name)`. Access first: banned IDs are refused, and in private mode anyone neither whitelisted nor admin. Then the seat rule: `false` refuses a non-admin once 12 participants are playing (the 13th connection is the admin seat) |
 | `OnClientFullConnect` | When the controller is present: every admin is seated as a spectator (`AdminSeat.Sit`; `dw_seat_play` to play); everyone else goes through `LobbyService.AdmitPlayer(controller, Timer)` (no bot check, as the archive), which places the player on the smaller team and checks auto-start 2 s later |

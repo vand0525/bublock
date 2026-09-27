@@ -25,3 +25,11 @@ Unit tests for `Modules/Loadout/LoadoutPlanner` (pure).
   give `FullyUpgradedBits` (`0b11111`).
 - `AbilityBits`: keeps first-seen ability order, caps upgrades at 3, treats
   an upgrade without an unlock as unlocked, ignores unknown step kinds.
+- `AbilityPrefix`:
+  - with the level-36 budget (4 unlocks, 32 points) a full 16-step order
+    matches `AbilityBits` and spends everything
+  - stops when the next tier costs 5 and only 4 points remain
+  - never skips ahead to a cheaper later step
+  - stops when unlocks run out
+  - an upgrade on a locked ability pays 1 unlock and the tier cost
+  - repeat unlocks, upgrades past 3 and unknown kinds cost nothing

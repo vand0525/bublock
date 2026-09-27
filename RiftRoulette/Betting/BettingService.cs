@@ -12,6 +12,8 @@ public static class BettingService
 {
   public const string BoardId = "bets.leaders";
 
+  public const int LingerSeconds = 10;
+
   private static readonly Logger Log = BublockLog.For("Betting");
 
   private static readonly int[] BothTeams = [RiftRouletteTeams.Sapphire, RiftRouletteTeams.Amber];
@@ -75,7 +77,7 @@ public static class BettingService
       return "Spectators can't bet.";
 
     if (!IsOpen)
-      return "Betting is closed - it opens again between rounds.";
+      return "Betting is closed - it opens again after this round.";
 
     var steamId = player.PlayerSteamId;
     var allowed = AllowedTeams(player);
@@ -174,7 +176,7 @@ public static class BettingService
       ? $"type {RiftRouletteTeams.Name(teams[0]).ToLowerInvariant()} to bet on your team"
       : "type sapphire or amber";
 
-    return $"Bet on the next round: {how}. You have {chips} chips; a win doubles them.";
+    return $"Bet on the next round: {how} (open until {LingerSeconds}s into the round). You have {chips} chips; a win doubles them.";
   }
 
   private static int Pay(IReadOnlyList<BetSettlement> settled, string reason, ExecutionMode mode)

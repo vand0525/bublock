@@ -63,6 +63,7 @@ public static class GameDependencies
     "client_full_connect",
     "client_disconnect",
     "game_frame",
-    "modify_currency"
+    "modify_currency",
+    "take_damage"
   ];
 }

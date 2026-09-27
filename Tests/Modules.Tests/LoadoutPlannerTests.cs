@@ -185,4 +185,88 @@ public class LoadoutPlannerTests
   {
     Assert.Equal([("a", 0b11)], LoadoutPlanner.AbilityBits([new AbilityStep("a", AbilityStep.Upgrade)]));
   }
+
+  private static AbilityStep Unlock(string ability) => new(ability, AbilityStep.Unlock);
+
+  private static AbilityStep Upgrade(string ability) => new(ability, AbilityStep.Upgrade);
+
+  [Fact]
+  public void AbilityPrefix_with_the_full_budget_matches_AbilityBits()
+  {
+    var steps = new[]
+    {
+      Unlock("a"), Upgrade("a"), Unlock("b"), Unlock("c"), Unlock("d"),
+      Upgrade("b"), Upgrade("a"), Upgrade("a"), Upgrade("c"), Upgrade("b"),
+      Upgrade("c"), Upgrade("b"), Upgrade("c"), Upgrade("d"), Upgrade("d"), Upgrade("d")
+    };
+
+    var plan = LoadoutPlanner.AbilityPrefix(steps, Progression.Max.Unlocks, Progression.Max.AbilityPoints);
+
+    Assert.Equal(LoadoutPlanner.AbilityBits(steps), plan.Bits);
+    Assert.Equal(16, plan.StepsTaken);
+    Assert.Equal(16, plan.StepsTotal);
+    Assert.Equal(4, plan.UnlocksUsed);
+    Assert.Equal(32, plan.PointsUsed);
+  }
+
+  [Fact]
+  public void AbilityPrefix_stops_when_the_next_tier_costs_more_than_is_left()
+  {
+    var steps = new[] { Unlock("a"), Upgrade("a"), Upgrade("a"), Upgrade("a"), Unlock("b") };
+
+    var plan = LoadoutPlanner.AbilityPrefix(steps, unlocks: 2, points: 7);
+
+    Assert.Equal([("a", 0b111)], plan.Bits);
+    Assert.Equal(3, plan.StepsTaken);
+    Assert.Equal(3, plan.PointsUsed);
+  }
+
+  [Fact]
+  public void AbilityPrefix_never_skips_ahead_to_a_cheaper_step()
+  {
+    var steps = new[] { Unlock("a"), Upgrade("a"), Upgrade("a"), Upgrade("a"), Upgrade("b") };
+
+    var plan = LoadoutPlanner.AbilityPrefix(steps, unlocks: 2, points: 4);
+
+    Assert.Equal([("a", 0b111)], plan.Bits);
+    Assert.Equal(1, plan.UnlocksUsed);
+  }
+
+  [Fact]
+  public void AbilityPrefix_stops_when_unlocks_run_out()
+  {
+    var steps = new[] { Unlock("a"), Unlock("b"), Upgrade("c"), Upgrade("a") };
+
+    var plan = LoadoutPlanner.AbilityPrefix(steps, unlocks: 2, points: 10);
+
+    Assert.Equal([("a", 0b1), ("b", 0b1)], plan.Bits);
+    Assert.Equal(2, plan.StepsTaken);
+  }
+
+  [Fact]
+  public void AbilityPrefix_upgrade_on_a_locked_ability_pays_the_unlock_first()
+  {
+    var plan = LoadoutPlanner.AbilityPrefix([Upgrade("a")], unlocks: 1, points: 1);
+
+    Assert.Equal([("a", 0b11)], plan.Bits);
+    Assert.Equal(1, plan.UnlocksUsed);
+    Assert.Equal(1, plan.PointsUsed);
+  }
+
+  [Fact]
+  public void AbilityPrefix_repeats_and_unknown_kinds_cost_nothing()
+  {
+    var steps = new[]
+    {
+      Unlock("a"), Unlock("a"), Upgrade("a"), Upgrade("a"), Upgrade("a"), Upgrade("a"),
+      new AbilityStep("a", "refund")
+    };
+
+    var plan = LoadoutPlanner.AbilityPrefix(steps, unlocks: 1, points: 8);
+
+    Assert.Equal([("a", LoadoutPlanner.FullyUpgradedBits)], plan.Bits);
+    Assert.Equal(6, plan.StepsTaken);
+    Assert.Equal(6, plan.StepsTotal);
+    Assert.Equal(8, plan.PointsUsed);
+  }
 }

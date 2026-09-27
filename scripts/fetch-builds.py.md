@@ -34,7 +34,8 @@ Takes about 1–2 minutes (about 160 requests, 0.35 s apart; retries on HTTP 429
      random item per optional group.
    - `BANNED_ITEMS` (Monster Rounds `upgrade_non_player_bonus`, Cultist
      Sacrifice `upgrade_non_player_bonus_sacrifice`, Golden Goose Egg
-     `upgrade_goose_egg`) are dropped from `items` and
+     `upgrade_goose_egg`, Trophy Collector `upgrade_trophy_collector`) are
+     dropped from `items` and
      `categories`; the build is kept and later items fill the slot. The run
      prints how many entries were dropped.
    - `imbues`: item to target ability class name, when the build names one.

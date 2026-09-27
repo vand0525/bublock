@@ -19,7 +19,7 @@ public static class RandomModeService
 {
   public const double JoinerFallbackSeconds = 2.0;
 
-  public static readonly LoadoutOptions Options = new(Level: 36, Gold: 0);
+  public static readonly LoadoutOptions Options = new(Gold: 0);
 
   private static readonly Logger Log = BublockLog.For("Random");
 

@@ -25,7 +25,7 @@ MAX_UPGRADES = 3
 
 # Laning / farming items that do nothing in rift rounds: never stored, so the
 # next item in the build takes the slot.
-BANNED_ITEMS = {"upgrade_non_player_bonus", "upgrade_non_player_bonus_sacrifice", "upgrade_goose_egg"}
+BANNED_ITEMS = {"upgrade_non_player_bonus", "upgrade_non_player_bonus_sacrifice", "upgrade_goose_egg", "upgrade_trophy_collector"}
 
 dropped_items = 0
 

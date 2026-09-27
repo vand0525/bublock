@@ -39,9 +39,42 @@ public class SoulRuleTests
     Assert.False(SoulRule.ShouldBlock(ECurrencyType.EGold, ECurrencySource.EItemPurchase, amount, matchRunning: true));
   }
 
+  [Theory]
+  [InlineData(ECurrencyType.EAbilityPoints, ECurrencySource.ELevelUp)]
+  [InlineData(ECurrencyType.EAbilityPoints, ECurrencySource.EStartingAmount)]
+  [InlineData(ECurrencyType.EAbilityUnlocks, ECurrencySource.ELevelUp)]
+  [InlineData(ECurrencyType.EAbilityUnlocks, ECurrencySource.EStartingAmount)]
+  public void Ability_gains_are_blocked_when_ranks_come_from_the_build(ECurrencyType type, ECurrencySource source)
+  {
+    Assert.True(SoulRule.ShouldBlock(type, source, 1, matchRunning: true, ranksFromBuild: true));
+  }
+
+  [Fact]
+  public void Ability_gains_pass_in_draft_mode()
+  {
+    Assert.False(SoulRule.ShouldBlock(ECurrencyType.EAbilityPoints, ECurrencySource.ELevelUp, 1, matchRunning: true));
+  }
+
+  [Fact]
+  public void Ability_gains_pass_without_a_match()
+  {
+    Assert.False(SoulRule.ShouldBlock(
+      ECurrencyType.EAbilityUnlocks, ECurrencySource.EStartingAmount, 1, matchRunning: false, ranksFromBuild: true));
+  }
+
+  [Fact]
+  public void Ability_cheat_grants_and_spending_pass()
+  {
+    Assert.False(SoulRule.ShouldBlock(
+      ECurrencyType.EAbilityPoints, ECurrencySource.ECheats, 1, matchRunning: true, ranksFromBuild: true));
+    Assert.False(SoulRule.ShouldBlock(
+      ECurrencyType.EAbilityPoints, ECurrencySource.EAbilityPurchase, -2, matchRunning: true, ranksFromBuild: true));
+  }
+
   [Fact]
   public void Other_currencies_pass()
   {
-    Assert.False(SoulRule.ShouldBlock(ECurrencyType.EAbilityPoints, ECurrencySource.ELevelUp, 1, matchRunning: true));
+    Assert.False(SoulRule.ShouldBlock(
+      ECurrencyType.EItemEnhancements, ECurrencySource.ELevelUp, 1, matchRunning: true, ranksFromBuild: true));
   }
 }

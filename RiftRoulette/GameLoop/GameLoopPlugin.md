@@ -10,7 +10,8 @@ Its `Timer` drives the match countdowns and the rounds the loop starts.
 | `OnLoad(isReload)` | 3 s later runs `AutoStartService.Check(Timer)` (Clean), so players already connected at a reload get a match without a connect event |
 | `OnGameFrame(simulating)` | Counts the frame (`SelfTest/EventCounters.Hit("game_frame")`), then while simulating: `Round/WatchGuard.Tick()` (checks every 16 frames that waiting players are still up top) |
 | `OnClientConCommand` | For a restrained player: `WatchGuard.LogCommand` (to find what the menu's Unstuck sends). Always returns `HookResult.Continue`; nothing is blocked |
-| `OnModifyCurrency` | Counts `modify_currency` (self-test). When `SoulRule.ShouldBlock(type, source, amount, MatchService.State.IsRunning)`: counts `soul_blocked_<Source>`, writes a Debug `Soul gain blocked Amount= Source=` line (with the player when the pawn has a controller) and returns `HookResult.Stop`; otherwise `Continue` |
+| `OnTakeDamage` | Counts `take_damage` (self-test). Damage to a restrained player (everyone up top, `RestraintService.IsRestrainedPawn`) counts `damage_blocked_restrained` and returns `HookResult.Stop`, so leftover turrets, troopers or anything else can't hurt players waiting up top; otherwise `Continue`. No log line (runs on every hit) |
+| `OnModifyCurrency` | Counts `modify_currency` (self-test). When `SoulRule.ShouldBlock(type, source, amount, MatchService.State.IsRunning, !MatchConfig.UsesDraft)`: counts `soul_blocked_<Source>` for gold or `ability_blocked_<Currency>_<Source>` for ability points / unlocks, writes a Debug `Currency gain blocked Currency= Amount= Source=` line (with the player when the pawn has a controller) and returns `HookResult.Stop`; otherwise `Continue` |
 
 ## Commands
 
@@ -20,7 +21,7 @@ a `[Match]` prefix.
 
 | Command | Who | Calls | Reply / errors |
 |---|---|---|---|
-| `/match_start` | admin | `MatchService.Start(Timer, Debug)` | `Match started. Round 1 in 10s.`, or the refusal if a match or a rift is running |
+| `/match_start` | admin | `MatchService.Start(Timer, Debug)` | `Match started. Round 1 in 5s.`, or the refusal if a match or a rift is running |
 | `/match_end` | admin | `MatchService.End(Timer, Debug)` | `Match ended after N round(s). Final: <score, or 1v1 best streaks>. M player(s) returned to the lobby.`, or `No match is running.` |
 | `/match_auto <on\|off>` | admin | `AutoStartService.SetEnabled(Debug)`; when turned on, also `AutoStartService.Check(Timer, Debug)` | `Auto-start on` (plus ` - match started` if the check started one) or `Auto-start off`; error on any other argument |
 | `/match_status` | admin | `MatchService.DescribeMatch` | two status lines (includes auto-start, mode and format); 1v1 shows the king and adds the streak leaderboard |

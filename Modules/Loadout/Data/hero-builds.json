@@ -1385,7 +1385,6 @@
       "upgrade_fury_trance",
       "upgrade_magic_shield",
       "upgrade_healbane",
-      "upgrade_trophy_collector",
       "upgrade_vex_barrier",
       "upgrade_spirit_bubble",
       "upgrade_regenerating_bullet_shield",
@@ -1448,7 +1447,6 @@
        "items": [
         "upgrade_magic_shield",
         "upgrade_healbane",
-        "upgrade_trophy_collector",
         "upgrade_vex_barrier",
         "upgrade_spirit_bubble",
         "upgrade_regenerating_bullet_shield"
@@ -1742,7 +1740,6 @@
       "upgrade_soaring_spirit",
       "upgrade_extra_charge",
       "upgrade_rapid_recharge",
-      "upgrade_trophy_collector",
       "upgrade_warp_stone",
       "upgrade_grit",
       "upgrade_health_stimpak",
@@ -1812,8 +1809,7 @@
         "upgrade_improved_spirit",
         "upgrade_soaring_spirit",
         "upgrade_extra_charge",
-        "upgrade_rapid_recharge",
-        "upgrade_trophy_collector"
+        "upgrade_rapid_recharge"
        ]
       },
       {
@@ -2065,7 +2061,6 @@
       "upgrade_warp_stone",
       "upgrade_healbane",
       "upgrade_healing_booster",
-      "upgrade_trophy_collector",
       "upgrade_greater_withering_whip",
       "upgrade_ability_power_shard",
       "upgrade_juggernaut"
@@ -2145,7 +2140,6 @@
         "upgrade_warp_stone",
         "upgrade_healbane",
         "upgrade_healing_booster",
-        "upgrade_trophy_collector",
         "upgrade_greater_withering_whip"
        ]
       },
@@ -3107,7 +3101,6 @@
       "upgrade_banshee_slugs",
       "upgrade_ability_refresher",
       "upgrade_weighted_shots",
-      "upgrade_trophy_collector",
       "upgrade_melee_rebuttal",
       "upgrade_counterspell",
       "upgrade_reduce_debuff_duration",
@@ -3175,8 +3168,7 @@
         "upgrade_close_quarter_combat",
         "upgrade_banshee_slugs",
         "upgrade_ability_refresher",
-        "upgrade_weighted_shots",
-        "upgrade_trophy_collector"
+        "upgrade_weighted_shots"
        ]
       },
       {
@@ -4014,7 +4006,6 @@
       "upgrade_close_range",
       "upgrade_fleetfoot_boots",
       "upgrade_active_reload",
-      "upgrade_trophy_collector",
       "upgrade_vex_barrier",
       "upgrade_health_stealing_magic",
       "upgrade_debuff_reducer",
@@ -4095,7 +4086,6 @@
         "upgrade_close_range",
         "upgrade_fleetfoot_boots",
         "upgrade_active_reload",
-        "upgrade_trophy_collector",
         "upgrade_vex_barrier",
         "upgrade_health_stealing_magic",
         "upgrade_debuff_reducer",
@@ -4399,7 +4389,6 @@
       "upgrade_self_bubble",
       "upgrade_healbane",
       "upgrade_rupture",
-      "upgrade_trophy_collector",
       "upgrade_tech_defense_shredders",
       "upgrade_counterspell",
       "upgrade_superior_stamina",
@@ -4464,13 +4453,6 @@
        "items": [
         "upgrade_healbane",
         "upgrade_rupture"
-       ]
-      },
-      {
-       "name": "Когда в тильте",
-       "optional": true,
-       "items": [
-        "upgrade_trophy_collector"
        ]
       },
       {
@@ -4582,7 +4564,6 @@
       "upgrade_crackshot",
       "upgrade_magic_burst",
       "upgrade_sharpshooter",
-      "upgrade_trophy_collector",
       "upgrade_magic_shock",
       "upgrade_chonky",
       "upgrade_magic_tempo",
@@ -4621,7 +4602,6 @@
         "upgrade_crackshot",
         "upgrade_magic_burst",
         "upgrade_sharpshooter",
-        "upgrade_trophy_collector",
         "upgrade_magic_shock",
         "upgrade_chonky",
         "upgrade_magic_tempo",
@@ -5677,7 +5657,6 @@
       "upgrade_target_stun",
       "upgrade_rupture",
       "upgrade_cardio_calibrator",
-      "upgrade_trophy_collector",
       "upgrade_spirit_bubble",
       "upgrade_counterspell",
       "upgrade_improved_bullet_armor",
@@ -5755,7 +5734,6 @@
        "optional": true,
        "items": [
         "upgrade_cardio_calibrator",
-        "upgrade_trophy_collector",
         "upgrade_spirit_bubble",
         "upgrade_counterspell",
         "upgrade_improved_bullet_armor",
@@ -5940,7 +5918,6 @@
       "upgrade_pristine_emblem",
       "upgrade_thermal_detonator",
       "upgrade_bulletshredimbue",
-      "upgrade_trophy_collector",
       "upgrade_veil_walker",
       "upgrade_chonky",
       "upgrade_colossus",
@@ -6054,7 +6031,6 @@
         "upgrade_pristine_emblem",
         "upgrade_thermal_detonator",
         "upgrade_bulletshredimbue",
-        "upgrade_trophy_collector",
         "upgrade_veil_walker",
         "upgrade_chonky",
         "upgrade_colossus",
@@ -6153,7 +6129,6 @@
       "upgrade_arcane_surge",
       "upgrade_healbane",
       "upgrade_tech_damage_pulse",
-      "upgrade_trophy_collector",
       "upgrade_health_stimpak",
       "upgrade_healing_booster",
       "upgrade_magic_vulnerability",
@@ -6196,7 +6171,6 @@
        "name": "EARLY GAME",
        "optional": true,
        "items": [
-        "upgrade_trophy_collector",
         "upgrade_health_stimpak",
         "upgrade_healing_booster"
        ]
@@ -7348,7 +7322,6 @@
       "upgrade_rapid_recharge",
       "upgrade_improved_stamina",
       "upgrade_magic_shield",
-      "upgrade_trophy_collector",
       "upgrade_healbane",
       "upgrade_veil_walker",
       "upgrade_chonky",
@@ -7400,7 +7373,6 @@
        "optional": false,
        "items": [
         "upgrade_magic_shield",
-        "upgrade_trophy_collector",
         "upgrade_healbane"
        ]
       },
@@ -7561,7 +7533,6 @@
       "upgrade_extra_charge",
       "upgrade_improved_spirit",
       "upgrade_soaring_spirit",
-      "upgrade_trophy_collector",
       "upgrade_rapid_recharge",
       "upgrade_magic_burst",
       "upgrade_rechargingbullets",
@@ -7595,7 +7566,6 @@
         "upgrade_extra_charge",
         "upgrade_improved_spirit",
         "upgrade_soaring_spirit",
-        "upgrade_trophy_collector",
         "upgrade_rapid_recharge",
         "upgrade_magic_burst",
         "upgrade_rechargingbullets",
@@ -7946,7 +7916,6 @@
      "items": [
       "upgrade_magic_burst",
       "upgrade_sprint_booster",
-      "upgrade_trophy_collector",
       "upgrade_magic_shield",
       "upgrade_healbane",
       "upgrade_cardio_calibrator",
@@ -7999,7 +7968,6 @@
        "items": [
         "upgrade_magic_burst",
         "upgrade_sprint_booster",
-        "upgrade_trophy_collector",
         "upgrade_magic_shield",
         "upgrade_healbane",
         "upgrade_cardio_calibrator",
@@ -8165,7 +8133,6 @@
      "favorites": 58616,
      "items": [
       "upgrade_endurance",
-      "upgrade_trophy_collector",
       "upgrade_containment",
       "upgrade_magic_burst",
       "upgrade_acolytes_glove",
@@ -8202,7 +8169,6 @@
        "optional": false,
        "items": [
         "upgrade_endurance",
-        "upgrade_trophy_collector",
         "upgrade_containment",
         "upgrade_magic_burst",
         "upgrade_acolytes_glove",
@@ -8357,7 +8323,6 @@
       "upgrade_weapon_backstabber",
       "upgrade_acolytes_glove",
       "upgrade_sprint_booster",
-      "upgrade_trophy_collector",
       "upgrade_cold_front",
       "upgrade_spirit_snatch",
       "upgrade_bullet_armor_reduction_aura",
@@ -8399,7 +8364,6 @@
         "upgrade_weapon_backstabber",
         "upgrade_acolytes_glove",
         "upgrade_sprint_booster",
-        "upgrade_trophy_collector",
         "upgrade_cold_front",
         "upgrade_spirit_snatch",
         "upgrade_bullet_armor_reduction_aura"
@@ -8571,7 +8535,6 @@
       "upgrade_acolytes_glove",
       "upgrade_weapon_backstabber",
       "upgrade_sprint_booster",
-      "upgrade_trophy_collector",
       "upgrade_cold_front",
       "upgrade_spirit_snatch",
       "upgrade_crackshot",
@@ -8610,7 +8573,6 @@
         "upgrade_acolytes_glove",
         "upgrade_weapon_backstabber",
         "upgrade_sprint_booster",
-        "upgrade_trophy_collector",
         "upgrade_cold_front",
         "upgrade_spirit_snatch",
         "upgrade_crackshot",
@@ -9410,7 +9372,6 @@
       "upgrade_extra_charge",
       "upgrade_soaring_spirit",
       "upgrade_magic_tempo",
-      "upgrade_trophy_collector",
       "upgrade_magic_shield",
       "upgrade_health_stimpak",
       "upgrade_medic_bullets",
@@ -9466,7 +9427,6 @@
         "upgrade_extra_charge",
         "upgrade_soaring_spirit",
         "upgrade_magic_tempo",
-        "upgrade_trophy_collector",
         "upgrade_magic_shield"
        ]
       },
@@ -9666,7 +9626,6 @@
       "upgrade_magic_reach",
       "upgrade_magic_burst",
       "upgrade_sprint_booster",
-      "upgrade_trophy_collector",
       "upgrade_cold_front",
       "upgrade_tech_damage_pulse",
       "upgrade_healbane",
@@ -9717,7 +9676,6 @@
         "upgrade_magic_reach",
         "upgrade_magic_burst",
         "upgrade_sprint_booster",
-        "upgrade_trophy_collector",
         "upgrade_cold_front",
         "upgrade_tech_damage_pulse",
         "upgrade_healbane",
@@ -9882,7 +9840,6 @@
       "upgrade_magic_burst",
       "upgrade_quick_silver",
       "upgrade_sprint_booster",
-      "upgrade_trophy_collector",
       "upgrade_cold_front",
       "upgrade_improved_spirit",
       "upgrade_healbane",
@@ -9961,7 +9918,6 @@
         "upgrade_magic_burst",
         "upgrade_quick_silver",
         "upgrade_sprint_booster",
-        "upgrade_trophy_collector",
         "upgrade_cold_front",
         "upgrade_improved_spirit",
         "upgrade_healbane",
@@ -10149,7 +10105,6 @@
       "upgrade_magic_burst",
       "upgrade_quick_silver",
       "upgrade_tech_damage_pulse",
-      "upgrade_trophy_collector",
       "upgrade_improved_spirit",
       "upgrade_cold_front",
       "upgrade_healbane",
@@ -10197,7 +10152,6 @@
         "upgrade_magic_burst",
         "upgrade_quick_silver",
         "upgrade_tech_damage_pulse",
-        "upgrade_trophy_collector",
         "upgrade_improved_spirit",
         "upgrade_cold_front"
        ]
@@ -12978,7 +12932,6 @@
       "upgrade_cooldown_reduction",
       "upgrade_transcendent_cooldown",
       "upgrade_spellslinger_headshots",
-      "upgrade_trophy_collector",
       "upgrade_magic_shield",
       "upgrade_vex_barrier",
       "upgrade_healbane",
@@ -13066,7 +13019,6 @@
         "upgrade_cooldown_reduction",
         "upgrade_transcendent_cooldown",
         "upgrade_spellslinger_headshots",
-        "upgrade_trophy_collector",
         "upgrade_magic_shield",
         "upgrade_vex_barrier",
         "upgrade_healbane",
@@ -13171,7 +13123,6 @@
       "upgrade_quick_silver",
       "upgrade_magic_burst",
       "upgrade_improved_spirit",
-      "upgrade_trophy_collector",
       "upgrade_soaring_spirit",
       "upgrade_extra_charge",
       "upgrade_rechargingbullets",
@@ -13241,7 +13192,6 @@
         "upgrade_quick_silver",
         "upgrade_magic_burst",
         "upgrade_improved_spirit",
-        "upgrade_trophy_collector",
         "upgrade_soaring_spirit",
         "upgrade_extra_charge",
         "upgrade_rechargingbullets",
@@ -13421,7 +13371,6 @@
       "upgrade_extra_charge",
       "upgrade_magic_reach",
       "upgrade_cold_front",
-      "upgrade_trophy_collector",
       "upgrade_crackshot",
       "upgrade_rocket_booster",
       "upgrade_superior_stamina",
@@ -13468,7 +13417,6 @@
         "upgrade_extra_charge",
         "upgrade_magic_reach",
         "upgrade_cold_front",
-        "upgrade_trophy_collector",
         "upgrade_crackshot"
        ]
       },
@@ -13627,7 +13575,6 @@
       "upgrade_close_range",
       "upgrade_lifestrike_gauntlets",
       "upgrade_magic_burst",
-      "upgrade_trophy_collector",
       "upgrade_extra_charge",
       "upgrade_magic_reach",
       "upgrade_acolytes_glove",
@@ -13667,7 +13614,6 @@
         "upgrade_close_range",
         "upgrade_lifestrike_gauntlets",
         "upgrade_magic_burst",
-        "upgrade_trophy_collector",
         "upgrade_extra_charge",
         "upgrade_magic_reach",
         "upgrade_acolytes_glove",
@@ -13891,7 +13837,6 @@
       "upgrade_cardio_calibrator",
       "upgrade_return_fire",
       "upgrade_guardian_ward",
-      "upgrade_trophy_collector",
       "upgrade_restorative_locket",
       "upgrade_rescue_beam",
       "upgrade_superior_stamina",
@@ -14043,7 +13988,6 @@
         "upgrade_cardio_calibrator",
         "upgrade_return_fire",
         "upgrade_guardian_ward",
-        "upgrade_trophy_collector",
         "upgrade_restorative_locket",
         "upgrade_rescue_beam",
         "upgrade_superior_stamina",
@@ -16198,7 +16142,6 @@
       "upgrade_rapid_recharge",
       "upgrade_soaring_spirit",
       "upgrade_spirit_sap",
-      "upgrade_trophy_collector",
       "upgrade_veil_walker",
       "upgrade_reduce_debuff_duration",
       "upgrade_spirit_bubble",
@@ -16266,7 +16209,6 @@
        "name": "The Method",
        "optional": false,
        "items": [
-        "upgrade_trophy_collector",
         "upgrade_veil_walker"
        ]
       },
@@ -16740,7 +16682,6 @@
       "upgrade_metal_skin",
       "upgrade_rescue_beam",
       "upgrade_spirit_bubble",
-      "upgrade_trophy_collector",
       "upgrade_ability_refresher",
       "upgrade_aoe_root",
       "upgrade_magic_shock",
@@ -16835,7 +16776,6 @@
         "upgrade_metal_skin",
         "upgrade_rescue_beam",
         "upgrade_spirit_bubble",
-        "upgrade_trophy_collector",
         "upgrade_ability_refresher",
         "upgrade_aoe_root",
         "upgrade_magic_shock",
@@ -17398,7 +17338,6 @@
       "upgrade_cheat_death",
       "upgrade_health_stimpak",
       "upgrade_kinetic_sash",
-      "upgrade_trophy_collector",
       "upgrade_medic_bullets",
       "upgrade_pristine_emblem",
       "upgrade_melee_rebuttal",
@@ -17539,7 +17478,6 @@
         "upgrade_cheat_death",
         "upgrade_health_stimpak",
         "upgrade_kinetic_sash",
-        "upgrade_trophy_collector",
         "upgrade_medic_bullets",
         "upgrade_pristine_emblem",
         "upgrade_melee_rebuttal"
@@ -17829,7 +17767,6 @@
       "upgrade_close_range",
       "upgrade_weapon_backstabber",
       "upgrade_kinetic_sash",
-      "upgrade_trophy_collector",
       "upgrade_endurance",
       "upgrade_melee_rebuttal",
       "upgrade_grit",
@@ -17902,8 +17839,7 @@
        "items": [
         "upgrade_close_range",
         "upgrade_weapon_backstabber",
-        "upgrade_kinetic_sash",
-        "upgrade_trophy_collector"
+        "upgrade_kinetic_sash"
        ]
       },
       {
@@ -19558,7 +19494,6 @@
       "upgrade_high_velocity_mag",
       "upgrade_grit",
       "upgrade_pristine_emblem",
-      "upgrade_trophy_collector",
       "upgrade_guardian_ward",
       "upgrade_close_range",
       "upgrade_health_stimpak",
@@ -19610,7 +19545,6 @@
         "upgrade_high_velocity_mag",
         "upgrade_grit",
         "upgrade_pristine_emblem",
-        "upgrade_trophy_collector",
         "upgrade_guardian_ward"
        ]
       },
@@ -19778,7 +19712,6 @@
       "upgrade_improved_spirit",
       "upgrade_extra_charge",
       "upgrade_sprint_booster",
-      "upgrade_trophy_collector",
       "upgrade_magic_reach",
       "upgrade_endurance",
       "upgrade_melee_rebuttal",
@@ -19828,7 +19761,6 @@
         "upgrade_improved_spirit",
         "upgrade_extra_charge",
         "upgrade_sprint_booster",
-        "upgrade_trophy_collector",
         "upgrade_magic_reach"
        ]
       },
@@ -19984,7 +19916,6 @@
       "upgrade_guardian_ward",
       "upgrade_extra_charge",
       "upgrade_improved_spirit",
-      "upgrade_trophy_collector",
       "upgrade_target_stun",
       "upgrade_arcane_surge",
       "upgrade_divine_barrier",
@@ -20052,8 +19983,7 @@
        "items": [
         "upgrade_guardian_ward",
         "upgrade_extra_charge",
-        "upgrade_improved_spirit",
-        "upgrade_trophy_collector"
+        "upgrade_improved_spirit"
        ]
       },
       {
@@ -20257,7 +20187,6 @@
       "upgrade_grit",
       "upgrade_magic_reach",
       "upgrade_containment",
-      "upgrade_trophy_collector",
       "upgrade_spirit_bubble",
       "upgrade_weapon_shielding",
       "upgrade_vex_barrier",
@@ -20332,7 +20261,6 @@
        "name": "Survival",
        "optional": true,
        "items": [
-        "upgrade_trophy_collector",
         "upgrade_spirit_bubble",
         "upgrade_weapon_shielding",
         "upgrade_vex_barrier",
@@ -20525,7 +20453,6 @@
       "upgrade_cardio_calibrator",
       "upgrade_chonky",
       "upgrade_guardian_ward",
-      "upgrade_trophy_collector",
       "upgrade_reduce_debuff_duration",
       "upgrade_veil_walker",
       "upgrade_rechargingbullets",
@@ -20581,7 +20508,6 @@
        "optional": true,
        "items": [
         "upgrade_guardian_ward",
-        "upgrade_trophy_collector",
         "upgrade_reduce_debuff_duration",
         "upgrade_veil_walker"
        ]
@@ -20757,7 +20683,6 @@
       "upgrade_sprint_booster",
       "upgrade_magic_reach",
       "upgrade_rapid_recharge",
-      "upgrade_trophy_collector",
       "upgrade_healbane",
       "upgrade_guardian_ward",
       "upgrade_health_stealing_magic",
@@ -20836,7 +20761,6 @@
        "name": "Early Optional",
        "optional": true,
        "items": [
-        "upgrade_trophy_collector",
         "upgrade_healbane",
         "upgrade_guardian_ward"
        ]
@@ -23175,7 +23099,6 @@
       "upgrade_high_velocity_mag",
       "upgrade_pristine_emblem",
       "upgrade_extra_charge",
-      "upgrade_trophy_collector",
       "upgrade_arcane_surge",
       "upgrade_rupture",
       "upgrade_targeted_silence",
@@ -23228,7 +23151,6 @@
         "upgrade_high_velocity_mag",
         "upgrade_pristine_emblem",
         "upgrade_extra_charge",
-        "upgrade_trophy_collector",
         "upgrade_arcane_surge"
        ]
       },
@@ -23401,7 +23323,6 @@
       "upgrade_improved_spirit",
       "upgrade_extra_charge",
       "upgrade_magic_shield",
-      "upgrade_trophy_collector",
       "upgrade_healbane",
       "upgrade_rapid_recharge",
       "upgrade_magic_reach",
@@ -23451,7 +23372,6 @@
         "upgrade_improved_spirit",
         "upgrade_extra_charge",
         "upgrade_magic_shield",
-        "upgrade_trophy_collector",
         "upgrade_healbane",
         "upgrade_rapid_recharge",
         "upgrade_magic_reach"
@@ -23619,7 +23539,6 @@
       "upgrade_magic_burst",
       "upgrade_extra_charge",
       "upgrade_healing_booster",
-      "upgrade_trophy_collector",
       "upgrade_magic_tempo",
       "upgrade_dps_aura",
       "upgrade_rupture",
@@ -23684,7 +23603,6 @@
        "name": "PHASE 2: ROAMING",
        "optional": false,
        "items": [
-        "upgrade_trophy_collector",
         "upgrade_magic_tempo",
         "upgrade_dps_aura",
         "upgrade_rupture",
@@ -24675,7 +24593,6 @@
       "upgrade_spellbreaker",
       "upgrade_spirit_burn",
       "upgrade_soaring_spirit",
-      "upgrade_trophy_collector",
       "upgrade_vex_barrier",
       "upgrade_return_fire",
       "upgrade_target_stun",
@@ -24777,7 +24694,6 @@
        "optional": true,
        "items": [
         "upgrade_soaring_spirit",
-        "upgrade_trophy_collector",
         "upgrade_vex_barrier",
         "upgrade_return_fire",
         "upgrade_target_stun",
@@ -24909,7 +24825,6 @@
       "upgrade_superior_stamina",
       "upgrade_counterspell",
       "upgrade_vex_barrier",
-      "upgrade_trophy_collector",
       "upgrade_debuff_reducer",
       "upgrade_weapon_shielding"
      ],
@@ -24988,7 +24903,6 @@
         "upgrade_superior_stamina",
         "upgrade_counterspell",
         "upgrade_vex_barrier",
-        "upgrade_trophy_collector",
         "upgrade_debuff_reducer",
         "upgrade_weapon_shielding"
        ]
@@ -25235,9 +25149,6 @@
   "upgrade_transcendent_cooldown": [
    "upgrade_cooldown_reduction"
   ],
-  "upgrade_trophy_collector": [
-   "upgrade_sprint_booster"
-  ],
   "upgrade_ultimate_burst": [
    "upgrade_magic_slow"
   ],
@@ -25405,7 +25316,6 @@
   "upgrade_titan_round": 1600,
   "upgrade_toxic_bullets": 3200,
   "upgrade_transcendent_cooldown": 6400,
-  "upgrade_trophy_collector": 1600,
   "upgrade_ultimate_burst": 6400,
   "upgrade_unstoppable": 6400,
   "upgrade_vampire": 1600,

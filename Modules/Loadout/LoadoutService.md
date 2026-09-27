@@ -6,36 +6,49 @@ hero state (`LoadoutSnapshot`) and applies it to another pawn. Game-agnostic.
 
 ## Types
 
-- `LoadoutOptions(Level = 36, Gold = 0, Slots = 9, MaxValue = 20000)`
-- `LoadoutResult(ItemsAdded, ItemsFailed, Imbued, AbilitiesSet, AbilitiesMissing, Unknown, Value, ItemsCapped)`
+- `LoadoutOptions(Gold = 0, Slots = 9, MaxValue = 20000)`. There is no
+  level option: the level follows the item value.
+- `LoadoutResult(ItemsAdded, ItemsFailed, Imbued, AbilitiesSet, AbilitiesMissing, Unknown, Value, ItemsCapped, Progression, AbilityPlan)`
 - `DefaultMaxValue` = 20,000 souls: the most a loadout's items may be worth.
 
 ## Operations
 
 ### `Apply(pawn, build, options, catalog = Default, mode, rng = Random.Shared)`
 
-Follows the Deadworks Deathmatch example's known-good order:
+Gives a hero the power a real player of that build has at the same net
+worth. Plans first, then follows the Deadworks Deathmatch example's
+known-good order:
 
-1. `pawn.ResetHero()`: wipes items and abilities.
-2. `pawn.Level = options.Level`, then `ModifyCurrency(EGold, 0, ECheats,
-   silent)` so health and damage recalculate for the level.
-3. Abilities: for each `LoadoutPlanner.AbilityBits` entry,
-   `AbilityComponent.FindAbilityByName`, then `UpgradeBits |= bits`.
-   Abilities missing on the hero are counted and logged at Trace.
-4. Items: `LoadoutPlanner.ItemOrder(build, rng)` (one random pick per
-   optional group), then `FirstSlots(order, catalog.ComponentsOf,
+1. Plan the items: `LoadoutPlanner.ItemOrder(build, rng)` (one random pick
+   per optional group), then `FirstSlots(order, catalog.ComponentsOf,
    options.Slots, ItemInfo.Exists)`, then `CapValue(slots, catalog.CostOf,
    options.MaxValue)` (drops the most expensive items while over the cap,
-   keeping at least 6), then `pawn.AddItem(name)` for each kept item.
-   Unknown items are collected. For imbuable items (`ItemInfo.CanBeImbued`),
-   it imbues into the build's target ability (`build.Imbues`), else into the
-   first signature slot that accepts it (`CanImbue`).
-5. `SetCurrency(EGold, options.Gold)`, then `Heal(GetMaxHealth())`.
+   keeping at least 6). Unknown items are collected. `value` is the kept
+   items' soul cost.
+2. Plan the power: `Progression.ForSouls(value)` gives the level, boons,
+   unlocks and ability points at that net worth; `AbilityPrefix(build.Abilities,
+   unlocks, points)` gives the ranks the build's order has bought by then.
+3. `pawn.ResetHero()`: wipes items and abilities.
+4. `pawn.Level = progression.Level`, then `ModifyCurrency(EGold, 0, ECheats,
+   silent)` so health and damage recalculate for the level (the boons).
+5. Abilities: for each prefix entry, `AbilityComponent.FindAbilityByName`,
+   then `UpgradeBits = bits`. Abilities missing on the hero are counted and
+   logged at Trace.
+6. Items: `pawn.AddItem(name)` for each kept item. For imbuable items
+   (`ItemInfo.CanBeImbued`), it imbues into the build's target ability
+   (`build.Imbues`), else into the first signature slot that accepts it
+   (`CanImbue`).
+7. `SetCurrency(EGold, options.Gold)`, `SetCurrency(EAbilityPoints, 0)`,
+   `SetCurrency(EAbilityUnlocks, 0)`: the ranks are the build's, and the
+   points left over after the prefix stopped are not handed out. Then
+   `Heal(GetMaxHealth())`.
 
 Returns a `LoadoutResult`. Logs `Loadout over cap, removed ...` (with value,
 cap, and baseline) when items were capped, one Information line per loadout
-(with `PlayerRef`, value, baseline, capped count), and a Warning when any
-item failed or was unknown.
+(`Loadout applied`, with `PlayerRef`, value, baseline, capped count,
+`Level`, `Boons`, `Unlocks`, `Points`, `PointsLeft`, `Steps` / `StepsTotal`
+and `Ranks` as `ability:bits`), and a Warning when any item failed or was
+unknown.
 
 ### `Swap(player, hero, build, timer, options, mode, applied)`
 
@@ -101,4 +114,9 @@ Warning when an item failed or an ability was missing. Returns a
 - `AddItem` grants the item as owned, for free. It returns null when the
   game refuses (for example, category slots full).
 - Setting `Level` directly avoids the per-level UI events of
-  `ModifyCurrency` level-ups (see the Deathmatch example comment).
+  `ModifyCurrency` level-ups (see the Deathmatch example comment). It also
+  grants no ability points, and `UpgradeBits` deducts none, so the wallets
+  are set explicitly.
+- Partial masks (`0b11`, `0b111`) are unverified in game. Budgeted
+  loadouts use them; the `Ranks=` field of `Loadout applied` is what to
+  check against the hero's ability panel.

@@ -37,21 +37,44 @@ public class GameLoopPlugin : DeadworksPluginBase
     return HookResult.Continue;
   }
 
+  public override HookResult OnTakeDamage(TakeDamageEvent args)
+  {
+    EventCounters.Hit("take_damage");
+
+    if (!RestraintService.IsRestrainedPawn(args.Entity))
+      return HookResult.Continue;
+
+    EventCounters.Hit("damage_blocked_restrained");
+    return HookResult.Stop;
+  }
+
   public override HookResult OnModifyCurrency(ModifyCurrencyEvent args)
   {
     EventCounters.Hit("modify_currency");
 
-    if (!SoulRule.ShouldBlock(args.CurrencyType, args.Source, args.Amount, MatchService.State.IsRunning))
+    if (!SoulRule.ShouldBlock(
+          args.CurrencyType, args.Source, args.Amount, MatchService.State.IsRunning, !MatchConfig.UsesDraft))
       return HookResult.Continue;
 
-    EventCounters.Hit($"soul_blocked_{args.Source}");
+    EventCounters.Hit(args.CurrencyType == ECurrencyType.EGold
+      ? $"soul_blocked_{args.Source}"
+      : $"ability_blocked_{args.CurrencyType}_{args.Source}");
 
     var player = args.Pawn.Controller;
 
     if (player != null)
-      MatchLog.Debug(player.ToPlayerRef(), "Soul gain blocked Amount={Amount} Source={Source}", args.Amount, args.Source);
+    {
+      MatchLog.Debug(
+        player.ToPlayerRef(),
+        "Currency gain blocked Currency={Currency} Amount={Amount} Source={Source}",
+        args.CurrencyType, args.Amount, args.Source);
+    }
     else
-      MatchLog.Debug("Soul gain blocked Amount={Amount} Source={Source}", args.Amount, args.Source);
+    {
+      MatchLog.Debug(
+        "Currency gain blocked Currency={Currency} Amount={Amount} Source={Source}",
+        args.CurrencyType, args.Amount, args.Source);
+    }
 
     return HookResult.Stop;
   }

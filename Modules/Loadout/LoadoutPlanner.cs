@@ -1,10 +1,19 @@
 namespace Bublock.Modules.Loadout;
 
+public sealed record AbilityPlan(
+  IReadOnlyList<(string Ability, int Bits)> Bits,
+  int StepsTaken,
+  int StepsTotal,
+  int UnlocksUsed,
+  int PointsUsed);
+
 public static class LoadoutPlanner
 {
   public const int DefaultSlots = 9;
 
   public const int MaxUpgrades = 3;
+
+  public static readonly IReadOnlyList<int> UpgradeCosts = [1, 2, 5];
 
   public const int FullyUpgradedBits = 0b11111;
 
@@ -14,7 +23,8 @@ public static class LoadoutPlanner
   {
     "upgrade_non_player_bonus",
     "upgrade_non_player_bonus_sacrifice",
-    "upgrade_goose_egg"
+    "upgrade_goose_egg",
+    "upgrade_trophy_collector"
   };
 
   public static IReadOnlyList<string> ItemOrder(
@@ -129,6 +139,46 @@ public static class LoadoutPlanner
     }
 
     return order.Select(ability => (ability, BitsFor(upgrades[ability]))).ToList();
+  }
+
+  public static AbilityPlan AbilityPrefix(IEnumerable<AbilityStep> steps, int unlocks, int points)
+  {
+    var order = new List<string>();
+    var upgrades = new Dictionary<string, int>();
+    var known = steps.Where(step => step.Kind == AbilityStep.Unlock || step.Kind == AbilityStep.Upgrade).ToList();
+    var unlocksUsed = 0;
+    var pointsUsed = 0;
+    var taken = 0;
+
+    foreach (var step in known)
+    {
+      var unlocked = upgrades.TryGetValue(step.Ability, out var tiers);
+      var unlockCost = unlocked ? 0 : 1;
+      var pointCost = step.Kind == AbilityStep.Upgrade && tiers < MaxUpgrades ? UpgradeCosts[tiers] : 0;
+
+      if (unlocksUsed + unlockCost > unlocks || pointsUsed + pointCost > points)
+        break;
+
+      if (!unlocked)
+      {
+        order.Add(step.Ability);
+        upgrades[step.Ability] = 0;
+      }
+
+      if (pointCost > 0)
+        upgrades[step.Ability]++;
+
+      unlocksUsed += unlockCost;
+      pointsUsed += pointCost;
+      taken++;
+    }
+
+    return new AbilityPlan(
+      order.Select(ability => (ability, BitsFor(upgrades[ability]))).ToList(),
+      taken,
+      known.Count,
+      unlocksUsed,
+      pointsUsed);
   }
 
   public static int BitsFor(int upgrades)
