@@ -18,8 +18,9 @@ count. Static state, one per DLL load.
 | `AllowConnect(steamId, name)` | `AdminSeatRule.CanConnect(isAdmin, playing)`. Refusal logs a Warning (`Connection refused, player slots full`); an admin connecting while 12 play logs an Information line | bool |
 | `SeatOnJoin(player)` | The player is an admin (`AdminSeatRule.SeatOnJoin`): every admin starts spectating on connect | bool |
 | `Sit(player, timer, mode)` | See below | reply text |
-| `Stand(player, timer, mode)` | Refuses if not seated or 12 already playing (`AdminSeatRule.CanStand`). Otherwise removes the seat and runs `LobbyService.AdmitPlayer` (smaller team, Skyrunner, watch spot + restraint, Random joiner / 1v1 setup souls, auto-start). `HeroCheckSeconds` (2 s) later logs `Admin hero after leaving the seat TeamNum= Pawn=`, or a Warning `Admin has no hero after leaving the seat` if no hero pawn spawned from the observer | reply text |
-| `Forget(steamId)` | Drops the seat (disconnect) | — |
+| `Stand(player, timer, mode)` | Refuses if not seated or 12 already playing (`AdminSeatRule.CanStand`). Otherwise removes the seat, resets the stream camera state (`StreamCam.Forget`), and runs `LobbyService.AdmitPlayer` (smaller team, Skyrunner, watch spot + restraint, Random joiner / 1v1 setup souls, auto-start). `HeroCheckSeconds` (2 s) later logs `Admin hero after leaving the seat TeamNum= Pawn=`, or a Warning `Admin has no hero after leaving the seat` if no hero pawn spawned from the observer | reply text |
+| `Forget(steamId)` | Drops the seat and the stream camera state (disconnect) | — |
+| `Restore(mode)` | After a hot reload (which empties `Seated`): every connected `AdminAuth` player whose pawn is the `observer` pawn (`SpectateService.IsObserving`) is added back to `Seated`, logged `Admin seat restored after reload TeamNum=`. Called from `LobbyPlugin.OnLoad(isReload: true)` | count restored |
 | `Describe()` | Playing / cap, seated count, `maxplayers` and `sv_visiblemaxplayers`, then per seated player: slot, name, `TeamNum`, pawn present | lines |
 
 ### Sit

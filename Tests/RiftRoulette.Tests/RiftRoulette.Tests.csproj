@@ -47,6 +47,8 @@
     <Compile Include="..\..\RiftRoulette\Lobby\AdminSeatRule.cs" Link="RiftRoulette\Lobby\AdminSeatRule.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\AccessRule.cs" Link="RiftRoulette\Lobby\AccessRule.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\AccessList.cs" Link="RiftRoulette\Lobby\AccessList.cs" />
+    <Compile Include="..\..\RiftRoulette\Lobby\OverviewRule.cs" Link="RiftRoulette\Lobby\OverviewRule.cs" />
+    <Compile Include="..\..\RiftRoulette\Lobby\BigUlts.cs" Link="RiftRoulette\Lobby\BigUlts.cs" />
     <Compile Include="..\..\RiftRoulette\Round\RoundLocations.cs" Link="RiftRoulette\Round\RoundLocations.cs" />
     <Compile Include="..\..\RiftRoulette\Round\WatchSpotRule.cs" Link="RiftRoulette\Round\WatchSpotRule.cs" />
     <Compile Include="..\..\RiftRoulette\Round\WatchLayout.cs" Link="RiftRoulette\Round\WatchLayout.cs" />

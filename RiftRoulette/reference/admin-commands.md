@@ -236,6 +236,45 @@ position, entity index.
 - **Side effects:** playing count and cap (12), seated count, the `maxplayers` and `sv_visiblemaxplayers` values, then per seated admin: slot, name, team number, whether a pawn exists
 - **Notes:** new in Stage 13f. Use it to check that `maxplayers 13` took effect
 
+### Stream camera (`LobbyPlugin`, `Lobby/StreamCam`)
+
+While an admin is seated as an observer the stream camera runs by itself
+(no command needed): it follows a live player's view, cuts to the killer
+when the watched player dies, goes top-down over the rift for 10 s on the
+first big teamfight ult of each round (`Lobby/BigUlts`) and then to the
+ult user's view (another live player if they died), and parks top-down
+over the current rift when nobody plays. These commands are optional. They
+take no player argument: they target the caller, else the connected admin
+(same fallback as `dw_seat_spec`). Spectators have no chat, so use the
+client console (`dw_spec_*`).
+
+#### /spec_auto <on|off>
+
+- **Invocation:** console `dw_spec_auto on` / `dw_spec_auto off` | chat `/spec_auto <on|off>`
+- **Who:** admin
+- **Calls:** `StreamCam.SetAuto`
+- **Mode:** Debug
+- **Side effects:** turns the automatic camera on or off for that admin (default on) and clears any top-down in progress. Off leaves the camera where it is for manual control. `on`/`1`, `off`/`0`; anything else errors. Resets to on when the admin stands up or disconnects
+- **Notes:** new with the stream camera (2026-09-27)
+
+#### /spec_status
+
+- **Invocation:** console `dw_spec_status` | chat `/spec_status`
+- **Who:** admin
+- **Calls:** `StreamCam.Describe`
+- **Mode:** Debug; read-only
+- **Side effects:** three lines: auto, seated, observer, observer mode; who is on camera, parked and side; top-down showing or off, return-to player, round number, whether a round is running, whether this round's top-down is used
+- **Notes:** new with the stream camera (2026-09-27)
+
+#### /spec_overview
+
+- **Invocation:** console `dw_spec_overview` | chat `/spec_overview`
+- **Who:** admin
+- **Calls:** `StreamCam.ShowOverview` (→ `SpectateService.Park` at `WatchSpot.Location(WatchSpot.Side)`, pitch 89)
+- **Mode:** Debug
+- **Side effects:** top-down over the rift now for 10 s, then back to the player the camera was on (or the next choice). Does not use up the round's automatic top-down. Errors when the admin is not spectating
+- **Notes:** new with the stream camera (2026-09-27); also the quickest in-game check that teleporting the observer camera works
+
 ### Access (`AccessPlugin`, in RiftRoulette.dll)
 
 Admin (`AdminCommand.Authorize` with the `Access` log; server console

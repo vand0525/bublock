@@ -1,0 +1,12 @@
+<Project>
+
+  <PropertyGroup>
+    <HasSharedItems>true</HasSharedItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)SpectateRule.cs" Link="Modules/Spectate/SpectateRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SpectateService.cs" Link="Modules/Spectate/SpectateService.cs" />
+  </ItemGroup>
+
+</Project>

@@ -226,6 +226,9 @@ The target command list. **Status:** `archive` = renames an archive command
 | `dw_seat_spec` | — | Lobby | `AdminSeat.Sit` | Admin (caller, else the admin Steam ID) to the spectator seat, outside teams. Console only (`ConsoleOnly`); any time (spectator team + `MakeObserver`). Admins are seated on every connect | new | 13f |
 | `/seat_play` | — | Lobby | `AdminSeat.Stand` | Admin (caller, else the admin Steam ID) out of the seat and onto a team (console: `dw_seat_play`, no arguments) | new | 13f |
 | `/seat_status` | — | Lobby | `AdminSeat.Describe` | Player slots, admin seat, `maxplayers` | new | 13f |
+| `/spec_auto <on\|off>` | — | Lobby | `StreamCam.SetAuto` | Automatic stream camera on or off for the seated admin (default on; console `dw_spec_auto`) | new | stream camera |
+| `/spec_status` | — | Lobby | `StreamCam.Describe` | Who is on camera, top-down state, round and whether its top-down is used | new | stream camera |
+| `/spec_overview` | — | Lobby | `StreamCam.ShowOverview` | Top-down over the rift now for 10 s (does not use the round's automatic one) | new | stream camera |
 | `/player_ban <slot>` | — | Lobby (Access) | `AccessService.Ban`, `KickPlayer` | Ban a connected player (Steam ID to `access.json`) and kick | new | access |
 | `/ban_add <steamid>` | — | Lobby (Access) | `AccessService.Ban`, `KickDenied` | Ban a Steam64 ID; kicks them if connected | new | access |
 | `/ban_remove <steamid>` | — | Lobby (Access) | `AccessService.Unban` | Unban a Steam64 ID | new | access |

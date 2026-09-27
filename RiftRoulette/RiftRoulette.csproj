@@ -30,6 +30,7 @@
   <Import Project="..\Modules\Restraint\Restraint.projitems" />
   <Import Project="..\Modules\Restraint\RestraintCommands.projitems" />
   <Import Project="..\Modules\Queue\Queue.projitems" />
+  <Import Project="..\Modules\Spectate\Spectate.projitems" />
 
   <ItemGroup>
     <EmbeddedResource Include="Round\Data\spots.json" LogicalName="RiftRoulette.Round.spots.json" />

@@ -30,6 +30,7 @@ Join from the Deadlock console:
 - [Loadout](Modules/Loadout/FEATURE.md): hero builds from real build data
 - [Restraint](Modules/Restraint/FEATURE.md): "can't fight" state
 - [Queue](Modules/Queue/FEATURE.md): player join queue
+- [Spectate](Modules/Spectate/FEATURE.md): spectator camera control (follow a player, park a free camera)
 
 ## Build
 

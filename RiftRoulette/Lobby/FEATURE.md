@@ -32,6 +32,15 @@ admitting and respawning send players there restrained. Disconnects also
 drop the player's restraint and 1v1 queue place; sitting in the admin seat
 releases the restraint.
 
+Stream camera: while an admin is seated as an observer, `StreamCam` runs
+their camera for streaming with no command needed. It follows a live
+player's view (in-eye), cuts to the killer when the watched player dies,
+goes top-down over the rift for 10 s on the first big teamfight ult of each
+round (`BigUlts`, from the `player_used_ability` event) and then to the ult
+user's view, and parks top-down over the current rift when nobody plays.
+Camera calls go through `Modules/Spectate`. A hot reload re-seats an admin
+still on the observer pawn (`AdminSeat.Restore`).
+
 Join access: `bublock/access.json` on the server (next to `bublock/logs/`)
 holds banned and whitelisted (`allowed`) Steam64 IDs and the open / private
 mode. `OnClientConnect` checks it before the seat rule. A ban always wins,
@@ -51,7 +60,10 @@ changes).
 | `CommandList.cs` | Player command list for `/commands` (reflects `[Command]` attributes) |
 | `Participants.cs` | Who plays: connected players minus bots and seated admins |
 | `AdminSeatRule.cs` | Pure seat rules: cap 12, `CanConnect`, `CanStand`, `SeatOnJoin` (every admin; tested) |
-| `AdminSeat.cs` | Admin seat service: connect gate, `Sit`, `Stand`, `Forget`, `Describe` |
+| `AdminSeat.cs` | Admin seat service: connect gate, `Sit`, `Stand`, `Forget`, `Restore` (after hot reload), `Describe` |
+| `StreamCam.cs` | Automatic stream camera for seated admins: follow, killer cut, big-ult top-down, park |
+| `BigUlts.cs` | Teamfight ultimate class names that trigger the top-down view (tested) |
+| `OverviewRule.cs` | Pure top-down timing: 10 s showing, once per live round (tested) |
 | `HeroLock.cs` | Reusable hero lock (applied / pending / enforcement kills, `Enforce`) |
 | `AccessRule.cs` | Pure access rule: ban, private, whitelist, admin; Steam64 ID check (tested) |
 | `AccessList.cs` | `access.json` model: mode + banned / allowed sets, JSON parse and write (tested) |
@@ -63,7 +75,8 @@ changes).
 See `LobbyService.md`. Player commands: `/status`, `/commands` (Stage 12,
 built by `CommandList`). Admin commands: `/player_list`, `/player_info`,
 `/player_kick`, `/player_team`, `/lobby_setup`, `dw_seat_spec` (console
-only, any time), `/seat_play`, `/seat_status`.
+only, any time), `/seat_play`, `/seat_status`, `/spec_auto`,
+`/spec_status`, `/spec_overview` (stream camera).
 Access (admin): `/player_ban <slot>`, `/ban_add`, `/ban_remove`,
 `/ban_list`, `/allow_add`, `/allow_remove`, `/allow_list`,
 `/access_mode [open|private]` (see `AccessPlugin.md`).
@@ -73,14 +86,18 @@ Archive names `/state`,
 
 ## State
 
-`AdminSeat` holds the seated Steam IDs; each `HeroLock` instance is owned by
+`AdminSeat` holds the seated Steam IDs; `StreamCam` holds each seated
+admin's camera state (auto flag, followed player, pending killer, parked
+side, top-down end, return-to player, last round shown); each `HeroLock` instance is owned by
 its mode. `AccessService` caches the last good `access.json` (the file is
 the source of truth and survives reloads and deploys). Otherwise reads and releases picks in `Draft/DraftState` and
 redraws boards with `Draft/DraftService.RedrawBoards`.
 
 ## Dependencies
 
-- `Round/WatchSpot` (send players up), `Modules/Restraint`
+- `Modules/Spectate` (stream camera calls), `Rift/RiftService`
+  (`IsRunning`, `RoundNumber` for the once-per-round top-down).
+- `Round/WatchSpot` (send players up; top-down camera position), `Modules/Restraint`
   (`Forget` / `Release`), `Duel/DuelService.Forget`.
 - `Draft/DraftState` and `Draft/DraftService` (board redraw).
 - `GameLoop/MatchService` / `MatchConfig` and `RandomMode/RandomModeService`
@@ -91,7 +108,10 @@ redraws boards with `Draft/DraftService.RedrawBoards`.
 ## Logs
 
 - `lobby-YYYYMMDD.log`: setup, connect, disconnect, kick, team changes,
-  admin command gate.
+  admin command gate, stream camera moves (`Stream camera Reason=`), first
+  sighting of each ability name.
+- `spectate-YYYYMMDD.log`: `Modules/Spectate` follow / park details
+  (Debug) and the client-command fallback (Information).
 - `players-YYYYMMDD.log`: deaths (Debug), status lines.
 - `access-YYYYMMDD.log`: file loads, list and mode changes, refused
   connections (Warning, so also in master), access kicks.

@@ -28,6 +28,7 @@ deadworks/                 # Cursor workspace root
       Loadout/             # stored hero builds, give a loadout (dw_loadout_*)
       Restraint/           # silence / disarm / no melee until released (dw_restrain*)
       Queue/               # reusable player join queue (no commands)
+      Spectate/            # spectator camera: follow a player, park a free camera (no commands)
     RiftRoulette/            # game mode DLL
       Session/             # session lifecycle lines in the master log
       Lobby/ Draft/ Rift/  # game-specific plugin classes
@@ -218,6 +219,14 @@ Assume the git repo is rooted at `Bublock/`.
   `citadel_koth_cashin` (the spawner removes itself about 1 s after
   spawning); a cash-in already up before the forced spawn is a leftover
   and is adopted right away.
+- Stream camera: a seated admin's camera is run by `Lobby/StreamCam`
+  (every 2 s, on deaths, on big ults) through `Modules/Spectate`; no
+  command needed. Top-down uses the main `WatchSpot.Location` anchor
+  with `SpectateRule.LookDown` (pitch 89). Big ults are the class names
+  in `Lobby/BigUlts` (hero `signature4`), at most one top-down per live
+  round (`OverviewRule`, `RiftService.RoundNumber`). Never use
+  `IsValidObserverTarget` (it rejects team 3, Sapphire). A hot reload
+  re-seats an admin still on the observer pawn (`AdminSeat.Restore`).
 
 ---
 
@@ -451,7 +460,7 @@ When debugging with Cursor: run `pull-logs.sh` first, then inspect
                            # round start/end, plus every feature Warning+
   <feature>-YYYYMMDD.log   # one per feature: draft, rift, lobby, worldtext,
                            # movement, hud, match, cleanup, commands,
-                           # watch, probe, ...
+                           # watch, probe, spectate, ...
 ```
 
 - Every feature gets its own file (`BublockLog.For("Draft")` →

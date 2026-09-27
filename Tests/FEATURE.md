@@ -11,14 +11,15 @@ server. Never deployed to the server.
   `Shared.projitems`). Tests run against temp folders with a fake clock.
 - `Modules.Tests/` — xUnit tests for the pure helpers in `Bublock/Modules`
   (imports `Shared.projitems`, `WorldText.projitems`,
-  `Movement.projitems`, `Hud.projitems`, `Queue.projitems`, and `Loadout.projitems`, which
+  `Movement.projitems`, `Hud.projitems`, `Queue.projitems`, `Spectate.projitems`, and `Loadout.projitems`, which
   also embeds `hero-builds.json` in the test assembly; references
   `Google.Protobuf` because `MovementService` sends a camera message):
   WorldText placement math and text formatting, the Movement
   `LocationRegistry`, the Hud banner text parser, the Loadout planner
   (9 slots, components, optional groups, banned items, value cap, ability
   bits), the build catalog (inline sample plus the committed data,
-  baseline value), and the `PlayerQueue` join queue. Service ops that touch entities or players are
+  baseline value), the `PlayerQueue` join queue, and the spectate choice
+  (keep, killer, any, park) and straight-down angle. Service ops that touch entities or players are
   not tested here.
 - `RiftRoulette.Tests/` — xUnit tests for pure Rift Roulette pieces, compiled in
   directly as linked files (`RiftRoulette/Draft/DraftState.cs`,
@@ -29,7 +30,7 @@ server. Never deployed to the server.
   `WatchGuardRule.cs`, `RiftRoulette/Duel/KothRule.cs`,
   `RiftRoulette/GameLoop/MatchState.cs`,
   `MatchConfig.cs`, `AutoStartRule.cs`, `ShopRule.cs`, `RiftRoulette/RandomMode/HeroDraw.cs`,
-  `RiftRoulette/Lobby/TeamBalance.cs`, `AdminSeatRule.cs`, `RiftRoulette/Stats/StatsLedger.cs`,
+  `RiftRoulette/Lobby/TeamBalance.cs`, `AdminSeatRule.cs`, `OverviewRule.cs`, `BigUlts.cs`, `RiftRoulette/Stats/StatsLedger.cs`,
   `StatsBoardText.cs`, `RiftRoulette/Balance/BalanceTracker.cs`,
   `BalancePicker.cs`) rather than referencing the plugin DLL: pick
   bookkeeping, hero pool team lookup, draft board / pool text, team name
@@ -39,7 +40,7 @@ server. Never deployed to the server.
   watch view angles, the below-the-watch-spot line, the 1v1 winner / loser
   / streak rule, match scoring, match config parsing
   (including the `1v1` alias), when buying is open, the match auto-start decision, the admin
-  seat rules,
+  seat rules, the stream camera's once-per-round top-down timing and big-ult list,
   the random hero draw, team placement, kill / death / assist counting and
   board text, and the auto-balance trigger and pick. Imports `Shared.projitems` and
   `Movement.projitems` because the locations are Movement types.

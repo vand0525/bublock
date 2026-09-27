@@ -38,6 +38,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Session (`Session/`) | Session id, map name, registers locations | `Server.MapName`, `OnLoad` / `OnStartupServer` | `dw_session_info` |
 | Lobby (`Lobby/`) | Admits players, balances teams, convars, kick, respawn to watch spot | `OnClientConnect` / `FullConnect` / `Disconnect`, `player_spawn`, `player_death`, `SelectHero(Heroes.Skyrunner)`, `ChangeTeam`, `kickid`, lobby convars | join; `/status`; `dw_player_list` |
 | AdminSeat (`Lobby/AdminSeat`) | 13th seat on the spectator side | `maxplayers`, `sv_visiblemaxplayers`, team 1 | `dw_seat_status` |
+| Stream camera (`Lobby/StreamCam`, `Modules/Spectate`) | Seated admin's automatic camera: follow, killer cut, top-down on big ults | `observer` pawn designer name, `ObserverServices` (`InEye`, `Roaming`, `SetObserverTarget`), observer `Teleport`, `player_used_ability`, ult class names in `Lobby/BigUlts`, client `spec_player` | `dw_spec_status`, `dw_spec_overview` |
 | Access (`Lobby/Access*`) | Bans / private mode from `bublock/access.json` | `OnClientConnect` returning false, `kickid` | `/access_mode` |
 | Draft (`Draft/`) | Draft picks, boards (off in Random mode) | `player_hero_changed`, `SelectHero`, `Heroes` pools, `point_worldtext` | `/draft_status`, `/draft_boards` |
 | Rift (`Rift/`) | Forces a rift at a side, detects capture / tie, cleans troopers | KOTH schema fields, `citadel_gamerules`, `citadel_item_koth_spawner`, `citadel_koth_cashin`, `npc_trooper`, `citadel_koth_enabled`, rift positions | `/rift_start green`, `rift-*.log` |
@@ -95,6 +96,8 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Settings not applied (team size, respawn, duplicates) | convar renamed / removed / hidden | self-test Convars FAIL; `Convar missing` warning in master log | new name from `cvarlist.md` upstream |
 | Banner or camera angle missing | protobuf message changed | `dw_hud_announce`, `dw_mv_angle` | check the message in the new `lib/` |
 | Boards missing | `point_worldtext` / `CPointWorldText` changed | `dw_wt_create test` | check `CPointWorldText` in `/tmp/dwapi.cs` |
+| Stream camera never goes top-down on ults | ult renamed / reworked, or `player_used_ability` no longer fires | self-test Events `player_used_ability`; `lobby-*.log` `Ability name seen for the first time` | new `signature4` names from `assets.deadlock-api.com/v2/heroes` into `Lobby/BigUlts` |
+| Stream camera stuck / not following | observer pawn renamed or observer services changed | `dw_spec_status` (`Observer=False`, `Mode=`); `spectate-*.log` | check `CPlayer_ObserverServices` and the pawn designer name in `/tmp/dwapi.cs` |
 
 ---
 
@@ -136,6 +139,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | `npc_trooper_boss`, `npc_boss_tier2`, `npc_barrack_boss`, `citadel_item_powerup_spawner`, `citadel_herotest_orbspawner`, `citadel_shop_prop_dynamic` | removed | `CleanSlate/CleanSlateService.cs` |
 | `trigger_item_shop`, `trigger_item_shop_safe_zone` | disabled | same |
 | `info_super_trooper_spawn`, `item_crate_spawn` | never remove | same (comment) |
+| `observer` | spectator pawn designer name (seated admin) | `Modules/Spectate/SpectateService.cs` `ObserverDesignerName` |
 
 Map dump counts (build 6698): `info_koth_spawn_location` 2, `info_super_trooper_spawn` 12, `item_crate_spawn` 6, `trigger_item_shop` 9, `trigger_item_shop_safe_zone` 2, `citadel_shop_prop_dynamic` 8, `npc_boss_tier2` 6, `npc_barrack_boss` 12, `citadel_item_powerup_spawner` 2.
 
@@ -155,7 +159,7 @@ Map dump counts (build 6698): `info_koth_spawn_location` 2, `info_super_trooper_
 
 ### Events and hooks
 
-`player_spawn` (Lobby, Duel, Random), `player_death` (Lobby, Stats), `player_respawned` (Duel, Random), `player_hero_changed` (Draft); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnLoad`, `OnStartupServer`.
+`player_spawn` (Lobby, Duel, Random), `player_death` (Lobby, Stats, stream camera), `player_used_ability` (stream camera: `Abilityname`, `Player`, `Caster`), `player_respawned` (Duel, Random), `player_hero_changed` (Draft); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnLoad`, `OnStartupServer`.
 
 ### Enums and hero data
 
@@ -163,6 +167,8 @@ Map dump counts (build 6698): `info_koth_spawn_location` 2, `info_super_trooper_
 - `hero-builds.json` (38 heroes, 161 items, 154 abilities), banned items in `Modules/Loadout/LoadoutPlanner.cs`.
 - `EAbilitySlot.Signature1..4`, `ECurrencyType.EGold` / `EAbilityPoints` / `EAbilityUnlocks`, `ECurrencySource.ECheats` / `EStartingAmount` / `EItemSale` (the sources `GameLoop/SoulRule` lets through), `ImbueResult.Success`.
 - Teams: Amber 2, Sapphire 3, spectator 1.
+- Big teamfight ults: 17 ability class names in `Lobby/BigUlts.cs` (each hero's `signature4` from `assets.deadlock-api.com/v2/heroes`, 2026-09-27). Heroes get reworked; re-check after a hero patch.
+- Observer: `ObserverMode_t.InEye` (player view) and `Roaming` (free cam); client command `spec_player <slot>` (`clientcmd_can_execute`) as the follow fallback. Never `IsValidObserverTarget` (rejects team 3).
 
 ### Coordinates (dl_midtown)
 

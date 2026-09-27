@@ -1,4 +1,5 @@
 using Bublock.Modules.Restraint;
+using Bublock.Modules.Spectate;
 using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Draft;
@@ -107,6 +108,7 @@ public static class AdminSeat
       return $"All {AdminSeatRule.PlayerCap} player slots are taken; staying in the admin seat.";
 
     Seated.Remove(steamId);
+    StreamCam.Forget(steamId);
 
     var team = LobbyService.AdmitPlayer(player, timer, mode);
 
@@ -136,7 +138,28 @@ public static class AdminSeat
       log.Warn(who, "Admin has no hero after leaving the seat TeamNum={TeamNum} Pawn={Pawn}", player.TeamNum, pawn);
   }
 
-  public static void Forget(ulong steamId) => Seated.Remove(steamId);
+  public static void Forget(ulong steamId)
+  {
+    Seated.Remove(steamId);
+    StreamCam.Forget(steamId);
+  }
+
+  // Hot reload wipes Seated; an admin still on the observer pawn goes back into the seat.
+  public static int Restore(ExecutionMode mode = ExecutionMode.Clean)
+  {
+    var restored = 0;
+
+    foreach (var player in Players.GetAll())
+    {
+      if (!AdminAuth.IsAuthorized(player.PlayerSteamId) || !SpectateService.IsObserving(player) || !Seated.Add(player.PlayerSteamId))
+        continue;
+
+      restored++;
+      Log.WithMode(mode).Info(player.ToPlayerRef(), "Admin seat restored after reload TeamNum={TeamNum}", player.TeamNum);
+    }
+
+    return restored;
+  }
 
   public static IReadOnlyList<string> Describe()
   {

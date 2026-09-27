@@ -17,7 +17,9 @@ by `SelfTestTests`.
 - `KeptEntities`: map entities we rely on staying (`info_super_trooper_spawn`,
   `item_crate_spawn`, the two shop triggers, `info_koth_spawn_location`).
 - `CleanedEntities`: what CleanSlate removes; should be 0 on the map.
-- `Events`: counter names `EventCounters` tracks.
+- `Events`: counter names `EventCounters` tracks. `player_used_ability`
+  feeds the stream camera's big-ult top-down (`Lobby/StreamCam`); a zero
+  count after abilities were cast means the server does not fire it.
 - `RiftPointName` = `info_koth_spawn_location`, `RiftPointTolerance` = 100
   units (a map rift point must be this close to `RiftSides.Position`).
 

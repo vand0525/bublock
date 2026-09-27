@@ -43,6 +43,8 @@ public static class RiftService
 
   public static bool IsRunning => Phase != RiftPhase.Idle;
 
+  public static int RoundNumber => _roundNumber;
+
   public static string RunRift(ITimer timer, RiftRoundSteps steps, ExecutionMode mode = ExecutionMode.Clean)
   {
     var log = Log.WithMode(mode);

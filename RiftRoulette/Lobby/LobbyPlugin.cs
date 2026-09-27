@@ -12,12 +12,19 @@ public class LobbyPlugin : DeadworksPluginBase
 
   private static readonly Logger PlayersLog = BublockLog.For("Players");
 
+  private static readonly HashSet<string> SeenAbilities = [];
+
   public override string Name => "Rift Roulette Lobby";
 
   public override void OnLoad(bool isReload)
   {
     if (isReload)
+    {
       LobbyService.ApplyServerConvars();
+      AdminSeat.Restore();
+    }
+
+    Timer.Every(StreamCam.TickSeconds.Seconds(), StreamCam.Tick);
   }
 
   public override void OnStartupServer()
@@ -77,6 +84,30 @@ public class LobbyPlugin : DeadworksPluginBase
 
     if (player != null && pawn != null)
       LobbyService.LogDeath(player, pawn);
+
+    if (player?.As<CCitadelPlayerController>() is { } victim)
+      StreamCam.OnDeath(victim, args.AttackerController?.As<CCitadelPlayerController>(), Timer);
+
+    return HookResult.Continue;
+  }
+
+  [GameEventHandler("player_used_ability")]
+  public HookResult OnPlayerUsedAbility(PlayerUsedAbilityEvent args)
+  {
+    EventCounters.Hit("player_used_ability");
+    var ability = args.Abilityname;
+    var caster = (args.Player ?? args.Caster?.As<CBasePlayerPawn>())?.Controller?.As<CCitadelPlayerController>();
+
+    if (SeenAbilities.Add(ability))
+      LobbyLog.Info("Ability name seen for the first time since load Ability={Ability} Big={Big} Caster={Caster}", ability, BigUlts.IsBig(ability), caster?.PlayerName ?? "none");
+
+    if (caster == null)
+      return HookResult.Continue;
+
+    LobbyLog.Trace(caster.ToPlayerRef(), "Ability used Ability={Ability} Big={Big}", ability, BigUlts.IsBig(ability));
+
+    if (BigUlts.IsBig(ability) && Participants.IsParticipant(caster))
+      StreamCam.OnBigUlt(caster, ability, Timer);
 
     return HookResult.Continue;
   }
@@ -187,6 +218,40 @@ public class LobbyPlugin : DeadworksPluginBase
 
     foreach (var line in AdminSeat.Describe())
       AdminCommand.Reply(caller, $"[Lobby] {line}");
+  }
+
+  [Command("spec_auto", Description = "Stream camera: automatic follow / top-down on or off: spec_auto <on|off>")]
+  public void CmdSpecAuto(CCitadelPlayerController? caller, string state)
+  {
+    AdminCommand.Authorize(caller, LobbyLog, "spec_auto");
+
+    var on = state.Trim().ToLowerInvariant() switch
+    {
+      "on" or "1" => true,
+      "off" or "0" => false,
+      _ => throw new CommandException("Usage: spec_auto <on|off>")
+    };
+
+    var admin = SeatTarget(caller);
+    StreamCam.SetAuto(admin, on, ExecutionMode.Debug);
+    AdminCommand.Reply(caller, $"[Lobby] Stream camera auto {(on ? "on" : "off")}");
+  }
+
+  [Command("spec_status", Description = "Stream camera: who is on camera, top-down state, and the round")]
+  public void CmdSpecStatus(CCitadelPlayerController? caller)
+  {
+    AdminCommand.Authorize(caller, LobbyLog, "spec_status");
+
+    foreach (var line in StreamCam.Describe(SeatTarget(caller)))
+      AdminCommand.Reply(caller, $"[Lobby] {line}");
+  }
+
+  [Command("spec_overview", Description = "Stream camera: show the top-down view over the rift now for 10 s")]
+  public void CmdSpecOverview(CCitadelPlayerController? caller)
+  {
+    AdminCommand.Authorize(caller, LobbyLog, "spec_overview");
+
+    AdminCommand.Reply(caller, $"[Lobby] {StreamCam.ShowOverview(SeatTarget(caller), Timer, ExecutionMode.Debug)}");
   }
 
   // A console command can arrive without a caller, so the seat falls back to the admin Steam ID.

@@ -44,7 +44,7 @@ logger.
 | `LastOutcome` | `none`, `finished`, `tied`, `spawn timed out`, or `cancelled` |
 | trooper snapshot | `npc_trooper` entity indexes present when the last rift started; used only by `WatchOutcome` to spot the first new trooper |
 | handles | `IHandle`s of the spawn wait, the watch, and the end timer, cancelled by `CancelRift` |
-| round counter | `BublockLog.RoundId` is `r<n>` from start until the round finishes, times out, or is cancelled |
+| round counter | `BublockLog.RoundId` is `r<n>` from start until the round finishes, times out, or is cancelled. `RoundNumber` (read-only) is that `n`: 0 before the first round, only goes up during a DLL load; the stream camera uses it for one top-down per round (`Lobby/OverviewRule`) |
 
 ## Operations
 
