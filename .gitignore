@@ -1,0 +1,25 @@
+# Cursor IDE (local only — rules source of truth is RiftRoulette/reference/.rules)
+.cursor/
+
+# OS / IDE noise
+.DS_Store
+
+# Local server SFTP details (copy scripts/server.env.example)
+scripts/server.env
+
+# Build outputs
+**/bin/
+**/obj/
+
+# Never commit binaries (Deadworks API and other mods' DLLs stay outside the repo)
+*.dll
+*.pdb
+
+# Map vertex buffer for scripts/check-spots.py (74 MB, re-downloadable)
+RiftRoulette/reference/maps/*/world.bin*
+
+# Pulled server logs (local inspection copies)
+logs/**
+!logs/**/.gitkeep
+RiftRoulette/logs/*
+!RiftRoulette/logs/.gitkeep

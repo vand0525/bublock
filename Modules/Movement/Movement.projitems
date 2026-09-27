@@ -1,0 +1,13 @@
+<Project>
+
+  <PropertyGroup>
+    <HasSharedItems>true</HasSharedItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)LocationRegistry.cs" Link="Modules/Movement/LocationRegistry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MovementLocation.cs" Link="Modules/Movement/MovementLocation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MovementService.cs" Link="Modules/Movement/MovementService.cs" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="DeadworksManaged.Api">
+      <HintPath>$(DeadworksLibDir)/DeadworksManaged.Api.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="Google.Protobuf">
+      <HintPath>$(DeadworksLibDir)/Google.Protobuf.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Import Project="..\Shared\Shared.projitems" />
+
+</Project>

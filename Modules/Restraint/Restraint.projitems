@@ -1,0 +1,11 @@
+<Project>
+
+  <PropertyGroup>
+    <HasSharedItems>true</HasSharedItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)RestraintService.cs" Link="Modules/Restraint/RestraintService.cs" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="DeadworksManaged.Api">
+      <HintPath>$(DeadworksLibDir)/DeadworksManaged.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Protobuf">
+      <HintPath>$(DeadworksLibDir)/Google.Protobuf.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Import Project="..\..\Shared\Shared.projitems" />
+  <Import Project="..\..\Modules\WorldText\WorldText.projitems" />
+  <Import Project="..\..\Modules\Movement\Movement.projitems" />
+  <Import Project="..\..\Modules\Hud\Hud.projitems" />
+  <Import Project="..\..\Modules\Loadout\Loadout.projitems" />
+  <Import Project="..\..\Modules\Queue\Queue.projitems" />
+
+</Project>

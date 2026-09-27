@@ -1,0 +1,16 @@
+<Project>
+
+  <PropertyGroup>
+    <HasSharedItems>true</HasSharedItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)HeroBuildData.cs" Link="Modules/Loadout/HeroBuildData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HeroBuildCatalog.cs" Link="Modules/Loadout/HeroBuildCatalog.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LoadoutPlanner.cs" Link="Modules/Loadout/LoadoutPlanner.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LoadoutSnapshot.cs" Link="Modules/Loadout/LoadoutSnapshot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LoadoutService.cs" Link="Modules/Loadout/LoadoutService.cs" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Data/hero-builds.json" LogicalName="Bublock.Modules.Loadout.hero-builds.json" Link="Modules/Loadout/Data/hero-builds.json" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,26 @@
+<Project>
+
+  <PropertyGroup>
+    <HasSharedItems>true</HasSharedItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Auth/AdminAuth.cs" Link="Shared/Auth/AdminAuth.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Auth/AdminCommand.cs" Link="Shared/Auth/AdminCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Chat/PlayerChat.cs" Link="Shared/Chat/PlayerChat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Cheats/Cheats.cs" Link="Shared/Cheats/Cheats.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConVars/ServerConVars.cs" Link="Shared/ConVars/ServerConVars.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Execution/ExecutionMode.cs" Link="Shared/Execution/ExecutionMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging/BublockLog.cs" Link="Shared/Logging/BublockLog.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging/LogFormatter.cs" Link="Shared/Logging/LogFormatter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging/Logger.cs" Link="Shared/Logging/Logger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging/LogHub.cs" Link="Shared/Logging/LogHub.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging/LogLevel.cs" Link="Shared/Logging/LogLevel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging/LogPaths.cs" Link="Shared/Logging/LogPaths.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging/LogRetention.cs" Link="Shared/Logging/LogRetention.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging/PlayerRef.cs" Link="Shared/Logging/PlayerRef.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging/PlayerRefExtensions.cs" Link="Shared/Logging/PlayerRefExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logging/RollingFileWriter.cs" Link="Shared/Logging/RollingFileWriter.cs" />
+  </ItemGroup>
+
+</Project>

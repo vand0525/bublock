@@ -1,0 +1,69 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="DeadworksManaged.Api">
+      <HintPath>$(DeadworksLibDir)/DeadworksManaged.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Protobuf">
+      <HintPath>$(DeadworksLibDir)/Google.Protobuf.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Import Project="..\..\Shared\Shared.projitems" />
+  <Import Project="..\..\Modules\Movement\Movement.projitems" />
+
+  <ItemGroup>
+    <Compile Include="..\..\RiftRoulette\Draft\DraftState.cs" Link="RiftRoulette\Draft\DraftState.cs" />
+    <Compile Include="..\..\RiftRoulette\Draft\DraftPools.cs" Link="RiftRoulette\Draft\DraftPools.cs" />
+    <Compile Include="..\..\RiftRoulette\Draft\DraftBoardText.cs" Link="RiftRoulette\Draft\DraftBoardText.cs" />
+    <Compile Include="..\..\RiftRoulette\Lobby\RiftRouletteTeams.cs" Link="RiftRoulette\Lobby\RiftRouletteTeams.cs" />
+    <Compile Include="..\..\RiftRoulette\Lobby\CommandList.cs" Link="RiftRoulette\Lobby\CommandList.cs" />
+    <Compile Include="..\..\RiftRoulette\Locations\RiftRouletteLocations.cs" Link="RiftRoulette\Locations\RiftRouletteLocations.cs" />
+    <Compile Include="..\..\RiftRoulette\Rift\RiftSide.cs" Link="RiftRoulette\Rift\RiftSide.cs" />
+    <Compile Include="..\..\RiftRoulette\Rift\RiftWatch.cs" Link="RiftRoulette\Rift\RiftWatch.cs" />
+    <Compile Include="..\..\RiftRoulette\Rift\RiftRoundResult.cs" Link="RiftRoulette\Rift\RiftRoundResult.cs" />
+    <Compile Include="..\..\RiftRoulette\GameLoop\MatchState.cs" Link="RiftRoulette\GameLoop\MatchState.cs" />
+    <Compile Include="..\..\RiftRoulette\GameLoop\MatchConfig.cs" Link="RiftRoulette\GameLoop\MatchConfig.cs" />
+    <Compile Include="..\..\RiftRoulette\GameLoop\AutoStartRule.cs" Link="RiftRoulette\GameLoop\AutoStartRule.cs" />
+    <Compile Include="..\..\RiftRoulette\RandomMode\HeroDraw.cs" Link="RiftRoulette\RandomMode\HeroDraw.cs" />
+    <Compile Include="..\..\RiftRoulette\Lobby\TeamBalance.cs" Link="RiftRoulette\Lobby\TeamBalance.cs" />
+    <Compile Include="..\..\RiftRoulette\Lobby\AdminSeatRule.cs" Link="RiftRoulette\Lobby\AdminSeatRule.cs" />
+    <Compile Include="..\..\RiftRoulette\Lobby\AccessRule.cs" Link="RiftRoulette\Lobby\AccessRule.cs" />
+    <Compile Include="..\..\RiftRoulette\Lobby\AccessList.cs" Link="RiftRoulette\Lobby\AccessList.cs" />
+    <Compile Include="..\..\RiftRoulette\Round\RoundLocations.cs" Link="RiftRoulette\Round\RoundLocations.cs" />
+    <Compile Include="..\..\RiftRoulette\Round\WatchSpotRule.cs" Link="RiftRoulette\Round\WatchSpotRule.cs" />
+    <Compile Include="..\..\RiftRoulette\Round\WatchLayout.cs" Link="RiftRoulette\Round\WatchLayout.cs" />
+    <Compile Include="..\..\RiftRoulette\Round\WatchGuardRule.cs" Link="RiftRoulette\Round\WatchGuardRule.cs" />
+    <Compile Include="..\..\RiftRoulette\Round\SlotSpots.cs" Link="RiftRoulette\Round\SlotSpots.cs" />
+    <EmbeddedResource Include="..\..\RiftRoulette\Round\Data\spots.json" LogicalName="RiftRoulette.Round.spots.json" Link="RiftRoulette\Round\Data\spots.json" />
+    <Compile Include="..\..\RiftRoulette\GameLoop\ShopRule.cs" Link="RiftRoulette\GameLoop\ShopRule.cs" />
+    <Compile Include="..\..\RiftRoulette\GameLoop\SoulRule.cs" Link="RiftRoulette\GameLoop\SoulRule.cs" />
+    <Compile Include="..\..\RiftRoulette\SelfTest\SelfTestResult.cs" Link="RiftRoulette\SelfTest\SelfTestResult.cs" />
+    <Compile Include="..\..\RiftRoulette\SelfTest\GameDependencies.cs" Link="RiftRoulette\SelfTest\GameDependencies.cs" />
+    <Compile Include="..\..\RiftRoulette\SelfTest\EventCounters.cs" Link="RiftRoulette\SelfTest\EventCounters.cs" />
+    <Compile Include="..\..\RiftRoulette\Duel\KothRule.cs" Link="RiftRoulette\Duel\KothRule.cs" />
+    <Compile Include="..\..\RiftRoulette\Duel\StreakBoard.cs" Link="RiftRoulette\Duel\StreakBoard.cs" />
+    <Compile Include="..\..\RiftRoulette\Stats\StatsLedger.cs" Link="RiftRoulette\Stats\StatsLedger.cs" />
+    <Compile Include="..\..\RiftRoulette\Stats\StatsBoardText.cs" Link="RiftRoulette\Stats\StatsBoardText.cs" />
+    <Compile Include="..\..\RiftRoulette\Balance\BalanceTracker.cs" Link="RiftRoulette\Balance\BalanceTracker.cs" />
+    <Compile Include="..\..\RiftRoulette\Balance\BalancePicker.cs" Link="RiftRoulette\Balance\BalancePicker.cs" />
+  </ItemGroup>
+
+</Project>

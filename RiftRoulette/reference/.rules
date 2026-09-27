@@ -1,0 +1,523 @@
+# Rift Roulette — Development Rules
+
+Source of truth for Rift Roulette work. Mirrored as Cursor always-apply rules in
+`.cursor/rules/riftroulette.mdc`. Handoff context lives in
+`Bublock/RiftRoulette/reference/chat-handoff.md`. Resources and discoveries live
+in `Bublock/RiftRoulette/reference/resources.md`. Rebuild roadmap lives in
+`Bublock/RiftRoulette/reference/master-plan.md`.
+
+These rules govern documentation, architecture, execution mode, and logging.
+They do not authorize inventing Deadworks APIs.
+
+---
+
+## 0. Workspace layout
+
+```text
+deadworks/                 # Cursor workspace root
+  lib/                     # shared libraries (keep)
+  ref/                     # shared reference assemblies (keep)
+  Directory.Build.Targets  # shared deploy (opt-in)
+  archive/                 # frozen known-good oracles
+  Bublock/                 # active multi-plugin home
+    Shared/                # Shared.projitems: Auth, Cheats, ExecutionMode, Logging
+    Modules/               # reusable game-agnostic modules (<Name>/<Name>.projitems)
+      WorldText/           # boards / in-game text (dw_wt_*)
+      Movement/            # named locations, teleports (dw_mv_*)
+      Hud/                 # on-screen announcement banners (dw_hud_*)
+      Loadout/             # stored hero builds, give a loadout (dw_loadout_*)
+      Restraint/           # silence / disarm / no melee until released (dw_restrain*)
+      Queue/               # reusable player join queue (no commands)
+    RiftRoulette/            # game mode DLL
+      Session/             # session lifecycle lines in the master log
+      Lobby/ Draft/ Rift/  # game-specific plugin classes
+      Round/               # parity round composer (Rift + Draft + Movement ops) + watch spot
+      GameLoop/            # match loop + MatchConfig (hero mode, format) + auto-start
+      RandomMode/          # random hero + build every round (Stage 13b)
+      Stats/               # match kills / deaths / assists, stats boards (Stage 13c)
+      Balance/             # auto-balance swaps between rounds (Stage 13c)
+      Duel/                # 1v1 mode: copied build, queue, winner stays on (Stage 13g, 13j)
+      SelfTest/            # patch-day self-test of every game dependency (dw_selftest_*)
+    DevTools/              # discovery / diagnostics
+    CleanSlate/            # map cleanup helpers
+    Tests/                 # local xUnit tests (never deployed)
+    logs/                  # Cursor pull root (<Dll>/ subfolders)
+    scripts/update.sh      # build-all (never deploys)
+    scripts/deploy.sh      # backup server DLLs, then upload (needs --confirm)
+    scripts/rollback.sh    # re-upload a deploy backup (<stamp>)
+    scripts/test.sh        # run local tests
+    scripts/pull-logs.sh   # read-only mirror of server logs into logs/
+    scripts/fetch-builds.py # refresh Modules/Loadout/Data/hero-builds.json (offline)
+    scripts/check-spots.py # check the per-slot spots against the map mesh (offline)
+    scripts/patch-baseline.sh # save a known-good snapshot before a game patch
+    scripts/patch-check.py # diff game data / API vs that snapshot (offline)
+  server-backups/          # deploy.sh backups (<UTC stamp>/), outside git
+```
+
+- **New plugin work** lives under `Bublock/` (many plugins).
+- **Known-good extraction source** is `archive/` for each plugin.
+- Do not casually edit archive in place; copy/extract into Bublock.
+- Shared `lib/` and `ref/` stay at the workspace root for the agent and builds.
+- Shared conventions (logging, auth, docs, Clean/Debug) apply across Bublock plugins.
+- `Shared/` and `Modules/` are **not** plugins on their own. They are compiled
+  into consuming DLLs as source via `.projitems` imports. Never ship them as
+  separate library DLLs in the server plugins folder (the loader treats every
+  `plugins/*.dll` as a plugin, and only discovers commands inside the loaded DLL).
+- `Modules/` MUST NOT depend on Rift Roulette. Game-specific constants and
+  logic live under `RiftRoulette/`.
+
+---
+
+## 0.1. Git hygiene — Cursor IDE files
+
+Assume the git repo is rooted at `Bublock/`.
+
+- Never commit Cursor IDE paths (`.cursor/`, or any other Cursor-local metadata).
+- Committed rules source of truth is `RiftRoulette/reference/.rules` (under Bublock).
+- Workspace `deadworks/.cursor/rules/riftroulette.mdc` is a **local** always-apply
+  mirror only: regenerate it from `.rules` when rules change; do not commit it.
+- `Bublock/.gitignore` MUST keep `.cursor/` excluded (along with build outputs
+  and pulled logs under `logs/` / `RiftRoulette/logs/`).
+- Cursor commit/PR attribution trailers are allowed; do not strip them.
+- The repo is public on GitHub. Server SFTP host, port and user live only in
+  git-ignored `scripts/server.env` (template `server.env.example`); never
+  put them, passwords or keychain values in committed files. The public
+  join address in `README.md` is fine.
+- License: PolyForm Strict 1.0.0 (`LICENSE`). Future versions may be
+  relicensed; merged outside contributions need their authors' agreement
+  first. Third-party data (hero builds, map extracts, game data) is not
+  covered by it.
+
+---
+
+## 0.2. Master plan — one stage at a time
+
+- Rebuild work follows `Bublock/RiftRoulette/reference/master-plan.md`.
+- Pull **one** unchecked stage, make a focused Cursor plan for that stage only,
+  implement, verify, then mark the stage done in `master-plan.md`.
+- Do **not** skip ahead into a full lifecycle rewrite or multi-stage mega-PR.
+- Stage 12 parity is done (2026-09-27); Stage 13 gameplay is split into
+  sub-stages (13a, 13b, ...), each with its own plan.
+- Do **not** SFTP/push any Bublock plugin to the live server without the
+  user's explicit approval for that upload. The only push path is
+  `Bublock/scripts/deploy.sh --confirm`, which backs up the server DLLs to
+  `deadworks/server-backups/<stamp>/` first (`--no-backup` only when the
+  user says so); `rollback.sh <stamp>` restores them. `update.sh` is
+  build-only.
+- When a stage changes architecture decisions, update `master-plan.md` and this
+  `.rules` file in the same change.
+- Extraction stages (6–10) followed the strangler pattern: each moved one
+  behavior from the archive baseline (`RiftRumble/Legacy/`) into its module
+  or plugin class and removed it from Legacy in the same change, moving its
+  `Console.WriteLine` lines to the shared logger. Stage 11 deleted Legacy;
+  `archive/` stays the oracle for parity checks.
+- Round flow is composed by `RiftRoulette/Round/RoundFlow` from Rift, Draft,
+  and Movement ops. The lifecycle calls it in Clean mode; admin commands
+  call the same methods in Debug mode.
+- The match loop (`RiftRoulette/GameLoop/MatchService`) is the lifecycle: it
+  starts rounds through `RoundFlow` and learns each result through the
+  `RiftRoundSteps.RoundEnded` step. Players see match state on the HUD
+  banner (`Modules/Hud`), not chat spam.
+- `GameLoop/MatchConfig` holds the match settings (hero mode `random` or
+  `draft`, format `continuous`). In Random mode `RandomModeService` gives
+  every player a random hero and one of its stored top builds each
+  intermission (through `Modules/Loadout`); draft code stays but its boards
+  and pick commands are off. Build data is fetched offline by
+  `scripts/fetch-builds.py` and embedded in the DLL; the server never calls
+  the Deadlock API.
+- Stage 13c: `Stats/StatsService` counts match kills, deaths and assists
+  from `player_death` and draws them on the Sapphire / Amber boards (Random
+  mode). `Balance/BalanceService` decides swaps at the start of each Random
+  intermission, before heroes are drawn. New connections join the smaller
+  team (`Lobby/TeamBalance`). In Random mode a menu hero change kills the
+  player, who respawns with the assigned hero and build; that death is not
+  counted.
+- 1v1 mode has no team score: the only score is the best-streak
+  leaderboard (`Duel/StreakBoard`), shown on both stats boards and in
+  `/score`.
+- Join access lives in `bublock/access.json` on the server (banned /
+  allowed Steam64 IDs, open or private). `Lobby/AccessService` checks it
+  in `OnClientConnect` before the admin seat rule; a ban wins over
+  everything. The file never grants admin (that stays `AdminAuth`).
+- Stage 13d: `GameLoop/AutoStartService` starts the match (Clean) when 2
+  human players are connected and ends it when fewer than 2 remain, checked
+  2 s after every join (`CheckSoon`), on every disconnect and 3 s after
+  load. A disconnect never starts a match (it crashed the server with the
+  leaving controller still listed); never start a match inside
+  `OnClientFullConnect` (the hero swaps are lost). `/match_auto off` hands
+  control back to `/match_start` / `/match_end`.
+- Stage 13f: the server takes 13 connections (12 shown); the 13th is an
+  admin-only seat on the spectator side (`Lobby/AdminSeat`, console
+  `dw_seat_spec` / `dw_seat_play`). Admins are seated on every connect.
+  `seat_spec` is `ConsoleOnly` and works any time: `ChangeTeam(1, false)`
+  then `MakeObserver()` on the next tick. Never spectate with `ChangeTeam`
+  alone (the hero pawn stays and the client drops). Every player list the game uses
+  (teams, heroes, rounds, stats, auto-start) comes from
+  `Lobby/Participants.Humans()`, which leaves out bots and seated admins;
+  never build a new ad-hoc human list.
+- Stage 13g: hero mode `duel` (`/match_mode 1v1`) copies one player's exact
+  hero state (`Modules/Loadout` `LoadoutSnapshot`) onto both players with
+  `/duel_copy <slot>` and locks them to it (`Lobby/HeroLock`, one instance
+  per mode), re-applied every intermission. Code that means "the draft is
+  off" checks `MatchConfig.UsesDraft`, not `IsRandom`.
+- Stage 13h: every player the game sends up top is restrained
+  (`Modules/Restraint`: real modifier `modifier_citadel_silenced` plus
+  `Silenced` / `ItemsDisabled` / `ShootingDisabled` / `MeleeDisabled`
+  states set every frame) until `RoundFlow.MoveTeamsToRift` releases them.
+  Never use disarm (`modifier_citadel_disarmed` / `Disarmed`): it also
+  blocks reloading.
+- Stage 13i: "up top" is `Round/WatchSpot`, above the rift being fought
+  (running) or the next one (idle), per `WatchSpotRule`. Never teleport to
+  the fixed `draft` spot; call `WatchSpot.SendUp` (teleport + restrain).
+  The spot and the boards only move when players are sent back up after a
+  round (round end passes `RiftService.NextSide` explicitly).
+- Per-slot spots: every teleport up top or into a rift goes to the player's
+  own spot, `Round/SlotSpots` (`Watch` / `Fight`) with `player.Slot`: an
+  anchor from `RiftRouletteLocations` plus that slot's (forward, right, up)
+  offset from `Round/Data/spots.json`. Never teleport a group to one point.
+  Move a group by moving its anchor; after changing an anchor or
+  `spots.json`, run `scripts/check-spots.py` (all spots must pass) and
+  `/spots_walk` in game.
+- Game patches: after any Deadlock or Deadworks update, follow
+  `reference/patch-day.md` (`patch-check.py`, rebuild against the new
+  `lib/`, `dw_selftest_run`). A new game dependency (convar, entity name,
+  schema field, modifier, event) goes into `SelfTest/GameDependencies` or a
+  `SelfTestService` check and into `patch-day.md` section 5 in the same
+  change. Set convars with `ServerConVars.TrySet`, never a bare
+  `ConVar.Find(...)?.SetInt`.
+- Stage 13j: 1v1 mode is winner-stays-on over a `Modules/Queue`
+  `PlayerQueue` owned by `DuelService`: the first two queued are the
+  fighters (`IsFighter`), only they get the build and lock and move into
+  the rift; the loser goes to the back; auto-start counts the queue in 1v1
+  mode. New "wait your turn" features reuse `PlayerQueue`.
+- Hot reload: an upload hot-reloads each DLL, which runs
+  `OnLoad(isReload: true)` but not `OnStartupServer` and drops timers from
+  the previous load. Startup work that matters (CleanSlate cleanup, server
+  convars, boards) must also run in `OnLoad` when `isReload` is true.
+- Buying: CleanSlate disables every shop; buying anywhere is on only in 1v1
+  setup (1v1 mode, no match). Only `GameLoop/ShopAccess` sets
+  `citadel_allow_purchasing_anywhere`. Items reach players with `AddItem`.
+- Souls: while a match runs every earned soul gain is blocked
+  (`GameLoop/SoulRule`, applied in `GameLoopPlugin.OnModifyCurrency`);
+  power comes only from the round's build. `ECheats`, `EStartingAmount`
+  and `EItemSale` pass so loadouts still set gold.
+- Rift troopers: round end and cancel remove every `npc_trooper` (lane
+  troopers are off) and sweep again 5 s and 10 s later; the cash-in wave
+  keeps spawning after the round ends. Never sweep at rift start.
+- `Round/WatchGuard` sends restrained players who drop 300 units below the
+  watch spot back up (Unstuck cannot be blocked yet).
+- Banners and chat: only what players need (match start, round result,
+  their hero and build with its soul value, `Round N` / score 3 s before
+  each round). No debug-style banners or chat lines (item counts, "abilities
+  on", cleanup notices); details go to the logs. Fold a new message into an
+  existing banner when both would show at the same moment.
+- If a round's new rift does not spawn in time, `RiftService` uses a rift
+  already on the map (`FindRiftOnMap`, side from `RiftSides.TryMatch`,
+  else `Nearest`); every go-live goes through `GoLive`, so teams, watch
+  spot and next side follow the rift actually used. A live rift is its
+  `citadel_koth_cashin` (the spawner removes itself about 1 s after
+  spawning); a cash-in already up before the forced spawn is a leftover
+  and is adopted right away.
+
+---
+
+## 1. Colocated file documentation
+
+- Every source file `Foo.cs` MUST have a sibling `Foo.md`.
+- The colocated doc describes behavior succinctly and exactly:
+  - what the file does
+  - inputs / outputs
+  - side effects
+  - invariants
+  - dangerous Deadworks constraints (if any)
+- **Edit workflow (mandatory):**
+  1. Read the colocated `.md` first.
+  2. Change the code.
+  3. Update the colocated `.md` last in the same change.
+- Never leave documentation stale relative to the code it describes.
+- Do not ship a new source file without its sibling doc.
+
+---
+
+## 2. Component / feature documentation
+
+- Each component or feature folder MUST have a `FEATURE.md`
+  (examples: `Shared/FEATURE.md`, `Modules/WorldText/FEATURE.md`,
+  `RiftRoulette/Draft/FEATURE.md`, `RiftRoulette/Rift/FEATURE.md`).
+- Feature docs use the same read-first / update-last workflow as file docs.
+- A `FEATURE.md` MUST cover:
+  - purpose of the component
+  - public operations it exposes
+  - state it owns (if any)
+  - which command/operation units compose it
+  - how it relates to game lifecycle vs admin/player commands
+
+---
+
+## 3. Command catalogs
+
+Maintain living catalogs under Bublock reference. Update them whenever
+commands are added, renamed, restricted, or removed.
+
+- `Bublock/RiftRoulette/reference/user-commands.md` — player-facing commands
+- `Bublock/RiftRoulette/reference/admin-commands.md` — admin / debug / force commands
+
+Each catalog entry MUST include:
+
+- invocation (chat form and/or `dw_` console form)
+- who may use it
+- which core operation(s) it calls
+- clean vs debug behavior
+- expected side effects
+
+Do not invent undocumented commands in catalogs. Populate entries from
+verified source as commands are extracted.
+
+---
+
+## 4. Resource discovery
+
+Whenever research finds something **highly useful** or **difficult to find**,
+add an entry to `Bublock/RiftRoulette/reference/resources.md` under
+**Discoveries** in the same change.
+
+- Prefer linking official docs/schema over restating them.
+- Discoveries is for non-obvious verified knowledge (APIs, fields, pitfalls,
+  sequences, convars).
+- Detailed earlier session narrative remains in `chat-handoff.md`.
+- Keep this `.rules` file and `.cursor/rules/riftroulette.mdc` in sync when
+  this policy changes.
+
+---
+
+## 5. Clean mode vs debug mode
+
+Every operation and command MUST support an execution mode (explicit
+parameter or ambient context flag).
+
+| Invoker | Mode |
+|---------|------|
+| Manual admin command | Debug ON |
+| Game lifecycle orchestration | Debug OFF (clean) |
+
+Rules:
+
+- **Debug ON** enables deeper subsystem log detail and extra diagnostic
+  fields for that invocation’s scope.
+- **Debug OFF (clean)** keeps lifecycle noise low: Information+ for that
+  run’s detail stream unless elevated elsewhere.
+- Core operation logic is shared. Mode changes logging/diagnostics only,
+  never gameplay outcomes.
+- Player commands follow game-state rules; they do not get admin debug
+  privileges by default.
+
+---
+
+## 6. Composable testable units
+
+Architecture is three layers. Not every internal function is a Deadworks
+`[Command]`.
+
+```text
+GameLifecycle  →  composed ops (typed C#, same DLL)  →  service core operations
+AdminCommand   →  same core operations (Debug ON)
+PlayerCommand  →  same core operations (game-state rules; Clean by default)
+```
+
+- Core operations are small, reusable, individually testable units
+  (examples: SpawnRift, MoveTeams, CleanupRift, ReturnToDraft).
+- Admin and player commands are thin wrappers around core operations.
+- Game lifecycle composes operations; individual commands must not own
+  the entire match.
+- Prefer extracting a stable operation once, then wrapping it — do not
+  duplicate working logic into parallel admin/lifecycle paths.
+
+### Plugin classes and services
+
+- One DLL hosts **many small plugin classes** (one per feature, e.g.
+  `WorldTextPlugin`, `DraftPlugin`, `RiftPlugin`). The Deadworks loader
+  instantiates every `IDeadworksPlugin` type in a DLL.
+- Plugin classes are thin hosts: hooks and `[Command]` wrappers only.
+  Commands must be declared on a plugin class (the loader only scans
+  plugin-class methods).
+- Core operations live on **services**: plain C# classes, stateless or held
+  in a static inside the assembly, created lazily. Services MUST NOT depend
+  on plugin-class load order.
+- `Timer` is a per-plugin instance property. Services take an `ITimer`
+  parameter from the calling plugin class instead of owning timers.
+- Compose with typed C# calls across plugin classes/services inside the
+  same DLL. Do **not** compose via `Server.ExecuteCommand("dw_…")` or any
+  cross-DLL messaging (separate DLLs are isolated load contexts).
+- Each module keeps service files separate from its plugin/commands file,
+  so another consumer can include the service alone if command names would
+  clash across DLLs.
+- Flesh out obvious supporting commands (list, clear, info, where, reset)
+  when adding a module or plugin class, and document them in the catalogs.
+
+### Command naming and gating
+
+Parity means archive **functionality**, not archive command names. Names
+follow SourceMod / CounterStrikeSharp conventions. Target command set:
+`RiftRoulette/reference/behavior-inventory.md` §4.
+
+- Every command runs in game as `/name`; Deadworks also registers `!name`
+  and `dw_name`.
+- Player commands: short verbs, no prefix (`/pick`, `/unpick`, `/picks`,
+  `/heroes`, `/status`, `/commands`). `/commands` lists non-hidden names
+  without `_`, so player command names must not contain `_`.
+- Admin commands: feature word first (`/rift_start`, `/draft_reset`,
+  `/player_kick`, `/lobby_setup`, `/session_info`, `/wt_list`, `/mv_tp`,
+  `/ent_find`, `/dev_logpath`, `/cleanup_run`).
+- Commands that act on another player take a slot number (`<slot>`).
+- No archive-name aliases: the hidden aliases used during Stages 6–11 were
+  removed in Stage 12. Only the names in `behavior-inventory.md` §4 exist.
+- Help: the built-in `dw_help` is console-only and lists every visible
+  command; players use `/commands` in chat. Every command sets
+  `Description`. Never name a command `help`.
+- Every admin command checks `AdminAuth`. A null caller (server console) is
+  trusted.
+- Command names must not collide across Bublock DLLs (they register
+  independently).
+- Module commands never take game-specific arguments (teams are team
+  numbers, not `sapphire`/`amber`).
+
+---
+
+## 7. Logging and debugging
+
+Debugging is a first-class concern. Follow a recognized structured-logging
+shape aligned with Microsoft.Extensions.Logging / OpenTelemetry / Serilog
+production practices.
+
+Implementation: `Bublock/Shared/Logging/` (`BublockLog`, `Logger`,
+`PlayerRef`; see `Shared/FEATURE.md`). Tested locally by
+`Tests/Shared.Tests` (`scripts/test.sh`).
+
+### Where logs live
+
+1. **Server (live write path)** — each DLL writes rolling files to
+   `game/bin/win64/bublock/logs/<Dll>/`
+   (`Z:\gameserver\server\game\bin\win64\bublock\logs\` on this Windows
+   server, `/server/game/bin/win64/bublock/logs/` over SFTP), a sibling of
+   `managed/` like the host's `configs/`. The path is resolved from the
+   `DeadworksManaged.Api` assembly location (plugin `Assembly.Location` is
+   empty). `dw_dev_logpath` (DevTools) prints the resolved path.
+2. **Local pull target (Cursor)** — `Bublock/logs/<Dll>/` in this workspace.
+   `Bublock/scripts/pull-logs.sh` mirrors newer server files here
+   (read-only on the server; allowed before Stage 12).
+
+When debugging with Cursor: run `pull-logs.sh` first, then inspect
+`Bublock/logs/<Dll>/`. Prefer that over console paste.
+
+### Mandatory
+
+- Do **not** use `Console.WriteLine` for diagnostics in new or extracted
+  code. Use `BublockLog.Master` / `BublockLog.For("<Feature>")`.
+- Console output is allowed only for (a) the logger's single
+  `[Bublock.Logging]` line when file writes fail, and (b) command results
+  an admin asked for (e.g. DevTools entity listings).
+- Rift Roulette has no console diagnostics left; all archive console lines
+  moved to the logger during Stages 6–10.
+- Never use the old `[Rift Wars]` or `[RiftRumble]` prefixes in new or
+  extracted code. The game mode is Rift Roulette (renamed from Rift Rumble
+  on 2026-09-27); the log prefix comes from the DLL name (`[RiftRoulette]`).
+
+### Line structure (every entry)
+
+```text
+2026-09-26T20:13:00.123Z [Information] [RiftRoulette.Draft] session=a1b2c3d4 round=- player="Theo" steam=76561198192980843 slot=3 | Selected hero Hero=Shiv
+```
+
+- ISO-8601 timestamp in **UTC** with milliseconds.
+- Severity: `Trace` | `Debug` | `Information` | `Warning` | `Error` | `Critical`
+  (align with .NET `LogLevel`).
+- Prefix: every feature has its own, `[<Dll>.<Feature>]`
+  (e.g. `[RiftRoulette.Draft]`, `[CleanSlate.Cleanup]`,
+  `[DevTools.Commands]`). Master lines use `[<Dll>]`.
+- Correlation: `session=` always (one per DLL load); `round=` (`-` when no
+  round is active).
+- Affected player: whenever a line is about a player, pass a `PlayerRef`
+  (`controller.ToPlayerRef()`) so the line carries name, Steam ID, and slot.
+- Message templates (`{SpawnerIndex}`) rendered as `Name=value` after the
+  level check; never string-built before it. `Hero={Hero}` also renders
+  `Hero=Shiv` (the formatter does not repeat a name the template wrote).
+- Exceptions with stack on `Error` / `Critical`.
+
+### Files (master + one per feature)
+
+```text
+# On server under bublock/logs/<Dll>/, and after pull under Bublock/logs/<Dll>/:
+  master-YYYYMMDD.log      # game story: startup/shutdown, state transitions,
+                           # round start/end, plus every feature Warning+
+  <feature>-YYYYMMDD.log   # one per feature: draft, rift, lobby, worldtext,
+                           # movement, hud, match, cleanup, commands,
+                           # watch, probe, ...
+```
+
+- Every feature gets its own file (`BublockLog.For("Draft")` →
+  `draft-YYYYMMDD.log`).
+- **Master log** answers: “What happened to the game?” Feature `Warning`+
+  lines are copied to master with `(see <feature>.log)`.
+- **Feature logs** answer: “What exactly happened inside this subsystem?”
+- Master must not dump every low-level diagnostic detail.
+
+### Retention (recent logs prioritized)
+
+- Daily rolling files by UTC date, plus a size roll at 10 MB
+  (`<feature>-YYYYMMDD.1.log`, `.2`, ...).
+- Retention: files dated more than **7 days** before today are deleted when
+  each DLL's logger starts (every load / hot reload).
+- Never allow unbounded disk growth.
+
+### Verbosity
+
+- Lifecycle / clean: loggers default to Information+.
+- Admin debug invocation: `logger.WithMode(ExecutionMode.Debug)` accepts
+  Trace+ for that operation's scope.
+- No per-tick spam unless explicitly gated and short-lived.
+
+### Constraints
+
+- Do not invent Deadworks logging APIs; the logger is plain .NET file I/O.
+- No extra logging DLLs (e.g. `Microsoft.Extensions.Logging`) in the
+  plugins folder; every DLL there is loaded as a plugin.
+- Files are closed on `AssemblyLoadContext.Unloading`; writes flush per line.
+- On-server file writes and `pull-logs.sh` verified at the Stage 12 push
+  (2026-09-27).
+
+---
+
+## 8. Deadworks and safety constraints
+
+- Do not invent Deadworks APIs or schema field names. Verify before use
+  (schema DB, docs, `lib/` / `ref/`, archive source).
+- Prefer isolated changes and one focused test at a time.
+- Preserve known-good behavior. Staged refactors; behavior before beauty.
+- For small fixes, show exact insertion/replacement sites rather than
+  rewriting entire working methods.
+- Preserve the known-good KOTH / Rift spawn sequence; do not casually
+  alter it.
+- Never call `SelectHero` while the player is dead
+  (`CanChangeHero`: pawn exists and `IsAlive`).
+- Never remove `info_super_trooper_spawn` (crash risk).
+- `Entities.All` is an enumerable **property** (not a method).
+- `Players.GetAll()` **is** a method.
+- Admin authorization: Steam ID from existing DevTools / source only —
+  do not invent a Steam ID. Look in `archive/DevTools/` when needed.
+  The single shared auth implementation lives in `Bublock/Shared/` (Stage 3+).
+- EntityIndex is not globally unique across `Entities.All`; do not key
+  global dictionaries by EntityIndex alone.
+
+---
+
+## 9. Documentation catalog maintenance
+
+When changing player or admin commands, update:
+
+1. the command’s colocated file doc
+2. the owning feature’s `FEATURE.md` (if applicable)
+3. `Bublock/RiftRoulette/reference/user-commands.md` or
+   `Bublock/RiftRoulette/reference/admin-commands.md`
+
+When changing logging categories, log file names, or resource policy, update
+this `.rules` file and the Cursor mirror in the same change.

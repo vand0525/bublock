@@ -1,0 +1,15 @@
+<Project>
+
+  <PropertyGroup>
+    <HasSharedItems>true</HasSharedItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)WorldTextColor.cs" Link="Modules/WorldText/WorldTextColor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WorldTextFormat.cs" Link="Modules/WorldText/WorldTextFormat.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WorldTextPlacement.cs" Link="Modules/WorldText/WorldTextPlacement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WorldTextService.cs" Link="Modules/WorldText/WorldTextService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WorldTextSpec.cs" Link="Modules/WorldText/WorldTextSpec.cs" />
+  </ItemGroup>
+
+</Project>
