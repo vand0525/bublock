@@ -20,7 +20,7 @@ a `[Match]` prefix.
 
 | Command | Who | Calls | Reply / errors |
 |---|---|---|---|
-| `/match_start` | admin | `MatchService.Start(Timer, Debug)` | `Match started. Round 1 in 15s.`, or the refusal if a match or a rift is running |
+| `/match_start` | admin | `MatchService.Start(Timer, Debug)` | `Match started. Round 1 in 10s.`, or the refusal if a match or a rift is running |
 | `/match_end` | admin | `MatchService.End(Timer, Debug)` | `Match ended after N round(s). Final: <score, or 1v1 best streaks>. M player(s) returned to the lobby.`, or `No match is running.` |
 | `/match_auto <on\|off>` | admin | `AutoStartService.SetEnabled(Debug)`; when turned on, also `AutoStartService.Check(Timer, Debug)` | `Auto-start on` (plus ` - match started` if the check started one) or `Auto-start off`; error on any other argument |
 | `/match_status` | admin | `MatchService.DescribeMatch` | two status lines (includes auto-start, mode and format); 1v1 shows the king and adds the streak leaderboard |

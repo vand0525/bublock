@@ -3,8 +3,10 @@
 Random mode orchestration (Stage 13b, joiners and hero guard in 13c). Each
 intermission, every human player gets a new random hero, plus one of that
 hero's top 3 builds (`Modules/Loadout`). Teams are evened out at match start
-and kept (auto-balance may swap players between rounds). Static state;
-called by `GameLoop/MatchService` only when `MatchConfig.IsRandom`.
+and kept (auto-balance may swap players between rounds). The fighting teams
+are always even: with an odd number of players, one sits out each round in
+turn (the bench). Static state; called by `GameLoop/MatchService` only when
+`MatchConfig.IsRandom`.
 
 ## State
 
@@ -23,6 +25,12 @@ called by `GameLoop/MatchService` only when `MatchConfig.IsRandom`.
   hero changes in flight never trigger the guard), and enforcement kills
   (`StatsService` consumes the entry and skips that death).
 - `Options`: `LoadoutOptions(Level: 36, Gold: 0)` (9 slots, 20,000 cap).
+- `BenchRotation`: a `Modules/Queue` `PlayerQueue`, next to sit out first
+  (`BenchRule.Next`).
+- `_benched` (public `Benched`): who sits out this round, or null.
+  `_returning`: last round's bench player, placed into the gap this round.
+  `_benchRound`: the `MatchState.Round` the bench was chosen for, so a
+  reroll in the same intermission keeps the bench.
 
 ## Operations
 
@@ -30,42 +38,52 @@ called by `GameLoop/MatchService` only when `MatchConfig.IsRandom`.
 |---|---|---|
 | `BeginMatch(mode)` | Clears state; `TeamBalance.Even` over connected humans' current teams (keeps them when already even); logs sizes and how many moved | — |
 | `PrepareRound(timer, mode, forceBalance = false)` | See below | players swapped now |
-| `AddJoiner(player, team, timer, mode)` | Records the joiner's team. In an intermission: draws a hero not assigned this round (any hero if none are left), assigns a random build, marks pending, and after 2 s tries `ApplyPending` as a fallback. During a round: hero at the next intermission | — |
+| `AddJoiner(player, team, timer, mode)` | Records the joiner's team and adds them to the back of the bench rotation. During a round: hero at the next intermission. In an intermission, keeping the fighters even: an odd number of fighters: the joiner plays on the smaller fighting team; else a bench player is connected: both play (bench player on the other team, swapped now; logged `Subbed in with a joiner`); else the joiner sits out (`Joiner sitting out this round`, sitting-out banner if the build banner already went out). A late hero (`AssignLate`): a hero not assigned this round (any hero if none are left), a random build, pending, `ApplyPending` fallback after 2 s | — |
+| `OnLeave(steamId, timer, mode)` | From `LobbyService.RemovePlayer` during a Random match, before the pawn is removed. `Forget`s the leaver. If they were fighting and it is an intermission and a bench player is connected: the bench player takes the leaver's team with a late hero, swapped now (`Subbed in for a player who left`). Mid-round the round plays on uneven; the next intermission evens it | — |
 | `ApplyPending(player, timer, mode)` | In Random mode, for a pending player now alive: starts their swap and clears pending | `bool` started |
 | `TryGetAssignment(steamId, out assignment)` | Current assignment lookup | `bool` |
 | `GuardHero(player, pawn, timer, mode)` | See below | `bool` handled |
 | `ConsumeEnforcementKill(steamId)` | Removes and returns the enforcement-kill flag | `bool` |
-| `Forget(steamId)` | Drops the player's team, assignment, and lock entries (admin seat) | — |
-| `AnnounceBuilds(mode)` | Marks the build banner as sent, then shows each player whose loadout has landed: title = hero game name, description `BuildDescription(build, souls)`. Called by `MatchService` 3 s into the intermission | players shown |
+| `Forget(steamId)` | Drops the player's team, assignment, lock and bench rotation entries; clears the bench if it was them (admin seat, leave) | — |
+| `AnnounceBuilds(mode)` | Marks the build banner as sent, then shows each player whose loadout has landed: title = hero game name, description `BuildDescription(build, souls)`. The bench player gets `SitOutTitle` / `SitOutDescription` (`Sitting out` / `You play next round`). Called by `MatchService` 3 s into the intermission | players shown |
 | `BuildDescription(buildName, souls)` | `<build> - 12,345 souls` (invariant culture) | string |
 | `EndMatch(mode)` | `ResetHero()` for alive assigned players (clears the build before the lobby reset), then clears state | heroes reset |
-| `Describe()` | Config line, then one line per player: slot, name, team, hero, build, `PENDING` | lines |
+| `Describe()` | Config line with `Bench=`, then one line per player: slot, name, team, hero, build, `PENDING`, `SITTING OUT` | lines |
 
 ### PrepareRound
 
 1. Drops teams of players who left or took the admin seat
    (`Participants.Humans()`); players still without a team go to
    `TeamBalance.SmallerTeam`.
-2. Evens the teams (private `EvenTeams`): `TeamBalance.Even(Teams)` moves
-   random players from the bigger team while the two differ by 2 or more;
-   logs `Teams evened Moved= Sapphire= Amber=` when anyone moved. A
-   leaver or a seated admin used to leave 2v0.
-3. `BalanceService.TryBalance(Teams, mode, forceBalance)` may swap players
-   between teams (see `Balance/`).
-4. `HeroDraw.Draw(connected, catalog.Heroes, LastHero)`.
-5. Clears `Assignments`, `Values`, `Pending`, `DraftState`, and the
-   build-banner flag. For each player: a
+2. Bench: on a new intermission (`_benchRound` differs from
+   `MatchState.Round`), the old bench player becomes `_returning` and
+   `BenchRule.Next` picks this round's (odd count of 3+: the front of the
+   rotation, who then goes to the back). A reroll in the same intermission
+   keeps the bench. Logs `Sitting out this round Players=`.
+3. Fighting teams: `BenchRule.FightingTeams(Teams, bench, returning)`:
+   without the bench player, the returner unassigned (fills the side the
+   bench player left), then `TeamBalance.Even`. Logs `Teams evened Moved=
+   Sapphire= Amber=` when anyone moved.
+4. `BalanceService.TryBalance(fighters, mode, forceBalance)` may swap
+   players between teams (see `Balance/`; with equal teams it swaps a pair,
+   so the teams stay even). The fighters' teams are written back to
+   `Teams`; the bench player keeps their old entry.
+5. `HeroDraw.Draw(fighters, catalog.Heroes, LastHero)`: the bench player
+   gets no hero, no assignment and no `DraftState` pick, so `RoundFlow`
+   leaves them up top, restrained, for the round.
+6. Clears `Assignments`, `Values`, `Pending`, `DraftState`, and the
+   build-banner flag. For each fighter: a
    random build of the drawn hero; records the assignment and last hero;
    `DraftState.Add` (so the disconnect release, `/status`, and `RoundFlow`
    team moves keep working).
-6. `Start` per player:
+7. `Start` per fighter:
    - Dead or no pawn: pending (Debug line), applied on the next spawn.
    - Alive: `ChangeTeam(team)` if needed, then `LoadoutService.Swap`
      (`SelectHero`, then after 1 s `ResetHero`, level, abilities, items).
      When applied (and still the current assignment), the player is marked
      `Applied` and the build's soul value is stored; no chat line. If the
      build banner already went out, the player's banner shows now.
-7. `StatsService.RefreshBoards` (teams may have changed).
+8. `StatsService.RefreshBoards` (teams may have changed).
 
 ### GuardHero (hero swap guard)
 
@@ -85,8 +103,8 @@ Called from `DraftService.EnforceHero` on `player_hero_changed` (after
 ## Logs
 
 `Random` feature log (`random-YYYYMMDD.log`): teams, late joiners, joiners,
-round prepared (players / swapped / pending), pending starts, hero swap
-punishments, match end. Loadout details are in `loadout-*.log`.
+sitting out and subbed in, round prepared (players / swapped / pending),
+pending starts, hero swap punishments, match end. Loadout details are in `loadout-*.log`.
 
 ## Deadworks constraints
 

@@ -1,3 +1,4 @@
+using System.Numerics;
 using Bublock.Modules.Restraint;
 using Bublock.Modules.Spectate;
 using Bublock.Shared;
@@ -11,6 +12,14 @@ namespace RiftRoulette.Lobby;
 public static class StreamCam
 {
   public const int TickSeconds = 2;
+
+  // Above the players' floor up top (z 1536), so the straight-down view covers the platform.
+  public const float OverheadHeight = 264f;
+
+  public static readonly TimeSpan ReparkEvery = TimeSpan.FromSeconds(6);
+
+  // The client needs a moment after MakeObserver before it takes spectator commands.
+  public static readonly TimeSpan SeatGrace = TimeSpan.FromSeconds(3);
 
   private static readonly Logger Log = BublockLog.For("Lobby");
 
@@ -27,20 +36,24 @@ public static class StreamCam
     public DateTime? OverviewEnd;
     public ulong? ReturnTo;
     public int? LastShownRound;
+    public DateTime? LastParkAt;
+    public DateTime? SeatedAt;
   }
 
-  public static void Tick() => Tick(ExecutionMode.Clean);
-
-  public static void Tick(ExecutionMode mode)
+  public static void Tick(ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
+    var now = DateTime.UtcNow;
+
     foreach (var admin in SeatedObservers())
     {
       var state = State(admin.PlayerSteamId);
 
-      if (state.Auto)
-        Update(admin, state, mode);
+      if (state.Auto && !(state.SeatedAt is { } seated && now - seated < SeatGrace))
+        Update(admin, state, timer, mode);
     }
   }
+
+  public static void Seated(ulong steamId) => State(steamId).SeatedAt = DateTime.UtcNow;
 
   public static void OnDeath(CCitadelPlayerController victim, CCitadelPlayerController? attacker, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
@@ -61,7 +74,7 @@ public static class StreamCam
     }
 
     if (watched)
-      timer.NextTick(() => Tick(mode));
+      timer.NextTick(() => Tick(timer, mode));
   }
 
   public static void OnBigUlt(CCitadelPlayerController caster, string abilityName, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
@@ -139,7 +152,7 @@ public static class StreamCam
     ];
   }
 
-  private static void Update(CCitadelPlayerController admin, CamState state, ExecutionMode mode)
+  private static void Update(CCitadelPlayerController admin, CamState state, ITimer timer, ExecutionMode mode)
   {
     var now = DateTime.UtcNow;
     var returning = false;
@@ -189,7 +202,7 @@ public static class StreamCam
         break;
 
       default:
-        Park(admin, state, mode);
+        Park(admin, state, timer, mode);
         break;
     }
   }
@@ -226,40 +239,52 @@ public static class StreamCam
     Log.WithMode(mode).Info(admin.ToPlayerRef(), "Stream camera Reason={Reason} Target={Target} Accepted={Accepted}", reason, target.PlayerName, accepted);
   }
 
-  private static void Park(CCitadelPlayerController admin, CamState state, ExecutionMode mode)
+  // Parked is only a claim: the client can leave fly cam (or never enter it), so a park that did not hold is retried.
+  private static void Park(CCitadelPlayerController admin, CamState state, ITimer timer, ExecutionMode mode)
   {
     var side = WatchSpot.Side;
+    var now = DateTime.UtcNow;
+    var reason = "park";
     state.LastFollowed = null;
     state.PendingKiller = null;
 
     if (state.Parked && state.ParkedSide == side)
-      return;
+    {
+      if (state.LastParkAt is { } last && now - last < ReparkEvery)
+        return;
 
-    if (ParkOverhead(admin, side, mode))
+      if (SpectateService.IsParkedAt(admin, OverheadSpot(side)))
+        return;
+
+      reason = "repark";
+    }
+
+    if (ParkOverhead(admin, side, timer, mode))
     {
       state.Parked = true;
       state.ParkedSide = side;
-      Log.WithMode(mode).Info(admin.ToPlayerRef(), "Stream camera Reason={Reason} Side={Side}", "park", RiftSides.Name(side));
+      state.LastParkAt = now;
+      Log.WithMode(mode).Info(admin.ToPlayerRef(), "Stream camera Reason={Reason} Side={Side} Mode={Mode}", reason, RiftSides.Name(side), SpectateService.Mode(admin));
     }
   }
 
   private static void StartOverview(CCitadelPlayerController admin, CamState state, ulong? returnTo, ITimer timer, ExecutionMode mode)
   {
-    ParkOverhead(admin, WatchSpot.Side, mode);
+    ParkOverhead(admin, WatchSpot.Side, timer, mode);
 
     state.OverviewEnd = OverviewRule.EndFrom(DateTime.UtcNow);
     state.ReturnTo = returnTo ?? state.LastFollowed;
     state.LastFollowed = null;
     state.Parked = false;
 
-    timer.Once(OverviewRule.Duration.TotalSeconds.Seconds(), () => Tick(mode));
+    timer.Once(OverviewRule.Duration.TotalSeconds.Seconds(), () => Tick(timer, mode));
   }
 
-  private static bool ParkOverhead(CCitadelPlayerController admin, RiftSide side, ExecutionMode mode)
-  {
-    var location = WatchSpot.Location(side);
-    return SpectateService.Park(admin, location.Position, SpectateRule.LookDown(location.Angle.Y), mode);
-  }
+  private static bool ParkOverhead(CCitadelPlayerController admin, RiftSide side, ITimer timer, ExecutionMode mode) =>
+    SpectateService.Park(admin, OverheadSpot(side), SpectateRule.LookDown(WatchSpot.Location(side).Angle.Y), timer, mode);
+
+  private static Vector3 OverheadSpot(RiftSide side) =>
+    WatchSpot.Location(side).Position + new Vector3(0f, 0f, OverheadHeight);
 
   // During a round, restrained players are waiting up top; the camera prefers players who can fight.
   private static List<CCitadelPlayerController> Candidates()

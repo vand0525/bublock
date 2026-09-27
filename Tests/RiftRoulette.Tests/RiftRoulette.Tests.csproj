@@ -28,6 +28,7 @@
 
   <Import Project="..\..\Shared\Shared.projitems" />
   <Import Project="..\..\Modules\Movement\Movement.projitems" />
+  <Import Project="..\..\Modules\Queue\Queue.projitems" />
 
   <ItemGroup>
     <Compile Include="..\..\RiftRoulette\Draft\DraftState.cs" Link="RiftRoulette\Draft\DraftState.cs" />
@@ -43,6 +44,7 @@
     <Compile Include="..\..\RiftRoulette\GameLoop\MatchConfig.cs" Link="RiftRoulette\GameLoop\MatchConfig.cs" />
     <Compile Include="..\..\RiftRoulette\GameLoop\AutoStartRule.cs" Link="RiftRoulette\GameLoop\AutoStartRule.cs" />
     <Compile Include="..\..\RiftRoulette\RandomMode\HeroDraw.cs" Link="RiftRoulette\RandomMode\HeroDraw.cs" />
+    <Compile Include="..\..\RiftRoulette\RandomMode\BenchRule.cs" Link="RiftRoulette\RandomMode\BenchRule.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\TeamBalance.cs" Link="RiftRoulette\Lobby\TeamBalance.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\AdminSeatRule.cs" Link="RiftRoulette\Lobby\AdminSeatRule.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\AccessRule.cs" Link="RiftRoulette\Lobby\AccessRule.cs" />
@@ -66,6 +68,8 @@
     <Compile Include="..\..\RiftRoulette\Stats\StatsBoardText.cs" Link="RiftRoulette\Stats\StatsBoardText.cs" />
     <Compile Include="..\..\RiftRoulette\Balance\BalanceTracker.cs" Link="RiftRoulette\Balance\BalanceTracker.cs" />
     <Compile Include="..\..\RiftRoulette\Balance\BalancePicker.cs" Link="RiftRoulette\Balance\BalancePicker.cs" />
+    <Compile Include="..\..\RiftRoulette\Betting\BetBook.cs" Link="RiftRoulette\Betting\BetBook.cs" />
+    <Compile Include="..\..\RiftRoulette\Betting\BetBoardText.cs" Link="RiftRoulette\Betting\BetBoardText.cs" />
   </ItemGroup>
 
 </Project>

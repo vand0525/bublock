@@ -77,6 +77,9 @@ public static class LobbyService
       DraftService.RedrawBoards(mode);
     }
 
+    if (MatchService.State.IsRunning && MatchConfig.IsRandom)
+      RandomModeService.OnLeave(steamId, timer, mode);
+
     // Deadworks recommends explicitly removing both on disconnect.
     player.GetHeroPawn()?.Remove();
     player.Remove();

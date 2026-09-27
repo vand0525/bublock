@@ -38,8 +38,12 @@ Works at any time, including during a rift round.
    callback): finds the player again by Steam ID (skips, logged, if gone
    or no longer seated), then `ChangeTeam(SpectatorTeam, false)` and
    `MakeObserver()` (removes the hero pawn, clears it from the controller,
-   spawns an observer pawn). Logs `Admin spectating TeamNum= HeroPawn=
+   spawns an observer pawn). Starts the stream camera's seat grace
+   (`StreamCam.Seated`). Logs `Admin spectating TeamNum= HeroPawn=
    Observer=` (the controller's pawn designer name).
+   `FlyCamDelaySeconds` (1 s) later, if still observing, sends fly cam
+   (`SpectateService.SetFlyCam`, `spec_mode 4`): the client starts in the
+   directed view, where the stream camera cannot move it.
 6. Refreshes the stats boards and runs `AutoStartService.Check` (the match
    may auto-end if fewer than 2 participants remain). The teams left
    behind are evened at the next Random intermission

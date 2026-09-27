@@ -13,10 +13,12 @@ public static class BoardLayout
 
   private static readonly Vector3 SapphireOffset = new(-90f, 500f, 0f);
   private static readonly Vector3 AmberOffset = new(90f, -500f, 0f);
+  private static readonly Vector3 BackOffset = new(-500f, 0f, 0f);
 
   private static readonly Vector3 WelcomeAngle = new(0f, -90f, 90f);
   private static readonly Vector3 SapphireAngle = new(0f, 360f, 90f);
   private static readonly Vector3 AmberAngle = new(0f, 180f, 90f);
+  private static readonly Vector3 BackAngle = new(0f, 90f, 90f);
 
   private static readonly WorldTextColor WelcomeColor = new(255, 255, 255, 255);
   private static readonly WorldTextColor SapphireColor = new(0, 150, 255, 255);
@@ -34,6 +36,10 @@ public static class BoardLayout
     team == RiftRouletteTeams.Sapphire
       ? Place(text, SapphireOffset, SapphireAngle, SapphireColor, SideFontScale)
       : Place(text, AmberOffset, AmberAngle, AmberColor, SideFontScale);
+
+  // The empty side behind the watch view, between the side boards; board yaw = wall direction - 90, like the side boards.
+  public static WorldTextSpec Back(string text) =>
+    Place(text, BackOffset, BackAngle, WelcomeColor, SideFontScale);
 
   private static WorldTextSpec Place(string text, Vector3 greenOffset, Vector3 greenAngle, WorldTextColor color, float scale)
   {

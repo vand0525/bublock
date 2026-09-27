@@ -1,6 +1,7 @@
 using System.Globalization;
 using Bublock.Modules.Hud;
 using Bublock.Modules.Loadout;
+using Bublock.Modules.Queue;
 using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Balance;
@@ -32,9 +33,22 @@ public static class RandomModeService
 
   private static readonly HeroLock Lock = new();
 
+  private static readonly PlayerQueue BenchRotation = new();
+
+  private static ulong? _benched;
+
+  private static ulong? _returning;
+
+  private static int? _benchRound;
+
   private static bool _buildsAnnounced;
 
+  public const string SitOutTitle = "Sitting out";
+  public const string SitOutDescription = "You play next round";
+
   public static int PendingCount => Lock.PendingCount;
+
+  public static ulong? Benched => _benched;
 
   public static void BeginMatch(ExecutionMode mode = ExecutionMode.Clean)
   {
@@ -68,10 +82,31 @@ public static class RandomModeService
       log.Info(player.ToPlayerRef(), "Late joiner placed Team={Team}", RiftRouletteTeams.Name(Teams[player.PlayerSteamId]));
     }
 
-    EvenTeams(log);
-    BalanceService.TryBalance(Teams, mode, forceBalance);
+    // A reroll in the same intermission keeps the bench; only a new intermission rotates it.
+    if (_benchRound != MatchService.State.Round)
+    {
+      _returning = _benched;
+      _benched = BenchRule.Next(BenchRotation, connected);
+      _benchRound = MatchService.State.Round;
+    }
+    else if (_benched is { } kept && !connected.Contains(kept))
+    {
+      _benched = null;
+    }
 
-    var heroes = HeroDraw.Draw(connected.ToList(), catalog.Heroes, LastHero, Random.Shared);
+    var fighters = new Dictionary<ulong, int>(
+      BenchRule.FightingTeams(Teams, _benched, _returning == _benched ? null : _returning, Random.Shared));
+
+    LogEvened(log, fighters);
+    BalanceService.TryBalance(fighters, mode, forceBalance);
+
+    foreach (var (steamId, team) in fighters)
+      Teams[steamId] = team;
+
+    if (_benched is { } benchedId && Find(benchedId) is { } benchedPlayer)
+      log.Info(benchedPlayer.ToPlayerRef(), "Sitting out this round Players={Players}", connected.Count);
+
+    var heroes = HeroDraw.Draw(fighters.Keys.ToList(), catalog.Heroes, LastHero, Random.Shared);
 
     Assignments.Clear();
     Values.Clear();
@@ -97,30 +132,28 @@ public static class RandomModeService
     return swapped;
   }
 
-  private static void EvenTeams(Logger log)
+  private static void LogEvened(Logger log, IReadOnlyDictionary<ulong, int> fighters)
   {
-    var evened = TeamBalance.Even(Teams, Random.Shared);
-    var moved = evened.Count(pair => Teams[pair.Key] != pair.Value);
+    var moved = fighters.Count(pair => Teams.TryGetValue(pair.Key, out var team) && team != pair.Value);
 
     if (moved == 0)
       return;
 
-    foreach (var (steamId, team) in evened)
-      Teams[steamId] = team;
-
     log.Info(
       "Teams evened Moved={Moved} Sapphire={Sapphire} Amber={Amber}",
       moved,
-      Teams.Values.Count(team => team == RiftRouletteTeams.Sapphire),
-      Teams.Values.Count(team => team == RiftRouletteTeams.Amber));
+      fighters.Values.Count(team => team == RiftRouletteTeams.Sapphire),
+      fighters.Values.Count(team => team == RiftRouletteTeams.Amber));
   }
 
+  // During an intermission the fighters stay even: a joiner fills an odd gap, swaps in with the bench player, or sits out.
   public static void AddJoiner(CCitadelPlayerController player, int team, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
     var log = Log.WithMode(mode);
     var steamId = player.PlayerSteamId;
 
     Teams[steamId] = team;
+    BenchRotation.Join(steamId);
 
     if (MatchService.State.Phase != MatchPhase.Intermission)
     {
@@ -128,6 +161,58 @@ public static class RandomModeService
       return;
     }
 
+    var fighterTeams = FighterTeams();
+
+    if (fighterTeams.Count % 2 == 1)
+    {
+      Teams[steamId] = TeamBalance.SmallerTeam(fighterTeams, Random.Shared);
+      AssignLate(player, timer, mode);
+      return;
+    }
+
+    if (_benched is { } benchedId && benchedId != steamId && Find(benchedId) is { } benched)
+    {
+      _benched = null;
+      Teams[benchedId] = RiftRouletteTeams.Other(team);
+      AssignLate(player, timer, mode);
+      AssignLate(benched, timer, mode);
+      ApplyPending(benched, timer, mode);
+      log.Info(benched.ToPlayerRef(), "Subbed in with a joiner Joiner={Joiner} Team={Team}", player.PlayerName, RiftRouletteTeams.Name(Teams[benchedId]));
+      return;
+    }
+
+    _benched = steamId;
+    log.Info(player.ToPlayerRef(), "Joiner sitting out this round Team={Team}", RiftRouletteTeams.Name(team));
+
+    if (_buildsAnnounced)
+      HudService.Announce(player, SitOutTitle, SitOutDescription, mode);
+  }
+
+  // Called before the leaver is removed. In an intermission the bench player takes the leaver's team.
+  public static void OnLeave(ulong steamId, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    var log = Log.WithMode(mode);
+    var wasFighter = Assignments.ContainsKey(steamId);
+    var hadTeam = Teams.TryGetValue(steamId, out var team);
+
+    Forget(steamId);
+
+    if (!wasFighter || !hadTeam || MatchService.State.Phase != MatchPhase.Intermission)
+      return;
+
+    if (_benched is not { } benchedId || Find(benchedId) is not { } benched)
+      return;
+
+    _benched = null;
+    Teams[benchedId] = team;
+    AssignLate(benched, timer, mode);
+    ApplyPending(benched, timer, mode);
+    log.Info(benched.ToPlayerRef(), "Subbed in for a player who left Team={Team}", RiftRouletteTeams.Name(team));
+  }
+
+  private static void AssignLate(CCitadelPlayerController player, ITimer timer, ExecutionMode mode)
+  {
+    var steamId = player.PlayerSteamId;
     var catalog = HeroBuildCatalog.Default;
     var taken = Assignments.Values.Select(assignment => assignment.Hero).ToHashSet();
     var free = catalog.Heroes.Where(hero => !taken.Contains(hero)).ToList();
@@ -137,19 +222,26 @@ public static class RandomModeService
       return;
 
     var hero = HeroDraw.Draw([steamId], pool, LastHero, Random.Shared)[steamId];
-    var assignment = Assign(steamId, hero, catalog);
+    Assign(steamId, hero, catalog);
 
     Lock.MarkPending(steamId);
-    log.Info(player.ToPlayerRef(), "Joiner assigned, pending spawn Hero={Hero} Team={Team}", hero, RiftRouletteTeams.Name(team));
+    Log.WithMode(mode).Info(player.ToPlayerRef(), "Late hero assigned, pending spawn Hero={Hero} Team={Team}", hero, RiftRouletteTeams.Name(Teams[steamId]));
 
     timer.Once(JoinerFallbackSeconds.Seconds(), () =>
     {
-      var current = Players.GetAll().FirstOrDefault(candidate => candidate.PlayerSteamId == steamId);
-
-      if (current != null)
+      if (Find(steamId) is { } current)
         ApplyPending(current, timer, mode);
     });
   }
+
+  private static List<int> FighterTeams()
+  {
+    var connected = Humans().Select(player => player.PlayerSteamId).ToHashSet();
+    return Assignments.Where(pair => connected.Contains(pair.Key)).Select(pair => pair.Value.Team).ToList();
+  }
+
+  private static CCitadelPlayerController? Find(ulong steamId) =>
+    Players.GetAll().FirstOrDefault(player => player.PlayerSteamId == steamId);
 
   public static bool ApplyPending(CCitadelPlayerController player, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
@@ -199,6 +291,10 @@ public static class RandomModeService
     Assignments.Remove(steamId);
     Values.Remove(steamId);
     Lock.Forget(steamId);
+    BenchRotation.Leave(steamId);
+
+    if (_benched == steamId)
+      _benched = null;
   }
 
   public static int AnnounceBuilds(ExecutionMode mode = ExecutionMode.Clean)
@@ -209,7 +305,14 @@ public static class RandomModeService
     foreach (var player in Players.GetAll())
     {
       if (AnnounceBuild(player, mode))
+      {
         shown++;
+      }
+      else if (_benched == player.PlayerSteamId)
+      {
+        HudService.Announce(player, SitOutTitle, SitOutDescription, mode);
+        shown++;
+      }
     }
 
     return shown;
@@ -259,7 +362,8 @@ public static class RandomModeService
     var catalog = HeroBuildCatalog.Default;
     var lines = new List<string>
     {
-      $"{MatchConfig.Describe()} | Assigned={Assignments.Count} | Pending={Lock.PendingCount} | Teams={Teams.Count}"
+      $"{MatchConfig.Describe()} | Assigned={Assignments.Count} | Pending={Lock.PendingCount} | Teams={Teams.Count} | " +
+      $"Bench={(_benched is { } benched ? Find(benched)?.PlayerName ?? benched.ToString() : "none")}"
     };
 
     foreach (var player in Players.GetAll())
@@ -270,8 +374,9 @@ public static class RandomModeService
         ? $"{catalog.DisplayName(assignment.Hero)} | Build={assignment.Build.Name} ({assignment.Build.BuildId})"
         : "-";
       var pending = Lock.IsPending(steamId) ? " | PENDING" : "";
+      var sitting = _benched == steamId ? " | SITTING OUT" : "";
 
-      lines.Add($"Slot={player.Slot} | {player.PlayerName} | Team={team} | Hero={hero}{pending}");
+      lines.Add($"Slot={player.Slot} | {player.PlayerName} | Team={team} | Hero={hero}{pending}{sitting}");
     }
 
     return lines;
@@ -338,5 +443,9 @@ public static class RandomModeService
     Values.Clear();
     _buildsAnnounced = false;
     Lock.Clear();
+    BenchRotation.Clear();
+    _benched = null;
+    _returning = null;
+    _benchRound = null;
   }
 }

@@ -10,3 +10,5 @@ Unit tests for `Modules/Spectate/SpectateRule`.
   candidate).
 - Parks when there are no candidates.
 - `LookDown` returns pitch 89, the given yaw and roll 0.
+- `ParkCheck` is true only when roaming, with no target, within the
+  tolerance (the edge counts); not roaming, a target, or too far fail.

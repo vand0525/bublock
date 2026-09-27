@@ -17,11 +17,19 @@ spectated) then auto-balance before each draw (`Balance/`), and the hero swap
 guard (changing hero from the menu kills you; you respawn with your
 assigned hero and full build).
 
+The fighting teams are always even. With an odd number of players (3 or
+more), one sits out each round, up top and restrained, with a `Sitting out`
+banner; everyone takes turns (`BenchRule`, a `Modules/Queue` rotation). Last
+round's bench player fills the gap the new one leaves. A join or leave
+during an intermission subs the bench player in; mid-round the round plays
+on uneven until the next intermission.
+
 ## Files
 
 | File | Role |
 |---|---|
 | `HeroDraw.cs` | Unique random heroes, no repeat of last round (pure, tested) |
+| `BenchRule.cs` | Who sits out (rotation) and the fighting teams around them (pure, tested) |
 | `RandomModeService.cs` | Match / round orchestration, joiners, pending swaps, hero guard, banners, status |
 | `RandomPlugin.cs` | `player_respawned` + `player_spawn` hooks, `/random_status`, `/random_reroll` |
 
@@ -34,13 +42,15 @@ See `RandomModeService.md`. Admin commands in
 
 ## State
 
-`RandomModeService` statics: teams, last heroes, current assignments, and a
+`RandomModeService` statics: teams, last heroes, current assignments, the
+bench rotation and bench player, and a
 `Lobby/HeroLock` (pending set, applied set, enforcement kills; one per DLL
 load; cleared by `BeginMatch` / `EndMatch`). 1v1 mode owns its own lock.
 
 ## Dependencies
 
 - `Modules/Loadout` (`HeroBuildCatalog`, `LoadoutService.Swap`).
+- `Modules/Queue` (`PlayerQueue` bench rotation).
 - `Modules/Hud` (per-player build banner: hero, build, soul value),
   `Shared` (`PlayerChat` for the hero-lock line, logging, auth).
 - `Draft/DraftState` (assignments are written as picks), `Lobby/RiftRouletteTeams`,
@@ -55,7 +65,8 @@ load; cleared by `BeginMatch` / `EndMatch`). 1v1 mode owns its own lock.
   `AnnounceUpcoming` at the 5 s warning, and `EndMatch` in `End`. These run
   in the match's mode (Debug when an admin started the match).
 - `Lobby/LobbyService.AdmitPlayer` calls `AddJoiner` for players who connect
-  during a Random match.
+  during a Random match; `RemovePlayer` calls `OnLeave` for players who
+  disconnect during one.
 - `Draft/DraftService.EnforceHero` calls `DuelService.GuardHero`, then
   `GuardHero`.
 - `Lobby/AdminSeat.Sit` calls `Forget`.

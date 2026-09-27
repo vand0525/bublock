@@ -84,10 +84,10 @@ Assume the git repo is rooted at `Bublock/`.
   git-ignored `scripts/server.env` (template `server.env.example`); never
   put them, passwords or keychain values in committed files. The public
   join address in `README.md` is fine.
-- License: PolyForm Strict 1.0.0 (`LICENSE`). Future versions may be
-  relicensed; merged outside contributions need their authors' agreement
-  first. Third-party data (hero builds, map extracts, game data) is not
-  covered by it.
+- License: PolyForm Noncommercial 1.0.0 (`LICENSE`). Noncommercial changes,
+  new works, and sharing are allowed. Future versions may be relicensed;
+  merged outside contributions need their authors' agreement first.
+  Third-party data (hero builds, map extracts, game data) is not covered by it.
 
 ---
 
@@ -133,6 +133,20 @@ Assume the git repo is rooted at `Bublock/`.
   team (`Lobby/TeamBalance`). In Random mode a menu hero change kills the
   player, who respawns with the assigned hero and build; that death is not
   counted.
+- Random mode fighting teams are always even: with an odd count (3+) one
+  player sits out each round (`RandomMode/BenchRule`, a `PlayerQueue`
+  rotation owned by `RandomModeService`). The bench player gets no hero and
+  no pick, so `RoundFlow` leaves them up top, restrained. Joins and leaves
+  in an intermission sub the bench player in; never give a bench player a
+  pick without evening the teams.
+- Betting (Random mode, `Betting/BettingService`): 100 starting chips, 100
+  per credited kill, all-in bets on the next round during the intermission
+  (default 10 s, `MatchService.DefaultIntermissionSeconds`), a win doubles
+  the stake, no result refunds. Fighters bet only on their own team. Bets
+  come from chat lines that are exactly `sapphire` / `amber`
+  (`BettingPlugin.OnChatMessage`) or `/bet`. Betting messages are chat
+  only, never a banner. The leaderboard is `BoardLayout.Back`, the empty
+  side of the watch spot. Chips never affect gameplay.
 - 1v1 mode has no team score: the only score is the best-streak
   leaderboard (`Duel/StreakBoard`), shown on both stats boards and in
   `/score`.
@@ -222,7 +236,11 @@ Assume the git repo is rooted at `Bublock/`.
 - Stream camera: a seated admin's camera is run by `Lobby/StreamCam`
   (every 2 s, on deaths, on big ults) through `Modules/Spectate`; no
   command needed. Top-down uses the main `WatchSpot.Location` anchor
-  with `SpectateRule.LookDown` (pitch 89). Big ults are the class names
+  (raised by `StreamCam.OverheadHeight`) with `SpectateRule.LookDown`
+  (pitch 89). The server's observer mode does not switch the client:
+  every park goes through `SpectateService.Park` (client `spec_mode 4`
+  fly cam, then teleport, then the angle later), and a park that did not
+  hold is retried. Big ults are the class names
   in `Lobby/BigUlts` (hero `signature4`), at most one top-down per live
   round (`OverviewRule`, `RiftService.RoundNumber`). Never use
   `IsValidObserverTarget` (it rejects team 3, Sapphire). A hot reload
@@ -460,7 +478,7 @@ When debugging with Cursor: run `pull-logs.sh` first, then inspect
                            # round start/end, plus every feature Warning+
   <feature>-YYYYMMDD.log   # one per feature: draft, rift, lobby, worldtext,
                            # movement, hud, match, cleanup, commands,
-                           # watch, probe, spectate, ...
+                           # watch, probe, spectate, betting, ...
 ```
 
 - Every feature gets its own file (`BublockLog.For("Draft")` →

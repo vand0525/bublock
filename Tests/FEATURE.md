@@ -29,10 +29,10 @@ server. Never deployed to the server.
   `RiftRoulette/Round/RoundLocations.cs`, `WatchSpotRule.cs`, `WatchLayout.cs`,
   `WatchGuardRule.cs`, `RiftRoulette/Duel/KothRule.cs`,
   `RiftRoulette/GameLoop/MatchState.cs`,
-  `MatchConfig.cs`, `AutoStartRule.cs`, `ShopRule.cs`, `RiftRoulette/RandomMode/HeroDraw.cs`,
+  `MatchConfig.cs`, `AutoStartRule.cs`, `ShopRule.cs`, `RiftRoulette/RandomMode/HeroDraw.cs`, `BenchRule.cs`,
   `RiftRoulette/Lobby/TeamBalance.cs`, `AdminSeatRule.cs`, `OverviewRule.cs`, `BigUlts.cs`, `RiftRoulette/Stats/StatsLedger.cs`,
   `StatsBoardText.cs`, `RiftRoulette/Balance/BalanceTracker.cs`,
-  `BalancePicker.cs`) rather than referencing the plugin DLL: pick
+  `BalancePicker.cs`, `RiftRoulette/Betting/BetBook.cs`, `BetBoardText.cs`) rather than referencing the plugin DLL: pick
   bookkeeping, hero pool team lookup, draft board / pool text, team name
   parsing, the `/commands` list filter, rift sides, the rift outcome
   decision, each side's team starts (each team on its own half) and watch
@@ -41,9 +41,12 @@ server. Never deployed to the server.
   / streak rule, match scoring, match config parsing
   (including the `1v1` alias), when buying is open, the match auto-start decision, the admin
   seat rules, the stream camera's once-per-round top-down timing and big-ult list,
-  the random hero draw, team placement, kill / death / assist counting and
-  board text, and the auto-balance trigger and pick. Imports `Shared.projitems` and
-  `Movement.projitems` because the locations are Movement types.
+  the random hero draw, who sits out (bench rotation) and the fighting teams,
+  team placement, kill / death / assist counting and
+  board text, the auto-balance trigger and pick, and betting chips, payouts
+  and board text. Imports `Shared.projitems`,
+  `Movement.projitems` because the locations are Movement types, and
+  `Queue.projitems` for the bench rotation's `PlayerQueue`.
 
 All three test projects reference `Google.Protobuf` because Shared
 (`PlayerChat`) and Movement send net messages.

@@ -108,6 +108,7 @@ they call each other with typed C# (no command/convar messaging):
 | `Modules/Queue/` (compiled in) | — (data) | reusable player queue | 13j |
 | `Stats/` | `StatsPlugin` | match kills / deaths / assists, stats boards | 13c |
 | `Balance/` | `BalancePlugin` | auto-balance trigger and swaps | 13c |
+| `Betting/` | `BettingPlugin` | round betting with kill chips, betting board (Random mode) | 13 |
 | `Session/` | `SessionPlugin` | session lifecycle lines in the master log | 4 (done) |
 | `SelfTest/` | `SelfTestPlugin` | patch-day self-test of every game dependency, hook counters | patch-day readiness |
 
@@ -135,6 +136,8 @@ they call each other with typed C# (no command/convar messaging):
 - Stats (`StatsPlugin`): player `/stats`; admin `stats_board`, `stats_reset`
 - Balance (`BalancePlugin`): admin `balance_status`, `balance_auto`,
   `balance_now`
+- Betting (`BettingPlugin`): players type `sapphire` / `amber` in chat or
+  `/bet <team>`, `/chips`; admin `bet_status`
 - Loadout admin commands (`LoadoutPlugin`): `loadout_give`,
   `loadout_copy`, `loadout_list`, `loadout_info`
 - Hud admin commands (`HudPlugin`): `hud_announce`, `hud_say`
@@ -179,13 +182,13 @@ GameLoop/MatchService (Stage 13a) ─┐
                      ├> RoundFlow.ReturnPlayersToDraft (WatchSpot.SendUp above NextSide: restrain + teleport; boards follow)
                      └> MatchService.OnRoundEnded (score, HudService banner; 1v1: DuelService.RecordResult)
                           └─> next intermission: RandomModeService.PrepareRound
-                                (BalanceService.TryBalance → HeroDraw →
-                                 LoadoutService.Swap per player)
+                                (BenchRule: odd count sits one out → BalanceService.TryBalance →
+                                 HeroDraw → LoadoutService.Swap per fighter)
 player_death ─> StatsService.RecordDeath ─> BalanceService.RecordKill, stats boards
 spawn ─> WatchSpot.SendUp (restrained, above the rift being fought)
 connect ─> LobbyService.AdmitPlayer (smaller team, WatchSpot.SendUp) ─> RandomModeService.AddJoiner
         └─> AutoStartService.Check (2+ humans: MatchService.Start)
-disconnect ─> LobbyService.RemovePlayer ─> AutoStartService.Check (under 2: MatchService.End)
+disconnect ─> LobbyService.RemovePlayer ─> RandomModeService.OnLeave (bench subs in) ─> AutoStartService.Check (under 2: MatchService.End)
 
 AdminCommand  → same ops (Debug ON)
 PlayerCommand → same ops (Clean by default)

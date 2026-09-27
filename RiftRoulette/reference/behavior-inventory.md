@@ -211,6 +211,8 @@ The target command list. **Status:** `archive` = renames an archive command
 | `/commands` | — | Lobby | `CommandList.PlayerCommands` | Chat list of the player commands (`dw_help` is console-only) | new | 12 |
 | `/score` | — | GameLoop | `MatchService.DescribeScore` | Match round and score in chat (1v1: best-streak leaderboard) | new | 13a |
 | `/stats` | — | Stats | `StatsService.Describe` | Your match K / D / A and both team totals | new | 13c |
+| `/bet <sapphire\|amber>` (or type the team name in chat) | — | Betting | `BettingService.TryBet` | Bet all your chips on the next round (own team only while fighting) | new | betting |
+| `/chips` | — | Betting | `BettingService.DescribePlayer` | Your chips, open bet, whether betting is open | new | betting |
 | `/queue` | — | Duel | `DuelService.JoinQueue` | Join the 1v1 queue (winner stays on), or see your place (1v1 mode only) | new | 13j |
 | `/unqueue` | — | Duel | `DuelService.LeaveQueue` | Leave the 1v1 queue (not while fighting) | new | 13j |
 
@@ -256,11 +258,12 @@ The target command list. **Status:** `archive` = renames an archive command
 | `/match_end` | — | GameLoop | `MatchService.End` | Stop the loop, cancel a running round, final score banner, draft reset | new | 13a |
 | `/match_auto <on\|off>` | — | GameLoop | `AutoStartService.SetEnabled` / `Check` | Turn match auto-start (2+ players) / auto-end (under 2) on or off | new | 13d |
 | `/match_status` | — | GameLoop | `MatchService.DescribeMatch` | Match phase, round, score, ties, auto-start, intermission, rift phase (1v1: king and streak leaderboard) | new | 13a |
-| `/match_intermission <seconds>` | — | GameLoop | `MatchService.SetIntermission` | Seconds between rounds (5-120, default 15) | new | 13a |
+| `/match_intermission <seconds>` | — | GameLoop | `MatchService.SetIntermission` | Seconds between rounds (5-120, default 10) | new | 13a |
 | `/match_mode <random\|draft\|duel\|1v1>` | — | GameLoop | `MatchService.SetHeroMode` | Hero mode between matches (default random; `1v1` = duel since 13g); lobby reset | new | 13b |
 | `/match_format <continuous>` | — | GameLoop | `MatchService.SetFormat` | Match format between matches (only continuous for now) | new | 13b |
 | `/match_config` | — | GameLoop | `MatchService.DescribeConfig` | Current mode, format, allowed values, intermission | new | 13b |
 | `/random_status` | — | RandomMode | `RandomModeService.Describe` | Teams, heroes, builds, pending swaps per player | new | 13b |
+| `/bet_status` | — | Betting | `BettingService.Describe` | Every player's chips and open bet; redraws the betting board | new | betting |
 | `/random_reroll` | — | RandomMode | `RandomModeService.PrepareRound` | New random heroes and builds now (Random mode intermission only) | new | 13b |
 | `/duel_copy <slot>` | — | Duel | `DuelService.Copy` | Copy a player's exact hero and build for the 1v1 fighters and start (needs 2 queued since 13j) | new | 13g |
 | `/duel_clear` | — | Duel | `DuelService.ClearSnapshot` | Drop the 1v1 build, back to free setup | new | 13g |

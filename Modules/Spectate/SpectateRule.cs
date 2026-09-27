@@ -32,4 +32,7 @@ public static class SpectateRule
   }
 
   public static Vector3 LookDown(float yaw) => new(StraightDownPitch, yaw, 0f);
+
+  public static bool ParkCheck(bool roaming, bool hasTarget, float distance, float tolerance) =>
+    roaming && !hasTarget && distance <= tolerance;
 }

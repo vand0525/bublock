@@ -2,6 +2,7 @@ using Bublock.Modules.WorldText;
 using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Balance;
+using RiftRoulette.Betting;
 using RiftRoulette.Draft;
 using RiftRoulette.Duel;
 using RiftRoulette.GameLoop;
@@ -75,7 +76,10 @@ public static class StatsService
       assisters.Select(ToParticipant));
 
     if (credited is { } team)
+    {
       BalanceService.RecordKill(team);
+      BettingService.OnKill(attacker!.PlayerSteamId, mode);
+    }
 
     log.Debug(
       victim.ToPlayerRef(),

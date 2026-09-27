@@ -65,7 +65,7 @@ public static class AdminSeat
     log.Info(player.ToPlayerRef(), "Admin seat taken, spectating next tick Phase={Phase}", RiftService.Phase);
     BublockLog.Master.Info("Admin seated {Player}", player.PlayerName);
 
-    timer.NextTick(() => BecomeObserver(steamId, mode));
+    timer.NextTick(() => BecomeObserver(steamId, timer, mode));
 
     StatsService.RefreshBoards(mode);
     AutoStartService.Check(timer, mode);
@@ -73,7 +73,9 @@ public static class AdminSeat
     return $"{player.PlayerName} is in the admin seat (spectator). Use dw_seat_play to play.";
   }
 
-  private static void BecomeObserver(ulong steamId, ExecutionMode mode)
+  public const int FlyCamDelaySeconds = 1;
+
+  private static void BecomeObserver(ulong steamId, ITimer timer, ExecutionMode mode)
   {
     var log = Log.WithMode(mode);
     var player = Players.GetAll().FirstOrDefault(candidate => candidate.PlayerSteamId == steamId);
@@ -86,6 +88,14 @@ public static class AdminSeat
 
     player.ChangeTeam(SpectatorTeam, false);
     player.MakeObserver();
+    StreamCam.Seated(steamId);
+
+    // The client starts in the directed view; fly cam is what lets the stream camera move it.
+    timer.Once(FlyCamDelaySeconds.Seconds(), () =>
+    {
+      if (Players.GetAll().FirstOrDefault(candidate => candidate.PlayerSteamId == steamId) is { } again && SpectateService.IsObserving(again))
+        SpectateService.SetFlyCam(again, mode);
+    });
 
     log.Info(
       player.ToPlayerRef(),

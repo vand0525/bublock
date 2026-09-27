@@ -2,12 +2,23 @@ using System.Numerics;
 using Bublock.Modules.Movement;
 using Bublock.Shared;
 using DeadworksManaged.Api;
+using ITimer = DeadworksManaged.Api.ITimer;
 
 namespace Bublock.Modules.Spectate;
 
 public static class SpectateService
 {
   public const string ObserverDesignerName = "observer";
+
+  // Source 2 OBS_MODE_ROAMING; CS2 uses spec_mode 4 for free cam. Deadlock's key for it is C.
+  public const int FlyCamMode = 4;
+
+  public const double TeleportDelaySeconds = 0.25;
+  public const double AngleDelaySeconds = 0.5;
+  public const double AngleRepeatSeconds = 1.0;
+
+  // Wide on purpose: a small manual nudge in fly cam is not a failed park.
+  public const float ParkTolerance = 1500f;
 
   private static readonly Logger Log = BublockLog.For("Spectate");
 
@@ -55,7 +66,15 @@ public static class SpectateService
     Log.WithMode(mode).Info(player.ToPlayerRef(), "Server target refused, sent client command Command={Command}", $"spec_player {target.Slot}");
   }
 
-  public static bool Park(CCitadelPlayerController player, Vector3 position, Vector3 angle, ExecutionMode mode = ExecutionMode.Clean)
+  // The server's Roaming mode does not switch the client; the client must be in fly cam before a teleport moves its camera.
+  public static void SetFlyCam(CCitadelPlayerController player, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    Server.ClientCommand(player.Slot, $"spec_mode {FlyCamMode}");
+    Log.WithMode(mode).Debug(player.ToPlayerRef(), "Sent client command Command={Command}", $"spec_mode {FlyCamMode}");
+  }
+
+  // Order matters: fly cam, then teleport, then the angle a moment later (an angle sent with the teleport is ignored).
+  public static bool Park(CCitadelPlayerController player, Vector3 position, Vector3 angle, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
     var log = Log.WithMode(mode);
     var observer = Observer(player);
@@ -66,11 +85,47 @@ public static class SpectateService
       return false;
     }
 
-    observer.SetObserverMode(ObserverMode_t.Roaming);
-    observer.Teleport(position: position, angles: angle, velocity: Vector3.Zero);
-    MovementService.SetViewAngle(player, angle);
+    var steamId = player.PlayerSteamId;
 
-    log.Debug(player.ToPlayerRef(), "Parked Position={Position} Angle={Angle} After={After}", position, angle, observer.Position);
+    observer.SetObserverMode(ObserverMode_t.Roaming);
+    SetFlyCam(player, mode);
+
+    timer.Once(TeleportDelaySeconds.Seconds(), () =>
+    {
+      if (Find(steamId) is { } again && Observer(again) is { } pawn)
+        pawn.Teleport(position: position, angles: null, velocity: Vector3.Zero);
+    });
+
+    timer.Once(AngleDelaySeconds.Seconds(), () =>
+    {
+      if (Find(steamId) is { } again && IsObserving(again))
+        MovementService.SetViewAngle(again, angle);
+    });
+
+    timer.Once(AngleRepeatSeconds.Seconds(), () =>
+    {
+      if (Find(steamId) is not { } again || Observer(again) is not { } pawn)
+        return;
+
+      MovementService.SetViewAngle(again, angle);
+      log.Debug(again.ToPlayerRef(), "Parked Position={Position} Angle={Angle} After={After} Mode={Mode}", position, angle, pawn.Position, pawn.ObserverMode);
+    });
+
+    log.Debug(player.ToPlayerRef(), "Park started Position={Position} Angle={Angle}", position, angle);
     return true;
   }
+
+  public static bool IsParkedAt(CCitadelPlayerController player, Vector3 position, float tolerance = ParkTolerance)
+  {
+    var observer = Observer(player);
+
+    return observer != null && SpectateRule.ParkCheck(
+      observer.ObserverMode == ObserverMode_t.Roaming,
+      observer.ObserverTarget != null,
+      Vector3.Distance(observer.Position, position),
+      tolerance);
+  }
+
+  private static CCitadelPlayerController? Find(ulong steamId) =>
+    Players.GetAll().FirstOrDefault(player => player.PlayerSteamId == steamId);
 }

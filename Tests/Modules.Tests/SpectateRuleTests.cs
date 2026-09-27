@@ -42,6 +42,17 @@ public class SpectateRuleTests
     Assert.Equal(new SpectateChoice(SpectateReason.Park, null), SpectateRule.Choose(20, 30, []));
   }
 
+  [Theory]
+  [InlineData(true, false, 0f, true)]
+  [InlineData(true, false, 1500f, true)]
+  [InlineData(true, false, 1501f, false)]
+  [InlineData(false, false, 0f, false)]
+  [InlineData(true, true, 0f, false)]
+  public void ParkCheck_needs_roaming_no_target_and_near_the_spot(bool roaming, bool hasTarget, float distance, bool expected)
+  {
+    Assert.Equal(expected, SpectateRule.ParkCheck(roaming, hasTarget, distance, 1500f));
+  }
+
   [Fact]
   public void LookDown_is_pitch_89_and_keeps_the_yaw()
   {

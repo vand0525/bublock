@@ -404,3 +404,20 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Verified fact (API):** a hero's ultimate class name is `items.signature4` in `https://assets.deadlock-api.com/v2/heroes` (for example Lash `citadel_ability_lash_ultimate`, Seven `citadel_ability_storm_cloud`, Pocket `synth_affliction`). The local `snapshot.json` has ability names but not slots.
 - **To confirm in game:** whether the server fires `player_used_ability` (self-test Events count; `lobby-*.log` `Ability name seen for the first time`), whether its `Abilityname` matches the `signature4` names, and whether teleporting a `Roaming` observer pawn moves the camera (`spec_overview`; `spectate-*.log` `Parked ... After=`).
 - **Link / path:** `Bublock/Modules/Spectate/SpectateService.cs`, `Bublock/RiftRoulette/Lobby/StreamCam.cs`, `Bublock/RiftRoulette/Lobby/BigUlts.cs`
+
+### 2026-09-27 — Reading player chat (OnChatMessage)
+
+- **Why hard / useful:** Lets players act by typing a plain word (betting: `sapphire` / `amber`) instead of a slash command. Not in the workspace docs.
+- **Verified fact (decompiled API):** `PluginBase.OnChatMessage(ChatMessage message)` returns `HookResult`. `ChatMessage` has `SenderSlot` (int), `ChatText` (string), `AllChat` (bool), `LaneColor`, and a `Controller` property that looks up the `CCitadelPlayerController` from the slot (null if gone). It mirrors the client message `CCitadelClientMsg_ChatMsg` (`ChatText`, `AllChat`, `LaneColor`). Returning `Continue` keeps the line in chat.
+- **Used as:** reply on the next tick (outside the hook), finding the sender again by Steam ID.
+- **To confirm in game:** that the hook fires for normal chat and whether slash commands (`/bet amber`) also reach it (harmless: the betting check needs the whole message to be a team name).
+- **Link / path:** `Bublock/RiftRoulette/Betting/BettingPlugin.cs`
+
+### 2026-09-27 — Moving a spectator's camera needs fly cam first
+
+- **Why hard / useful:** The server-side observer mode looks right (`Roaming`) while the client camera stays in the directed view (it sat on the Patron, `npc_boss_tier3`), so a park silently does nothing.
+- **Verified fact (in game):** `SetObserverMode(Roaming)` on the server does not change the client's camera mode. A teleport of the observer pawn only moved the camera once the client was in fly cam (C in game). An angle sent with `MovementService.SetViewAngle` in the same tick as the teleport was ignored.
+- **Verified fact (enum / cvarlist):** fly cam is `spec_mode 4` (`OBS_MODE_ROAMING` in the Source 2 `ObserverMode_t` enum; CS2's `spec_mode 4` is free cam). `spec_mode` is `clientcmd_can_execute`, so `Server.ClientCommand(slot, "spec_mode 4")` works. `spec_goto` is not (and ignores pitch and yaw); `citadel_spectator_mode` is devonly.
+- **Sequence used:** `spec_mode 4`, teleport with no angles 0.25 s later, then the angle at 0.5 s and 1.0 s (like a hero pawn: teleport first, set the angle after). Re-check the park every 6 s (roaming, no target, near the spot) and redo it if it did not hold.
+- **To confirm in game:** that pitch 89 holds with the delayed angle. Fallback: write the observer's view angle field with `SchemaAccessor<T>` (field name to verify first).
+- **Link / path:** `Bublock/Modules/Spectate/SpectateService.cs`, `Bublock/RiftRoulette/Lobby/StreamCam.cs`

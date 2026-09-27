@@ -270,9 +270,9 @@ client console (`dw_spec_*`).
 
 - **Invocation:** console `dw_spec_overview` | chat `/spec_overview`
 - **Who:** admin
-- **Calls:** `StreamCam.ShowOverview` (→ `SpectateService.Park` at `WatchSpot.Location(WatchSpot.Side)`, pitch 89)
+- **Calls:** `StreamCam.ShowOverview` (→ `SpectateService.Park` 264 units above `WatchSpot.Location(WatchSpot.Side)`, pitch 89)
 - **Mode:** Debug
-- **Side effects:** top-down over the rift now for 10 s, then back to the player the camera was on (or the next choice). Does not use up the round's automatic top-down. Errors when the admin is not spectating
+- **Side effects:** puts the admin's client in fly cam (`spec_mode 4`), then top-down over the rift now for 10 s, then back to the player the camera was on (or the next choice). Does not use up the round's automatic top-down. Errors when the admin is not spectating
 - **Notes:** new with the stream camera (2026-09-27); also the quickest in-game check that teleporting the observer camera works
 
 ### Access (`AccessPlugin`, in RiftRoulette.dll)
@@ -511,7 +511,7 @@ matches by hand.
 - **Who:** admin
 - **Calls:** `MatchService.Start` → in Random mode `RandomModeService.BeginMatch`, then each intermission `RandomModeService.PrepareRound` → after each intermission `RoundFlow.RunRound` (the lifecycle path)
 - **Mode:** Debug (the loop and its rounds log in detail)
-- **Side effects:** resets the score; in Random mode (the default) balances teams once and, at the start of every intermission, swaps every player to a new random hero with a top build; banner `Match starting` / `Round 1 in 15s` (1v1: `1v1` / the pairing); then, forever until `/match_end`: countdown (Random mode: 3 s in, each player sees `<Hero>` / `<build> - 12,345 souls`; 3 s before the round, everyone sees `Round N` / the score, or the pairing in 1v1), start the next rift round (no banner), score the result when it ends (banner `Sapphire 1 - 0 Amber` / `Sapphire took the rift`). If the new rift does not spawn but one is already on the map (left by a cancelled round), that rift is used. A captured rift gives 1 point to the team of the first new rift trooper; tied, cancelled, and timed-out rounds give none. Master log: match started, each round result, match ended
+- **Side effects:** resets the score; in Random mode (the default) balances teams once and, at the start of every intermission, swaps every player to a new random hero with a top build; banner `Match starting` / `Round 1 in 10s` (1v1: `1v1` / the pairing); then, forever until `/match_end`: countdown (Random mode: 3 s in, each player sees `<Hero>` / `<build> - 12,345 souls`; 3 s before the round, everyone sees `Round N` / the score, or the pairing in 1v1), start the next rift round (no banner), score the result when it ends (banner `Sapphire 1 - 0 Amber` / `Sapphire took the rift`). If the new rift does not spawn but one is already on the map (left by a cancelled round), that rift is used. A captured rift gives 1 point to the team of the first new rift trooper; tied, cancelled, and timed-out rounds give none. Master log: match started, each round result, match ended
 - **Notes:** refuses while a match or a rift is running. Players who die during a round respawn at the watch spot above the rift still being fought, silenced and unable to use items, shoot or melee (they can reload), and are out until the next round. Draft mode: picks carry over; players can `/pick` or `/unpick` during the intermission. Random mode: teams stay; players dead at the start of an intermission get their new hero on respawn. `/rift_start` during a countdown makes the loop wait for that rift instead of starting another
 
 #### /match_end
@@ -546,7 +546,7 @@ matches by hand.
 - **Who:** admin
 - **Calls:** `MatchService.SetIntermission`
 - **Mode:** Debug
-- **Side effects:** sets the seconds between rounds (5-120, default 15); applies from the next countdown; lost on plugin reload
+- **Side effects:** sets the seconds between rounds (5-120, default 10, which is also the betting window); applies from the next countdown; lost on plugin reload
 
 #### /match_mode <random|draft|duel|1v1>
 
@@ -586,7 +586,7 @@ trusted). Debug mode; `[Random]` replies. Added in Stage 13b.
 - **Who:** admin
 - **Calls:** `RandomModeService.Describe`
 - **Mode:** Debug; read-only
-- **Side effects:** a config line (mode, format, assigned, pending, teams), then one line per player: slot, name, team, hero, build name and ID, `PENDING` if their swap waits for a respawn
+- **Side effects:** a config line (mode, format, assigned, pending, teams, `Bench=` who sits out this round or `none`), then one line per player: slot, name, team, hero, build name and ID, `PENDING` if their swap waits for a respawn, `SITTING OUT` for the bench player
 
 #### /random_reroll
 
@@ -595,7 +595,7 @@ trusted). Debug mode; `[Random]` replies. Added in Stage 13b.
 - **Calls:** `RandomModeService.PrepareRound`
 - **Mode:** Debug
 - **Side effects:** gives every player a new random hero (never their last one) and build right away, the same as the start of an intermission; dead players are swapped on respawn. Replies `Rerolled: N swapped, M pending`
-- **Notes:** error unless the hero mode is `random` and the match is in an intermission. Runs an auto-balance check first, like every intermission
+- **Notes:** error unless the hero mode is `random` and the match is in an intermission. Runs an auto-balance check first, like every intermission. Keeps this intermission's bench player (the bench only rotates at a new intermission)
 
 ### Duel (`DuelPlugin`, in RiftRoulette.dll)
 
@@ -713,6 +713,23 @@ chat line `Auto-balance: A <-> B`.
 - **Mode:** Debug
 - **Side effects:** forces a swap now for the leading team (rounds, then kills, since the last swap), then rerolls everyone's hero and build like `/random_reroll`. Replies `Balanced and rerolled: N swapped, M pending`
 - **Notes:** error unless the hero mode is `random` and the match is in an intermission. No swap with fewer than 3 players
+
+### Betting (`BettingPlugin`, in RiftRoulette.dll)
+
+Round betting runs by itself in Random mode (see `user-commands.md` `/bet`):
+100 starting chips, 100 per kill, all-in bets on the next round during the
+intermission, a win doubles the stake, a `BETTING` board on the empty side
+of the watch spot. Admin (`AdminCommand.Authorize` with the `Betting` log;
+server console trusted). `[Betting]` replies.
+
+#### /bet_status
+
+- **Invocation:** chat `/bet_status` | console `dw_bet_status`
+- **Who:** admin
+- **Calls:** `BettingService.RefreshBoard`, `BettingService.Describe`
+- **Mode:** Debug; read-only apart from redrawing the board
+- **Side effects:** redraws the betting board (Random mode), then one line with active, open, bet count, total staked, and one line per participant: slot, name, chips, open bet
+- **Notes:** new 2026-09-27
 
 ### Loadout (`LoadoutPlugin`, in RiftRoulette.dll)
 

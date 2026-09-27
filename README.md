@@ -41,7 +41,8 @@ Deploying needs `scripts/server.env` (copy `server.env.example`).
 
 ## License
 
-[PolyForm Strict 1.0.0](LICENSE): source available for non-commercial use;
-no redistribution and no modified versions. Hero build data, map extracts and
-game data belong to their owners (Valve, build authors) and are not covered by
-this license.
+[PolyForm Noncommercial 1.0.0](LICENSE): noncommercial use, including
+changes, new works, and sharing copies. Anyone who receives a copy must keep
+this license and the copyright notice. Hero build data, map extracts and game
+data belong to their owners (Valve, build authors) and are not covered by this
+license.

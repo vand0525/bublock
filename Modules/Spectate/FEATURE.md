@@ -13,20 +13,30 @@ angle. Built for the admin's stream camera.
 | `SpectateService.Observer / IsObserving / Current / Mode / IsWatching` | `SpectateService.md` |
 | `SpectateService.Follow(player, target, mode)` | `SpectateService.md` |
 | `SpectateService.ClientFollow(player, target, mode)` | `SpectateService.md` |
-| `SpectateService.Park(player, position, angle, mode)` | `SpectateService.md` |
+| `SpectateService.SetFlyCam(player, mode)` | `SpectateService.md` |
+| `SpectateService.Park(player, position, angle, timer, mode)` | `SpectateService.md` |
+| `SpectateService.IsParkedAt(player, position, tolerance)` | `SpectateService.md` |
 | `SpectateRule.Choose(currentId, killerId, candidates)` | `SpectateRule.md` |
 | `SpectateRule.LookDown(yaw)` | `SpectateRule.md` |
+| `SpectateRule.ParkCheck(roaming, hasTarget, distance, tolerance)` | `SpectateRule.md` |
 
 ## State
 
-None. The consumer keeps whom it follows and where it parked.
+None. The consumer keeps whom it follows and where it parked. `Park`
+schedules its later steps on the caller's `ITimer`.
+
+## Camera modes
+
+The server's `SetObserverMode` does not switch the client's camera. The
+client must be in fly cam (`spec_mode 4`, sent by `SetFlyCam` and at the
+start of every `Park`) before a teleport of the observer pawn moves it.
 
 ## Units
 
 | File | Role |
 |---|---|
-| `SpectateRule.cs` | Pure choice (keep, killer, any, park) and the straight-down angle |
-| `SpectateService.cs` | Observer-services calls, client-command fallback, park teleport |
+| `SpectateRule.cs` | Pure choice (keep, killer, any, park), the straight-down angle, the parked check |
+| `SpectateService.cs` | Observer-services calls, client-command fallback, fly cam (`spec_mode 4`) and the timed park |
 | `Spectate.projitems` | Service and rule (no commands) |
 
 ## Lifecycle vs commands

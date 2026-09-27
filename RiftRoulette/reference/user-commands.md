@@ -77,7 +77,7 @@ below work.
 - **Who:** players, in game (`LobbyPlugin`)
 - **Calls:** `CommandList.PlayerCommands` (reads the `[Command]` attributes in RiftRoulette.dll)
 - **Mode:** Clean; read-only; not logged
-- **Side effects:** one chat line per player command (`/name - Description`, sorted: `/commands`, `/heroes`, `/pick`, `/picks`, `/queue`, `/score`, `/stats`, `/status`, `/unpick`, `/unqueue`), then `Full list: dw_help in console`
+- **Side effects:** one chat line per player command (`/name - Description`, sorted: `/bet`, `/chips`, `/commands`, `/heroes`, `/pick`, `/picks`, `/queue`, `/score`, `/stats`, `/status`, `/unpick`, `/unqueue`), then `Full list: dw_help in console`
 - **Notes:** new in Stage 12. Deadworks' built-in `dw_help` only runs from the game console (there is no chat `/help`) and lists every visible command, admin ones included; `/commands` gives players a chat list of just their commands
 
 ### /score
@@ -115,3 +115,21 @@ below work.
 - **Mode:** Clean; logged in `duel-*.log` (Information)
 - **Side effects:** removes the caller from the 1v1 queue (`<name> left the 1v1 queue.`); with fewer than 2 left in the queue, auto-start ends the match
 - **Notes:** new in Stage 13j. A fighter can't leave during a match (`is fighting now` mid-round, `fights next round` between rounds); an admin can remove them between rounds with `/duel_queue_remove`
+
+### /bet <sapphire|amber> (or type the team name in chat)
+
+- **Invocation:** chat `sapphire` / `amber` (the whole message, any case) | chat `/bet <team>` or `!bet <team>` | console `dw_bet <team>`
+- **Who:** players, in game (`BettingPlugin`); Random mode match only
+- **Calls:** `BettingService.TryBet` → `BetBook.Place`
+- **Mode:** Clean; logged in `betting-*.log`
+- **Side effects:** bets all your chips on that team for the next round; typing the other team before the round starts moves the bet. Players in the coming round's fight may only bet on their own team; the player sitting out may bet on either. Chat reply: `Bet 300 chips on Amber.` At round end: `You won 600 chips (now 600).`, `You lost 300 chips (now 0).`, or `No result - your 300 chips are back.` (tie, cancel, match end). The betting board updates
+- **Notes:** new 2026-09-27. Everyone starts a match with 100 chips and earns 100 per kill. Betting is open during the intermission (10 s) and closes when the round starts (`Betting is closed - it opens again between rounds.`); with 0 chips: `No chips - get a kill.` A plain team-name chat message outside a Random match is ignored; `/bet` then replies that betting is only open during a Random mode match
+
+### /chips
+
+- **Invocation:** chat `/chips` or `!chips` | console `dw_chips`
+- **Who:** players, in game (`BettingPlugin`)
+- **Calls:** `BettingService.DescribePlayer`
+- **Mode:** Clean; read-only; not logged
+- **Side effects:** chat lines: `You have N chips.`, your open bet if any, and whether betting is open
+- **Notes:** new 2026-09-27

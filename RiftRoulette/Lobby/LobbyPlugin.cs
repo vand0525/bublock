@@ -24,7 +24,7 @@ public class LobbyPlugin : DeadworksPluginBase
       AdminSeat.Restore();
     }
 
-    Timer.Every(StreamCam.TickSeconds.Seconds(), StreamCam.Tick);
+    Timer.Every(StreamCam.TickSeconds.Seconds(), () => StreamCam.Tick(Timer));
   }
 
   public override void OnStartupServer()

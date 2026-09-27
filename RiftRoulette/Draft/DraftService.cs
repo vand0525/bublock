@@ -1,6 +1,7 @@
 using Bublock.Modules.WorldText;
 using Bublock.Shared;
 using DeadworksManaged.Api;
+using RiftRoulette.Betting;
 using RiftRoulette.Duel;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Lobby;
@@ -235,7 +236,8 @@ public static class DraftService
     if (!MatchConfig.UsesDraft)
     {
       StatsService.RefreshBoards(mode);
-      Log.WithMode(mode).Debug("Boards redrawn, draft off (welcome + stats) Mode={Mode}", MatchConfig.HeroMode);
+      BettingService.RefreshBoard(mode);
+      Log.WithMode(mode).Debug("Boards redrawn, draft off (welcome + stats + betting) Mode={Mode}", MatchConfig.HeroMode);
       return;
     }
 

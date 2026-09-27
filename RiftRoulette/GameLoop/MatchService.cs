@@ -2,6 +2,7 @@ using Bublock.Modules.Hud;
 using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Balance;
+using RiftRoulette.Betting;
 using RiftRoulette.Draft;
 using RiftRoulette.Duel;
 using RiftRoulette.Lobby;
@@ -15,7 +16,7 @@ namespace RiftRoulette.GameLoop;
 
 public static class MatchService
 {
-  public const int DefaultIntermissionSeconds = 15;
+  public const int DefaultIntermissionSeconds = 10;
   public const int MinIntermissionSeconds = 5;
   public const int MaxIntermissionSeconds = 120;
 
@@ -52,6 +53,7 @@ public static class MatchService
     ShopAccess.Sync(mode);
     StatsService.Reset(mode);
     BalanceService.Reset(mode);
+    BettingService.Reset(mode);
 
     if (MatchConfig.IsRandom)
       RandomModeService.BeginMatch(mode);
@@ -90,7 +92,10 @@ public static class MatchService
       log.Info("Cancelling running rift for match end Result={Result}", RoundFlow.CancelRound(timer, mode));
 
     if (MatchConfig.IsRandom)
+    {
+      BettingService.EndMatch(mode);
       RandomModeService.EndMatch(mode);
+    }
 
     var returned = DraftService.Reset(timer, mode);
 
@@ -135,6 +140,7 @@ public static class MatchService
 
     BalanceService.RecordRound(pointTo, mode);
     StatsService.SetRounds(State.Sapphire, State.Amber, mode);
+    BettingService.OnRoundEnded(pointTo, mode);
 
     if (result.Outcome == RiftOutcome.Finished && pointTo == null)
       log.Warn("Rift finished but the winner team is unknown WinnerTeam={WinnerTeam}", result.WinnerTeam);
@@ -255,6 +261,8 @@ public static class MatchService
     else if (prepareHeroes && MatchConfig.IsDuel)
       DuelService.PrepareRound(timer, mode);
 
+    BettingService.Open(mode);
+
     if (seconds > FinalCountdownSeconds)
     {
       _finalCountdown = timer.Once((seconds - FinalCountdownSeconds).Seconds(), () => AnnounceFinalCountdown(mode));
@@ -310,6 +318,7 @@ public static class MatchService
     }
 
     State.BeginRound();
+    BettingService.Close(mode);
 
     log.Info("Round started Round={Round} Side={Side}", State.Round, RiftSides.Name(side));
   }
