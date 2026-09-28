@@ -14,9 +14,6 @@ public static class SpectateService
   public const double AngleDelaySeconds = 0.5;
   public const double AngleRepeatSeconds = 1.0;
 
-  // Wide on purpose: a small manual nudge in fly cam is not a failed park.
-  public const float ParkTolerance = 1500f;
-
   private static readonly Logger Log = BublockLog.For("Spectate");
 
   public static CBasePlayerPawn? Observer(CCitadelPlayerController player) =>
@@ -31,6 +28,23 @@ public static class SpectateService
 
   public static bool IsWatching(CCitadelPlayerController player, CBaseEntity? target) =>
     target != null && Current(player) is { } current && current.EntityHandle == target.EntityHandle;
+
+  // The client decides the camera mode; the observer only reads Roaming with no target once the viewer pressed C.
+  public static bool IsFlyCam(CCitadelPlayerController player) =>
+    Mode(player) == ObserverMode_t.Roaming && Current(player) == null;
+
+  // EyeAngles is only on the hero pawn class; the observer pawn's view angle is the base pawn's v_angle.
+  public static SchemaAccessor<Vector3> ViewAngle => new("CBasePlayerPawn"u8, "v_angle"u8);
+
+  public static (Vector3 Position, Vector3? Angles)? Pose(CCitadelPlayerController player)
+  {
+    if (Observer(player) is not { } observer)
+      return null;
+
+    var accessor = ViewAngle;
+    Vector3? angles = accessor.GetAddress(observer.Handle) == observer.Handle ? null : accessor.Get(observer.Handle);
+    return (observer.Position, angles);
+  }
 
   // Never IsValidObserverTarget: it rejects TeamNum 3, a playing team in Deadlock.
   public static bool Follow(CCitadelPlayerController player, CCitadelPlayerController target, ExecutionMode mode = ExecutionMode.Clean)
@@ -98,28 +112,6 @@ public static class SpectateService
 
     log.Debug(player.ToPlayerRef(), "Park started Position={Position} Angle={Angle}", position, angle);
     return true;
-  }
-
-  public static bool IsParkedAt(CCitadelPlayerController player, Vector3 position, float tolerance = ParkTolerance)
-  {
-    var observer = Observer(player);
-
-    return observer != null && SpectateRule.ParkCheck(
-      observer.ObserverMode == ObserverMode_t.Roaming,
-      observer.ObserverTarget != null,
-      Vector3.Distance(observer.Position, position),
-      tolerance);
-  }
-
-  public static bool IsManualMove(CCitadelPlayerController player, Vector3 position, float tolerance = ParkTolerance)
-  {
-    var observer = Observer(player);
-
-    return observer != null && SpectateRule.IsManualMove(
-      observer.ObserverMode == ObserverMode_t.Roaming,
-      observer.ObserverTarget != null,
-      Vector3.Distance(observer.Position, position),
-      tolerance);
   }
 
   private static CCitadelPlayerController? Find(ulong steamId) =>

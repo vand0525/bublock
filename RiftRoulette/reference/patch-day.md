@@ -38,7 +38,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Session (`Session/`) | Session id, map name, registers locations | `Server.MapName`, `OnLoad` / `OnStartupServer` | `dw_session_info` |
 | Lobby (`Lobby/`) | Admits players, balances teams, convars, kick, respawn to watch spot | `OnClientConnect` / `FullConnect` / `Disconnect`, `player_spawn`, `player_death`, `SelectHero(Heroes.Skyrunner)`, `ChangeTeam`, `kickid`, lobby convars | join; `/status`; `dw_player_list` |
 | AdminSeat (`Lobby/AdminSeat`) | 13th seat on the spectator side | `maxplayers`, `sv_visiblemaxplayers`, team 1 | `dw_seat_status` |
-| Stream camera (`Lobby/StreamCam`, `Modules/Spectate`) | Seated admin's automatic camera: follow, killer cut, top-down on big ults | `observer` pawn designer name, `ObserverServices` (`InEye`, `Roaming`, `SetObserverTarget`), observer `Teleport`, `player_used_ability`, ult class names in `Lobby/BigUlts` (no client commands: the client refuses `spec_*` from the server) | `dw_spec_status`, `dw_spec_overview` |
+| Stream camera (`Lobby/StreamCam`, `Modules/Spectate`) | Seated admin's automatic camera: follow, killer cut, park at the saved framing | `observer` pawn designer name, `ObserverServices` (`InEye`, `Roaming`, `SetObserverTarget`), observer `Teleport`, `CBasePlayerPawn.v_angle` (framing angle; self-test schema), `bublock/streamcam.json` (no client commands: the client refuses `spec_*` from the server) | `dw_spec_status` (`ViewAngle=` changes while turning), `dw_selftest_run` |
 | Access (`Lobby/Access*`, `BanStatueService`) | Bans / private mode from `bublock/access.json`; banned players turned to stone then kicked | `OnClientConnect` returning false, `kickid`, `AddModifier` (statue modifier) | `/access_mode`, `/ban_list`, `/ban_modifier` |
 | Draft (`Draft/`) | Draft picks, boards (off in Random mode) | `player_hero_changed`, `SelectHero`, `Heroes` pools, `point_worldtext` | `/draft_status`, `/draft_boards` |
 | Rift (`Rift/`) | Forces a rift at a side, detects capture / tie, cleans troopers | KOTH schema fields, `citadel_gamerules`, `citadel_item_koth_spawner`, `citadel_koth_cashin`, `npc_trooper`, `citadel_koth_enabled`, rift positions | `/rift_start green`, `rift-*.log` |
@@ -100,7 +100,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Settings not applied (team size, respawn, duplicates) | convar renamed / removed / hidden | self-test Convars FAIL; `Convar missing` warning in master log | new name from `cvarlist.md` upstream |
 | Banner or camera angle missing | protobuf message changed | `dw_hud_announce`, `dw_mv_angle` | check the message in the new `lib/` |
 | Boards missing | `point_worldtext` / `CPointWorldText` changed | `dw_wt_create test` | check `CPointWorldText` in `/tmp/dwapi.cs` |
-| Stream camera never goes top-down on ults | ult renamed / reworked, or `player_used_ability` no longer fires | self-test Events `player_used_ability`; `lobby-*.log` `Ability name seen for the first time` | new `signature4` names from `assets.deadlock-api.com/v2/heroes` into `Lobby/BigUlts` |
+| Stream camera saves the wrong framing angle | `v_angle` moved or no longer tracks the observer view | self-test Schema `CBasePlayerPawn.v_angle`; `dw_spec_status` `ViewAngle=`; `lobby-*.log` `framing saved ... AngleRead=` | new field name into `SpectateService.ViewAngle`; `dw_spec_reset` meanwhile |
 | Stream camera stuck / not following | observer pawn renamed or observer services changed | `dw_spec_status` (`Observer=False`, `Mode=`); `spectate-*.log` | check `CPlayer_ObserverServices` and the pawn designer name in `/tmp/dwapi.cs` |
 | Top-down never moves (camera stays in the directed view) | The admin is not in fly cam (C); the server cannot switch it. If a patch gives a `spec_*` command `server_can_execute`, the server could send it | `lobby-*.log` `Reason=repark` every 6 s; `server_can_execute` in the `patch-check.py` convar diff | press C; or send the newly allowed command from `SpectateService.Park` |
 
@@ -164,6 +164,7 @@ Map dump counts (build 6698): `info_koth_spawn_location` 2, `info_super_trooper_
 | `CCitadelGameRules.m_timeNextKothSpawn` | float | same |
 | `CCitadelGameRules.m_timeKothGiveUp` | float | same (read only) |
 | `CCitadelTeam.m_nFlexSlotsUnlocked` | `EFlexSlotTypes_t` (uint16 flags, 15 = all four flex slots) | `Lobby/FlexSlots.cs` |
+| `CBasePlayerPawn.v_angle` | `QAngle` (read as `Vector3`: pitch, yaw, roll), the observer's view angle | `Modules/Spectate/SpectateService.cs` (`ViewAngle`) |
 | `CGameRules.m_bGamePaused`, `CCitadelGameRules.m_bServerPaused` | bool (API `GameRules.GamePaused` / `ServerPaused`) | `Lobby/PauseGuard.cs` |
 
 ### Net messages
@@ -193,7 +194,7 @@ a red wireframe; if the hero enum or the ability moves, update
 
 ### Events and hooks
 
-`player_spawn` (Lobby, Duel, Random), `player_death` (Lobby, Stats, stream camera), `player_used_ability` (stream camera: `Abilityname`, `Player`, `Caster`), `player_respawned` (Duel, Random), `player_hero_changed` (Draft); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnAddModifier` (DevTools `ModifierProbe`, `AddModifierEvent.ModifierVData.Name`; diagnostics only), `OnLoad`, `OnStartupServer`.
+`player_spawn` (Lobby, Duel, Random), `player_death` (Lobby, Stats, stream camera), `player_respawned` (Duel, Random), `player_hero_changed` (Draft); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnAddModifier` (DevTools `ModifierProbe`, `AddModifierEvent.ModifierVData.Name`; diagnostics only), `OnLoad`, `OnStartupServer`.
 
 ### Enums and hero data
 
@@ -203,7 +204,6 @@ a red wireframe; if the hero enum or the ability moves, update
 - `EAbilitySlot.Signature1..4`, `ECurrencyType.EGold` / `EAbilityPoints` / `EAbilityUnlocks`, `ECurrencySource.ECheats` / `EStartingAmount` / `EItemSale` (the sources `GameLoop/SoulRule` lets through for gold; for ability points and unlocks only `ECheats` passes in Random and 1v1 matches), `ImbueResult.Success`.
 - Level table: 36 soul thresholds, unlock rows and 32 points in `Modules/Loadout/Progression.cs`, from the wiki's [Data:SoulUnlockData.json](https://deadlock.wiki/index.php?title=Data:SoulUnlockData.json&action=raw) (+600 each). Upgrade tier costs 1 / 2 / 5 in `LoadoutPlanner.UpgradeCosts`. An economy patch that moves boons or points needs both updated (`ProgressionTests` pins the current values).
 - Teams: Amber 2, Sapphire 3, spectator 1.
-- Big teamfight ults: 17 ability class names in `Lobby/BigUlts.cs` (each hero's `signature4` from `assets.deadlock-api.com/v2/heroes`, 2026-09-27). Heroes get reworked; re-check after a hero patch.
 - Observer: `ObserverMode_t.InEye` (player view) and `Roaming` (free cam); no client commands: `spec_player` / `spec_mode` are `clientcmd_can_execute`, not `server_can_execute`, and the client refuses them from the server, so parks only move a viewer already in fly cam (C). Never `IsValidObserverTarget` (rejects team 3).
 
 ### Coordinates (dl_midtown)

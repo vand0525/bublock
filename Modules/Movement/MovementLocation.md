@@ -21,3 +21,6 @@ registering it; registering only makes it reachable by name (`/mv_tp`,
   ignored. The angle is kept; the name is replaced when `name` is given.
   Moving the anchor moves every offset spot with it, and an anchor turned
   half a turn mirrors its offsets.
+- `LocalOf(world)`: pure. The inverse of `Offset`: the
+  `(forward, right, up)` of a world position in this location's frame,
+  so `LocalOf(Offset(local).Position) == local`.

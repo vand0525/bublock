@@ -4,6 +4,7 @@ using Bublock.Modules.Hud;
 using Bublock.Modules.Loadout;
 using Bublock.Modules.Movement;
 using Bublock.Modules.Restraint;
+using Bublock.Modules.Spectate;
 using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Lobby;
@@ -127,7 +128,8 @@ public static class SelfTestService
       ("CCitadelGameRules.m_timeNextKothSpawnWindowTime", RiftGameRules.NextWindow),
       ("CCitadelGameRules.m_timeNextKothSpawn", RiftGameRules.NextSpawn),
       ("CCitadelGameRules.m_timeKothGiveUp", RiftGameRules.KothGiveUp),
-      ("CCitadelTeam.m_nFlexSlotsUnlocked", FlexSlots.Unlocked)
+      ("CCitadelTeam.m_nFlexSlotsUnlocked", FlexSlots.Unlocked),
+      ("CBasePlayerPawn.v_angle", SpectateService.ViewAngle)
     };
 
     var allFound = true;

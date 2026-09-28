@@ -45,4 +45,16 @@ public class MovementLocationTests
     Assert.Equal("a#1", moved.Name);
     Assert.Equal("a", anchor.Offset(Vector3.One).Name);
   }
+
+  [Theory]
+  [InlineData(0f)]
+  [InlineData(90f)]
+  [InlineData(-135f)]
+  public void LocalOf_undoes_Offset(float yaw)
+  {
+    var anchor = new MovementLocation("a", new Vector3(100f, -50f, 1536f), new Vector3(0f, yaw, 0f));
+    var local = new Vector3(-120f, 40f, 264f);
+
+    Near(local, anchor.LocalOf(anchor.Offset(local).Position));
+  }
 }

@@ -9,16 +9,15 @@ Unit tests for `Modules/Spectate/SpectateRule`.
 - Never picks the dead victim (a suicide's killer is the victim, not a
   candidate).
 - Parks when there are no candidates.
-- `LookDown` returns pitch 89, the given yaw and roll 0.
-- `ParkCheck` is true only when roaming, with no target, within the
-  tolerance (the edge counts); not roaming, a target, or too far fail.
-- `IsManualMove` is true only when roaming, with no target, past the
-  tolerance (the edge does not count).
-- `ManualActive` is true before the hold's end, false at it and with no hold.
 - `FollowReady` is true with no spawn seen and from the grace on; false
   inside it.
-- `FlyCamStep`: first sight waits; still for `FlyCamSettle` (1.5 s) or more
-  parks, 1 s waits; moving while settling is manual; after a park it
-  stays at the spot (the park's own jump does not count as moving) or
-  waits to settle again; once confirmed it stays at the spot while still and
-  is manual when moving or flown away. `FlyCamSettle` is under the 2 s camera tick.
+- `LookDown` returns pitch 89, the given yaw and roll 0.
+- `WrapDegrees` maps into [-180, 180) (190 is -170, 180 is -180, 360 is 0).
+- `Turned` wraps yaw (179 to -179 is 2) and takes the larger of pitch and
+  yaw.
+- `HandMoved` is true past 50 units or 3 degrees (the edges do not count).
+- `FramingStep`: a still camera that is not placed parks; flying before
+  the first park waits; moving a placed camera (or one already being
+  adjusted) adjusts, and letting go saves (even if the spot changed
+  meanwhile); a placed still camera stays, and parks again when the spot
+  changes.

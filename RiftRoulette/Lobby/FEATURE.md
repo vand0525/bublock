@@ -32,20 +32,21 @@ admitting and respawning send players there restrained. Disconnects also
 drop the player's restraint and 1v1 queue place; sitting in the admin seat
 releases the restraint.
 
+Disconnect removes the hero pawn, the current pawn (a seated admin's
+`observer` pawn) and the controller, and 1 s later removes any `observer`
+pawn no connected player owns (also after a disconnect with no
+controller). A pawn left behind spammed `Couldn't resolve offset ... in
+CCitadelPlayerPawn` on an empty server.
+
 Stream camera: while an admin is seated as an observer, `StreamCam` runs
 their camera for streaming with no command needed. It follows a live
-player's view (in-eye), cuts to the killer when the watched player dies,
-goes top-down over the rift for 10 s on the first big teamfight ult of each
-round (`BigUlts`, from the `player_used_ability` event) and then to the ult
-user's view, and parks top-down over the current rift when nobody plays.
-Once the admin presses C (fly cam) and holds still for a moment, it parks
-the camera top-down over the rift once and leaves it there (reparking only
-when the watch spot changes side); no follows or ult views in fly cam.
-It never follows a hero spawned less than 5 s ago, and it steps aside for
-60 s (extended while the camera keeps moving) when the admin takes the
-camera: moving in fly cam before or after the park, or a `spec_*` console
-command. Moving the camera while the server also moved it crashed the
-client.
+player's view (in-eye) and cuts to the killer when the watched player
+dies. When nobody plays it parks at the framing for the current watch spot
+side (default straight down over the watch spot; only moves the client in
+fly cam, C). Moving the camera after that park and letting go saves the
+new framing (`StreamFramingStore`, `bublock/streamcam.json`), mirrored to
+the other side. It never moves the camera while the admin moves it, and
+never follows a hero spawned less than 5 s ago.
 Camera calls go through `Modules/Spectate`. A hot reload re-seats an admin
 still on the observer pawn (`AdminSeat.Restore`).
 
@@ -94,9 +95,9 @@ startup, hot reload, every join and every intermission;
 | `Participants.cs` | Who plays: connected players minus bots, seated admins and statues |
 | `AdminSeatRule.cs` | Pure seat rules: cap 12, `CanConnect`, `CanStand`, `SeatOnJoin` (every admin; tested) |
 | `AdminSeat.cs` | Admin seat service: connect gate, `Sit`, `Stand`, `Forget`, `Restore` (after hot reload), `Describe` |
-| `StreamCam.cs` | Automatic stream camera for seated admins: follow, killer cut, big-ult top-down, park |
-| `BigUlts.cs` | Teamfight ultimate class names that trigger the top-down view (tested) |
-| `OverviewRule.cs` | Pure top-down timing: 10 s showing, once per live round (tested) |
+| `StreamCam.cs` | Automatic stream camera for seated admins: follow, killer cut, park at the saved framing, save the admin's framing |
+| `StreamFraming.cs` | Pure framing math: pose relative to a watch spot anchor, default, pick per side, JSON (tested) |
+| `StreamFramingStore.cs` | Saved framing per side in `bublock/streamcam.json` |
 | `HeroLock.cs` | Reusable hero lock (applied / pending / enforcement kills, `Enforce`) |
 | `AccessRule.cs` | Pure access rule: ban, private, whitelist, admin; Steam64 ID check (tested) |
 | `AccessList.cs` | `access.json` model: mode + banned / allowed sets + statue modifier, JSON parse and write (tested) |
@@ -114,7 +115,7 @@ See `LobbyService.md`. Player commands: `/status`, `/commands` (Stage 12,
 built by `CommandList`). Admin commands: `/player_list`, `/player_info`,
 `/player_kick`, `/player_team`, `/lobby_setup`, `/lobby_flex`, `/pause_allow`, `dw_seat_spec` (console
 only, any time), `/seat_play`, `/seat_status`, `/spec_auto`,
-`/spec_status`, `/spec_overview` (stream camera).
+`/spec_status`, `/spec_reset` (stream camera).
 Access (admin): `/player_ban <slot>`, `/ban_add`, `/ban_remove`,
 `/ban_list`, `/ban_modifier`, `/allow_add`, `/allow_remove`, `/allow_list`,
 `/access_mode [open|private]` (see `AccessPlugin.md`).
@@ -126,7 +127,8 @@ Archive names `/state`,
 
 `AdminSeat` holds the seated Steam IDs; `StreamCam` holds each seated
 admin's camera state (auto flag, followed player, pending killer, parked
-side, top-down end, return-to player, last round shown); each `HeroLock` instance is owned by
+side, placed / adjusting, last pose); `StreamFramingStore` holds the saved
+framing (file `bublock/streamcam.json`, survives reloads); each `HeroLock` instance is owned by
 its mode. `AccessService` caches the last good `access.json` (the file is
 the source of truth and survives reloads and deploys). `BanStatueService`
 holds statues and rejoin strikes in memory (cleared by restart or reload). `PauseGuard` holds

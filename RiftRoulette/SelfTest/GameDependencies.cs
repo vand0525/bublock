@@ -60,7 +60,6 @@ public static class GameDependencies
   [
     "player_spawn",
     "player_death",
-    "player_used_ability",
     "player_respawned",
     "player_hero_changed",
     "client_connect",

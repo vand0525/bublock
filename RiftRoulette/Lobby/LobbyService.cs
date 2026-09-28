@@ -1,4 +1,5 @@
 using Bublock.Modules.Restraint;
+using Bublock.Modules.Spectate;
 using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Draft;
@@ -16,6 +17,8 @@ public static class LobbyService
   private static readonly Logger LobbyLog = BublockLog.For("Lobby");
 
   private static readonly Logger PlayersLog = BublockLog.For("Players");
+
+  public const double OrphanSweepSeconds = 1.0;
 
   public static void ApplyServerConvars(ExecutionMode mode = ExecutionMode.Clean)
   {
@@ -85,12 +88,62 @@ public static class LobbyService
     if (MatchService.State.IsRunning && MatchConfig.IsRandom)
       RandomModeService.OnLeave(steamId, timer, mode);
 
-    // Deadworks recommends explicitly removing both on disconnect.
-    player.GetHeroPawn()?.Remove();
+    RemovePawns(player, log);
     player.Remove();
+    timer.Once(OrphanSweepSeconds.Seconds(), () => SweepOrphanObservers(mode));
 
     StatsService.RefreshBoards(mode);
     AutoStartService.Check(timer, mode, steamId);
+  }
+
+  // A pawn left without its client keeps queuing network changes the server cannot send
+  // ("Couldn't resolve offset ... in CCitadelPlayerPawn") until it is removed.
+  private static void RemovePawns(CCitadelPlayerController player, Logger log)
+  {
+    var hero = player.GetHeroPawn();
+    var current = player.Pawn;
+    var sameEntity = hero != null && current != null && hero.EntityHandle == current.EntityHandle;
+    var extra = current != null && !sameEntity ? current : null;
+
+    log.Info(
+      player.ToPlayerRef(),
+      "Disconnect pawns removed Hero={Hero} HeroIndex={HeroIndex} Current={Current} CurrentIndex={CurrentIndex} Removed={Removed}",
+      hero?.DesignerName ?? "none",
+      hero?.EntityIndex ?? -1,
+      current?.DesignerName ?? "none",
+      current?.EntityIndex ?? -1,
+      (hero != null ? 1 : 0) + (extra != null ? 1 : 0));
+
+    hero?.Remove();
+    extra?.Remove();
+  }
+
+  public static void OnDisconnectWithoutController(int slot, int reason, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    LobbyLog.WithMode(mode).Warn("Disconnect without a controller Slot={Slot} Reason={Reason}", slot, reason);
+    timer.Once(OrphanSweepSeconds.Seconds(), () => SweepOrphanObservers(mode));
+  }
+
+  // Only observer pawns: hero pawns lose their controller for a moment during a rebuild.
+  public static int SweepOrphanObservers(ExecutionMode mode = ExecutionMode.Clean)
+  {
+    var owned = Players.GetAll()
+      .Select(player => player.Pawn?.EntityHandle)
+      .OfType<uint>()
+      .ToHashSet();
+    var removed = 0;
+
+    foreach (var entity in Entities.ByDesignerName(SpectateService.ObserverDesignerName).ToList())
+    {
+      if (owned.Contains(entity.EntityHandle))
+        continue;
+
+      LobbyLog.WithMode(mode).Warn("Orphan observer pawn removed Index={Index} Class={Class}", entity.EntityIndex, entity.Classname);
+      entity.Remove();
+      removed++;
+    }
+
+    return removed;
   }
 
   public static bool KickPlayer(int slot, ExecutionMode mode = ExecutionMode.Clean)

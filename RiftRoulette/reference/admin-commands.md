@@ -257,14 +257,16 @@ position, entity index.
 ### Stream camera (`LobbyPlugin`, `Lobby/StreamCam`)
 
 While an admin is seated as an observer the stream camera runs by itself
-(no command needed): it follows a live player's view, cuts to the killer
-when the watched player dies, goes top-down over the rift for 10 s on the
-first big teamfight ult of each round (`Lobby/BigUlts`) and then to the
-ult user's view (another live player if they died), and parks top-down
-over the current rift when nobody plays. These commands are optional. They
-take no player argument: they target the caller, else the connected admin
-(same fallback as `dw_seat_spec`). Spectators have no chat, so use the
-client console (`dw_spec_*`).
+(no command needed): with players to watch it follows one (in-eye) and
+cuts to the killer when they die; with nobody to watch it parks at the
+saved framing for the current rift side (default straight down over the
+watch spot; the park only moves the view in fly cam, C). Move the camera
+after that park and let go: that becomes the saved framing
+(`bublock/streamcam.json`), mirrored to the other side. The camera never
+moves while you move it. These commands are optional. They take no player
+argument: they target the caller, else the connected admin (same fallback
+as `dw_seat_spec`). Spectators have no chat, so use the client console
+(`dw_spec_*`).
 
 #### /spec_auto <on|off>
 
@@ -272,7 +274,7 @@ client console (`dw_spec_*`).
 - **Who:** admin
 - **Calls:** `StreamCam.SetAuto`
 - **Mode:** Debug
-- **Side effects:** turns the automatic camera on or off for that admin (default on) and clears any top-down in progress and any manual hold. Off leaves the camera where it is for manual control. With auto on, the camera already steps aside for 60 s on its own when you fly away or leave a follow (manual hold), so `off` is only needed for longer manual stretches. `on`/`1`, `off`/`0`; anything else errors. Resets to on when the admin stands up or disconnects
+- **Side effects:** turns the automatic camera on or off for that admin (default on) and resets its camera state (the saved framing stays). Off leaves the camera where it is for manual control. `on`/`1`, `off`/`0`; anything else errors. Resets to on when the admin stands up or disconnects
 - **Notes:** new with the stream camera (2026-09-27)
 
 #### /spec_status
@@ -281,17 +283,17 @@ client console (`dw_spec_*`).
 - **Who:** admin
 - **Calls:** `StreamCam.Describe`
 - **Mode:** Debug; read-only
-- **Side effects:** three lines: auto, manual hold (`Manual=until HH:mm:ss UTC` or `off`), fly cam (`FlyCam=parked|settling|off`), seated, observer, observer mode; who is on camera, parked and side; top-down showing or off, return-to player, round number, whether a round is running, whether this round's top-down is used
-- **Notes:** new with the stream camera (2026-09-27)
+- **Side effects:** three lines: auto, seated, observer, observer mode, fly cam, the view angle read (`ViewAngle=pitch yaw` or `unreadable`); who is on camera, parked side, placed, adjusting, watch side; the saved framing per side (offset, pitch, yaw) or `default`
+- **Notes:** new with the stream camera (2026-09-27); `ViewAngle` changing while you turn in fly cam confirms the framing angle can be saved
 
-#### /spec_overview
+#### /spec_reset
 
-- **Invocation:** console `dw_spec_overview` | chat `/spec_overview`
+- **Invocation:** console `dw_spec_reset` | chat `/spec_reset`
 - **Who:** admin
-- **Calls:** `StreamCam.ShowOverview` (→ `SpectateService.Park` 264 units above `WatchSpot.Location(WatchSpot.Side)`, pitch 89)
+- **Calls:** `StreamCam.ResetFraming` (→ `StreamFramingStore.Reset`)
 - **Mode:** Debug
-- **Side effects:** top-down over the rift now for 10 s (the view only moves when the admin is in fly cam, C; the server cannot switch it), then back to the player the camera was on (or the next choice). Does not use up the round's automatic top-down. Errors when the admin is not spectating
-- **Notes:** new with the stream camera (2026-09-27); also the quickest in-game check that teleporting the observer camera works
+- **Side effects:** forgets the saved framing for both sides (rewrites `bublock/streamcam.json`); the next park (nobody to watch, fly cam) goes to the top-down default
+- **Notes:** new 2026-09-28; replaces `/spec_overview` (removed with the big-ult top-down)
 
 ### Access (`AccessPlugin`, in RiftRoulette.dll)
 

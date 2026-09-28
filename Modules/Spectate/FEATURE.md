@@ -10,21 +10,19 @@ angle. Built for the admin's stream camera.
 
 | Op | Doc |
 |---|---|
-| `SpectateService.Observer / IsObserving / Current / Mode / IsWatching` | `SpectateService.md` |
+| `SpectateService.Observer / IsObserving / Current / Mode / IsWatching / IsFlyCam` | `SpectateService.md` |
+| `SpectateService.ViewAngle` / `Pose(player)` | `SpectateService.md` |
 | `SpectateService.Follow(player, target, mode)` | `SpectateService.md` |
 | `SpectateService.Park(player, position, angle, timer, mode)` | `SpectateService.md` |
-| `SpectateService.IsParkedAt(player, position, tolerance)` | `SpectateService.md` |
-| `SpectateService.IsManualMove(player, position, tolerance)` | `SpectateService.md` |
 | `SpectateRule.Choose(currentId, killerId, candidates)` | `SpectateRule.md` |
-| `SpectateRule.LookDown(yaw)` | `SpectateRule.md` |
-| `SpectateRule.ParkCheck(roaming, hasTarget, distance, tolerance)` | `SpectateRule.md` |
-| `SpectateRule.IsManualMove` / `ManualActive` / `FollowReady` | `SpectateRule.md` |
-| `SpectateRule.FlyCamStep(...)` / `FlyCamSettle` | `SpectateRule.md` |
+| `SpectateRule.LookDown(yaw)` / `FollowReady` | `SpectateRule.md` |
+| `SpectateRule.Turned` / `WrapDegrees` / `HandMoved` | `SpectateRule.md` |
+| `SpectateRule.FramingStep(placed, adjusting, moved, spotChanged)` | `SpectateRule.md` |
 
 ## State
 
-None. The consumer keeps whom it follows and where it parked. `Park`
-schedules its later steps on the caller's `ITimer`.
+None. The consumer keeps whom it follows, where it parked and its framing.
+`Park` schedules its later steps on the caller's `ITimer`.
 
 ## Camera modes
 
@@ -37,15 +35,15 @@ of the observer pawn (`Park`) moves it.
 
 | File | Role |
 |---|---|
-| `SpectateRule.cs` | Pure choice (keep, killer, any, park), the straight-down angle, the parked check, the fly cam step (wait, park, stay, manual) |
-| `SpectateService.cs` | Observer-services calls and the timed park |
+| `SpectateRule.cs` | Pure choice (keep, killer, any, park), the straight-down angle, view movement checks, the framing step (wait, adjust, save, park, stay) |
+| `SpectateService.cs` | Observer-services calls, the observer's pose, the timed park |
 | `Spectate.projitems` | Service and rule (no commands) |
 
 ## Lifecycle vs commands
 
 - No lifecycle of its own. Rift Roulette's `Lobby/StreamCam` calls it every
-  2 s, on deaths and on big ultimates; the `spec_*` admin commands in
-  `Lobby/LobbyPlugin` call the same ops in Debug mode. See
+  2 s and on deaths; the `spec_*` admin commands in `Lobby/LobbyPlugin`
+  call the same ops in Debug mode. See
   `RiftRoulette/reference/admin-commands.md`.
 
 ## Consumers

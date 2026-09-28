@@ -403,7 +403,8 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Verified fact (decompiled API):** the game event `player_used_ability` maps to `PlayerUsedAbilityEvent` with `Player` (pawn), `Caster` (entity), `Abilityname`, `Annotation`. `ability_cast_succeeded` only has `entindex_ability`. `OnAbilityAttempt` sees `InputButton.Ability1..4` presses (not casts).
 - **Verified fact (API):** a hero's ultimate class name is `items.signature4` in `https://assets.deadlock-api.com/v2/heroes` (for example Lash `citadel_ability_lash_ultimate`, Seven `citadel_ability_storm_cloud`, Pocket `synth_affliction`). The local `snapshot.json` has ability names but not slots.
 - **To confirm in game:** whether the server fires `player_used_ability` (self-test Events count; `lobby-*.log` `Ability name seen for the first time`), whether its `Abilityname` matches the `signature4` names, and whether teleporting a `Roaming` observer pawn moves the camera (`spec_overview`; `spectate-*.log` `Parked ... After=`).
-- **Link / path:** `Bublock/Modules/Spectate/SpectateService.cs`, `Bublock/RiftRoulette/Lobby/StreamCam.cs`, `Bublock/RiftRoulette/Lobby/BigUlts.cs`
+- **Removed (2026-09-28):** the big-ult top-down (`BigUlts`, `OverviewRule`, the `player_used_ability` handler) was deleted; the facts above stay for reference.
+- **Link / path:** `Bublock/Modules/Spectate/SpectateService.cs`, `Bublock/RiftRoulette/Lobby/StreamCam.cs`
 
 ### 2026-09-27 — Blocking damage and NPC targeting (OnTakeDamage)
 
@@ -500,3 +501,21 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Verified (logs, session `12681a2f` then `81c2ef2d`):** an upload at 04:14:34 hot-reloaded `RiftRoulette.dll` during round 2. The new load starts with `MatchService.State` empty (`Buying anywhere ... MatchRunning=False`), no rounds were scheduled for 6 minutes, and `SoulRule.ShouldBlock` returns false with no match running, so every soul gain passed. Auto-start did not restart it with one human connected. A fresh map load plus `/match_start` at 04:20 blocked souls again.
 - **Rule of thumb:** after an upload during a match, run `/match_start` again (or let auto-start do it with 2+ players).
 - **Link / path:** `Bublock/RiftRoulette/GameLoop/SoulRule.cs`, `Bublock/RiftRoulette/GameLoop/MatchService.cs`
+
+### 2026-09-28 — Reading the spectator camera's view angle
+
+- **Why hard / useful:** The stream camera saves the admin's framing (position and angle). The observer pawn is not a hero pawn, so the usual angle property is missing.
+- **Verified fact (build):** `EyeAngles` / `ViewAngles` / `CameraAngles` are on `CCitadelPlayerPawn` only; `CBasePlayerPawn` (the type of `controller.Pawn`, and the `observer` pawn) has none of them (CS1061).
+- **Verified fact (schema, [CBasePlayerPawn.h](https://github.com/SteamTracking/GameTracking-Deadlock/blob/master/DumpSource2/schemas/server/CBasePlayerPawn.h)):** `CBasePlayerPawn` has `QAngle v_angle` and `v_anglePrevious` (not networked). Read with `SchemaAccessor<Vector3>("CBasePlayerPawn"u8, "v_angle"u8)`; `GetAddress(handle) == handle` means the field is missing.
+- **Verified fact (logs, 2026-09-28):** pressing C (fly cam) sends no console command to the server; only `spec_next` clicks arrive in `OnClientConCommand`. The observer's `ObserverMode` follows the client: `Roaming` with no target means fly cam, and a server-side `SetObserverMode(Roaming)` still reads `InEye` in the directed view.
+- **To confirm in game:** that `v_angle` tracks the fly cam view (`dw_spec_status` `ViewAngle=` while turning), and whether a server follow (`InEye` + target) pulls the client out of fly cam (`lobby-*.log` `Stream camera follow did not take ... FlyCam=True`).
+- **Link / path:** `Bublock/Modules/Spectate/SpectateService.cs` (`ViewAngle`, `Pose`), `Bublock/RiftRoulette/Lobby/StreamCam.cs`
+
+### 2026-09-28 — "Couldn't resolve offset" spam after a spectator drops
+
+- **Why hard / useful:** The console floods on an empty server and the engine lines name only an offset and a path, not a field or an owner.
+- **Seen (server console, 01:39):** a seated admin idle in spectate timed out (`NETWORK_DISCONNECT_TIMEDOUT`, Steam reason 5003 `problem detected locally`). In the same second and every few seconds after, with nobody connected: `Couldn't resolve offset 488 in CCitadelPlayerPawn at path (4 = '26')`, the same for 496, then `SV: 2762/CCitadelPlayerPawn: requested resolve all N changes, actually resolved only M changes` and `488 path(4 = '26/') not resolved`. Every line is one entity (2762).
+- **Reading:** the server has two queued network changes on that pawn at byte offsets with no field in the `CCitadelPlayerPawn` send table (it excludes `m_flPoseParameter` / `m_flEncodedController`, [schema](https://github.com/SteamTracking/GameTracking-Deadlock/blob/master/DumpSource2/schemas/server/CCitadelPlayerPawn.h)). Unresolved changes are never cleared, so the warning repeats each snapshot while the entity exists. We write neither offset. The pawn outlived its client: `RemovePlayer` removed only `GetHeroPawn()` and the controller, and the observer class (`CCitadelObserverPawn`) is a separate entity from the hero.
+- **Used as:** `LobbyService.RemovePlayer` also removes `controller.Pawn` when it differs from the hero, logs both designer names and entity indexes (`Disconnect pawns removed`), and `SweepOrphanObservers` removes unowned `observer` pawns 1 s later (also on a disconnect with no controller).
+- **To confirm in game:** disconnect from the admin seat on an empty server; the spam should stop. If it continues and the log shows both pawns removed, match the logged indexes against the entity number in the spam.
+- **Link / path:** `Bublock/RiftRoulette/Lobby/LobbyService.cs`, `Bublock/RiftRoulette/Lobby/LobbyPlugin.cs`

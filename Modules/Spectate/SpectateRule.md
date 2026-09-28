@@ -8,11 +8,14 @@ unit tested (`Tests/Modules.Tests/SpectateRuleTests`).
 - `SpectateReason`: `Keep`, `Killer`, `Any`, `Park`.
 - `SpectateChoice(Reason, Target)`: the reason and the Steam ID to follow
   (null for `Park`).
-- `FlyCamAction`: `Wait`, `Park`, `Stay`, `Manual` (what to do with a
-  viewer in fly cam with no target).
-- `FlyCamSettle`: 1.5 s, how long a fly cam must stay still before the
-  camera parks it. Under the 2 s camera tick, so the tick after first
-  sight parks.
+- `FramingAction`: `Wait`, `Adjust`, `Save`, `Park`, `Stay` (what to do
+  with a parked fly cam, see `FramingStep`).
+
+## Constants
+
+- `StraightDownPitch` 89 (Source caps view pitch at 89).
+- `MoveUnits` 50 and `TurnDegrees` 3: how far the view must move or turn
+  between two checks to count as the viewer moving it.
 
 ## Operations
 
@@ -20,11 +23,11 @@ unit tested (`Tests/Modules.Tests/SpectateRuleTests`).
 |---|---|
 | `Choose(currentId, killerId, candidates)` | `Keep` the current target if it is a candidate; else `Killer` if the killer is a candidate; else `Any` (the first candidate); else `Park`. |
 | `LookDown(yaw)` | The straight-down view angle: pitch `StraightDownPitch` (89), the given yaw, roll 0. |
-| `ParkCheck(roaming, hasTarget, distance, tolerance)` | True only when the observer is roaming, has no observer target, and is within `tolerance` of the park spot (inclusive). |
-| `IsManualMove(roaming, hasTarget, distance, tolerance)` | True when the observer is roaming with no target but farther than `tolerance`: the viewer flew away, the park did not fail. |
-| `ManualActive(until, now)` | True while `now` is before the manual hold's end; false with no hold. |
 | `FollowReady(spawnedAt, now, grace)` | True when no spawn was seen or at least `grace` has passed since it. |
-| `FlyCamStep(confirmed, parkSent, atSpot, moved, firstSeen, now, settle)` | For a viewer in fly cam with no target. `confirmed` (a park was seen holding): `Stay` at the spot and still, else `Manual` (the viewer is moving or flew away). `parkSent` (park sent, not yet seen holding): `Stay` at the spot (the caller confirms it), else `Wait` (the caller restarts the settle). Otherwise `moved` since the last check: `Manual`; no `firstSeen`: `Wait`; still for at least `settle`: `Park`; else `Wait`. |
+| `Turned(from, to)` | The larger of the pitch change and the yaw change (yaw wrapped, so 179 to -179 is 2 degrees). |
+| `WrapDegrees(degrees)` | The angle in [-180, 180). |
+| `HandMoved(distance, turned)` | True when the view moved more than `MoveUnits` or turned more than `TurnDegrees`. |
+| `FramingStep(placed, adjusting, moved, spotChanged)` | `moved`: `Adjust` when the camera had been placed (or was already being adjusted), else `Wait` (the viewer is flying somewhere; never move the camera under them). Still and `adjusting`: `Save` (the viewer moved it from the placed spot and let go: that is the new framing). Still, not placed or the spot changed: `Park`. Otherwise `Stay`. |
 
 ## Invariants
 
@@ -33,4 +36,4 @@ unit tested (`Tests/Modules.Tests/SpectateRuleTests`).
   deterministic.
 - A dead victim is never chosen because the caller leaves dead players out
   of `candidates`, even when the victim is also the killer (suicide).
-- Pitch is 89, not 90: Source caps view pitch at 89.
+- `FramingStep` never returns `Park` or `Save` while the view is moving.

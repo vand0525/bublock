@@ -1,3 +1,4 @@
+using System.Numerics;
 using Bublock.Modules.Spectate;
 
 namespace Bublock.Tests.Modules;
@@ -42,37 +43,6 @@ public class SpectateRuleTests
     Assert.Equal(new SpectateChoice(SpectateReason.Park, null), SpectateRule.Choose(20, 30, []));
   }
 
-  [Theory]
-  [InlineData(true, false, 0f, true)]
-  [InlineData(true, false, 1500f, true)]
-  [InlineData(true, false, 1501f, false)]
-  [InlineData(false, false, 0f, false)]
-  [InlineData(true, true, 0f, false)]
-  public void ParkCheck_needs_roaming_no_target_and_near_the_spot(bool roaming, bool hasTarget, float distance, bool expected)
-  {
-    Assert.Equal(expected, SpectateRule.ParkCheck(roaming, hasTarget, distance, 1500f));
-  }
-
-  [Theory]
-  [InlineData(true, false, 1501f, true)]
-  [InlineData(true, false, 1500f, false)]
-  [InlineData(false, false, 5000f, false)]
-  [InlineData(true, true, 5000f, false)]
-  public void IsManualMove_needs_roaming_no_target_and_past_the_tolerance(bool roaming, bool hasTarget, float distance, bool expected)
-  {
-    Assert.Equal(expected, SpectateRule.IsManualMove(roaming, hasTarget, distance, 1500f));
-  }
-
-  [Fact]
-  public void ManualActive_until_the_hold_ends()
-  {
-    var now = new DateTime(2026, 9, 28, 2, 40, 0, DateTimeKind.Utc);
-
-    Assert.False(SpectateRule.ManualActive(null, now));
-    Assert.True(SpectateRule.ManualActive(now.AddSeconds(1), now));
-    Assert.False(SpectateRule.ManualActive(now, now));
-  }
-
   [Fact]
   public void FollowReady_after_the_grace_or_with_no_spawn_seen()
   {
@@ -94,51 +64,58 @@ public class SpectateRuleTests
     Assert.Equal(0f, angle.Z);
   }
 
-  private static readonly DateTime Now = new(2026, 9, 28, 5, 40, 0, DateTimeKind.Utc);
-
-  private static FlyCamAction Step(
-    bool confirmed = false, bool parkSent = false, bool atSpot = false, bool moved = false, double? seenSecondsAgo = null) =>
-    SpectateRule.FlyCamStep(
-      confirmed, parkSent, atSpot, moved, seenSecondsAgo is { } ago ? Now.AddSeconds(-ago) : null, Now, SpectateRule.FlyCamSettle);
-
-  [Fact]
-  public void FlyCamStep_waits_on_first_sight()
+  [Theory]
+  [InlineData(10f, 10f)]
+  [InlineData(190f, -170f)]
+  [InlineData(-190f, 170f)]
+  [InlineData(180f, -180f)]
+  [InlineData(360f, 0f)]
+  public void WrapDegrees_is_in_minus_180_to_180(float degrees, float expected)
   {
-    Assert.Equal(FlyCamAction.Wait, Step());
+    Assert.Equal(expected, SpectateRule.WrapDegrees(degrees), 3);
   }
 
   [Fact]
-  public void FlyCamStep_parks_after_staying_still_for_the_settle()
+  public void Turned_is_the_larger_of_pitch_and_wrapped_yaw()
   {
-    Assert.Equal(FlyCamAction.Wait, Step(seenSecondsAgo: 1));
-    Assert.Equal(FlyCamAction.Park, Step(seenSecondsAgo: 1.5));
-    Assert.Equal(FlyCamAction.Park, Step(seenSecondsAgo: 2));
+    Assert.Equal(2f, SpectateRule.Turned(new Vector3(0f, 179f, 0f), new Vector3(0f, -179f, 0f)), 3);
+    Assert.Equal(10f, SpectateRule.Turned(new Vector3(80f, 0f, 0f), new Vector3(70f, 1f, 0f)), 3);
+  }
+
+  [Theory]
+  [InlineData(0f, 0f, false)]
+  [InlineData(50f, 3f, false)]
+  [InlineData(51f, 0f, true)]
+  [InlineData(0f, 3.5f, true)]
+  public void HandMoved_past_the_move_or_turn_threshold(float distance, float turned, bool expected)
+  {
+    Assert.Equal(expected, SpectateRule.HandMoved(distance, turned));
   }
 
   [Fact]
-  public void FlyCamStep_moving_while_settling_is_manual()
+  public void FramingStep_parks_a_still_camera_that_is_not_placed()
   {
-    Assert.Equal(FlyCamAction.Manual, Step(moved: true, seenSecondsAgo: 2));
+    Assert.Equal(FramingAction.Park, SpectateRule.FramingStep(placed: false, adjusting: false, moved: false, spotChanged: false));
   }
 
   [Fact]
-  public void FlyCamStep_after_a_park_confirms_at_the_spot_or_settles_again()
+  public void FramingStep_waits_while_flying_before_the_first_park()
   {
-    Assert.Equal(FlyCamAction.Stay, Step(parkSent: true, atSpot: true, moved: true, seenSecondsAgo: 2));
-    Assert.Equal(FlyCamAction.Wait, Step(parkSent: true, moved: true, seenSecondsAgo: 2));
+    Assert.Equal(FramingAction.Wait, SpectateRule.FramingStep(placed: false, adjusting: false, moved: true, spotChanged: false));
   }
 
   [Fact]
-  public void FlyCamStep_confirmed_stays_at_the_spot_and_is_manual_once_flown_away()
+  public void FramingStep_moving_a_placed_camera_adjusts_then_saves_when_still()
   {
-    Assert.Equal(FlyCamAction.Stay, Step(confirmed: true, atSpot: true));
-    Assert.Equal(FlyCamAction.Manual, Step(confirmed: true, atSpot: true, moved: true));
-    Assert.Equal(FlyCamAction.Manual, Step(confirmed: true));
+    Assert.Equal(FramingAction.Adjust, SpectateRule.FramingStep(placed: true, adjusting: false, moved: true, spotChanged: false));
+    Assert.Equal(FramingAction.Adjust, SpectateRule.FramingStep(placed: false, adjusting: true, moved: true, spotChanged: false));
+    Assert.Equal(FramingAction.Save, SpectateRule.FramingStep(placed: false, adjusting: true, moved: false, spotChanged: true));
   }
 
   [Fact]
-  public void FlyCamSettle_is_under_one_camera_tick()
+  public void FramingStep_stays_placed_and_reparks_when_the_spot_changes()
   {
-    Assert.True(SpectateRule.FlyCamSettle < TimeSpan.FromSeconds(2));
+    Assert.Equal(FramingAction.Stay, SpectateRule.FramingStep(placed: true, adjusting: false, moved: false, spotChanged: false));
+    Assert.Equal(FramingAction.Park, SpectateRule.FramingStep(placed: true, adjusting: false, moved: false, spotChanged: true));
   }
 }

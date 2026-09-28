@@ -22,10 +22,7 @@ by `SelfTestTests`.
 - `KeptEntities`: map entities we rely on staying (`info_super_trooper_spawn`,
   `item_crate_spawn`, the two shop triggers, `info_koth_spawn_location`).
 - `CleanedEntities`: what CleanSlate removes; should be 0 on the map.
-- `Events`: counter names `EventCounters` tracks. `player_used_ability`
-  feeds the stream camera's big-ult top-down (`Lobby/StreamCam`); a zero
-  count after abilities were cast means the server does not fire it.
-  `take_damage` guards the up-top damage block
+- `Events`: counter names `EventCounters` tracks. `take_damage` guards the up-top damage block
   (`GameLoop/GameLoopPlugin.OnTakeDamage`); zero after a fight means the
   hook stopped firing and waiting players can be hurt again.
 - `RiftPointName` = `info_koth_spawn_location`, `RiftPointTolerance` = 100

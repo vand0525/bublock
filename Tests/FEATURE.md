@@ -30,7 +30,7 @@ server. Never deployed to the server.
   `WatchGuardRule.cs`, `RiftRoulette/Duel/KothRule.cs`,
   `RiftRoulette/GameLoop/MatchState.cs`,
   `MatchConfig.cs`, `AutoStartRule.cs`, `ShopRule.cs`, `RiftRoulette/RandomMode/HeroDraw.cs`, `BenchRule.cs`,
-  `RiftRoulette/Lobby/TeamBalance.cs`, `AdminSeatRule.cs`, `OverviewRule.cs`, `BigUlts.cs`, `RiftRoulette/Stats/StatsLedger.cs`,
+  `RiftRoulette/Lobby/TeamBalance.cs`, `AdminSeatRule.cs`, `StreamFraming.cs`, `RiftRoulette/Stats/StatsLedger.cs`,
   `StatsBoardText.cs`, `RiftRoulette/Balance/BalanceTracker.cs`,
   `BalancePicker.cs`, `RiftRoulette/Betting/BetBook.cs`, `BetBoardText.cs`) rather than referencing the plugin DLL: pick
   bookkeeping, hero pool team lookup, draft board / pool text, team name

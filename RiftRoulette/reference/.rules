@@ -282,27 +282,26 @@ Assume the git repo is rooted at `Bublock/`.
   spawning); a cash-in already up before the forced spawn is a leftover
   and is adopted right away.
 - Stream camera: a seated admin's camera is run by `Lobby/StreamCam`
-  (every 2 s, on deaths, on big ults) through `Modules/Spectate`; no
-  command needed. Top-down uses the main `WatchSpot.Location` anchor
-  (raised by `StreamCam.OverheadHeight`) with `SpectateRule.LookDown`
-  (pitch 89). The server's observer mode does not switch the client:
-  every park goes through `SpectateService.Park` (teleport, then the
-  angle later; it only moves an admin already in fly cam, C, because the
-  client refuses `spec_*` commands from the server, which is why no
-  client commands are sent), and a park that did not
-  hold is retried. Big ults are the class names
-  in `Lobby/BigUlts` (hero `signature4`), at most one top-down per live
-  round (`OverviewRule`, `RiftService.RoundNumber`). Never use
+  (every 2 s and on deaths) through `Modules/Spectate`; no command
+  needed. Players to watch: follow one, cut to the killer. Nobody to
+  watch: park at the saved framing for `WatchSpot.Side`
+  (`StreamFramingStore`, `bublock/streamcam.json`; default straight down
+  264 above the main `WatchSpot.Location` anchor). Moving the camera
+  after that park and letting go saves the new framing, relative to the
+  side's anchor (`StreamFraming`), so it mirrors to the other side;
+  `/spec_reset` forgets it. The server's observer mode does not switch
+  the client: every park goes through `SpectateService.Park` (teleport,
+  then the angle later) and only moves an admin already in fly cam (C;
+  the client refuses `spec_*` commands from the server, so none are
+  sent). Fly cam is `SpectateService.IsFlyCam` (observer `Roaming`, no
+  target). The view angle is `CBasePlayerPawn.v_angle`
+  (`SpectateService.ViewAngle`; the observer pawn has no `EyeAngles`).
+  Never move the camera while the admin moves it in fly cam (the client
+  crashed): no camera call on an update where the view moved over 50
+  units or 3 degrees (`SpectateRule.HandMoved`). Never use
   `IsValidObserverTarget` (it rejects team 3, Sapphire). A hot reload
   re-seats an admin still on the observer pawn (`AdminSeat.Restore`).
-  Never move the camera while the admin moves it (the client crashed):
-  moving in fly cam (before or after its park) or a `spec_*` console
-  command starts a 60 s manual hold with no camera calls. In fly cam
-  (observer `Roaming`, no target; only the admin's C puts it there) the
-  camera parks once after `SpectateRule.FlyCamSettle` of stillness,
-  confirms it by position, then leaves it (repark only on a watch spot
-  side change); no follows or ult top-downs in fly cam. Never follow
-  a hero spawned less than 5 s ago (`StreamCam.FollowGrace`).
+  Never follow a hero spawned less than 5 s ago (`StreamCam.FollowGrace`).
 
 ---
 

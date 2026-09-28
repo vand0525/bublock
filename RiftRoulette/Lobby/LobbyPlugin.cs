@@ -13,8 +13,6 @@ public class LobbyPlugin : DeadworksPluginBase
 
   private static readonly Logger PlayersLog = BublockLog.For("Players");
 
-  private static readonly HashSet<string> SeenAbilities = [];
-
   private readonly List<IHandle> _pauseHooks = [];
 
   public override string Name => "Rift Roulette Lobby";
@@ -62,9 +60,6 @@ public class LobbyPlugin : DeadworksPluginBase
 
   public override HookResult OnClientConCommand(ClientConCommandEvent args)
   {
-    if (args.Controller is { } caller)
-      StreamCam.OnAdminCommand(caller, args.Command, args.Args);
-
     if (!PauseRule.IsPauseCommand(args.Command) || !PauseGuard.Block(args.Controller, "command", args.Command))
       return HookResult.Continue;
 
@@ -112,6 +107,8 @@ public class LobbyPlugin : DeadworksPluginBase
 
     if (args.Controller != null)
       LobbyService.RemovePlayer(args.Controller, Timer);
+    else
+      LobbyService.OnDisconnectWithoutController(args.Slot, args.Reason, Timer);
   }
 
   [GameEventHandler("player_spawn")]
@@ -142,27 +139,6 @@ public class LobbyPlugin : DeadworksPluginBase
 
     if (player?.As<CCitadelPlayerController>() is { } victim)
       StreamCam.OnDeath(victim, args.AttackerController?.As<CCitadelPlayerController>(), Timer);
-
-    return HookResult.Continue;
-  }
-
-  [GameEventHandler("player_used_ability")]
-  public HookResult OnPlayerUsedAbility(PlayerUsedAbilityEvent args)
-  {
-    EventCounters.Hit("player_used_ability");
-    var ability = args.Abilityname;
-    var caster = (args.Player ?? args.Caster?.As<CBasePlayerPawn>())?.Controller?.As<CCitadelPlayerController>();
-
-    if (SeenAbilities.Add(ability))
-      LobbyLog.Info("Ability name seen for the first time since load Ability={Ability} Big={Big} Caster={Caster}", ability, BigUlts.IsBig(ability), caster?.PlayerName ?? "none");
-
-    if (caster == null)
-      return HookResult.Continue;
-
-    LobbyLog.Trace(caster.ToPlayerRef(), "Ability used Ability={Ability} Big={Big}", ability, BigUlts.IsBig(ability));
-
-    if (BigUlts.IsBig(ability) && Participants.IsParticipant(caster))
-      StreamCam.OnBigUlt(caster, ability, Timer);
 
     return HookResult.Continue;
   }
@@ -312,7 +288,7 @@ public class LobbyPlugin : DeadworksPluginBase
       AdminCommand.Reply(caller, $"[Lobby] {line}");
   }
 
-  [Command("spec_auto", Description = "Stream camera: automatic follow / top-down on or off: spec_auto <on|off>")]
+  [Command("spec_auto", Description = "Stream camera: automatic follow / framing on or off: spec_auto <on|off>")]
   public void CmdSpecAuto(CCitadelPlayerController? caller, string state)
   {
     AdminCommand.Authorize(caller, LobbyLog, "spec_auto");
@@ -329,7 +305,7 @@ public class LobbyPlugin : DeadworksPluginBase
     AdminCommand.Reply(caller, $"[Lobby] Stream camera auto {(on ? "on" : "off")}");
   }
 
-  [Command("spec_status", Description = "Stream camera: who is on camera, top-down state, and the round")]
+  [Command("spec_status", Description = "Stream camera: who is on camera, fly cam, and the saved framing per rift side")]
   public void CmdSpecStatus(CCitadelPlayerController? caller)
   {
     AdminCommand.Authorize(caller, LobbyLog, "spec_status");
@@ -338,12 +314,13 @@ public class LobbyPlugin : DeadworksPluginBase
       AdminCommand.Reply(caller, $"[Lobby] {line}");
   }
 
-  [Command("spec_overview", Description = "Stream camera: show the top-down view over the rift now for 10 s")]
-  public void CmdSpecOverview(CCitadelPlayerController? caller)
+  [Command("spec_reset", Description = "Stream camera: forget the saved framing and go back to the top-down default")]
+  public void CmdSpecReset(CCitadelPlayerController? caller)
   {
-    AdminCommand.Authorize(caller, LobbyLog, "spec_overview");
+    AdminCommand.Authorize(caller, LobbyLog, "spec_reset");
 
-    AdminCommand.Reply(caller, $"[Lobby] {StreamCam.ShowOverview(SeatTarget(caller), Timer, ExecutionMode.Debug)}");
+    StreamCam.ResetFraming(ExecutionMode.Debug);
+    AdminCommand.Reply(caller, "[Lobby] Stream camera framing reset to the top-down default");
   }
 
   // A console command can arrive without a caller, so the seat falls back to the admin Steam ID.

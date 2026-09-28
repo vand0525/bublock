@@ -29,6 +29,7 @@
   <Import Project="..\..\Shared\Shared.projitems" />
   <Import Project="..\..\Modules\Movement\Movement.projitems" />
   <Import Project="..\..\Modules\Queue\Queue.projitems" />
+  <Import Project="..\..\Modules\Spectate\Spectate.projitems" />
 
   <ItemGroup>
     <Compile Include="..\..\RiftRoulette\Draft\DraftState.cs" Link="RiftRoulette\Draft\DraftState.cs" />
@@ -52,8 +53,7 @@
     <Compile Include="..\..\RiftRoulette\Lobby\AccessList.cs" Link="RiftRoulette\Lobby\AccessList.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\BanJoinRule.cs" Link="RiftRoulette\Lobby\BanJoinRule.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\PauseRule.cs" Link="RiftRoulette\Lobby\PauseRule.cs" />
-    <Compile Include="..\..\RiftRoulette\Lobby\OverviewRule.cs" Link="RiftRoulette\Lobby\OverviewRule.cs" />
-    <Compile Include="..\..\RiftRoulette\Lobby\BigUlts.cs" Link="RiftRoulette\Lobby\BigUlts.cs" />
+    <Compile Include="..\..\RiftRoulette\Lobby\StreamFraming.cs" Link="RiftRoulette\Lobby\StreamFraming.cs" />
     <Compile Include="..\..\RiftRoulette\Round\RoundLocations.cs" Link="RiftRoulette\Round\RoundLocations.cs" />
     <Compile Include="..\..\RiftRoulette\Round\WatchSpotRule.cs" Link="RiftRoulette\Round\WatchSpotRule.cs" />
     <Compile Include="..\..\RiftRoulette\Round\WatchLayout.cs" Link="RiftRoulette\Round\WatchLayout.cs" />

@@ -15,13 +15,12 @@ lifecycle, server setup, and the lobby commands. Ops live on
 | `OnPrecacheResources` | `Precache.AddHero(BanStatueService.StatueLookHero)` (Vyper), logs `Precached hero` in `Lobby`. Runs at map load only, not on hot reload |
 | `OnStartupServer` | `LobbyService.ApplyServerConvars()` |
 | `OnGameFrame` | `PauseGuard.Tick()` every frame, simulating or not (a paused game does not simulate): the automatic unpause while pausing is off |
-| `OnClientConCommand` | First `StreamCam.OnAdminCommand(controller, command, args)` (seated admins only: logged in `spectate-*.log`; a `spec_*` command pauses the stream camera). Then a `PauseRule.IsPauseCommand` command (`pause`, `setpause`, `citadel_pause`, `citadel_toggle_server_pause`) returns `Stop` when `PauseGuard.Block(controller, "command", <name>)` says so; everything else `Continue` |
+| `OnClientConCommand` | A `PauseRule.IsPauseCommand` command (`pause`, `setpause`, `citadel_pause`, `citadel_toggle_server_pause`) returns `Stop` when `PauseGuard.Block(controller, "command", <name>)` says so; everything else `Continue` |
 | `OnClientConnect` | Returns `AccessService.AllowConnect(SteamId, Name) && AdminSeat.AllowConnect(SteamId, Name)`. Access first: a banned ID gets a statue visit or is refused inside a rejoin lockout (`BanStatueService.AdmitBanned`), and in private mode anyone neither whitelisted nor admin is refused. Then the seat rule: `false` refuses a non-admin once 12 participants are playing (the 13th connection is the admin seat) |
 | `OnClientFullConnect` | When the controller is present: a banned player let in at connect (`BanStatueService.TakeArrival`) becomes a statue and is kicked 10 s later (`Petrify(RejoinKickSeconds, liveBan: false)`); otherwise every admin is seated as a spectator (`AdminSeat.Sit`; `dw_seat_play` to play); everyone else goes through `LobbyService.AdmitPlayer(controller, Timer)` (no bot check, as the archive), which places the player on the smaller team and checks auto-start 2 s later |
 | `OnClientDisconnect` | `LobbyService.RemovePlayer(controller, Timer)` when the controller is present (may auto-end the match, never auto-starts one) |
 | `player_spawn` | Skips bots and seated admins (`Participants.IsParticipant`, but statues pass so a respawned statue goes back up); gives `WatchGuard.Grace` at once (a respawn at base is not a rescue) and `StreamCam.NoteSpawn` (the camera waits 5 s before following a fresh hero), then on the next tick `WatchSpot.SendUp(player)`: restrained and teleported to the watch spot above the rift being fought, or the next one when idle (archive `ReturnToDraftOnSpawn`; stays here because it needs `Timer`) |
 | `player_death` | `LobbyService.LogDeath` when controller and pawn are present; then `StreamCam.OnDeath(victim, attacker, Timer)` (the camera cuts to the killer if the admin was watching the victim) |
-| `player_used_ability` | Resolves the caster from `Player` (or `Caster`) pawn's controller. The first time each ability name is seen since load it logs Information `Ability name seen for the first time since load Ability= Big= Caster=` (confirms the event fires and shows real names); every use is Trace. A `BigUlts.IsBig` ability cast by a participant goes to `StreamCam.OnBigUlt` |
 
 ## Commands
 
@@ -39,9 +38,9 @@ lifecycle, server setup, and the lobby commands. Ops live on
 | `dw_seat_spec` | admin, console only (`ConsoleOnly`; chat `/seat_spec` does not run) | `AdminSeat.Sit`: the admin moves to the spectator seat (`MakeObserver` on the next tick); works any time, including mid-round |
 | `/seat_play` | admin | `AdminSeat.Stand`: the admin goes back onto a team through `AdmitPlayer`; refused when 12 are playing |
 | `/seat_status` | admin | `AdminSeat.Describe` |
-| `/spec_auto <on\|off>` | admin | `StreamCam.SetAuto`: the automatic stream camera on or off (default on; also ends a manual hold); error for another value |
-| `/spec_status` | admin | `StreamCam.Describe`: auto, manual hold, seated, observer mode, who is on camera, parked side, top-down state, return-to player, round and whether its top-down is used |
-| `/spec_overview` | admin | `StreamCam.ShowOverview`: top-down over the rift now for 10 s; does not use the round's automatic top-down; error when not spectating |
+| `/spec_auto <on\|off>` | admin | `StreamCam.SetAuto`: the automatic stream camera on or off (default on; resets that admin's camera state); error for another value |
+| `/spec_status` | admin | `StreamCam.Describe`: auto, seated, observer mode, fly cam, the view angle read; who is on camera, parked side, placed / adjusting, watch side; the saved framing per side |
+| `/spec_reset` | admin | `StreamCam.ResetFraming(Debug)`: forgets the saved framing (`streamcam.json`), so the next park is the top-down default |
 
 Seat and `spec_*` commands take no player argument. They target the caller, or without a
 caller (server console, or a client console command that arrived without
@@ -62,10 +61,9 @@ reply with `AdminCommand.Reply`. Errors use `CommandException`.
 - `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`,
   `player_spawn` and `player_death` each call `SelfTest/EventCounters.Hit`
   first (`client_connect`, `client_full_connect`, `client_disconnect`,
-  `player_spawn`, `player_death`, `player_used_ability`), so `dw_selftest_run` can tell whether the
+  `player_spawn`, `player_death`), so `dw_selftest_run` can tell whether the
   hook still fires after a game update.
 
 - Hooks never throw; missing controllers or pawns are skipped.
-- State: `SeenAbilities` (ability names already logged since load) and the
-  pause message hook handles; picks live in `Draft/DraftState`, camera state
+- State: the pause message hook handles; picks live in `Draft/DraftState`, camera state
   in `StreamCam`, pause state in `PauseGuard`.
