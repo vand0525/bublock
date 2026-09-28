@@ -225,16 +225,18 @@ The target command list. **Status:** `archive` = renames an archive command
 | `/player_kick <slot>` | `/kick` | Lobby | `KickPlayer` | Release pick, redraw boards, `kickid` | archive | 8 |
 | `/player_team <slot> <sapphire\|amber>` | — | Lobby | `SetTeam` | Move a player to a team (Sapphire 3, Amber 2) | new | 8 |
 | `/lobby_setup` | — | Lobby | `ApplyServerConvars` | Re-apply the startup convars and commands | new | 8 |
+| `/pause_allow [on\|off]` | — | Lobby | `PauseGuard.Describe` / `SetAllowed` | Show whether players can pause, or turn pausing on / off (off after every load) | new | pause |
 | `dw_seat_spec` | — | Lobby | `AdminSeat.Sit` | Admin (caller, else the admin Steam ID) to the spectator seat, outside teams. Console only (`ConsoleOnly`); any time (spectator team + `MakeObserver`). Admins are seated on every connect | new | 13f |
 | `/seat_play` | — | Lobby | `AdminSeat.Stand` | Admin (caller, else the admin Steam ID) out of the seat and onto a team (console: `dw_seat_play`, no arguments) | new | 13f |
 | `/seat_status` | — | Lobby | `AdminSeat.Describe` | Player slots, admin seat, `maxplayers` | new | 13f |
 | `/spec_auto <on\|off>` | — | Lobby | `StreamCam.SetAuto` | Automatic stream camera on or off for the seated admin (default on; console `dw_spec_auto`) | new | stream camera |
 | `/spec_status` | — | Lobby | `StreamCam.Describe` | Who is on camera, top-down state, round and whether its top-down is used | new | stream camera |
 | `/spec_overview` | — | Lobby | `StreamCam.ShowOverview` | Top-down over the rift now for 10 s (does not use the round's automatic one) | new | stream camera |
-| `/player_ban <slot>` | — | Lobby (Access) | `AccessService.Ban`, `KickPlayer` | Ban a connected player (Steam ID to `access.json`) and kick | new | access |
-| `/ban_add <steamid>` | — | Lobby (Access) | `AccessService.Ban`, `KickDenied` | Ban a Steam64 ID; kicks them if connected | new | access |
+| `/player_ban <slot>` | — | Lobby (Access) | `AccessService.Ban`, `PetrifyBanned` | Ban a connected player (Steam ID to `access.json`); statue, kicked in 30 s | new | access |
+| `/ban_add <steamid>` | — | Lobby (Access) | `AccessService.Ban`, `PetrifyBanned` | Ban a Steam64 ID; if connected, statue and kicked in 30 s | new | access |
 | `/ban_remove <steamid>` | — | Lobby (Access) | `AccessService.Unban` | Unban a Steam64 ID | new | access |
-| `/ban_list` | — | Lobby (Access) | `AccessService.DescribeBanned` | List banned IDs | new | access |
+| `/ban_list` | — | Lobby (Access) | `AccessService.DescribeBanned` | List banned IDs with rejoin strikes and lockouts | new | access |
+| `/ban_modifier [name\|none]` | — | Lobby (Access) | `AccessService.SetStatueModifier` | Show or set the statue modifier (saved in `access.json`) | new | access |
 | `/allow_add <steamid>` | — | Lobby (Access) | `AccessService.Allow` | Whitelist a Steam64 ID for private mode | new | access |
 | `/allow_remove <steamid>` | — | Lobby (Access) | `AccessService.Disallow` | Remove from the whitelist (no kick) | new | access |
 | `/allow_list` | — | Lobby (Access) | `AccessService.DescribeAllowed` | List whitelisted IDs | new | access |

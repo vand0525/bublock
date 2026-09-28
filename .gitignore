@@ -18,6 +18,9 @@ scripts/server.env
 # Map vertex buffer for scripts/check-spots.py (74 MB, re-downloadable)
 RiftRoulette/reference/maps/*/world.bin*
 
+# Pulled server data (access.json holds banned / whitelisted Steam IDs)
+server-data/
+
 # Pulled server logs (local inspection copies)
 logs/**
 !logs/**/.gitkeep

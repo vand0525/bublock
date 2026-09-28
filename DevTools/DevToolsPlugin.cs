@@ -35,6 +35,12 @@ public class DevToolsPlugin : DeadworksPluginBase
     BublockLog.Master.Info("Initialized. Awaiting commands from authorized users.");
   }
 
+  public override HookResult OnAddModifier(AddModifierEvent args)
+  {
+    ModifierProbe.Observe(args);
+    return HookResult.Continue;
+  }
+
   // SERVER COMMANDS
 
   [Command("dev_logpath", Description = "Show where this server writes Bublock logs")]

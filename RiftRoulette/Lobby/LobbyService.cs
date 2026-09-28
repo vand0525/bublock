@@ -28,6 +28,7 @@ public static class LobbyService
     Server.ExecuteCommand("citadel_player_override_spawn_time 1");
     ServerConVars.TrySet("citadel_allow_duplicate_heroes", 1, LobbyLog);
     ShopAccess.Sync(mode);
+    PauseGuard.Apply(mode);
 
     LobbyLog.WithMode(mode).Info(
       "Server convars applied TeamSize={TeamSize} MaxPlayers={MaxPlayers} Visible={Visible}",
@@ -64,6 +65,7 @@ public static class LobbyService
   {
     var steamId = player.PlayerSteamId;
     AdminSeat.Forget(steamId);
+    BanStatueService.Forget(steamId);
     RestraintService.Forget(steamId);
     WatchGuard.Forget(steamId);
     DuelService.Forget(steamId);

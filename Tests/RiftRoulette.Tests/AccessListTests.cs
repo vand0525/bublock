@@ -41,6 +41,19 @@ public class AccessListTests
   }
 
   [Fact]
+  public void Statue_modifier_round_trips_and_is_left_out_when_unset()
+  {
+    var unset = new AccessList().ToJson();
+    var list = new AccessList { StatueModifier = "modifier_example" };
+    var parsed = AccessList.Parse(list.ToJson());
+
+    Assert.DoesNotContain("statueModifier", unset);
+    Assert.Null(AccessList.Parse(unset).StatueModifier);
+    Assert.Equal("modifier_example", parsed.StatueModifier);
+    Assert.Null(AccessList.Parse("""{ "statueModifier": "  " }""").StatueModifier);
+  }
+
+  [Fact]
   public void Parse_rejects_bad_json()
   {
     Assert.ThrowsAny<JsonException>(() => AccessList.Parse("{ not json"));

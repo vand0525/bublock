@@ -207,7 +207,16 @@ position, entity index.
 - **Who:** admin
 - **Calls:** `LobbyService.ApplyServerConvars`
 - **Mode:** Debug
-- **Side effects:** re-applies the startup convars and commands (team size 6, max players 13 with 12 shown in the browser (the 13th is the admin seat), KOTH off and warning times 1, override spawn time 1, purchasing anywhere, duplicate heroes). Note `citadel_koth_enabled 0` would close the KOTH gate if run mid-rift
+- **Side effects:** re-applies the startup convars and commands (team size 6, max players 13 with 12 shown in the browser (the 13th is the admin seat), KOTH off and warning times 1, override spawn time 1, purchasing anywhere, duplicate heroes, pause convars from `PauseGuard`). Note `citadel_koth_enabled 0` would close the KOTH gate if run mid-rift
+
+#### /pause_allow [on|off]
+
+- **Invocation:** chat `/pause_allow [on|off]` | console `dw_pause_allow [on|off]`
+- **Who:** admin
+- **Calls:** `PauseGuard.Describe` (no argument) or `PauseGuard.SetAllowed` (`on` / `off`, also `1` / `0`)
+- **Mode:** Debug
+- **Side effects:** no argument: one line with pausing on / off, `GamePaused`, `ServerPaused`, blocked requests and automatic unpauses since load. `on` / `off`: sets `citadel_allow_pausing` and `citadel_allow_pause_in_match` to 1 / 0 (`citadel_pause_allow_in_pregame` stays 0) and writes a master line `Pausing turned on/off`. While off, pause console commands (`pause`, `setpause`, `citadel_pause`, `citadel_toggle_server_pause`) and the pause net messages (`CCLCMsg_RequestPause`, `CCitadelClientMsg_Pause`) are blocked for everyone, admins included; the player gets the chat line `Pausing is off on this server.` (at most once per 5 s), and a game that is paused anyway gets the server `pause` toggle every 2 s until it runs again (`pause-*.log`)
+- **Notes:** new 2026-09-27 (a player kept pausing the lobby). Off after every load and hot reload; `on` lasts until the next one. Error for any other argument
 
 #### dw_seat_spec
 
@@ -282,27 +291,30 @@ trusted). Debug mode; `[Access]` replies. The lists and mode live in
 `game/bin/win64/bublock/access.json` on the server (`{"private": false,
 "banned": [], "allowed": []}`, Steam64 IDs). The file can be edited by hand;
 the change applies on the next connection. `LobbyPlugin.OnClientConnect`
-checks it before the admin seat rule: banned IDs are always refused (even
-admins), and private mode refuses anyone neither whitelisted nor an
-`AdminAuth` admin. Refusals are Warnings in `access-*.log` (copied to
-master) with name and Steam ID. Steam ID arguments must be real Steam64 IDs
-(17 digits, starting 7656119); slot numbers are refused.
+checks it before the admin seat rule. A banned ID (even an admin) is let
+in as a statue and kicked 10 s later (`BanStatueService`); each such visit
+is a strike, and the next reconnect is refused for 10 min, then 30 min,
+then until restart. Private mode refuses anyone neither whitelisted nor an
+`AdminAuth` admin. Refusals and statue visits are Warnings in
+`access-*.log` (copied to master) with name and Steam ID. Steam ID
+arguments must be real Steam64 IDs (17 digits, starting 7656119); slot
+numbers are refused.
 
 #### /player_ban <slot>
 
 - **Invocation:** chat `/player_ban <slot>` | console `dw_player_ban <slot>`
 - **Who:** admin
-- **Calls:** `AccessService.Ban`, `LobbyService.KickPlayer`
+- **Calls:** `AccessService.Ban`, `AccessService.PetrifyBanned`
 - **Mode:** Debug
-- **Side effects:** adds the connected player's Steam ID to `banned`, saves the file, kicks them (releases a pick first). Refuses an empty slot, a bot, or yourself
+- **Side effects:** adds the connected player's Steam ID to `banned` and saves the file. The player turns to stone up top (out of the game, restrained, statue modifier), is told `You are banned. Do better. You will be kicked in 30s.`, everyone else sees `<name> is banned.`, and they are kicked 30 s later. Refuses an empty slot, a bot, or yourself
 
 #### /ban_add <steamid>
 
 - **Invocation:** chat `/ban_add <steamid>` | console `dw_ban_add <steamid>`
 - **Who:** admin
-- **Calls:** `AccessService.Ban`, `AccessService.KickDenied`
+- **Calls:** `AccessService.Ban`, `AccessService.PetrifyBanned`
 - **Mode:** Debug
-- **Side effects:** adds the ID to `banned` and saves; if that player is connected they are kicked. Replies `... is banned.` or `... was already banned.`
+- **Side effects:** adds the ID to `banned` and saves; if that player is connected they turn to stone and are kicked 30 s later (as `/player_ban`). Replies `... is banned.` or `... was already banned.`, plus `Turned to stone, kicked in 30s: <names>.`
 
 #### /ban_remove <steamid>
 
@@ -318,7 +330,15 @@ master) with name and Steam ID. Steam ID arguments must be real Steam64 IDs
 - **Who:** admin
 - **Calls:** `AccessService.DescribeBanned`
 - **Mode:** Debug; read-only
-- **Side effects:** count, then one ID per line (with the name if connected)
+- **Side effects:** count, then one ID per line (with the name if connected), each with its rejoin record: `Strikes=N`, `locked M min` or `locked until restart`, `statue now`
+
+#### /ban_modifier [name|none]
+
+- **Invocation:** chat `/ban_modifier [name|none]` | console `dw_ban_modifier [name|none]`
+- **Who:** admin
+- **Calls:** `AccessService.SetStatueModifier` (no argument: reads `AccessService.Load().StatueModifier`)
+- **Mode:** Debug
+- **Side effects:** no argument shows the modifier banned players get (`none (restraint only)` when unset). A name saves it as `statueModifier` in `access.json`; `none` clears it. Find the name in DevTools `modifiers-*.log` after someone casts Vyper's Petrify. A name the game refuses logs a Warning once per statue; the statue is then restrained only
 
 #### /allow_add <steamid>
 
@@ -882,6 +902,8 @@ and Steam ID). Results go to the caller's console (server console for a null
 caller) with a `[DevTools]` prefix. Diagnostic tools with no lifecycle
 caller, so there is no Clean/Debug split. Renamed from the archive in
 Stage 12 (old names removed); the archive left four of them ungated.
+DevTools also logs each game modifier name the first time it is added
+(`ModifierProbe`, `DevTools/modifiers-*.log`); no command.
 
 #### /dev_logpath
 

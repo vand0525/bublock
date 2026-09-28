@@ -43,11 +43,12 @@ deadworks/                 # Cursor workspace root
     CleanSlate/            # map cleanup helpers
     Tests/                 # local xUnit tests (never deployed)
     logs/                  # Cursor pull root (<Dll>/ subfolders)
+    server-data/           # pulled access.json (bans / whitelist), git-ignored
     scripts/update.sh      # build-all (never deploys)
     scripts/deploy.sh      # backup server DLLs, then upload (needs --confirm)
     scripts/rollback.sh    # re-upload a deploy backup (<stamp>)
     scripts/test.sh        # run local tests
-    scripts/pull-logs.sh   # read-only mirror of server logs into logs/
+    scripts/pull-logs.sh   # read-only pull: server logs into logs/, access.json into server-data/
     scripts/fetch-builds.py # refresh Modules/Loadout/Data/hero-builds.json (offline)
     scripts/check-spots.py # check the per-slot spots against the map mesh (offline)
     scripts/patch-baseline.sh # save a known-good snapshot before a game patch
@@ -104,7 +105,10 @@ Assume the git repo is rooted at `Bublock/`.
   `Bublock/scripts/deploy.sh --confirm`, which backs up the server DLLs to
   `deadworks/server-backups/<stamp>/` first (`--no-backup` only when the
   user says so); `rollback.sh <stamp>` restores them. `update.sh` is
-  build-only.
+  build-only. Every deploy also runs `pull-logs.sh` before uploading
+  (logs, and `access.json` into `Bublock/server-data/` and the stamp
+  folder), so the ban list and whitelist have a local copy until they
+  move to database storage. Never commit `server-data/` (Steam IDs).
 - When a stage changes architecture decisions, update `master-plan.md` and this
   `.rules` file in the same change.
 - Extraction stages (6–10) followed the strangler pattern: each moved one
@@ -155,6 +159,18 @@ Assume the git repo is rooted at `Bublock/`.
   allowed Steam64 IDs, open or private). `Lobby/AccessService` checks it
   in `OnClientConnect` before the admin seat rule; a ban wins over
   everything. The file never grants admin (that stays `AdminAuth`).
+- Banned players are never kicked on the spot: `Lobby/BanStatueService`
+  turns them to stone up top (out of the game, restrained, the
+  `statueModifier` from `access.json`) and kicks them 30 s after a live
+  ban, 10 s after a reconnect. Each reconnect is a strike
+  (`Lobby/BanJoinRule`): refused 10 min, then 30 min, then until restart.
+  Statues are not participants. Never kick inside `OnClientConnect` /
+  `OnClientFullConnect`; kick from a timer.
+- Pausing is off after every load (`Lobby/PauseGuard`): pause convars 0,
+  pause console commands and both pause net messages blocked, and a game
+  paused anyway gets the server `pause` toggle. `/pause_allow on` turns it
+  back on until the next load. Never set `citadel_pause_count` or
+  `citadel_num_team_pauses_allowed` to 0 (0 means unlimited).
 - Stage 13d: `GameLoop/AutoStartService` starts the match (Clean) when 2
   human players are connected and ends it when fewer than 2 remain, checked
   2 s after every join (`CheckSoon`), on every disconnect and 3 s after
@@ -484,7 +500,7 @@ When debugging with Cursor: run `pull-logs.sh` first, then inspect
                            # round start/end, plus every feature Warning+
   <feature>-YYYYMMDD.log   # one per feature: draft, rift, lobby, worldtext,
                            # movement, hud, match, cleanup, commands,
-                           # watch, probe, spectate, betting, ...
+                           # watch, probe, spectate, betting, pause, ...
 ```
 
 - Every feature gets its own file (`BublockLog.For("Draft")` →

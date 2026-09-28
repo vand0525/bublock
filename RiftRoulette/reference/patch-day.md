@@ -39,7 +39,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Lobby (`Lobby/`) | Admits players, balances teams, convars, kick, respawn to watch spot | `OnClientConnect` / `FullConnect` / `Disconnect`, `player_spawn`, `player_death`, `SelectHero(Heroes.Skyrunner)`, `ChangeTeam`, `kickid`, lobby convars | join; `/status`; `dw_player_list` |
 | AdminSeat (`Lobby/AdminSeat`) | 13th seat on the spectator side | `maxplayers`, `sv_visiblemaxplayers`, team 1 | `dw_seat_status` |
 | Stream camera (`Lobby/StreamCam`, `Modules/Spectate`) | Seated admin's automatic camera: follow, killer cut, top-down on big ults | `observer` pawn designer name, `ObserverServices` (`InEye`, `Roaming`, `SetObserverTarget`), observer `Teleport`, `player_used_ability`, ult class names in `Lobby/BigUlts`, client `spec_player` and `spec_mode 4` (fly cam) | `dw_spec_status`, `dw_spec_overview` |
-| Access (`Lobby/Access*`) | Bans / private mode from `bublock/access.json` | `OnClientConnect` returning false, `kickid` | `/access_mode` |
+| Access (`Lobby/Access*`, `BanStatueService`) | Bans / private mode from `bublock/access.json`; banned players turned to stone then kicked | `OnClientConnect` returning false, `kickid`, `AddModifier` (statue modifier) | `/access_mode`, `/ban_list`, `/ban_modifier` |
 | Draft (`Draft/`) | Draft picks, boards (off in Random mode) | `player_hero_changed`, `SelectHero`, `Heroes` pools, `point_worldtext` | `/draft_status`, `/draft_boards` |
 | Rift (`Rift/`) | Forces a rift at a side, detects capture / tie, cleans troopers | KOTH schema fields, `citadel_gamerules`, `citadel_item_koth_spawner`, `citadel_koth_cashin`, `npc_trooper`, `citadel_koth_enabled`, rift positions | `/rift_start green`, `rift-*.log` |
 | Round (`Round/`) | Round flow, watch spot, per-slot spots, WatchGuard | `Teleport`, camera net message, anchors, `spots.json`, skybox floor z 1536 | `/spots_walk`, `/rift_start` |
@@ -95,6 +95,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Players can shoot / cast up top | modifier or state renamed / renumbered | self-test live Restraint FAIL; `restraint` Trace `refused` | new names from the schema DB / enum |
 | Players take damage up top (turrets, troopers) | `OnTakeDamage` no longer fires or `Stop` no longer blocks | self-test Events `take_damage` = 0 after a fight; `damage_blocked_restrained` stays 0 | check `OnTakeDamage` / `TakeDamageEvent` in `/tmp/dwapi.cs`; fallback state `EModifierState.NoIncomingDamage` (142) in `RestraintService.States` |
 | Bosses, shops or urn back on the map | CleanSlate names or crate convars changed | self-test Entities WARN; convar FAIL; `probe-*.log` counts | `dw_ent_find boss` / `shop`; update `CleanSlateService` |
+| Players can pause again | pause convar renamed, pause message renamed / renumbered, or a new pause command | self-test Convars WARN; `lobby-*.log` `Pause message hook not registered`; `pause-*.log` has no `Pause blocked` line for the pause | new names from `cvarlist.md` and the new `lib/` into `Lobby/PauseRule` / `LobbyPlugin` |
 | Settings not applied (team size, respawn, duplicates) | convar renamed / removed / hidden | self-test Convars FAIL; `Convar missing` warning in master log | new name from `cvarlist.md` upstream |
 | Banner or camera angle missing | protobuf message changed | `dw_hud_announce`, `dw_mv_angle` | check the message in the new `lib/` |
 | Boards missing | `point_worldtext` / `CPointWorldText` changed | `dw_wt_create test` | check `CPointWorldText` in `/tmp/dwapi.cs` |
@@ -119,6 +120,10 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | `citadel_player_override_spawn_time` | 1 (console) | `LobbyService` |
 | `citadel_allow_duplicate_heroes` | 1 | `LobbyService` |
 | `citadel_allow_purchasing_anywhere` | 0, or 1 in 1v1 setup | `GameLoop/ShopAccess.cs` |
+| `citadel_allow_pausing` | 0, or 1 after `/pause_allow on` (devonly, replicated) | `Lobby/PauseRule.cs` `ConVars`, set by `PauseGuard.Apply` |
+| `citadel_allow_pause_in_match` | 0, or 1 after `/pause_allow on` | same |
+| `citadel_pause_allow_in_pregame` | 0 | same |
+| `pause` | command (toggle), automatic unpause | `Lobby/PauseGuard.cs` `Tick` |
 | `citadel_trooper_spawn_enabled` | 0 | `CleanSlate/CleanSlateService.cs` |
 | `citadel_npc_spawn_enabled` | 0 | same |
 | `citadel_active_lane` | 0 | same |
@@ -155,14 +160,31 @@ Map dump counts (build 6698): `info_koth_spawn_location` 2, `info_super_trooper_
 | `CCitadelGameRules.m_timeNextKothSpawnWindowTime` | float | same |
 | `CCitadelGameRules.m_timeNextKothSpawn` | float | same |
 | `CCitadelGameRules.m_timeKothGiveUp` | float | same (read only) |
+| `CGameRules.m_bGamePaused`, `CCitadelGameRules.m_bServerPaused` | bool (API `GameRules.GamePaused` / `ServerPaused`) | `Lobby/PauseGuard.cs` |
+
+### Net messages
+
+Incoming, hooked with `NetMessages.HookIncoming` and blocked while pausing is
+off: `CCLCMsg_RequestPause` (clc 33) and `CCitadelClientMsg_Pause` (1008).
+`Lobby/LobbyPlugin.cs`. A missing ID logs `Pause message hook not registered`
+in `lobby-*.log`. Client pause commands blocked in `OnClientConCommand`:
+`pause`, `setpause`, `citadel_pause`, `citadel_toggle_server_pause`
+(`Lobby/PauseRule.cs`).
 
 ### Modifiers and states
 
 `modifier_citadel_silenced`; `EModifierState.Silenced` (15), `ItemsDisabled` (14), `ShootingDisabled` (62), `MeleeDisabled` (106), `IgnoredByNpcTargeting` (33). Never `Disarmed` (12). `Modules/Restraint/RestraintService.cs`.
 
+Banned-player statue: the modifier name is data, not code: `statueModifier`
+in `bublock/access.json` on the server (`/ban_modifier`), added by
+`Lobby/BanStatueService.cs` with a `duration`. After a patch, if statues
+stop turning to stone (Warning `Statue modifier refused` in `access-*.log`),
+have someone cast Vyper's Petrify, read the new name in DevTools
+`modifiers-*.log` (`ModifierProbe`), and `/ban_modifier <name>`.
+
 ### Events and hooks
 
-`player_spawn` (Lobby, Duel, Random), `player_death` (Lobby, Stats, stream camera), `player_used_ability` (stream camera: `Abilityname`, `Player`, `Caster`), `player_respawned` (Duel, Random), `player_hero_changed` (Draft); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnLoad`, `OnStartupServer`.
+`player_spawn` (Lobby, Duel, Random), `player_death` (Lobby, Stats, stream camera), `player_used_ability` (stream camera: `Abilityname`, `Player`, `Caster`), `player_respawned` (Duel, Random), `player_hero_changed` (Draft); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnAddModifier` (DevTools `ModifierProbe`, `AddModifierEvent.ModifierVData.Name`; diagnostics only), `OnLoad`, `OnStartupServer`.
 
 ### Enums and hero data
 

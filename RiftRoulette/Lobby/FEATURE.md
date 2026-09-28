@@ -49,6 +49,25 @@ admins. Admin commands on `AccessPlugin` rewrite the file; a hand edit
 applies on the next connection (the file is re-read when its write time
 changes).
 
+Banned-player statue (`BanStatueService`): a ban never kicks on the spot.
+A player banned while connected turns to stone up top (restrained, no
+damage, out of the game like a leaver) and is kicked 30 s later. A banned
+player who reconnects is let in as a statue, told `You are banned. Do
+better.` and kicked 10 s later. Each such visit is a strike
+(`BanJoinRule`): the next reconnect is refused for 10 min, then 30 min,
+then until restart. The stone look is a game modifier named in
+`access.json` `statueModifier` (`/ban_modifier`); until it is set,
+statues are restrained only. `DevTools/ModifierProbe` logs modifier names
+to find it (have someone cast Vyper's Petrify, then read
+`modifiers-*.log`).
+
+Pausing: off after every load (`PauseGuard`). The game's pause convars are
+set to 0 with the other server convars, pause console commands are blocked
+in `OnClientConCommand`, the two pause net messages are blocked with
+`NetMessages.HookIncoming`, and a game that is paused anyway is unpaused
+with the server `pause` toggle. `/pause_allow on` turns pausing back on
+until the next load.
+
 ## Files
 
 | File | Role |
@@ -58,7 +77,7 @@ changes).
 | `RiftRouletteTeams.cs` | Team numbers and names (Amber 2, Sapphire 3) |
 | `TeamBalance.cs` | `Even` (fewest moves to even teams) and `SmallerTeam` (pure, tested) |
 | `CommandList.cs` | Player command list for `/commands` (reflects `[Command]` attributes) |
-| `Participants.cs` | Who plays: connected players minus bots and seated admins |
+| `Participants.cs` | Who plays: connected players minus bots, seated admins and statues |
 | `AdminSeatRule.cs` | Pure seat rules: cap 12, `CanConnect`, `CanStand`, `SeatOnJoin` (every admin; tested) |
 | `AdminSeat.cs` | Admin seat service: connect gate, `Sit`, `Stand`, `Forget`, `Restore` (after hot reload), `Describe` |
 | `StreamCam.cs` | Automatic stream camera for seated admins: follow, killer cut, big-ult top-down, park |
@@ -66,19 +85,23 @@ changes).
 | `OverviewRule.cs` | Pure top-down timing: 10 s showing, once per live round (tested) |
 | `HeroLock.cs` | Reusable hero lock (applied / pending / enforcement kills, `Enforce`) |
 | `AccessRule.cs` | Pure access rule: ban, private, whitelist, admin; Steam64 ID check (tested) |
-| `AccessList.cs` | `access.json` model: mode + banned / allowed sets, JSON parse and write (tested) |
-| `AccessService.cs` | Access file load / save, connect gate, list changes, kick players without access |
-| `AccessPlugin.cs` | Admin access commands (`/player_ban`, `/ban_*`, `/allow_*`, `/access_mode`) |
+| `AccessList.cs` | `access.json` model: mode + banned / allowed sets + statue modifier, JSON parse and write (tested) |
+| `AccessService.cs` | Access file load / save, connect gate, list changes, statue banned players, kick private-mode outsiders |
+| `AccessPlugin.cs` | Admin access commands (`/player_ban`, `/ban_*`, `/ban_modifier`, `/allow_*`, `/access_mode`) |
+| `BanJoinRule.cs` | Pure rejoin rule: statue visit or refuse; strikes lock out 10 min, 30 min, then until restart (tested) |
+| `BanStatueService.cs` | Statue: out of the game, up top, modifier, chat, timed kick; rejoin strikes; `Sustain` |
+| `PauseRule.cs` | Pure pause rules: pause commands, pause convars, unpause and chat throttles (tested) |
+| `PauseGuard.cs` | Pause service: convars, blocking pause requests, automatic unpause, `/pause_allow` state |
 
 ## Public operations
 
 See `LobbyService.md`. Player commands: `/status`, `/commands` (Stage 12,
 built by `CommandList`). Admin commands: `/player_list`, `/player_info`,
-`/player_kick`, `/player_team`, `/lobby_setup`, `dw_seat_spec` (console
+`/player_kick`, `/player_team`, `/lobby_setup`, `/pause_allow`, `dw_seat_spec` (console
 only, any time), `/seat_play`, `/seat_status`, `/spec_auto`,
 `/spec_status`, `/spec_overview` (stream camera).
 Access (admin): `/player_ban <slot>`, `/ban_add`, `/ban_remove`,
-`/ban_list`, `/allow_add`, `/allow_remove`, `/allow_list`,
+`/ban_list`, `/ban_modifier`, `/allow_add`, `/allow_remove`, `/allow_list`,
 `/access_mode [open|private]` (see `AccessPlugin.md`).
 Archive names `/state`,
 `/kick`, `/test` were removed in Stage 12. Catalogued in
@@ -90,7 +113,10 @@ Archive names `/state`,
 admin's camera state (auto flag, followed player, pending killer, parked
 side, top-down end, return-to player, last round shown); each `HeroLock` instance is owned by
 its mode. `AccessService` caches the last good `access.json` (the file is
-the source of truth and survives reloads and deploys). Otherwise reads and releases picks in `Draft/DraftState` and
+the source of truth and survives reloads and deploys). `BanStatueService`
+holds statues and rejoin strikes in memory (cleared by restart or reload). `PauseGuard` holds
+the pause on / off flag (off after every load), blocked and unpause counts,
+and when each player was last told pausing is off. Otherwise reads and releases picks in `Draft/DraftState` and
 redraws boards with `Draft/DraftService.RedrawBoards`.
 
 ## Dependencies
@@ -114,7 +140,11 @@ redraws boards with `Draft/DraftService.RedrawBoards`.
   (Debug) and the client-command fallback (Information).
 - `players-YYYYMMDD.log`: deaths (Debug), status lines.
 - `access-YYYYMMDD.log`: file loads, list and mode changes, refused
-  connections (Warning, so also in master), access kicks.
+  connections and statue visits (Warning, so also in master), statues,
+  access kicks.
+- `pause-YYYYMMDD.log`: pause convars applied, each blocked pause request
+  (player, `Source=command|message`, `Detail=`), automatic unpause attempts
+  (Warning, so also in master).
 
 ## Lifecycle vs commands
 

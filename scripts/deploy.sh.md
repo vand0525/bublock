@@ -11,7 +11,8 @@ server's current copies first. The only push path for Bublock plugins.
 
 Without `--confirm` (or with an unknown argument) it prints usage and exits
 1 (nothing built or sent). `--no-backup` skips step 2; the stamp folder then
-only holds `uploaded.sha256` and `rollback.sh` has nothing to restore.
+only holds `uploaded.sha256` and `access.json`, and `rollback.sh` has
+nothing to restore.
 
 ## Steps
 
@@ -23,18 +24,23 @@ only holds `uploaded.sha256` and `rollback.sh` has nothing to restore.
    `/server/game/bin/win64/managed/plugins/`, downloads it to
    `deadworks/server-backups/<UTC stamp>/` (e.g. `20260927T011500Z`). A
    failed download aborts before any upload.
-3. Retired DLLs: deletes each `RETIRED_PLUGINS` DLL still in the plugins
+3. Pull: runs `pull-logs.sh` (server logs into `Bublock/logs/`,
+   `access.json` into `Bublock/server-data/`), then copies `access.json`
+   into the stamp folder, so every deploy keeps the ban list and whitelist
+   as they were. Runs even with `--no-backup`. A failed pull is a warning
+   and the deploy goes on.
+4. Retired DLLs: deletes each `RETIRED_PLUGINS` DLL still in the plugins
    folder, before uploading. A renamed plugin otherwise keeps loading under
    its old name and every command registers twice.
-4. Upload: `put` each Bublock DLL over the same name in the plugins folder,
+5. Upload: `put` each Bublock DLL over the same name in the plugins folder,
    appending its SHA-256 to `<stamp>/uploaded.sha256`.
-5. Retired logs: if a retired DLL was deleted, waits 5 s for it to unload,
+6. Retired logs: if a retired DLL was deleted, waits 5 s for it to unload,
    then removes `/server/game/bin/win64/bublock/logs/<retired>/` if present.
    A failure (files still open) is only a warning; rerunning deploy retries.
-6. Writes the stamp to `server-backups/latest` and prints the rollback
+7. Writes the stamp to `server-backups/latest` and prints the rollback
    command.
 
-Steps 3 and 5 do nothing once the old files are gone. `RETIRED_PLUGINS`
+Steps 4 and 6 do nothing once the old files are gone. `RETIRED_PLUGINS`
 must stay non-empty (macOS bash 3.2 with `set -u` rejects an empty array);
 delete the loop instead of emptying it.
 
@@ -43,7 +49,8 @@ delete the loop instead of emptying it.
 - Replaces the live plugins; Deadworks reloads changed DLLs from the plugins
   folder (the archive deploy used the same direct `put`).
 - Writes backups under `deadworks/server-backups/` (workspace root, outside
-  the Bublock git repo, so never committed).
+  the Bublock git repo, so never committed), including `access.json`.
+- Updates the local log and `server-data/` copies (`pull-logs.sh`).
 
 ## Requirements
 

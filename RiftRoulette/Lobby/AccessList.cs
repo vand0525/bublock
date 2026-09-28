@@ -21,18 +21,24 @@ public sealed class AccessList
 
   public SortedSet<ulong> Allowed { get; } = [];
 
+  public string? StatueModifier { get; set; }
+
   public AccessVerdict Check(ulong steamId, bool isAdmin) =>
     AccessRule.Check(Banned.Contains(steamId), Private, Allowed.Contains(steamId), isAdmin);
 
   public string ToJson() =>
-    JsonSerializer.Serialize(new AccessFile(Private, [.. Banned], [.. Allowed]), Options) + "\n";
+    JsonSerializer.Serialize(new AccessFile(Private, [.. Banned], [.. Allowed], StatueModifier), Options) + "\n";
 
   public static AccessList Parse(string json)
   {
     var file = JsonSerializer.Deserialize<AccessFile>(json, Options)
       ?? throw new JsonException("Access file is empty.");
 
-    var list = new AccessList { Private = file.Private };
+    var list = new AccessList
+    {
+      Private = file.Private,
+      StatueModifier = string.IsNullOrWhiteSpace(file.StatueModifier) ? null : file.StatueModifier.Trim()
+    };
 
     foreach (var steamId in file.Banned ?? [])
       list.Banned.Add(steamId);
@@ -43,5 +49,9 @@ public sealed class AccessList
     return list;
   }
 
-  internal sealed record AccessFile(bool Private, ulong[]? Banned, ulong[]? Allowed);
+  internal sealed record AccessFile(
+    bool Private,
+    ulong[]? Banned,
+    ulong[]? Allowed,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? StatueModifier);
 }

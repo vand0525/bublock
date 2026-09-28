@@ -72,6 +72,16 @@ else
   echo "Skipping backup (--no-backup)."
 fi
 
+echo "Pulling server logs and access.json before the upload ..."
+if "$ROOT/scripts/pull-logs.sh"; then
+  if [[ -f "$ROOT/server-data/access.json" ]]; then
+    cp "$ROOT/server-data/access.json" "$BACKUP_DIR/access.json"
+    echo "  saved access.json to $BACKUP_DIR"
+  fi
+else
+  echo "  warning: pull-logs.sh failed; logs and access.json were not saved locally" >&2
+fi
+
 RETIRED_REMOVED=false
 for plugin in "${RETIRED_PLUGINS[@]}"; do
   if sftp_run "cls -1 '$REMOTE_DIR/$plugin.dll'" >/dev/null 2>&1; then

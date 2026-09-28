@@ -8,7 +8,7 @@ Server-side discovery and diagnostics for Deadlock/Deadworks experimentation
 ## Current state
 
 - Single plugin class `DevToolsPlugin` under `Bublock/DevTools/`, derived
-  from the archive snapshot.
+  from the archive snapshot, plus the `ModifierProbe` service.
 - Compiles in `Bublock/Shared/` via `Shared.projitems`.
 - Builds with `Bublock.sln` / `scripts/update.sh`; ships as `DevTools.dll`
   (replaces the archive DLL of the same name on the server).
@@ -23,12 +23,17 @@ All admin-only (Debug-style diagnostics; no lifecycle caller):
 Every command is gated with `AdminCommand.Authorize` from `Bublock/Shared/`
 (null caller = server console, trusted). Results reply to the caller's
 console. Diagnostics log to `bublock/logs/DevTools/` (`master`, `commands`,
-`herowatch`).
+`herowatch`, `modifiers`).
+
+Passive probe: `ModifierProbe` (via `DevToolsPlugin.OnAddModifier`) logs
+each modifier name the first time the game adds it, to find names no data
+file lists (Vyper's Petrify for the banned-player statue).
 
 ## State
 
 Hero watcher flag/timer and the last entity snapshot, held on the plugin
-instance (lost on reload).
+instance (lost on reload); the modifier names seen (`ModifierProbe`, static,
+reset on load).
 
 ## Relation to lifecycle
 

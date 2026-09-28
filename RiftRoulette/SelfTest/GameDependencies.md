@@ -12,7 +12,10 @@ by `SelfTestTests`.
   through the console (`citadel_koth_warning_time`,
   `citadel_koth_early_warning_time`, `citadel_player_override_spawn_time`,
   which `ConVar.Find` may not see), `citadel_active_lane` and
-  `citadel_crate_disable_early_spawn` (may not exist); `Fail` otherwise.
+  `citadel_crate_disable_early_spawn` (may not exist), and the three pause
+  convars (`citadel_allow_pausing`, `citadel_allow_pause_in_match`,
+  `citadel_pause_allow_in_pregame`, expected 0; a WARN on value after
+  `/pause_allow on` is expected); `Fail` otherwise.
 - `RequiredEntities`: must exist (`citadel_gamerules`).
 - `KeptEntities`: map entities we rely on staying (`info_super_trooper_spawn`,
   `item_crate_spawn`, the two shop triggers, `info_koth_spawn_location`).

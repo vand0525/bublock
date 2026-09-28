@@ -6,9 +6,9 @@ public static class Participants
 {
   public static List<CCitadelPlayerController> Humans() =>
     Players.GetAll()
-      .Where(player => !player.IsBot && !AdminSeat.IsSeated(player.PlayerSteamId))
+      .Where(IsParticipant)
       .ToList();
 
   public static bool IsParticipant(CCitadelPlayerController player) =>
-    !player.IsBot && !AdminSeat.IsSeated(player.PlayerSteamId);
+    !player.IsBot && !AdminSeat.IsSeated(player.PlayerSteamId) && !BanStatueService.IsStatue(player.PlayerSteamId);
 }

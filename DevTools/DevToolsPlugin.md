@@ -36,6 +36,12 @@ server console for a null caller. The archive printed `entity_info`,
 with `Console.WriteLine` (some with the old `[Rift Wars]` prefix); every line
 now uses `[DevTools]`.
 
+## Hooks
+
+| Hook | Behavior |
+|---|---|
+| `OnAddModifier` | `ModifierProbe.Observe(args)` (first sighting of each modifier name to `modifiers-*.log`); always `HookResult.Continue` |
+
 ## Hero watcher
 
 - Enabling cancels any previous timer, stores the caller's `EntityIndex`, and
@@ -55,6 +61,7 @@ Folder: `bublock/logs/DevTools/`.
 | Loaded (`Reload=`), initialized | `master` | `[DevTools]` |
 | Admin command accepted / rejected, each `ent_remove` removal | `commands` | `[DevTools.Commands]` |
 | Hero watcher enabled / disabled / hero change | `herowatch` | `[DevTools.HeroWatch]` |
+| First sighting of each modifier name | `modifiers` | `[DevTools.Modifiers]` |
 
 ## Dangerous constraints
 

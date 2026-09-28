@@ -15,6 +15,8 @@ public class LobbyPlugin : DeadworksPluginBase
 
   private static readonly HashSet<string> SeenAbilities = [];
 
+  private readonly List<IHandle> _pauseHooks = [];
+
   public override string Name => "Rift Roulette Lobby";
 
   public override void OnLoad(bool isReload)
@@ -23,15 +25,54 @@ public class LobbyPlugin : DeadworksPluginBase
     {
       LobbyService.ApplyServerConvars();
       AdminSeat.Restore();
+      BanStatueService.KickConnectedBanned();
     }
+
+    HookPauseMessage<CCLCMsg_RequestPause>();
+    HookPauseMessage<CCitadelClientMsg_Pause>();
 
     Timer.Every(StreamCam.TickSeconds.Seconds(), () => StreamCam.Tick(Timer));
     Timer.Every(AutoStartService.WaitingReminderSeconds.Seconds(), () => AutoStartService.RemindWaiting());
+    Timer.Every(BanStatueService.SustainSeconds.Seconds(), BanStatueService.Sustain);
+  }
+
+  public override void OnUnload()
+  {
+    foreach (var hook in _pauseHooks)
+      hook.Cancel();
+
+    _pauseHooks.Clear();
   }
 
   public override void OnStartupServer()
   {
     LobbyService.ApplyServerConvars();
+  }
+
+  public override void OnGameFrame(bool simulating, bool firstTick, bool lastTick)
+  {
+    PauseGuard.Tick();
+  }
+
+  public override HookResult OnClientConCommand(ClientConCommandEvent args)
+  {
+    if (!PauseRule.IsPauseCommand(args.Command) || !PauseGuard.Block(args.Controller, "command", args.Command))
+      return HookResult.Continue;
+
+    return HookResult.Stop;
+  }
+
+  private void HookPauseMessage<T>() where T : Google.Protobuf.IMessage<T>, new()
+  {
+    try
+    {
+      _pauseHooks.Add(NetMessages.HookIncoming<T>(context =>
+        PauseGuard.Block(context.SenderSlot, "message", typeof(T).Name) ? HookResult.Stop : HookResult.Continue));
+    }
+    catch (InvalidOperationException exception)
+    {
+      LobbyLog.Warn("Pause message hook not registered Message={Message} Reason={Reason}", typeof(T).Name, exception.Message);
+    }
   }
 
   public override bool OnClientConnect(ClientConnectEvent args)
@@ -48,7 +89,9 @@ public class LobbyPlugin : DeadworksPluginBase
     if (player == null)
       return;
 
-    if (AdminSeat.SeatOnJoin(player))
+    if (BanStatueService.TakeArrival(player.PlayerSteamId))
+      BanStatueService.Petrify(player, BanStatueService.RejoinKickSeconds, liveBan: false, Timer);
+    else if (AdminSeat.SeatOnJoin(player))
       AdminSeat.Sit(player, Timer);
     else
       LobbyService.AdmitPlayer(player, Timer);
@@ -68,7 +111,7 @@ public class LobbyPlugin : DeadworksPluginBase
     EventCounters.Hit("player_spawn");
     var player = args.UseridController?.As<CCitadelPlayerController>();
 
-    if (player == null || !Participants.IsParticipant(player))
+    if (player == null || (!Participants.IsParticipant(player) && !BanStatueService.IsStatue(player.PlayerSteamId)))
       return HookResult.Continue;
 
     WatchGuard.Grace(player.PlayerSteamId);
@@ -193,6 +236,31 @@ public class LobbyPlugin : DeadworksPluginBase
 
     LobbyService.ApplyServerConvars(ExecutionMode.Debug);
     AdminCommand.Reply(caller, "[Lobby] Server convars applied");
+  }
+
+  [Command("pause_allow", Description = "Show whether players can pause, or set it: pause_allow [on|off]")]
+  public void CmdPauseAllow(CCitadelPlayerController? caller, string state = "")
+  {
+    AdminCommand.Authorize(caller, LobbyLog, "pause_allow");
+
+    switch (state.Trim().ToLowerInvariant())
+    {
+      case "":
+        foreach (var line in PauseGuard.Describe())
+          AdminCommand.Reply(caller, $"[Lobby] {line}");
+        return;
+
+      case "on" or "1":
+        AdminCommand.Reply(caller, $"[Lobby] {PauseGuard.SetAllowed(true, ExecutionMode.Debug)}");
+        return;
+
+      case "off" or "0":
+        AdminCommand.Reply(caller, $"[Lobby] {PauseGuard.SetAllowed(false, ExecutionMode.Debug)}");
+        return;
+
+      default:
+        throw new CommandException("Usage: pause_allow [on|off]");
+    }
   }
 
   [Command("seat_spec", ConsoleOnly = true, Description = "Admin seat: move the admin to spectator, any time; console only (dw_seat_spec)")]

@@ -14,10 +14,12 @@ commands. Ops live on `AccessService`. The connect gate itself stays in
 
 | Command | Does |
 |---|---|
-| `/player_ban <slot>` | Bans the connected player in `slot` (`AccessService.Ban`), then `LobbyService.KickPlayer`. Refuses an empty slot, a bot, or the caller |
-| `/ban_add <steamid>` | `AccessService.Ban`, then `KickDenied` (a banned player who is connected is kicked) |
-| `/ban_remove <steamid>` | `AccessService.Unban` |
-| `/ban_list` | `AccessService.DescribeBanned` |
+| `/player_ban <slot>` | Bans the connected player in `slot` (`AccessService.Ban`), then `PetrifyBanned` (statue, kicked in 30 s). Refuses an empty slot, a bot, or the caller |
+| `/ban_add <steamid>` | `AccessService.Ban`, then `PetrifyBanned` (a banned player who is connected becomes a statue and is kicked in 30 s) |
+| `/ban_remove <steamid>` | `AccessService.Unban` (rejoin strikes stay until restart but no longer matter) |
+| `/ban_list` | `AccessService.DescribeBanned` (with rejoin strikes and lockout) |
+| `/ban_modifier` | Shows the statue modifier (`none (restraint only)` when unset) |
+| `/ban_modifier <name>` / `none` | `AccessService.SetStatueModifier` (saved in `access.json`; `none` clears it) |
 | `/allow_add <steamid>` | `AccessService.Allow` (whitelist for private mode) |
 | `/allow_remove <steamid>` | `AccessService.Disallow` (does not kick) |
 | `/allow_list` | `AccessService.DescribeAllowed` |

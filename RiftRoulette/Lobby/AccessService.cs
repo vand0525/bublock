@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Bublock.Shared;
 using DeadworksManaged.Api;
+using ITimer = DeadworksManaged.Api.ITimer;
 
 namespace RiftRoulette.Lobby;
 
@@ -70,15 +71,15 @@ public static class AccessService
     switch (verdict)
     {
       case AccessVerdict.Banned:
-        Log.Warn("Connection refused, banned Name={Name} SteamId={SteamId}", name, steamId);
-        break;
+        return BanStatueService.AdmitBanned(steamId, name);
 
       case AccessVerdict.Private:
         Log.Warn("Connection refused, server is private Name={Name} SteamId={SteamId}", name, steamId);
-        break;
-    }
+        return false;
 
-    return verdict == AccessVerdict.Allowed;
+      default:
+        return true;
+    }
   }
 
   public static AccessVerdict Check(CCitadelPlayerController player) =>
@@ -114,6 +115,44 @@ public static class AccessService
       $"Server was already {name}.");
   }
 
+  public static string SetStatueModifier(string? name, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    var modifier = string.IsNullOrWhiteSpace(name) ? null : name.Trim();
+    var shown = modifier ?? "none";
+
+    return Change(
+      list =>
+      {
+        var changed = list.StatueModifier != modifier;
+        list.StatueModifier = modifier;
+        return changed;
+      },
+      mode,
+      "Statue modifier set",
+      shown,
+      $"Statue modifier is {shown}.",
+      $"Statue modifier was already {shown}.");
+  }
+
+  // Banned players still in the game become statues and are kicked after LiveBanKickSeconds.
+  public static IReadOnlyList<string> PetrifyBanned(ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    var list = Load();
+    var petrified = new List<string>();
+
+    foreach (var player in Players.GetAll().Where(player => !player.IsBot && list.Banned.Contains(player.PlayerSteamId)).ToList())
+    {
+      if (BanStatueService.IsStatue(player.PlayerSteamId))
+        continue;
+
+      BanStatueService.Petrify(player, BanStatueService.LiveBanKickSeconds, liveBan: true, timer, mode);
+      petrified.Add(player.PlayerName);
+    }
+
+    return petrified;
+  }
+
+  // Banned players are left to PetrifyBanned; this kicks only players shut out by private mode.
   public static IReadOnlyList<string> KickDenied(ExecutionMode mode = ExecutionMode.Clean)
   {
     var list = Load();
@@ -123,7 +162,7 @@ public static class AccessService
     {
       var verdict = list.Check(player.PlayerSteamId, AdminAuth.IsAuthorized(player.PlayerSteamId));
 
-      if (verdict == AccessVerdict.Allowed)
+      if (verdict != AccessVerdict.Private)
         continue;
 
       Log.WithMode(mode).Info(player.ToPlayerRef(), "Kicking player without access Verdict={Verdict}", verdict);
@@ -141,15 +180,16 @@ public static class AccessService
 
     return
     [
-      $"Mode={(list.Private ? "private" : "open")} | File={FilePath}",
+      $"Mode={(list.Private ? "private" : "open")} | StatueModifier={list.StatueModifier ?? "none"} | File={FilePath}",
       $"Banned ({list.Banned.Count}): {Join(list.Banned)}",
       $"Allowed ({list.Allowed.Count}): {Join(list.Allowed)}"
     ];
   }
 
-  public static IReadOnlyList<string> DescribeBanned() => DescribeIds("Banned", Load().Banned);
+  public static IReadOnlyList<string> DescribeBanned() =>
+    DescribeIds("Banned", Load().Banned, steamId => $" | {BanStatueService.Describe(steamId)}");
 
-  public static IReadOnlyList<string> DescribeAllowed() => DescribeIds("Allowed", Load().Allowed);
+  public static IReadOnlyList<string> DescribeAllowed() => DescribeIds("Allowed", Load().Allowed, _ => "");
 
   private static string Change(
     Func<AccessList, bool> change,
@@ -196,7 +236,7 @@ public static class AccessService
     }
   }
 
-  private static IReadOnlyList<string> DescribeIds(string title, IReadOnlyCollection<ulong> ids)
+  private static IReadOnlyList<string> DescribeIds(string title, IReadOnlyCollection<ulong> ids, Func<ulong, string> suffix)
   {
     var connected = Players.GetAll()
       .Where(player => !player.IsBot)
@@ -206,7 +246,7 @@ public static class AccessService
     var lines = new List<string> { $"{title} ({ids.Count})" };
 
     foreach (var steamId in ids)
-      lines.Add(connected.TryGetValue(steamId, out var name) ? $"{steamId} ({name}, connected)" : steamId.ToString());
+      lines.Add((connected.TryGetValue(steamId, out var name) ? $"{steamId} ({name}, connected)" : steamId.ToString()) + suffix(steamId));
 
     return lines;
   }

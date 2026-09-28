@@ -8,13 +8,17 @@ lifecycle, server setup, and the lobby commands. Ops live on
 
 | Hook | Does |
 |---|---|
-| `OnLoad(isReload: true)` | `LobbyService.ApplyServerConvars()` (a hot reload skips `OnStartupServer`; keeps `maxplayers 13` and the buying convar right after an upload), then `AdminSeat.Restore()` (an admin still on the observer pawn goes back into the seat) |
-| `OnLoad` (every load) | `Timer.Every(StreamCam.TickSeconds, StreamCam.Tick)`: the stream camera check every 2 s, and `Timer.Every(AutoStartService.WaitingReminderSeconds, RemindWaiting)`: the waiting chat line every 30 s while a lone player waits for a match (timers die on hot reload, so both start here) |
+| `OnLoad(isReload: true)` | `LobbyService.ApplyServerConvars()` (a hot reload skips `OnStartupServer`; keeps `maxplayers 13` and the buying convar right after an upload), then `AdminSeat.Restore()` (an admin still on the observer pawn goes back into the seat), then `BanStatueService.KickConnectedBanned()` (the reload dropped statue state and kick timers, so banned players still connected are kicked) |
+| `OnLoad` (every load) | `Timer.Every(StreamCam.TickSeconds, StreamCam.Tick)`: the stream camera check every 2 s; `Timer.Every(AutoStartService.WaitingReminderSeconds, RemindWaiting)`: the waiting chat line every 30 s while a lone player waits for a match; `Timer.Every(BanStatueService.SustainSeconds, Sustain)`: keeps statues restrained and re-adds the statue modifier every 1 s (timers die on hot reload, so all start here) |
+| `OnLoad` (every load) | Hooks the two incoming pause net messages, `CCLCMsg_RequestPause` and `CCitadelClientMsg_Pause` (`NetMessages.HookIncoming`); each returns `Stop` when `PauseGuard.Block(SenderSlot, "message", <type>)` says so. A message type without a registered ID logs a Warning in `Lobby` and is skipped. The handles are kept for `OnUnload` |
+| `OnUnload` | Cancels the pause message hooks, so a hot reload does not stack them |
 | `OnStartupServer` | `LobbyService.ApplyServerConvars()` |
-| `OnClientConnect` | Returns `AccessService.AllowConnect(SteamId, Name) && AdminSeat.AllowConnect(SteamId, Name)`. Access first: banned IDs are refused, and in private mode anyone neither whitelisted nor admin. Then the seat rule: `false` refuses a non-admin once 12 participants are playing (the 13th connection is the admin seat) |
-| `OnClientFullConnect` | When the controller is present: every admin is seated as a spectator (`AdminSeat.Sit`; `dw_seat_play` to play); everyone else goes through `LobbyService.AdmitPlayer(controller, Timer)` (no bot check, as the archive), which places the player on the smaller team and checks auto-start 2 s later |
+| `OnGameFrame` | `PauseGuard.Tick()` every frame, simulating or not (a paused game does not simulate): the automatic unpause while pausing is off |
+| `OnClientConCommand` | A `PauseRule.IsPauseCommand` command (`pause`, `setpause`, `citadel_pause`, `citadel_toggle_server_pause`) returns `Stop` when `PauseGuard.Block(controller, "command", <name>)` says so; everything else `Continue` |
+| `OnClientConnect` | Returns `AccessService.AllowConnect(SteamId, Name) && AdminSeat.AllowConnect(SteamId, Name)`. Access first: a banned ID gets a statue visit or is refused inside a rejoin lockout (`BanStatueService.AdmitBanned`), and in private mode anyone neither whitelisted nor admin is refused. Then the seat rule: `false` refuses a non-admin once 12 participants are playing (the 13th connection is the admin seat) |
+| `OnClientFullConnect` | When the controller is present: a banned player let in at connect (`BanStatueService.TakeArrival`) becomes a statue and is kicked 10 s later (`Petrify(RejoinKickSeconds, liveBan: false)`); otherwise every admin is seated as a spectator (`AdminSeat.Sit`; `dw_seat_play` to play); everyone else goes through `LobbyService.AdmitPlayer(controller, Timer)` (no bot check, as the archive), which places the player on the smaller team and checks auto-start 2 s later |
 | `OnClientDisconnect` | `LobbyService.RemovePlayer(controller, Timer)` when the controller is present (may auto-end the match, never auto-starts one) |
-| `player_spawn` | Skips bots and seated admins (`Participants.IsParticipant`); gives `WatchGuard.Grace` at once (a respawn at base is not a rescue), then on the next tick `WatchSpot.SendUp(player)`: restrained and teleported to the watch spot above the rift being fought, or the next one when idle (archive `ReturnToDraftOnSpawn`; stays here because it needs `Timer`) |
+| `player_spawn` | Skips bots and seated admins (`Participants.IsParticipant`, but statues pass so a respawned statue goes back up); gives `WatchGuard.Grace` at once (a respawn at base is not a rescue), then on the next tick `WatchSpot.SendUp(player)`: restrained and teleported to the watch spot above the rift being fought, or the next one when idle (archive `ReturnToDraftOnSpawn`; stays here because it needs `Timer`) |
 | `player_death` | `LobbyService.LogDeath` when controller and pawn are present; then `StreamCam.OnDeath(victim, attacker, Timer)` (the camera cuts to the killer if the admin was watching the victim) |
 | `player_used_ability` | Resolves the caster from `Player` (or `Caster`) pawn's controller. The first time each ability name is seen since load it logs Information `Ability name seen for the first time since load Ability= Big= Caster=` (confirms the event fires and shows real names); every use is Trace. A `BigUlts.IsBig` ability cast by a participant goes to `StreamCam.OnBigUlt` |
 
@@ -29,6 +33,7 @@ lifecycle, server setup, and the lobby commands. Ops live on
 | `/player_kick <slot>` | admin | `LobbyService.KickPlayer`; error if the slot is empty |
 | `/player_team <slot> <sapphire\|amber>` | admin | `LobbyService.SetTeam`; errors for an unknown team, empty slot, or a player with a pick |
 | `/lobby_setup` | admin | `LobbyService.ApplyServerConvars(Debug)` |
+| `/pause_allow [on\|off]` | admin | No argument: `PauseGuard.Describe` (on/off, paused state, counts). `on` / `off` (or `1` / `0`): `PauseGuard.SetAllowed(Debug)`, which sets the pause convars and writes a master line; error for another value. Resets to off on every load |
 | `dw_seat_spec` | admin, console only (`ConsoleOnly`; chat `/seat_spec` does not run) | `AdminSeat.Sit`: the admin moves to the spectator seat (`MakeObserver` on the next tick); works any time, including mid-round |
 | `/seat_play` | admin | `AdminSeat.Stand`: the admin goes back onto a team through `AdmitPlayer`; refused when 12 are playing |
 | `/seat_status` | admin | `AdminSeat.Describe` |
@@ -59,5 +64,6 @@ reply with `AdminCommand.Reply`. Errors use `CommandException`.
   hook still fires after a game update.
 
 - Hooks never throw; missing controllers or pawns are skipped.
-- State: only `SeenAbilities` (ability names already logged since load);
-  picks live in `Draft/DraftState`, camera state in `StreamCam`.
+- State: `SeenAbilities` (ability names already logged since load) and the
+  pause message hook handles; picks live in `Draft/DraftState`, camera state
+  in `StreamCam`, pause state in `PauseGuard`.

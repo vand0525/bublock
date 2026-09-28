@@ -412,6 +412,13 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **To confirm in game:** that `Stop` blocks turret damage (self-test counter `damage_blocked_restrained`), and whether turrets honor `IgnoredByNpcTargeting`.
 - **Link / path:** `Bublock/RiftRoulette/GameLoop/GameLoopPlugin.cs`, `Bublock/Modules/Restraint/RestraintService.cs`
 
+### 2026-09-27 — Finding modifier names (OnAddModifier)
+
+- **Why hard / useful:** Ability modifiers (Vyper's Petrify for the banned-player statue) are in no data we have: not the API assets, the schema snapshot or the cvar list. Guessing names is not allowed.
+- **Verified fact (decompiled API):** `PluginBase.OnAddModifier(AddModifierEvent args)` returns `HookResult`. `args.ModifierVData` is `CCitadelModifierVData` (base `CModifierVData`: `Name`, `Duration`, `IsHidden`); `args.ModifierProperty.Owner` is the entity getting it; also `Caster`, `Ability`, `AbilityHandle`, `Team`, `KeyValues`. `pawn.AddModifier(name, KeyValues3? kv, caster, ability, team)` adds one by name (`kv.SetFloat("duration", s)`). `CModifierProperty.HasModifier(name)` checks it.
+- **Used as:** DevTools `ModifierProbe` logs each name once per load to `modifiers-*.log`; cast the ability in game, then read the name. Deadlock API asset ids: Petrify is `ability_viper_ult`, Rabbit Hex `ability_magician_animalcurse` (`api.deadlock-api.com/v1/assets/items`).
+- **Link / path:** `Bublock/DevTools/ModifierProbe.cs`, `Bublock/RiftRoulette/Lobby/BanStatueService.cs`
+
 ### 2026-09-27 — Reading player chat (OnChatMessage)
 
 - **Why hard / useful:** Lets players act by typing a plain word (betting: `sapphire` / `amber`) instead of a slash command. Not in the workspace docs.
@@ -437,3 +444,12 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Used as:** `Modules/Loadout/Progression` (table), `LoadoutPlanner.AbilityPrefix` (build order walked against the unlock and point budgets), `LoadoutService.Apply` (level from the item value, prefix bits, both wallets 0), `GameLoop/SoulRule` (ability gains blocked in Random and 1v1 matches).
 - **To confirm in game:** partial masks (`0b11`, `0b111`) show the right tiers; the boon stats follow `Level` after the `ECheats` recalc; the `ability_blocked_*` self-test counters show which sources the game sends.
 - **Link / path:** `Bublock/Modules/Loadout/Progression.cs`, `Bublock/Modules/Loadout/LoadoutPlanner.cs`, `Bublock/Modules/Loadout/LoadoutService.cs`
+
+### 2026-09-27 — Turning pausing off (convars, commands, net messages)
+
+- **Why hard / useful:** A player kept pausing the lobby. The pause convars are all `devonly` (hidden from `find`), and the pause button may send a net message instead of a console command, so blocking one path alone may not be enough.
+- **Verified fact (cvarlist):** `citadel_allow_pausing` (`devonly, sv, cl, rep`, "Determines if pausing is enabled"), `citadel_allow_pause_in_match` ("Allow players to pause in matchmade games"), `citadel_pause_allow_in_pregame` (default false). Do not set `citadel_pause_count` or `citadel_num_team_pauses_allowed` to 0: 0 means unlimited. Commands: `pause` ("Toggle the server pause state"), `setpause`, `citadel_pause` (client "Send a game pause request"), `citadel_toggle_server_pause` (devonly). There is no `unpause` command in Deadlock's list.
+- **Verified fact (decompiled API):** `NetMessages.HookIncoming<T>(Func<IncomingMessageContext<T>, HookResult>)` returns an `IHandle` (`Cancel()`); the context has `Message`, `SenderSlot`, `MessageId`, and `HookResult.Stop` drops the message. It throws `InvalidOperationException` when `T` has no registered ID. Pause messages: `CCLCMsg_RequestPause` (`clc_RequestPause` = 33, `PauseType` `RequestPause_t` pause / unpause / toggle, `PauseGroup`) and `CCitadelClientMsg_Pause` (`CITADEL_CM_Pause` = 1008). Game event `citadel_pause_event` (`CitadelPauseEventEvent`: `userid`, `value`, `message`). `GameRules.GamePaused` reads `CGameRules.m_bGamePaused`, `GameRules.ServerPaused` reads `CCitadelGameRules.m_bServerPaused`; `GameRules.GameClock` subtracts paused ticks. `DeadworksPluginBase.OnUnload()` exists for cancelling hooks.
+- **Used as:** `Lobby/PauseGuard` (convars 0, `OnClientConCommand` and both message hooks return `Stop`, server `pause` toggle when `GamePaused` anyway), `/pause_allow`.
+- **To confirm in game:** which path the pause button takes (`Source=` in `pause-*.log`), and that the server `pause` toggle unpauses (`Game paused while pausing is off` Warnings should not repeat).
+- **Link / path:** `Bublock/RiftRoulette/Lobby/PauseGuard.cs`, `Bublock/RiftRoulette/Lobby/PauseRule.cs`, `Bublock/RiftRoulette/Lobby/LobbyPlugin.cs`
