@@ -9,11 +9,17 @@ Shows no banner (players don't need one).
 
 - `OnLoad(isReload)`: master `Loaded Reload=`. On a hot reload it also runs
   the startup work (`RunStartup`), because a reload does not call
-  `OnStartupServer` and drops the pending 2 s timer of the previous load.
+  `OnStartupServer` and drops the pending timers of the previous load.
 - `OnStartupServer` (Clean): `RunStartup`.
-- `RunStartup`: `ApplyConvars()` immediately, then after
-  `Timer.Once(2.Seconds())` `RemoveMapEntities()` and master
-  `Map cleanup complete Reload=... Removed=[...] Disabled=[...]`. No banner.
+- `RunStartup`: `ApplyConvars()` immediately, then `RemoveMapEntities()`
+  at 2, 10 and 30 s (`PassSeconds`). Master
+  `Map cleanup complete Reload=... Pass=<seconds> Removed=[...] Disabled=[...]`
+  for the first pass and for any later pass that removed something. The
+  later passes exist because after a map reload (`changelevel`, e.g.
+  `/restart_now`) the 2 s pass ran before the lane guardians
+  (`npc_trooper_boss`) spawned and left 6 standing; on a cold start
+  loading delays the timers, so 2 s was enough. Every pass is idempotent.
+  No banner.
 
 ## Commands
 

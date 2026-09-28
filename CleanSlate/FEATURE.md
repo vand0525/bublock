@@ -23,7 +23,8 @@ Roulette) can run on a cleaner map.
 ## Composition
 
 - Lifecycle: `OnStartupServer`, and `OnLoad(isReload: true)` after a hot
-  reload, run both in Clean mode (removals 2 s later). No banner.
+  reload, run both in Clean mode (removals at 2, 10 and 30 s: after a map
+  reload the lane guardians spawn later than 2 s). No banner.
 - Admin: `/cleanup_run` runs both immediately in Debug mode.
 
 ## State

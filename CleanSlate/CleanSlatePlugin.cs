@@ -36,15 +36,22 @@ public class CleanSlatePlugin : DeadworksPluginBase
             $"[CleanSlate] Convars applied, {result.RemovedCount} entities removed, {result.DisabledCount} disabled");
     }
 
+    // After a changelevel the lane guardians (npc_trooper_boss) spawn later than 2 s, so later passes catch them.
+    public static readonly int[] PassSeconds = [2, 10, 30];
+
     private void RunStartup(bool isReload)
     {
         CleanSlateService.ApplyConvars();
 
-        Timer.Once(2.Seconds(), () =>
+        foreach (var seconds in PassSeconds)
         {
-            var result = CleanSlateService.RemoveMapEntities();
+            Timer.Once(seconds.Seconds(), () =>
+            {
+                var result = CleanSlateService.RemoveMapEntities();
 
-            BublockLog.Master.Info("Map cleanup complete Reload={Reload} {Summary}", isReload, result.Describe());
-        });
+                if (seconds == PassSeconds[0] || result.RemovedCount > 0)
+                    BublockLog.Master.Info("Map cleanup complete Reload={Reload} Pass={Pass} {Summary}", isReload, seconds, result.Describe());
+            });
+        }
     }
 }
