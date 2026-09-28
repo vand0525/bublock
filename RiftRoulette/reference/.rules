@@ -225,7 +225,13 @@ Assume the git repo is rooted at `Bublock/`.
   alone (the hero pawn stays and the client drops). Every player list the game uses
   (teams, heroes, rounds, stats, auto-start) comes from
   `Lobby/Participants.Humans()`, which leaves out bots and seated admins;
-  never build a new ad-hoc human list.
+  never build a new ad-hoc human list. A seated admin has two states:
+  spectating while any participant is connected, roaming while none are
+  (`AdminSeatRule.ShouldRoam`): Abrams on Amber at their watch slot, not
+  restrained, invisible (`modifier_invis`, one 3600 s modifier put back
+  when it runs out and on respawn / reload, never every frame). Roaming
+  admins stay seated (never participants). `AdminSeat.SyncSoon` switches
+  2 s after a join / leave / statue (never inside `OnClientFullConnect`).
 - Hero mode `duel` (`/match_mode 1v1`) copies one player's exact
   hero state (`Modules/Loadout` `LoadoutSnapshot`) onto both players with
   `/duel_copy <slot>` and locks them to it (`Lobby/HeroLock`, one instance
@@ -314,7 +320,7 @@ Assume the git repo is rooted at `Bublock/`.
   crashed): no camera call on an update where the view moved over 50
   units or 3 degrees (`SpectateRule.HandMoved`). Never use
   `IsValidObserverTarget` (it rejects team 3, Sapphire). A hot reload
-  re-seats an admin still on the observer pawn (`AdminSeat.Restore`).
+  re-seats every connected admin (`AdminSeat.Restore`).
   Never follow a hero spawned less than 5 s ago (`StreamCam.FollowGrace`).
 
 ---

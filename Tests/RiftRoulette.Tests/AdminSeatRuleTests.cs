@@ -31,6 +31,15 @@ public class AdminSeatRuleTests
     Assert.Equal(expected, AdminSeatRule.SeatOnJoin(isAdmin));
   }
 
+  [Theory]
+  [InlineData(0, true)]
+  [InlineData(1, false)]
+  [InlineData(12, false)]
+  public void ShouldRoam_only_on_an_empty_server(int participants, bool expected)
+  {
+    Assert.Equal(expected, AdminSeatRule.ShouldRoam(participants));
+  }
+
   [Fact]
   public void Custom_cap_is_respected()
   {

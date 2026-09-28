@@ -47,8 +47,16 @@ fly cam, C). Moving the camera after that park and letting go saves the
 new framing (`StreamFramingStore`, `bublock/streamcam.json`), mirrored to
 the other side. It never moves the camera while the admin moves it, and
 never follows a hero spawned less than 5 s ago.
-Camera calls go through `Modules/Spectate`. A hot reload re-seats an admin
-still on the observer pawn (`AdminSeat.Restore`).
+Camera calls go through `Modules/Spectate`. A hot reload re-seats every
+connected admin (`AdminSeat.Restore`).
+
+Admin roaming: while no participants are connected, the seated admin plays
+an invisible Abrams (`modifier_invis`, 3600 s, put back when it runs out
+and on respawn) at their watch-spot slot in front of the boards, not
+restrained. 2 s after a participant joins they switch to spectating (the
+stream camera); 2 s after the last participant leaves (or turns to stone)
+they roam again. Roaming admins stay seated, so they are never
+participants.
 
 Join access: `bublock/access.json` on the server (next to `bublock/logs/`)
 holds banned and whitelisted (`allowed`) Steam64 IDs and the open / private

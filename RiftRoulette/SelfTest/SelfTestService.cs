@@ -72,6 +72,7 @@ public static class SelfTestService
     });
 
     WatchSpot.SendUp(player, mode);
+    var cloaked = RestraintService.AddModifier(pawn, AdminSeat.RoamModifier, (float)LiveCheckSeconds + 1f);
     Log.WithMode(mode).Info(player.ToPlayerRef(), "Live self-test started Target={Target} WasRestrained={WasRestrained}", target.Position, wasRestrained);
 
     timer.Once(LiveCheckSeconds.Seconds(), () =>
@@ -86,6 +87,10 @@ public static class SelfTestService
 
       Guard(results, "Teleport", () => CheckLanding(current, target));
       Guard(results, "Restraint", () => CheckRestraint(current));
+      Guard(results, "Roam", () => CheckRoamCloak(current, cloaked));
+
+      if (!AdminSeat.IsRoaming(steamId))
+        current.GetHeroPawn()?.RemoveModifier(AdminSeat.RoamModifier);
 
       if (!wasRestrained)
         RestraintService.Release(current, mode);
@@ -355,6 +360,15 @@ public static class SelfTestService
 
     foreach (var state in RestraintService.States)
       yield return new CheckResult("Restraint", state.ToString(), states.HasModifierState(state) ? CheckStatus.Pass : CheckStatus.Fail);
+  }
+
+  private static IEnumerable<CheckResult> CheckRoamCloak(CCitadelPlayerController player, bool added)
+  {
+    var active = player.GetHeroPawn()?.ModifierProp?.HasModifier(AdminSeat.RoamModifier) ?? false;
+
+    yield return added && active
+      ? new CheckResult("Roam", AdminSeat.RoamModifier, CheckStatus.Pass, "added and active; the roaming admin's cloak")
+      : new CheckResult("Roam", AdminSeat.RoamModifier, CheckStatus.Fail, $"added={added} active={active}; the roaming admin would not be invisible");
   }
 
   private static bool HasFloor(Vector3 position) =>

@@ -11,5 +11,6 @@ counting the player being decided about.
 | `CanConnect(isAdmin, playing, cap = 12)` | Admins always; anyone else only while `playing < cap` | bool |
 | `CanStand(playing, cap = 12)` | Leaving the seat to play needs `playing < cap` | bool |
 | `SeatOnJoin(isAdmin)` | Every admin starts in the seat (spectating) on connect, so an admin joining never changes the teams; `dw_seat_play` joins a team | bool |
+| `ShouldRoam(participants)` | A seated admin roams (free Abrams at the watch spot) only while no participants are connected; otherwise spectates | bool |
 
 `PlayerCap` = 12 (6 per team, `citadel_team_size 6`).

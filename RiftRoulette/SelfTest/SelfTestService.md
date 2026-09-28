@@ -37,11 +37,15 @@ Otherwise:
 2. Hud: sends a `Self-test` banner to the player (PASS means sent; confirm on
    screen).
 3. `WatchSpot.SendUp(player)` (teleport to the player's own watch spot +
-   restrain), remembering whether the player was already restrained.
+   restrain), remembering whether the player was already restrained. Adds
+   the roaming admin's cloak (`AdminSeat.RoamModifier`, `modifier_invis`)
+   for 2 s.
 4. After 1 s: Teleport (pawn within 32 units of the spot), Restraint
    (`modifier_citadel_silenced` present, each `RestraintService.States` state
-   set). Releases the restraint again if the player was not restrained
-   before. Logs the results like `Run` and replies every line to the caller.
+   set), Roam (the cloak was added and is active). Releases the restraint
+   again if the player was not restrained before, and removes the cloak
+   unless the player is a roaming admin. Logs the results like `Run` and
+   replies every line to the caller.
 
 ## Invariants and constraints
 

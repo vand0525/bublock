@@ -231,7 +231,7 @@ position, entity index.
 - **Calls:** `AdminSeat.Sit` (→ `DraftState.Release`, `RandomModeService.Forget`, `DuelService.Forget`, `RestraintService.Release`, `WatchGuard.Forget`, `StatsService.RefreshBoards`, `AutoStartService.Check`; next tick `ChangeTeam(1, false)` + `MakeObserver()`)
 - **Mode:** Debug
 - **Side effects:** works at any time, also during a rift round. Moves the admin to the spectator side, outside Sapphire and Amber, and removes their hero pawn (observer camera). They stop counting for teams, auto-start, stats, Random mode and 1v1; a running match may auto-end if fewer than 2 players remain, and the teams are evened at the next Random mode intermission. Logs `Admin seat taken, spectating next tick Phase=...`, then `Admin spectating TeamNum=... HeroPawn=... Observer=...`, and a master line
-- **Notes:** `ChangeTeam(1)` alone leaves the hero pawn alive and dropped the admin's client 12-23 s later (two crashes on 2026-09-27); `MakeObserver` prevents that. Spectators cannot type in game chat, so getting back out needs the console. Every admin is seated automatically on connect (use `dw_seat_play` to play)
+- **Notes:** `ChangeTeam(1)` alone leaves the hero pawn alive and dropped the admin's client 12-23 s later (two crashes on 2026-09-27); `MakeObserver` prevents that. Spectators cannot type in game chat, so getting back out needs the console. Every admin is seated automatically on connect (use `dw_seat_play` to play). While no participants are connected a seated admin roams as an invisible, unrestrained Abrams at the watch spot and switches to spectating 2 s after someone joins; `dw_seat_spec` while roaming switches to spectating right away (the next join or leave may roam them again if the server is still empty)
 
 #### /seat_play
 
@@ -239,7 +239,7 @@ position, entity index.
 - **Who:** admin. Same target as `dw_seat_spec`: the caller, else the connected player with the admin Steam ID
 - **Calls:** `AdminSeat.Stand` (→ `LobbyService.AdmitPlayer`)
 - **Mode:** Debug
-- **Side effects:** takes the admin out of the seat and admits them like a new connection: smaller team, Skyrunner, watch spot (restrained), Random mode joiner or 1v1 setup souls, auto-start check. 2 s later logs whether a hero spawned (`Admin hero after leaving the seat`, or the Warning `Admin has no hero after leaving the seat`)
+- **Side effects:** takes the admin out of the seat (ending roaming and its cloak) and admits them like a new connection: smaller team, Skyrunner, watch spot (restrained), Random mode joiner or 1v1 setup souls, auto-start check. 2 s later logs whether a hero spawned (`Admin hero after leaving the seat`, or the Warning `Admin has no hero after leaving the seat`)
 - **Notes:** refused when not seated, or when 12 players are already playing. Takes no slot argument: a seated admin's console command can arrive without a caller (seen 2026-09-27), so both seat commands fall back to the admin Steam ID
 
 #### /seat_status
@@ -248,7 +248,7 @@ position, entity index.
 - **Who:** admin
 - **Calls:** `AdminSeat.Describe`
 - **Mode:** Debug; read-only
-- **Side effects:** playing count and cap (12), seated count, the `maxplayers` and `sv_visiblemaxplayers` values, then per seated admin: slot, name, team number, whether a pawn exists
+- **Side effects:** playing count and cap (12), seated and roaming counts, the `maxplayers` and `sv_visiblemaxplayers` values, then per seated admin: slot, name, team number, whether a pawn exists, whether roaming
 - **Notes:** use it to check that `maxplayers 13` took effect
 
 ### Stream camera (`LobbyPlugin`, `Lobby/StreamCam`)
@@ -918,7 +918,7 @@ Patch-day checks; see `reference/patch-day.md`.
 - **Who:** admin (`AdminCommand.Authorize`; server console trusted)
 - **Calls:** `SelfTestService.Live` → `LoadoutService.Capture`, `HudService.Announce`, `WatchSpot.SendUp`, then `RestraintService.Release` if the player was not restrained before
 - **Mode:** Debug
-- **Side effects:** sends a `Self-test` banner to that player, teleports them to their own watch spot and restrains them; 1 s later replies Loadout / Hud / Teleport / Restraint results (modifier and each state). Refused during a rift round or when the player has no living hero; error when the slot is empty
+- **Side effects:** sends a `Self-test` banner to that player, teleports them to their own watch spot, restrains them and makes them invisible for 2 s (the roaming admin's `modifier_invis`); 1 s later replies Loadout / Hud / Teleport / Restraint (modifier and each state) / Roam results. Refused during a rift round or when the player has no living hero; error when the slot is empty
 
 ### DevTools (`DevToolsPlugin`, DevTools.dll)
 

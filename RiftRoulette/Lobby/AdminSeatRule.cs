@@ -11,4 +11,6 @@ public static class AdminSeatRule
     playing < cap;
 
   public static bool SeatOnJoin(bool isAdmin) => isAdmin;
+
+  public static bool ShouldRoam(int participants) => participants == 0;
 }

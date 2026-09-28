@@ -6,4 +6,5 @@ Unit tests for `Lobby/AdminSeatRule`.
   admin always gets in.
 - `CanStand`: only when fewer than 12 are playing.
 - `SeatOnJoin`: every admin is seated on join; a non-admin never is.
+- `ShouldRoam`: only with 0 participants.
 - A custom cap is respected; the default cap is 12.

@@ -64,6 +64,7 @@ public static class LobbyService
 
     StatsService.RefreshBoards(mode);
     AutoStartService.CheckSoon(timer, mode);
+    AdminSeat.SyncSoon(timer, mode);
     return team;
   }
 
@@ -94,6 +95,7 @@ public static class LobbyService
 
     StatsService.RefreshBoards(mode);
     AutoStartService.Check(timer, mode, steamId);
+    AdminSeat.SyncSoon(timer, mode);
   }
 
   // A pawn left without its client keeps queuing network changes the server cannot send

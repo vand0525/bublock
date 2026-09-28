@@ -179,6 +179,7 @@ public static class BanStatueService
 
     StatsService.RefreshBoards(mode);
     AutoStartService.Check(timer, mode, steamId);
+    AdminSeat.SyncSoon(timer, mode);
   }
 
   private static void Hold(CCitadelPlayerController player)

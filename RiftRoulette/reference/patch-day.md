@@ -36,7 +36,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Feature | What it does | Game dependencies | Proof |
 |---|---|---|---|
 | Session (`Session/`) | Session id, map name, registers locations | `Server.MapName`, `OnLoad` / `OnStartupServer` | `dw_session_info` |
-| Lobby (`Lobby/`) | Admits players, balances teams, convars, kick, respawn to watch spot | `OnClientConnect` / `FullConnect` / `Disconnect`, `player_spawn`, `player_death`, `SelectHero(Heroes.Skyrunner)`, `ChangeTeam`, `kickid`, lobby convars | join; `/status`; `dw_player_list` |
+| Lobby (`Lobby/`) | Admits players, balances teams, convars, kick, respawn to watch spot; the admin roams as an invisible Abrams on an empty server | `OnClientConnect` / `FullConnect` / `Disconnect`, `player_spawn`, `player_death`, `SelectHero(Heroes.Skyrunner)`, `SelectHero(Heroes.Atlas)`, `ChangeTeam`, `kickid`, `modifier_invis`, lobby convars | join; `/status`; `dw_player_list`; `dw_seat_status`; `dw_selftest_live` Roam row |
 | AdminSeat (`Lobby/AdminSeat`) | 13th seat on the spectator side | `maxplayers`, `sv_visiblemaxplayers`, team 1 | `dw_seat_status` |
 | Stream camera (`Lobby/StreamCam`, `Modules/Spectate`) | Seated admin's automatic camera: follow, killer cut, park at the saved framing | `observer` pawn designer name, `ObserverServices` (`InEye`, `Roaming`, `SetObserverTarget`), observer `Teleport`, `CBasePlayerPawn.v_angle` (framing angle; self-test schema), `bublock/streamcam.json` (no client commands: the client refuses `spec_*` from the server) | `dw_spec_status` (`ViewAngle=` changes while turning), `dw_selftest_run` |
 | Access (`Lobby/Access*`, `BanStatueService`) | Bans / private mode from `bublock/access.json`; banned players turned to stone then kicked | `OnClientConnect` returning false, `kickid`, `AddModifier` (statue modifier) | `/access_mode`, `/ban_list`, `/ban_modifier` |
@@ -193,6 +193,13 @@ precached (`LobbyPlugin.OnPrecacheResources`, `Heroes.Viper`) or it shows as
 a red wireframe; if the hero enum or the ability moves, update
 `BanStatueService.StatueLookHero`.
 
+Roaming admin cloak: `modifier_invis` (the invisibility from Cloaking
+Device, seen in DevTools `modifiers-*.log`), added by `Lobby/AdminSeat.cs`
+(`RoamModifier`) with a 3600 s `duration` and put back when it runs out.
+Checked by `dw_selftest_live` (Roam row). If it fails, Warning `Roaming
+admin cloak refused` in `lobby-*.log`; find the new name by using an
+invisibility item and reading `modifiers-*.log`.
+
 ### Events and hooks
 
 `player_spawn` (Lobby, Duel, Random), `player_death` (Lobby, Stats, stream camera), `player_respawned` (Duel, Random), `player_hero_changed` (Draft); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnAddModifier` (DevTools `ModifierProbe`, `AddModifierEvent.ModifierVData.Name`; diagnostics only), `OnLoad`, `OnStartupServer`.
@@ -200,6 +207,7 @@ a red wireframe; if the hero enum or the ability moves, update
 ### Enums and hero data
 
 - `Heroes.Skyrunner` is the lobby hero (`LobbyService`, `DraftService`); draft pools in `Draft/DraftPools.cs`.
+- `Heroes.Atlas` (Abrams) is the roaming admin's hero (`AdminSeat.RoamHero`).
 - `hero-builds.json` (38 heroes, 161 items, 154 abilities, per-build sell priorities), banned items in `Modules/Loadout/LoadoutPlanner.cs`.
 - Item slots: universal (any item in any slot), 9 open by default (one flex slot already open), 12 with every flex slot (`LoadoutPlanner.DefaultSlots`); each enemy Walker opens one in a real match, which `Modules/Loadout/ItemSlots` mirrors by soul value (`scripts/walker-souls.py`).
 - `EAbilitySlot.Signature1..4`, `ECurrencyType.EGold` / `EAbilityPoints` / `EAbilityUnlocks`, `ECurrencySource.ECheats` / `EStartingAmount` / `EItemSale` (the sources `GameLoop/SoulRule` lets through for gold; for ability points and unlocks only `ECheats` passes in Random and 1v1 matches), `ImbueResult.Success`.

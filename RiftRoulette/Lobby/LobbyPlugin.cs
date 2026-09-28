@@ -22,7 +22,7 @@ public class LobbyPlugin : DeadworksPluginBase
     if (isReload)
     {
       LobbyService.ApplyServerConvars();
-      AdminSeat.Restore();
+      AdminSeat.Restore(Timer);
       BanStatueService.KickConnectedBanned();
     }
 
@@ -96,7 +96,10 @@ public class LobbyPlugin : DeadworksPluginBase
     if (BanStatueService.TakeArrival(player.PlayerSteamId))
       BanStatueService.Petrify(player, BanStatueService.RejoinKickSeconds, liveBan: false, Timer);
     else if (AdminSeat.SeatOnJoin(player))
+    {
       AdminSeat.Sit(player, Timer);
+      AdminSeat.SyncSoon(Timer);
+    }
     else
       LobbyService.AdmitPlayer(player, Timer);
   }
@@ -119,6 +122,13 @@ public class LobbyPlugin : DeadworksPluginBase
   {
     EventCounters.Hit("player_spawn");
     var player = args.UseridController?.As<CCitadelPlayerController>();
+
+    if (player != null && AdminSeat.IsRoaming(player.PlayerSteamId))
+    {
+      var steamId = player.PlayerSteamId;
+      Timer.NextTick(() => AdminSeat.PlaceAndCloak(steamId, Timer));
+      return HookResult.Continue;
+    }
 
     if (player == null || (!Participants.IsParticipant(player) && !BanStatueService.IsStatue(player.PlayerSteamId)))
       return HookResult.Continue;

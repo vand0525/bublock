@@ -1,3 +1,4 @@
+using Bublock.Modules.Movement;
 using Bublock.Modules.Restraint;
 using Bublock.Modules.Spectate;
 using Bublock.Shared;
@@ -18,13 +19,24 @@ public static class AdminSeat
   public const int SpectatorTeam = 1;
   public const int HeroCheckSeconds = 2;
 
+  public const Heroes RoamHero = Heroes.Atlas;
+  public const int RoamTeam = RiftRouletteTeams.Amber;
+  public const string RoamModifier = "modifier_invis";
+  public const int RoamModifierSeconds = 3600;
+
   private static readonly Logger Log = BublockLog.For("Lobby");
 
   private static readonly HashSet<ulong> Seated = [];
 
+  private static readonly HashSet<ulong> Roaming = [];
+
+  private static readonly Dictionary<ulong, int> CloakGeneration = [];
+
   public static int SeatedCount => Seated.Count;
 
   public static bool IsSeated(ulong steamId) => Seated.Contains(steamId);
+
+  public static bool IsRoaming(ulong steamId) => Roaming.Contains(steamId);
 
   public static bool AllowConnect(ulong steamId, string name)
   {
@@ -47,6 +59,12 @@ public static class AdminSeat
   {
     var log = Log.WithMode(mode);
     var steamId = player.PlayerSteamId;
+
+    if (Roaming.Contains(steamId))
+    {
+      Spectate(player, timer, mode);
+      return $"{player.PlayerName} stopped roaming and is spectating.";
+    }
 
     if (!Seated.Add(steamId))
       return $"{player.PlayerName} is already in the admin seat.";
@@ -96,6 +114,110 @@ public static class AdminSeat
       player.Pawn?.DesignerName ?? "none");
   }
 
+  // Hero swaps made inside OnClientFullConnect are lost, so every switch runs from a timer.
+  public static void SyncSoon(ITimer timer, ExecutionMode mode = ExecutionMode.Clean) =>
+    timer.Once(HeroCheckSeconds.Seconds(), () => Sync(timer, mode));
+
+  public static void Sync(ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    var roam = AdminSeatRule.ShouldRoam(Participants.Humans().Count);
+
+    foreach (var player in Players.GetAll().Where(player => Seated.Contains(player.PlayerSteamId)).ToList())
+    {
+      if (roam == Roaming.Contains(player.PlayerSteamId))
+        continue;
+
+      if (roam)
+        Roam(player, timer, mode);
+      else
+        Spectate(player, timer, mode);
+    }
+  }
+
+  private static void Roam(CCitadelPlayerController player, ITimer timer, ExecutionMode mode)
+  {
+    var steamId = player.PlayerSteamId;
+    Roaming.Add(steamId);
+    CloakGeneration.Remove(steamId);
+    StreamCam.Forget(steamId);
+    RestraintService.Release(player, mode);
+    WatchGuard.Forget(steamId);
+
+    player.SelectHero(RoamHero);
+    player.ChangeTeam(RoamTeam, true);
+
+    Log.WithMode(mode).Info(player.ToPlayerRef(), "Admin roaming, server empty Hero={Hero} Team={Team}", RoamHero, RiftRouletteTeams.Name(RoamTeam));
+    BublockLog.Master.Info("Admin roaming {Player}", player.PlayerName);
+
+    timer.Once(HeroCheckSeconds.Seconds(), () => PlaceAndCloak(steamId, timer, mode, retry: true));
+  }
+
+  private static void Spectate(CCitadelPlayerController player, ITimer timer, ExecutionMode mode)
+  {
+    var steamId = player.PlayerSteamId;
+    Roaming.Remove(steamId);
+    CloakGeneration.Remove(steamId);
+
+    Log.WithMode(mode).Info(player.ToPlayerRef(), "Admin roam ended, spectating next tick Playing={Playing}", Participants.Humans().Count);
+    timer.NextTick(() => BecomeObserver(steamId, mode));
+  }
+
+  public static void PlaceAndCloak(ulong steamId, ITimer timer, ExecutionMode mode = ExecutionMode.Clean, bool retry = false)
+  {
+    var player = Find(steamId);
+
+    if (player == null || !Roaming.Contains(steamId))
+      return;
+
+    var log = Log.WithMode(mode);
+    var pawn = player.GetHeroPawn();
+
+    if (pawn == null || !pawn.IsAlive)
+    {
+      if (!retry)
+      {
+        log.Warn(player.ToPlayerRef(), "Roaming admin has no hero, not placed Pawn={Pawn}", player.Pawn?.DesignerName ?? "none");
+        return;
+      }
+
+      log.Warn(player.ToPlayerRef(), "Roaming admin has no hero yet, selecting again Pawn={Pawn}", player.Pawn?.DesignerName ?? "none");
+      player.SelectHero(RoamHero);
+      timer.Once(HeroCheckSeconds.Seconds(), () => PlaceAndCloak(steamId, timer, mode));
+      return;
+    }
+
+    // The respawn from the team change usually placed the admin already; don't pull them back.
+    if (retry && CloakGeneration.ContainsKey(steamId))
+      return;
+
+    MovementService.TeleportTo(player, SlotSpots.Watch(WatchSpot.Location(WatchSpot.Side), player.Slot), mode);
+    Cloak(player, timer, mode);
+  }
+
+  // One long modifier, put back when it runs out; a newer cloak cancels the older timer.
+  public static void Cloak(CCitadelPlayerController player, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    var steamId = player.PlayerSteamId;
+    var pawn = player.GetHeroPawn();
+
+    if (!Roaming.Contains(steamId) || pawn == null || !pawn.IsAlive)
+      return;
+
+    var added = RestraintService.AddModifier(pawn, RoamModifier, RoamModifierSeconds);
+    var generation = CloakGeneration[steamId] = CloakGeneration.GetValueOrDefault(steamId) + 1;
+
+    if (added)
+      Log.WithMode(mode).Info(player.ToPlayerRef(), "Roaming admin cloaked Modifier={Modifier} Seconds={Seconds}", RoamModifier, RoamModifierSeconds);
+    else
+      Log.Warn(player.ToPlayerRef(), "Roaming admin cloak refused Modifier={Modifier}", RoamModifier);
+
+    timer.Once(RoamModifierSeconds.Seconds(), () =>
+    {
+      if (CloakGeneration.GetValueOrDefault(steamId) == generation && Find(steamId) is { } current)
+        Cloak(current, timer, mode);
+    });
+  }
+
   public static string Stand(CCitadelPlayerController player, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
     var steamId = player.PlayerSteamId;
@@ -109,7 +231,10 @@ public static class AdminSeat
       return $"All {AdminSeatRule.PlayerCap} player slots are taken; staying in the admin seat.";
 
     Seated.Remove(steamId);
+    Roaming.Remove(steamId);
+    CloakGeneration.Remove(steamId);
     StreamCam.Forget(steamId);
+    player.GetHeroPawn()?.RemoveModifier(RoamModifier);
 
     var team = LobbyService.AdmitPlayer(player, timer, mode);
 
@@ -142,36 +267,57 @@ public static class AdminSeat
   public static void Forget(ulong steamId)
   {
     Seated.Remove(steamId);
+    Roaming.Remove(steamId);
+    CloakGeneration.Remove(steamId);
     StreamCam.Forget(steamId);
   }
 
-  // Hot reload wipes Seated; an admin still on the observer pawn goes back into the seat.
-  public static int Restore(ExecutionMode mode = ExecutionMode.Clean)
+  // Hot reload wipes Seated and Roaming. Every connected admin goes back into the seat; one on a
+  // hero pawn is roaming again (cloak re-applied in place), then Sync settles roam vs spectate.
+  public static int Restore(ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
     var restored = 0;
 
     foreach (var player in Players.GetAll())
     {
-      if (!AdminAuth.IsAuthorized(player.PlayerSteamId) || !SpectateService.IsObserving(player) || !Seated.Add(player.PlayerSteamId))
+      var steamId = player.PlayerSteamId;
+
+      if (!AdminAuth.IsAuthorized(steamId) || !Seated.Add(steamId))
         continue;
 
+      var roaming = !SpectateService.IsObserving(player) && player.GetHeroPawn() != null;
+
+      if (roaming)
+      {
+        Roaming.Add(steamId);
+        timer.NextTick(() =>
+        {
+          if (Find(steamId) is { } current)
+            Cloak(current, timer, mode);
+        });
+      }
+
       restored++;
-      Log.WithMode(mode).Info(player.ToPlayerRef(), "Admin seat restored after reload TeamNum={TeamNum}", player.TeamNum);
+      Log.WithMode(mode).Info(player.ToPlayerRef(), "Admin seat restored after reload TeamNum={TeamNum} Roaming={Roaming}", player.TeamNum, roaming);
     }
 
+    SyncSoon(timer, mode);
     return restored;
   }
+
+  private static CCitadelPlayerController? Find(ulong steamId) =>
+    Players.GetAll().FirstOrDefault(player => player.PlayerSteamId == steamId);
 
   public static IReadOnlyList<string> Describe()
   {
     var lines = new List<string>
     {
-      $"Playing={Participants.Humans().Count}/{AdminSeatRule.PlayerCap} | Seated={Seated.Count} | SpectatorTeam={SpectatorTeam} | " +
+      $"Playing={Participants.Humans().Count}/{AdminSeatRule.PlayerCap} | Seated={Seated.Count} | Roaming={Roaming.Count} | SpectatorTeam={SpectatorTeam} | " +
       $"maxplayers={ConVar.Find("maxplayers")?.GetInt()} | visible={ConVar.Find("sv_visiblemaxplayers")?.GetInt()}"
     };
 
     foreach (var player in Players.GetAll().Where(player => Seated.Contains(player.PlayerSteamId)))
-      lines.Add($"Seated: Slot={player.Slot} | {player.PlayerName} | TeamNum={player.TeamNum} | Pawn={(player.GetHeroPawn() != null ? "yes" : "none")}");
+      lines.Add($"Seated: Slot={player.Slot} | {player.PlayerName} | TeamNum={player.TeamNum} | Pawn={(player.GetHeroPawn() != null ? "yes" : "none")} | Roaming={Roaming.Contains(player.PlayerSteamId)}");
 
     return lines;
   }
