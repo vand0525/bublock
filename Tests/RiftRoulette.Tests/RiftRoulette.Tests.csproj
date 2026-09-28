@@ -45,7 +45,6 @@
     <Compile Include="..\..\RiftRoulette\GameLoop\AutoStartRule.cs" Link="RiftRoulette\GameLoop\AutoStartRule.cs" />
     <Compile Include="..\..\RiftRoulette\RandomMode\HeroDraw.cs" Link="RiftRoulette\RandomMode\HeroDraw.cs" />
     <Compile Include="..\..\RiftRoulette\RandomMode\BenchRule.cs" Link="RiftRoulette\RandomMode\BenchRule.cs" />
-    <Compile Include="..\..\RiftRoulette\RandomMode\HeroReservations.cs" Link="RiftRoulette\RandomMode\HeroReservations.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\TeamBalance.cs" Link="RiftRoulette\Lobby\TeamBalance.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\AdminSeatRule.cs" Link="RiftRoulette\Lobby\AdminSeatRule.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\AccessRule.cs" Link="RiftRoulette\Lobby\AccessRule.cs" />
