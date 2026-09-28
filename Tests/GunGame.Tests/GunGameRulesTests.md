@@ -12,3 +12,4 @@ asset.
 - `GunGame/Data/arena.json` loads through `Modules/Arena` as "mid lane
   brawl": lane 4, 13 offsets, bounds, and every slot's spot for both teams
   inside the bounds. (Floor and wall checks are `scripts/check-arena.py`.)
+- Practice bot count 0..11 (`gg_bots`), so one player always fits.

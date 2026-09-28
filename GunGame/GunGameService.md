@@ -14,6 +14,22 @@ plugin classes only forward hooks here. Static, one per DLL load.
 
 ## Operations
 
+### Dev / prod and testing
+
+| Op | Behavior |
+|---|---|
+| `Mode` | `RunMode`, starts at `GunGameRules.DefaultMode` (dev); the session's `AutoStart` follows it |
+| `Play(timer, mode)` | See `DevPlugin.md` (`/play`) |
+| `Stop(timer, mode)` | See `DevPlugin.md` (`/stop`) |
+| `Pause(timer, mode)` | `Session.Pause` + `DebugSnapshot.Take` with `Describe()`; reply lines |
+| `RequireDev(command)` | Throws `CommandException` with `DevRules.Refusal` in prod |
+| `SetBots(count, timer, mode)` | 0..11: `citadel_spawn_practice_bots_count`, `citadel_spawn_practice_bots`, `CountBots`; 0 also `bot_kick_all` (cheats); session check 1 s later; reply with humans / bots now |
+| `ReloadMap(mode)` | `changelevel <Server.MapName>` |
+| `Exec(caller, command, mode)` | `Server.ExecuteCommand`, logged (feature + master) |
+| `CountBots`, `Bots()` | Bots count as players for starting matches when on |
+
+### Game
+
 | Op | Behavior |
 |---|---|
 | `ApplyServerConvars(mode)` | `citadel_team_size 6`, `citadel_allow_duplicate_heroes 1`, `citadel_koth_enabled 0` (no rift), `citadel_allow_purchasing_anywhere 0`, `citadel_player_override_spawn_time 1`, and the arena's `citadel_active_lane` (4); logs |
@@ -23,7 +39,7 @@ plugin classes only forward hooks here. Static, one per DLL load.
 | `BlocksCommand(player, command)` | Humans only: `ChoiceGuard.Blocks(command, heroLocked: has a pick, teamLocked: true)` |
 | `BlocksCurrency(type, source, amount)` | `SoulRule.ShouldBlock(..., active: true)` |
 | `OnSpawn(player, timer)` | `ArenaService.SendToArenaNextTick`; a pending human gets `ApplyPending` on the next tick |
-| `ContainPlayers(mode)` | `ArenaService.ReturnStrays` over players on playable teams |
+| `ContainPlayers(mode)` | Prod only: `ArenaService.ReturnStrays` over players on playable teams |
 | `OnDeath(args, timer, mode)` | Only while a match plays; human attacker; `GunGameRules.Credits`; `Session.Scores.Add`; log `Kill Kills= Victim= Match=`; `Heroes.Roll(attacker)` (the banner comes when the build lands: `3 kills: <hero>` / build and souls) |
 | `Reroll(player, timer, mode)` | Admin `Heroes.Roll`; reply text |
 | `DescribeFor(player)` / `Describe()` | `/points` lines / `/gg_status` lines |

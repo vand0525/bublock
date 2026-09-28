@@ -11,6 +11,8 @@ modules (`GunGameService.md`).
 | `Title` | `Gun Game` |
 | `Session` | `SessionOptions(MatchSeconds: 120, BreakSeconds: 5, MinPlayers: 2, WarningSeconds: 10)` |
 | `ArenaResource` | `GunGame.arena.json` (the embedded `Data/arena.json`) |
+| `DefaultMode` | `RunMode.Dev` (experimental server; a prod server would start in prod) |
+| `MaxBots` | 11 (`IsValidBotCount`: 0..11) |
 
 ## Operations
 
@@ -22,6 +24,7 @@ modules (`GunGameService.md`).
 | `KillBanner(kills, hero, build, souls)` | `3 kills: Haze` / `<build> - 12,345 souls` | (title, description) |
 | `HeroBanner(hero, build, souls)` | `Haze` / `<build> - 12,345 souls` (join, admin reroll) | (title, description) |
 | `ResultBanner(result, nameOf, breakSeconds)` | `<name> wins` / `7 kills - next match in 5s`; ties `Tie: A, B` / `5 kills each - ...`; nobody scored `Match over` / `No kills - ...` | (title, description) |
+| `PlayBanner`, `StopBanner`, `PauseBanner` | `Live session` / `2:00 matches - most kills wins`; `Dev mode` / `Live session stopped`; `Paused` / `1:24 left - /play to resume` | (title, description) |
 | `WaitingLine(players, min)` | Chat line while waiting for players | string |
 | `BuildDescription(build, souls)`, `Kills(n)` | `<build> - 12,345 souls` (invariant culture); `1 kill` / `N kills` | string |
 

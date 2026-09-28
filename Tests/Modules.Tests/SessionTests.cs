@@ -16,6 +16,22 @@ public class SessionTests
     Assert.Equal(expected, SessionRule.Decide(phase, players, minPlayers: 2));
   }
 
+  [Theory]
+  [InlineData(SessionPhase.Waiting, 5, SessionAction.None)]
+  [InlineData(SessionPhase.Playing, 1, SessionAction.Stop)]
+  public void Without_auto_start_a_waiting_session_never_starts_but_still_stops(SessionPhase phase, int players, SessionAction expected)
+  {
+    Assert.Equal(expected, SessionRule.Decide(phase, players, minPlayers: 2, autoStart: false));
+  }
+
+  [Theory]
+  [InlineData(0)]
+  [InlineData(10)]
+  public void A_paused_match_is_never_started_or_stopped_by_player_counts(int players)
+  {
+    Assert.Equal(SessionAction.None, SessionRule.Decide(SessionPhase.Paused, players, minPlayers: 2));
+  }
+
   [Fact]
   public void Winners_are_everyone_tied_on_top_and_nobody_without_points()
   {

@@ -38,5 +38,6 @@
   <Import Project="..\..\Modules\Session\Session.projitems" />
   <Import Project="..\..\Modules\Economy\Economy.projitems" />
   <Import Project="..\..\Modules\RandomLoadout\RandomLoadout.projitems" />
+  <Import Project="..\..\Modules\DevMode\DevMode.projitems" />
 
 </Project>

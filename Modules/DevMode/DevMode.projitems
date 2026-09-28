@@ -1,0 +1,14 @@
+<Project>
+
+  <PropertyGroup>
+    <HasSharedItems>true</HasSharedItems>
+  </PropertyGroup>
+
+  <!-- DevRules is pure; PositionMemory and DebugSnapshot need Shared.projitems and Movement.projitems. -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)DevRules.cs" Link="Modules/DevMode/DevRules.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PositionMemory.cs" Link="Modules/DevMode/PositionMemory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DebugSnapshot.cs" Link="Modules/DevMode/DebugSnapshot.cs" />
+  </ItemGroup>
+
+</Project>

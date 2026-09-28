@@ -33,15 +33,6 @@ public class MatchPlugin : DeadworksPluginBase
       AdminCommand.Reply(caller, $"[GunGame] {line}");
   }
 
-  [Command("gg_start", Description = "Start a Gun Game match now, even with one player")]
-  public void CmdStart(CCitadelPlayerController? caller)
-  {
-    AdminCommand.Authorize(caller, MatchLog, "gg_start");
-
-    GunGameService.Session.Start(Timer, ExecutionMode.Debug);
-    AdminCommand.Reply(caller, $"[GunGame] Match {GunGameService.Session.Match} started ({SessionRule.Clock(GunGameService.Session.Options.MatchSeconds)}).");
-  }
-
   [Command("gg_end", Description = "End the current Gun Game match now and show the result")]
   public void CmdEnd(CCitadelPlayerController? caller)
   {
@@ -66,6 +57,7 @@ public class MatchPlugin : DeadworksPluginBase
   public void CmdReroll(CCitadelPlayerController? caller, int slot)
   {
     AdminCommand.Authorize(caller, MatchLog, "gg_reroll");
+    GunGameService.RequireDev("gg_reroll");
 
     var player = Players.GetAll().FirstOrDefault(candidate => candidate.Slot == slot)
       ?? throw new CommandException($"No player in slot {slot}.");

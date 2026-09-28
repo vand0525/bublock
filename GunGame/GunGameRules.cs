@@ -1,4 +1,5 @@
 using System.Globalization;
+using Bublock.Modules.DevMode;
 using Bublock.Modules.Session;
 using Bublock.Modules.Teams;
 
@@ -11,6 +12,14 @@ public static class GunGameRules
   public const string ArenaResource = "GunGame.arena.json";
 
   public static readonly SessionOptions Session = new(MatchSeconds: 120, BreakSeconds: 5, MinPlayers: 2, WarningSeconds: 10);
+
+  // The redock server is experimental: a load starts in dev (sandbox); /play starts the live session.
+  public const RunMode DefaultMode = RunMode.Dev;
+
+  // Practice bots for solo testing (gg_bots): a lobby is 12, so at most 11 next to one player.
+  public const int MaxBots = 11;
+
+  public static bool IsValidBotCount(int count) => count is >= 0 and <= MaxBots;
 
   // A point: a human on a playing team kills someone on the other team (no self kills, no team kills).
   public static bool Credits(ulong attacker, ulong victim, int attackerTeam, int victimTeam) =>
@@ -45,6 +54,15 @@ public static class GunGameRules
       ? ($"{names} wins", $"{Kills(top)} - {next}")
       : ($"Tie: {names}", $"{Kills(top)} each - {next}");
   }
+
+  public static (string Title, string Description) PlayBanner(int matchSeconds) =>
+    ("Live session", $"{SessionRule.Clock(matchSeconds)} matches - most kills wins");
+
+  public static (string Title, string Description) StopBanner() =>
+    ("Dev mode", "Live session stopped");
+
+  public static (string Title, string Description) PauseBanner(int secondsLeft) =>
+    ("Paused", $"{SessionRule.Clock(secondsLeft)} left - /play to resume");
 
   public static string WaitingLine(int players, int minPlayers) =>
     $"Gun Game starts at {minPlayers} players ({players} on). Kill to get a new hero; most kills in 2 minutes wins.";

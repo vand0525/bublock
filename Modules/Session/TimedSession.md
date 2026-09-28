@@ -24,15 +24,18 @@ reload starts from `Waiting`.
 |---|---|
 | `Check(timer, mode, players = null)` | `SessionRule.Decide(Phase, players ?? count, MinPlayers)`: `Start` or `Stop` as decided; Debug log; returns the action. On a disconnect pass the count without the leaver |
 | `Start(timer, mode)` | Cancels timers, `Playing`, `Match + 1`, scores cleared, end time set; schedules `Warned` at `WarningSeconds` left and `End` at `MatchSeconds`; logs (feature and master); invokes `Started` |
-| `End(timer, mode)` | Only while `Playing`: cancels timers, `MatchResult` (standings, `SessionRule.Winners`), `Break`, logs, invokes `Ended`; after `BreakSeconds` goes to `Waiting` and runs `Check`, so the next match starts while enough players remain. Returns the result, or null when not playing |
-| `Stop(mode)` | From `Playing` / `Break`: cancels timers, `Waiting`, scores cleared, logs `Session stopped`, invokes `Stopped` |
+| `End(timer, mode)` | While `Playing` or `Paused`: cancels timers, `MatchResult` (standings, `SessionRule.Winners`), `Break`, logs, invokes `Ended`; after `BreakSeconds` goes to `Waiting` and runs `Check`, so the next match starts while enough players remain. Returns the result, or null when not playing |
+| `Pause(mode)` | Only while `Playing`: keeps the seconds left, cancels timers, `Paused` (no points: `IsPlaying` is false), logs, invokes `PausedAt` | paused |
+| `Resume(timer, mode)` | Only while `Paused`: `Playing` again with the kept seconds (at least 1), warning and end rescheduled, logs, invokes `Resumed` | resumed |
+| `AutoStart` | When false (a dev sandbox) a waiting session never starts by itself; `Start` / `Resume` still work. Passed to `SessionRule.Decide` | — |
+| `Stop(mode)` | From `Playing` / `Break` / `Paused`: cancels timers, `Waiting`, scores cleared, logs `Session stopped`, invokes `Stopped` |
 | `TrySetMatchSeconds(seconds)` | 30..1800; applies from the next match |
 | `Describe(nameOf)` | Status line (phase, match, time left, length, min players), then one line per scorer |
 
 ## Callbacks
 
 `Started(mode)`, `Warned(secondsLeft, mode)`, `Ended(result, mode)`,
-`Stopped(mode)`: all on the game type's timer, outside game events.
+`Stopped(mode)`, `PausedAt(secondsLeft, mode)`, `Resumed(secondsLeft, mode)`: all on the game type's timer, outside game events.
 
 ## Deadworks constraints
 

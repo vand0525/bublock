@@ -25,6 +25,16 @@ public class GunGameRulesTests
     Assert.Equal(("Gun Game", "2:00 - most kills wins"), GunGameRules.StartBanner(120));
   }
 
+  [Theory]
+  [InlineData(-1, false)]
+  [InlineData(0, true)]
+  [InlineData(11, true)]
+  [InlineData(12, false)]
+  public void Practice_bot_count_leaves_room_for_one_player(int count, bool valid)
+  {
+    Assert.Equal(valid, GunGameRules.IsValidBotCount(count));
+  }
+
   [Fact]
   public void Kill_and_hero_banners_show_the_build_and_souls()
   {

@@ -21,15 +21,27 @@ CleanSlate"`, `DW_PARKED="RiftRoulette"`).
   team changes are refused. Earned souls are blocked: power comes only from
   the build.
 
+## Dev and prod
+
+Gun Game starts in **dev** (`GunGameRules.DefaultMode`, the experimental
+server): no match starts by itself, players roam freely, and admin
+environment tools work (`gg_bots`, `gg_map`, `gg_exec`, `gg_reroll`,
+`gg_arena`). `/play` starts the **live session** (prod: auto-starting
+2-minute matches, containment on, the environment tools refused), `/pause`
+freezes a match and writes a debug snapshot, and `/stop` returns everyone
+to dev where they stood. Engine: `Modules/DevMode` plus `TimedSession`
+pause / resume / auto-start.
+
 ## Files
 
 | File | Role |
 |---|---|
 | `GunGameRules.cs` | Gun Game's own rules: kill credit, session settings, banner text (pure, tested) |
 | `GunGameService.cs` | Wires the engine modules to the rules: admit, remove, spawn, kill, containment, status |
-| `LobbyPlugin.cs` | Load / startup convars, joins and leaves, hero / team command block, soul block, waiting reminder |
+| `LobbyPlugin.cs` | Load / startup convars, joins and leaves, hero / team command block, soul block, waiting reminder (prod) |
+| `DevPlugin.cs` | `/play`, `/stop`, `/pause`, dev-only `gg_bots`, `gg_map`, `gg_exec` |
 | `ArenaPlugin.cs` | Spawns into the arena, containment every second, `/gg_arena` |
-| `MatchPlugin.cs` | Kills, `/points`, `/gg_status`, `/gg_start`, `/gg_end`, `/gg_time`, `/gg_reroll` |
+| `MatchPlugin.cs` | Kills, `/points`, `/gg_status`, `/gg_end`, `/gg_time`, `/gg_reroll` (dev) |
 | `Data/arena.json` | The mid lane brawl arena (embedded as `GunGame.arena.json`) |
 | `GunGame.csproj` | Imports `Shared` and the modules below; services only, no module commands |
 
@@ -44,6 +56,7 @@ CleanSlate"`, `DW_PARKED="RiftRoulette"`).
 | `Modules/Movement` | teleports and camera angle |
 | `Modules/Teams` | team numbers, smaller-team placement, `ChoiceGuard` |
 | `Modules/Economy` | `SoulRule` |
+| `Modules/DevMode` | dev / prod, position memory, debug snapshot |
 | `Modules/Hud` | banners |
 | `Shared` | logging, admin auth, chat, convars |
 
@@ -65,11 +78,16 @@ selecthero / changeteam / jointeam ─> refused (ChoiceGuard); earned souls ─>
 |---|---|---|---|---|
 | `/points` (`dw_points`) | players | `GunGameService.DescribeFor` | Clean, read-only | chat: match number and time left, your kills and place, top 3; or that no match runs and why |
 | `/gg_status` | admin | `GunGameService.Describe` | Debug, read-only | session line, scorers, arena and pending count, every player's hero and build |
-| `/gg_start` | admin | `TimedSession.Start` | Debug | starts a match now even with one player (scores reset) |
+| `/play` | admin | `GunGameService.Play` | Debug | dev → live session (or resume a pause); see `DevPlugin.md` |
+| `/stop` | admin | `GunGameService.Stop` | Debug | live session → dev, players back where they stood |
+| `/pause` | admin | `GunGameService.Pause` | Debug | pause the match, debug snapshot |
+| `/gg_bots <0-11>` | admin, dev | `GunGameService.SetBots` | Debug | practice bots on / off; bots count as players |
+| `/gg_map` | admin, dev | `GunGameService.ReloadMap` | Debug | reload the map |
+| `/gg_exec <cmd>` | admin, dev | `GunGameService.Exec` | Debug | run a server console command (logged) |
 | `/gg_end` | admin | `TimedSession.End` | Debug | ends the match now: result banner, break, next match if 2+ players |
 | `/gg_time <30-1800>` | admin | `TimedSession.TrySetMatchSeconds` | Debug | match length from the next match (resets to 120 on load) |
-| `/gg_reroll <slot>` | admin | `RandomLoadouts.Roll` | Debug | new random hero and build for that player now (pending if dead) |
-| `/gg_arena <slot>` | admin | `ArenaService.SendToArena` | Debug | teleports that player to their arena spot |
+| `/gg_reroll <slot>` | admin, dev | `RandomLoadouts.Roll` | Debug | new random hero and build for that player now (pending if dead) |
+| `/gg_arena <slot>` | admin, dev | `ArenaService.SendToArena` | Debug | teleports that player to their arena spot |
 
 Admin commands check `AdminAuth` (the server console is trusted). All
 names are unique across Bublock DLLs (`gg_*`, `/points`).

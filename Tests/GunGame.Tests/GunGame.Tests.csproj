@@ -32,6 +32,7 @@
   <Import Project="..\..\Modules\Teams\Teams.projitems" />
   <Import Project="..\..\Modules\Arena\Arena.projitems" />
   <Import Project="..\..\Modules\Session\Session.projitems" />
+  <Import Project="..\..\Modules\DevMode\DevMode.projitems" />
 
   <ItemGroup>
     <Compile Include="..\..\GunGame\GunGameRules.cs" Link="GunGame\GunGameRules.cs" />

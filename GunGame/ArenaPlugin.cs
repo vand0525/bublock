@@ -37,6 +37,7 @@ public class ArenaPlugin : DeadworksPluginBase
   public void CmdArena(CCitadelPlayerController? caller, int slot)
   {
     AdminCommand.Authorize(caller, ArenaLog, "gg_arena");
+    GunGameService.RequireDev("gg_arena");
 
     var player = Players.GetAll().FirstOrDefault(candidate => candidate.Slot == slot)
       ?? throw new CommandException($"No player in slot {slot}.");

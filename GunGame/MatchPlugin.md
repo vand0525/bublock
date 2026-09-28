@@ -12,9 +12,8 @@ Thin host for kills and match commands.
 |---|---|---|---|
 | `/points` | players | `GunGameService.DescribeFor` | chat lines |
 | `/gg_status` | admin | `GunGameService.Describe` | `[GunGame]` lines |
-| `/gg_start` | admin | `TimedSession.Start` (Debug) | the match number and length |
 | `/gg_end` | admin | `TimedSession.End` (Debug) | the result count, or no match running |
 | `/gg_time <seconds>` | admin | `TimedSession.TrySetMatchSeconds` | new length from the next match, or the valid range |
-| `/gg_reroll <slot>` | admin | `GunGameService.Reroll` (Debug) | the new hero and build |
+| `/gg_reroll <slot>` | admin, dev only | `GunGameService.Reroll` (Debug) | the new hero and build |
 
 Full catalog entries: `GunGame/FEATURE.md` → Commands.

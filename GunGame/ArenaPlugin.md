@@ -4,7 +4,7 @@ Thin host for the arena.
 
 ## Hooks
 
-- `OnLoad`: `ContainPlayers` every `ContainSeconds` (1 s).
+- `OnLoad`: `ContainPlayers` every `ContainSeconds` (1 s); it only acts in prod.
 - `player_spawn` and `player_respawned`: `GunGameService.OnSpawn` (arena
   spot on the next tick, pending build).
 
@@ -12,4 +12,4 @@ Thin host for the arena.
 
 | Command | Who | Calls | Reply |
 |---|---|---|---|
-| `/gg_arena <slot>` | admin | `ArenaService.SendToArena` (Debug) | where the player went, or that they have no hero or team |
+| `/gg_arena <slot>` | admin, dev only | `ArenaService.SendToArena` (Debug) | where the player went, or that they have no hero or team |

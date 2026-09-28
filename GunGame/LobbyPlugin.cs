@@ -25,7 +25,7 @@ public class LobbyPlugin : DeadworksPluginBase
 
     Timer.Every(WaitingReminderSeconds.Seconds(), () =>
     {
-      if (GunGameService.Session.Phase != SessionPhase.Waiting)
+      if (GunGameService.Mode != Bublock.Modules.DevMode.RunMode.Prod || GunGameService.Session.Phase != SessionPhase.Waiting)
         return;
 
       var humans = GunGameService.Humans();

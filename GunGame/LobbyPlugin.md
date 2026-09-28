@@ -7,7 +7,7 @@ Thin host for joins, leaves and the server rules.
 - `OnLoad(isReload)`: master log `Gun Game loaded`; convars now and again
   3 s later (after other plugins' startup convars), then
   `AdmitConnected` and `Session.Check`; a 30 s reminder while waiting
-  (chat, never a banner).
+  in prod (chat, never a banner).
 - `OnStartupServer()`: convars now and 3 s later.
 - `OnClientFullConnect`: `Admit` (humans).
 - `OnClientDisconnect`: `Remove` (humans).

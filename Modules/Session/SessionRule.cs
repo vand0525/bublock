@@ -6,7 +6,8 @@ public enum SessionPhase
 {
   Waiting,
   Playing,
-  Break
+  Break,
+  Paused
 }
 
 public enum SessionAction
@@ -26,11 +27,15 @@ public sealed record MatchResult(int Match, IReadOnlyList<(ulong SteamId, int Po
 
 public static class SessionRule
 {
-  // Waiting starts once enough players are on; a running match or break stops when too few remain.
-  public static SessionAction Decide(SessionPhase phase, int players, int minPlayers) =>
-    phase == SessionPhase.Waiting
-      ? players >= minPlayers ? SessionAction.Start : SessionAction.None
-      : players < minPlayers ? SessionAction.Stop : SessionAction.None;
+  // Waiting starts once enough players are on (only with auto-start, e.g. prod); a running match or break
+  // stops when too few remain; a paused match is left alone until someone resumes or stops it.
+  public static SessionAction Decide(SessionPhase phase, int players, int minPlayers, bool autoStart = true) =>
+    phase switch
+    {
+      SessionPhase.Waiting => autoStart && players >= minPlayers ? SessionAction.Start : SessionAction.None,
+      SessionPhase.Paused => SessionAction.None,
+      _ => players < minPlayers ? SessionAction.Stop : SessionAction.None
+    };
 
   public static bool IsValidMatchSeconds(int seconds) =>
     seconds is >= SessionOptions.MinMatchSeconds and <= SessionOptions.MaxMatchSeconds;

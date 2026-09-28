@@ -11,3 +11,5 @@ game (`gg_status`, `session-*.log`).
 - Match length 30..1800 seconds.
 - `Scoreboard`: totals, standings order, shared places, unknown last,
   `Forget`, `Clear`.
+- Without auto-start (dev) a waiting session never starts but a running
+  one still stops; a paused match is never started or stopped by counts.

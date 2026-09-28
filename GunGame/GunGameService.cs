@@ -1,4 +1,5 @@
 using Bublock.Modules.Arena;
+using Bublock.Modules.DevMode;
 using Bublock.Modules.Economy;
 using Bublock.Modules.Hud;
 using Bublock.Modules.Loadout;
@@ -29,6 +30,78 @@ public static class GunGameService
   public static RandomLoadouts Heroes { get; } = CreateHeroes();
 
   public static TimedSession Session { get; } = CreateSession();
+
+  // gg_bots: bots count as players for starting matches (solo testing). Off after every load.
+  public static bool CountBots { get; private set; }
+
+  // Dev: sandbox, no auto-start, environment commands allowed. Prod: the live session. Reset on every load.
+  public static RunMode Mode { get; private set; } = GunGameRules.DefaultMode;
+
+  public static PositionMemory DevPositions { get; } = new();
+
+  // Dev-only commands call this; a refusal is thrown back to the caller.
+  public static void RequireDev(string command)
+  {
+    if (DevRules.Refusal(Mode, command) is { } refusal)
+      throw new CommandException(refusal);
+  }
+
+  // ---- dev / prod
+
+  public static string Play(ITimer timer, ExecutionMode mode = ExecutionMode.Debug)
+  {
+    if (Session.IsPaused)
+    {
+      Session.Resume(timer, mode);
+      return $"Resumed: {SessionRule.Clock(Session.SecondsLeft)} left.";
+    }
+
+    if (Mode == RunMode.Prod && Session.Phase != SessionPhase.Waiting)
+      return $"A live session is already running (match {Session.Match}, {Session.Phase}).";
+
+    var saved = Mode == RunMode.Dev ? DevPositions.Save(Humans()) : DevPositions.Count;
+    SetMode(RunMode.Prod, mode);
+
+    var (title, description) = GunGameRules.PlayBanner(Session.Options.MatchSeconds);
+    HudService.AnnounceAll(title, description, mode);
+    Session.Start(timer, mode);
+
+    return $"Live session started (prod): match {Session.Match}, {SessionRule.Clock(Session.Options.MatchSeconds)}; {saved} dev position(s) saved for /stop.";
+  }
+
+  public static string Stop(ITimer timer, ExecutionMode mode = ExecutionMode.Debug)
+  {
+    if (Mode == RunMode.Dev && Session.Phase == SessionPhase.Waiting)
+      return "Already in dev mode.";
+
+    SetMode(RunMode.Dev, mode);
+    Session.Stop(mode);
+
+    var (title, description) = GunGameRules.StopBanner();
+    HudService.AnnounceAll(title, description, mode);
+
+    // Back to where everyone stood in dev, outside the stop command.
+    timer.NextTick(() => DevPositions.Restore(Humans(), mode));
+    return $"Dev mode: live session stopped; returning {DevPositions.Count} player(s) to their dev positions.";
+  }
+
+  public static IReadOnlyList<string> Pause(ITimer timer, ExecutionMode mode = ExecutionMode.Debug)
+  {
+    var paused = Session.Pause(mode);
+    var lines = DebugSnapshot.Take(paused ? "pause" : $"pause ({DevRules.Name(Mode)}, {Session.Phase})", Describe(), mode);
+
+    return paused
+      ? [$"Paused with {SessionRule.Clock(Session.SecondsLeft)} left; /play resumes, /stop ends. Snapshot in debug log:", .. lines]
+      : [$"Nothing running to pause ({DevRules.Name(Mode)}, {Session.Phase}); snapshot taken:", .. lines];
+  }
+
+  private static void SetMode(RunMode next, ExecutionMode mode)
+  {
+    Mode = next;
+    Session.AutoStart = next == RunMode.Prod;
+    Log.WithMode(mode).Info("Mode set Mode={Mode} AutoStart={AutoStart}", DevRules.Name(next), Session.AutoStart);
+    BublockLog.Master.Info("Gun Game mode set Mode={Mode}", DevRules.Name(next));
+  }
 
   // ---- lobby
 
@@ -69,7 +142,7 @@ public static class GunGameService
 
     timer.Once(JoinCheckSeconds.Seconds(), () => Session.Check(timer, mode));
 
-    if (Session.Phase == SessionPhase.Waiting)
+    if (Mode == RunMode.Prod && Session.Phase == SessionPhase.Waiting)
       PlayerChat.Send(player, GunGameRules.WaitingLine(Humans().Count, Session.Options.MinPlayers));
   }
 
@@ -104,6 +177,53 @@ public static class GunGameService
     Session.Check(timer, mode, Humans().Count(other => other.PlayerSteamId != steamId));
   }
 
+  // ---- testing (experimental server)
+
+  public static string SetBots(int count, ITimer timer, ExecutionMode mode = ExecutionMode.Debug)
+  {
+    if (!GunGameRules.IsValidBotCount(count))
+      return $"Bots must be 0 to {GunGameRules.MaxBots}.";
+
+    if (count > 0)
+      ServerConVars.TrySet("citadel_spawn_practice_bots_count", count, Log);
+
+    ServerConVars.TrySet("citadel_spawn_practice_bots", count > 0 ? 1 : 0, Log);
+    CountBots = count > 0;
+
+    if (count == 0)
+      Cheats.Run(() => Server.ExecuteCommand("bot_kick_all"));
+
+    Log.WithMode(mode).Info("Practice bots set Count={Count} CountBots={CountBots}", count, CountBots);
+    timer.Once(1.Seconds(), () => Session.Check(timer, mode));
+
+    return count > 0
+      ? $"Practice bots on ({count}); bots now count as players. Now: {Humans().Count} humans, {Bots().Count} bots. None yet? Try gg_map (reloads the map; you stay connected)."
+      : $"Practice bots off, bots kicked. Now: {Humans().Count} humans, {Bots().Count} bots.";
+  }
+
+  public static string ReloadMap(ExecutionMode mode = ExecutionMode.Debug)
+  {
+    var map = Server.MapName;
+    Log.WithMode(mode).Info("Map reload requested Map={Map}", map);
+    BublockLog.Master.Info("Map reload requested Map={Map}", map);
+    Server.ExecuteCommand($"changelevel {map}");
+    return $"Reloading {map}; everyone stays connected.";
+  }
+
+  public static string Exec(CCitadelPlayerController? caller, string command, ExecutionMode mode = ExecutionMode.Debug)
+  {
+    if (string.IsNullOrWhiteSpace(command))
+      return "Give a server command, e.g. gg_exec citadel_solo_bot_match 1";
+
+    Log.WithMode(mode).Info("Server command from admin By={By} Command={Command}", caller?.PlayerName ?? "console", command);
+    BublockLog.Master.Info("Server command from admin By={By} Command={Command}", caller?.PlayerName ?? "console", command);
+    Server.ExecuteCommand(command);
+    return $"Ran: {command} (output is in the server console / engine log).";
+  }
+
+  public static List<CCitadelPlayerController> Bots() =>
+    Players.GetAll().Where(player => player.IsBot).ToList();
+
   public static bool BlocksCommand(CCitadelPlayerController? player, string command) =>
     player != null
     && !player.IsBot
@@ -130,8 +250,9 @@ public static class GunGameService
     });
   }
 
+  // Containment is a live-session rule: in dev players may roam to test.
   public static int ContainPlayers(ExecutionMode mode = ExecutionMode.Clean) =>
-    ArenaService.ReturnStrays(Players.GetAll().Where(player => DeadlockTeams.IsPlayable(player.TeamNum)), Arena, mode);
+    Mode != RunMode.Prod ? 0 : ArenaService.ReturnStrays(Players.GetAll().Where(player => DeadlockTeams.IsPlayable(player.TeamNum)), Arena, mode);
 
   // ---- match
 
@@ -185,8 +306,9 @@ public static class GunGameService
 
   public static IReadOnlyList<string> Describe() =>
   [
+    $"Mode={DevRules.Name(Mode)}",
     .. Session.Describe(NameOf),
-    $"Arena={Arena.Name} | ActiveLane={Arena.ActiveLane?.ToString() ?? "-"} | Pending={Heroes.PendingCount}",
+    $"Arena={Arena.Name} | ActiveLane={Arena.ActiveLane?.ToString() ?? "-"} | Pending={Heroes.PendingCount} | Humans={Humans().Count} | Bots={Bots().Count} | CountBots={CountBots}",
     .. Heroes.Describe(NameOf)
   ];
 
@@ -215,8 +337,16 @@ public static class GunGameService
     };
 
   private static TimedSession CreateSession() =>
-    new(GunGameRules.Title, GunGameRules.Session, () => Humans().Count(player => DeadlockTeams.IsPlayable(player.TeamNum)))
+    new(GunGameRules.Title, GunGameRules.Session, () => Players.GetAll().Count(player =>
+      (!player.IsBot || CountBots) && DeadlockTeams.IsPlayable(player.TeamNum)))
     {
+      AutoStart = GunGameRules.DefaultMode == RunMode.Prod,
+      PausedAt = (secondsLeft, mode) =>
+      {
+        var (title, description) = GunGameRules.PauseBanner(secondsLeft);
+        HudService.AnnounceAll(title, description, mode);
+      },
+      Resumed = (secondsLeft, mode) => HudService.AnnounceAll("Resumed", $"{SessionRule.Clock(secondsLeft)} left", mode),
       Started = mode =>
       {
         var (title, description) = GunGameRules.StartBanner(Session.Options.MatchSeconds);
@@ -237,6 +367,9 @@ public static class GunGameService
       },
       Stopped = mode =>
       {
+        if (Mode != RunMode.Prod)
+          return;
+
         foreach (var player in Humans())
           PlayerChat.Send(player, GunGameRules.WaitingLine(Humans().Count, Session.Options.MinPlayers));
       }
