@@ -41,6 +41,18 @@ public sealed class BetBook
 
   public int AwardKill(ulong steamId) => _chips[steamId] = Chips(steamId) + ChipsPerKill;
 
+  // Staked chips are not in the balance, so they can't be spent.
+  public bool TrySpend(ulong steamId, int amount)
+  {
+    var chips = Chips(steamId);
+
+    if (amount <= 0 || chips < amount)
+      return false;
+
+    _chips[steamId] = chips - amount;
+    return true;
+  }
+
   // All in: the whole balance is staked. A second call only changes the team.
   public BetResult Place(ulong steamId, int team, IReadOnlyCollection<int> allowedTeams)
   {

@@ -153,7 +153,12 @@ Assume the git repo is rooted at `Bublock/`.
   come from chat lines that are exactly `sapphire` / `amber`
   (`BettingPlugin.OnChatMessage`) or `/bet`. Betting messages are chat
   only, never a banner. The leaderboard is `BoardLayout.Back`, the empty
-  side of the watch spot. Chips never affect gameplay.
+  side of the watch spot. The only thing chips buy is a hero reservation
+  (`/reserve <hero>`, `RandomMode/HeroReservations`): 1,000 chips for the
+  player's next 3 fighting rounds, a waiting line per hero, and each round
+  the first fighter in a hero's line gets it (never two on one hero).
+  Reserved heroes go into `HeroDraw.Draw` as fixed heroes; everyone else
+  stays random. Rounds sat out don't count; no refunds.
 - 1v1 mode has no team score: the only score is the best-streak
   leaderboard (`Duel/StreakBoard`), shown on both stats boards and in
   `/score`.

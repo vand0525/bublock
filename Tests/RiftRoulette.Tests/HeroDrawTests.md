@@ -10,3 +10,7 @@ Unit tests for `RandomMode/HeroDraw` (pure, seeded `Random`).
   out.
 - More players than heroes: everyone is still assigned (duplicates allowed).
 - An empty pool assigns nobody.
+- Fixed heroes (reservations): the player gets theirs even if it was last
+  round's hero, nobody else draws it, heroes stay unique, and a fixed entry
+  for someone not playing is ignored (50 seeds).
+- An empty fixed map gives exactly the plain draw for the same seed.

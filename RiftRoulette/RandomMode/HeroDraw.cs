@@ -10,12 +10,24 @@ public static class HeroDraw
     IReadOnlyList<ulong> players,
     IReadOnlyList<Heroes> pool,
     IReadOnlyDictionary<ulong, Heroes> previous,
-    Random rng)
+    Random rng,
+    IReadOnlyDictionary<ulong, Heroes>? fixedHeroes = null)
   {
-    var drawn = DrawOnce(players, pool, previous, rng);
+    var fixedHere = (fixedHeroes ?? new Dictionary<ulong, Heroes>())
+      .Where(pair => players.Contains(pair.Key))
+      .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+    var rest = players.Where(player => !fixedHere.ContainsKey(player)).ToList();
+    var free = pool.Where(hero => !fixedHere.ContainsValue(hero)).ToList();
+    var restPool = free.Count > 0 ? free : pool;
+
+    var drawn = DrawOnce(rest, restPool, previous, rng);
 
     for (var attempt = 1; attempt < Attempts && Repeats(drawn, previous); attempt++)
-      drawn = DrawOnce(players, pool, previous, rng);
+      drawn = DrawOnce(rest, restPool, previous, rng);
+
+    foreach (var (player, hero) in fixedHere)
+      drawn[player] = hero;
 
     return drawn;
   }

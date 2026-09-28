@@ -5,8 +5,13 @@ when heroes later come from a real match ID.
 
 ## Operations
 
-`Draw(players, pool, previous, rng)` returns Steam ID to hero:
+`Draw(players, pool, previous, rng, fixedHeroes = null)` returns Steam ID to hero:
 
+- `fixedHeroes` (hero reservations, `HeroReservations.Take`): each listed
+  player who is in `players` gets that hero, with no repeat check. Their
+  heroes leave the pool for everyone else (unless that would empty it).
+  Players not in `players` are ignored. Null or empty: the draw below runs
+  unchanged over every player.
 - Shuffles the pool and the players, then gives each player the first
   remaining hero that is not the one they had last round (`previous`).
   Heroes are unique while the pool lasts.

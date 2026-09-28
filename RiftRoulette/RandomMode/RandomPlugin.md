@@ -14,10 +14,16 @@ Thin plugin class for Random mode (`Name` = "Rift Roulette Random").
 
 ## Commands
 
+Player (Clean mode, reply in chat only):
+
+| Command | Calls | Reply / errors |
+|---|---|---|
+| `/reserve [hero]` | `RandomModeService.Reserve(player, <words joined with spaces>)` (`params string[]`, so `/reserve lady geist` works) | the reservation, waiting-line, price or refusal line; no argument shows the player's reservation or how to buy one |
+
 Admin: `AdminCommand.Authorize` with the `Random` log (server console
 trusted), Debug mode, `[Random]` replies.
 
 | Command | Calls | Reply / errors |
 |---|---|---|
-| `/random_status` | `RandomModeService.Describe` | config line, then one line per player (team, hero, build, pending) |
+| `/random_status` | `RandomModeService.Describe` | config line, then one line per player (team, hero, build, pending, reservation) |
 | `/random_reroll` | `RandomModeService.PrepareRound(Timer, Debug)` | `Rerolled: N swapped, M pending`; error unless Random mode and the match is in intermission |

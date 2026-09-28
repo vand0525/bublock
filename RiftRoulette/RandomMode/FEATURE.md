@@ -27,26 +27,39 @@ round's bench player fills the gap the new one leaves. A join or leave
 during an intermission subs the bench player in; mid-round the round plays
 on uneven until the next intermission.
 
+Hero reservations: a player can spend 1,000 betting chips (`/reserve
+<hero>`) to play that hero in their next 3 fighting rounds
+(`HeroReservations`). Several players can reserve the same hero; they wait
+in line in the order they bought, and are told who is ahead and for how
+many rounds. At each draw the first player in a hero's line who is
+fighting that round gets it (so a benched or absent holder never stalls the
+line, and keeps their rounds); everyone else is drawn randomly from the
+other heroes. Rounds spent sitting out don't count. Reservations last one
+match, like the chips.
+
 ## Files
 
 | File | Role |
 |---|---|
-| `HeroDraw.cs` | Unique random heroes, no repeat of last round (pure, tested) |
+| `HeroDraw.cs` | Unique random heroes, no repeat of last round; reserved (fixed) heroes honored (pure, tested) |
+| `HeroReservations.cs` | Hero reservations: a waiting line per hero, rounds used per fighting round, reply text (pure, tested) |
 | `BenchRule.cs` | Who sits out (rotation) and the fighting teams around them (pure, tested) |
 | `RandomModeService.cs` | Match / round orchestration, joiners, pending swaps, hero guard, banners, status |
-| `RandomPlugin.cs` | `player_respawned` + `player_spawn` hooks, `/random_status`, `/random_reroll` |
+| `RandomPlugin.cs` | `player_respawned` + `player_spawn` hooks, `/reserve` (player), `/random_status`, `/random_reroll` |
 
 Team placement (`TeamBalance`) lives in `Lobby/` since Stage 13c.
 
 ## Public operations
 
-See `RandomModeService.md`. Admin commands in
+See `RandomModeService.md`. Player command `/reserve` in
+`reference/user-commands.md`; admin commands in
 `reference/admin-commands.md`.
 
 ## State
 
 `RandomModeService` statics: teams, last heroes, current assignments, the
-bench rotation and bench player, and a
+bench rotation and bench player, the hero reservation lines
+(`Reservations`, kept by Steam ID for the match), and a
 `Lobby/HeroLock` (pending set, applied set, enforcement kills; one per DLL
 load; cleared by `BeginMatch` / `EndMatch`). 1v1 mode owns its own lock.
 
@@ -59,6 +72,8 @@ load; cleared by `BeginMatch` / `EndMatch`). 1v1 mode owns its own lock.
 - `Draft/DraftState` (assignments are written as picks), `Lobby/RiftRouletteTeams`,
   `Lobby/TeamBalance`.
 - `Balance/BalanceService` (auto-balance), `Stats/StatsService` (board refresh).
+- `Betting/BettingService` (`Book.TrySpend` for reservations, `Active`,
+  board refresh after a purchase).
 - `GameLoop/MatchConfig`, `GameLoop/MatchService.State` (reroll / joiner gate).
 
 ## Lifecycle vs commands
@@ -73,7 +88,10 @@ load; cleared by `BeginMatch` / `EndMatch`). 1v1 mode owns its own lock.
 - `Draft/DraftService.EnforceHero` calls `DuelService.GuardHero`, then
   `GuardHero`.
 - `Lobby/AdminSeat.Sit` calls `Forget`.
-- `/random_reroll` calls the same `PrepareRound` in Debug mode;
+- `/reserve` (player, Clean) calls `Reserve`; `/chips` shows
+  `DescribeReservation`.
+- `/random_reroll` calls the same `PrepareRound` in Debug mode (a reroll
+  does not use up another reserved round);
   `/balance_now` calls it with `forceBalance: true`.
 - In Random mode, Draft's pool boards are replaced by the stats boards and
   `/pick`, `/unpick`, `/heroes`, and `/draft_assign` reply that heroes are

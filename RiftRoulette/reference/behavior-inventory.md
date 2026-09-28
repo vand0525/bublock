@@ -212,7 +212,8 @@ The target command list. **Status:** `archive` = renames an archive command
 | `/score` | — | GameLoop | `MatchService.DescribeScore` | Match round and score in chat (1v1: best-streak leaderboard) | new | 13a |
 | `/stats` | — | Stats | `StatsService.Describe` | Your match K / D / A and both team totals | new | 13c |
 | `/bet <sapphire\|amber>` (or type the team name in chat) | — | Betting | `BettingService.TryBet` | Bet all your chips on the next round (own team only while fighting) | new | betting |
-| `/chips` | — | Betting | `BettingService.DescribePlayer` | Your chips, open bet, whether betting is open | new | betting |
+| `/chips` | — | Betting | `BettingService.DescribePlayer` | Your chips, open bet, whether betting is open, your hero reservation | new | betting |
+| `/reserve [hero]` | — | Random | `RandomModeService.Reserve` | Spend 1,000 chips to play a hero in your next 3 fighting rounds; a waiting line per hero (Random mode match only) | new | reservations |
 | `/queue` | — | Duel | `DuelService.JoinQueue` | Join the 1v1 queue (winner stays on), or see your place (1v1 mode only) | new | 13j |
 | `/unqueue` | — | Duel | `DuelService.LeaveQueue` | Leave the 1v1 queue (not while fighting) | new | 13j |
 

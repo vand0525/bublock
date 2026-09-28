@@ -5,6 +5,7 @@ using Bublock.Modules.Queue;
 using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Balance;
+using RiftRoulette.Betting;
 using RiftRoulette.Draft;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Lobby;
@@ -45,6 +46,8 @@ public static class RandomModeService
 
   public const string SitOutTitle = "Sitting out";
   public const string SitOutDescription = "You play next round";
+
+  public static HeroReservations Reservations { get; } = new();
 
   public static int PendingCount => Lock.PendingCount;
 
@@ -106,7 +109,9 @@ public static class RandomModeService
     if (_benched is { } benchedId && Find(benchedId) is { } benchedPlayer)
       log.Info(benchedPlayer.ToPlayerRef(), "Sitting out this round Players={Players}", connected.Count);
 
-    var heroes = HeroDraw.Draw(fighters.Keys.ToList(), catalog.Heroes, LastHero, Random.Shared);
+    var turns = Reservations.Take(fighters.Keys, MatchService.State.Round);
+    var reserved = turns.ToDictionary(turn => turn.SteamId, turn => turn.Hero);
+    var heroes = HeroDraw.Draw(fighters.Keys.ToList(), catalog.Heroes, LastHero, Random.Shared, reserved);
 
     Assignments.Clear();
     Values.Clear();
@@ -127,9 +132,26 @@ public static class RandomModeService
         Lock.MarkPending(player.PlayerSteamId);
     }
 
-    log.Info("Round prepared Players={Players} Swapped={Swapped} Pending={Pending}", Assignments.Count, swapped, Lock.PendingCount);
+    foreach (var turn in turns)
+      TellTurn(turn, log);
+
+    log.Info(
+      "Round prepared Players={Players} Swapped={Swapped} Pending={Pending} Reserved={Reserved}",
+      Assignments.Count,
+      swapped,
+      Lock.PendingCount,
+      turns.Count);
     StatsService.RefreshBoards(mode);
     return swapped;
+  }
+
+  private static void TellTurn(ReservedTurn turn, Logger log)
+  {
+    if (Find(turn.SteamId) is not { } player)
+      return;
+
+    PlayerChat.Send(player, HeroReservations.TurnLine(HeroBuildCatalog.Default.DisplayName(turn.Hero), turn.Use));
+    log.Info(player.ToPlayerRef(), "Reserved hero used Hero={Hero} Use={Use} Of={Of}", turn.Hero, turn.Use, HeroReservations.Rounds);
   }
 
   private static void LogEvened(Logger log, IReadOnlyDictionary<ulong, int> fighters)
@@ -221,8 +243,12 @@ public static class RandomModeService
     if (pool.Count == 0)
       return;
 
-    var hero = HeroDraw.Draw([steamId], pool, LastHero, Random.Shared)[steamId];
+    var turn = Reservations.TakeLate(steamId, MatchService.State.Round, taken);
+    var hero = turn?.Hero ?? HeroDraw.Draw([steamId], pool, LastHero, Random.Shared)[steamId];
     Assign(steamId, hero, catalog);
+
+    if (turn != null)
+      TellTurn(turn, Log.WithMode(mode));
 
     Lock.MarkPending(steamId);
     Log.WithMode(mode).Info(player.ToPlayerRef(), "Late hero assigned, pending spawn Hero={Hero} Team={Team}", hero, RiftRouletteTeams.Name(Teams[steamId]));
@@ -375,12 +401,92 @@ public static class RandomModeService
         : "-";
       var pending = Lock.IsPending(steamId) ? " | PENDING" : "";
       var sitting = _benched == steamId ? " | SITTING OUT" : "";
+      var reservation = Reservations.Position(steamId) switch
+      {
+        null => "",
+        { Place: 0 } held => $" | Reserved={catalog.DisplayName(held.Hero)} ({held.RoundsLeft} left)",
+        var waiting => $" | Waiting={catalog.DisplayName(waiting.Hero)} #{waiting.Place + 1}"
+      };
 
-      lines.Add($"Slot={player.Slot} | {player.PlayerName} | Team={team} | Hero={hero}{pending}{sitting}");
+      lines.Add($"Slot={player.Slot} | {player.PlayerName} | Team={team} | Hero={hero}{pending}{sitting}{reservation}");
     }
 
     return lines;
   }
+
+  public static string Reserve(CCitadelPlayerController player, string heroText, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    if (!BettingService.Active)
+      return "Hero reservations are only open during a Random mode match.";
+
+    if (!Participants.IsParticipant(player))
+      return "Spectators can't reserve heroes.";
+
+    var text = heroText.Trim();
+
+    if (text.Length == 0)
+      return DescribeReservation(player);
+
+    var catalog = HeroBuildCatalog.Default;
+    var steamId = player.PlayerSteamId;
+
+    if (!TryParseReservable(catalog, text, out var hero))
+      return $"No hero called '{text}'. Use the hero's name, for example /reserve haze.";
+
+    if (Reservations.Position(steamId) != null)
+      return $"You already have a reservation. {DescribeReservation(player)}";
+
+    var book = BettingService.Book;
+
+    if (!book.TrySpend(steamId, HeroReservations.Cost))
+    {
+      var riding = book.TryGetBet(steamId, out _) ? " Your chips are on a bet until the round ends." : "";
+      return $"A reservation costs {BetBoardText.Format(HeroReservations.Cost)} chips; you have {BetBoardText.Format(book.Chips(steamId))}.{riding}";
+    }
+
+    var outcome = Reservations.TryReserve(steamId, hero);
+    var name = catalog.DisplayName(hero);
+    var left = $"{BetBoardText.Format(book.Chips(steamId))} chips left";
+
+    Log.WithMode(mode).Info(
+      player.ToPlayerRef(),
+      "Hero reserved Hero={Hero} Result={Result} Ahead={Ahead} RoundsAhead={RoundsAhead} Chips={Chips}",
+      hero,
+      outcome.Result,
+      outcome.Ahead,
+      outcome.RoundsAhead,
+      book.Chips(steamId));
+    BettingService.RefreshBoard(mode);
+
+    if (outcome.Result == ReserveResult.Waiting)
+      return $"{HeroReservations.WaitingLine(HolderName(outcome.Holder), name, outcome.Ahead, outcome.RoundsAhead)} ({left})";
+
+    var from = MatchService.State.Phase == MatchPhase.Intermission ? "the round after this one" : "the next round you play";
+    return $"Reserved {name} for your next {HeroReservations.Rounds} rounds, starting {from} ({left}).";
+  }
+
+  public static string DescribeReservation(CCitadelPlayerController player)
+  {
+    var steamId = player.PlayerSteamId;
+
+    if (Reservations.Position(steamId) is not { } position)
+      return $"Reserve a hero for your next {HeroReservations.Rounds} rounds: /reserve <hero> " +
+             $"({BetBoardText.Format(HeroReservations.Cost)} chips; you have {BetBoardText.Format(BettingService.Book.Chips(steamId))}).";
+
+    var name = HeroBuildCatalog.Default.DisplayName(position.Hero);
+
+    return position.Place == 0
+      ? $"Your reservation: {name}, {HeroReservations.RoundCount(position.RoundsLeft)} left."
+      : $"You're #{position.Place + 1} in line for {name}: {HeroReservations.RoundCount(position.RoundsAhead)} ahead of you, " +
+        $"then {HeroReservations.RoundCount(position.RoundsLeft)} for you.";
+  }
+
+  private static bool TryParseReservable(HeroBuildCatalog catalog, string text, out Heroes hero) =>
+    (catalog.TryParseHero(text, out hero) || catalog.TryParseHero(text.Replace(" ", ""), out hero))
+    && catalog.Heroes.Contains(hero);
+
+  private static string HolderName(ulong? steamId) =>
+    steamId is { } id && Find(id) is { } holder ? holder.PlayerName : "Another player";
 
   private static RandomAssignment Assign(ulong steamId, Heroes hero, HeroBuildCatalog catalog)
   {
@@ -447,5 +553,6 @@ public static class RandomModeService
     _benched = null;
     _returning = null;
     _benchRound = null;
+    Reservations.Reset();
   }
 }

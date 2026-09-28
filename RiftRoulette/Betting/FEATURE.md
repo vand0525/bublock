@@ -10,6 +10,12 @@ intermission everyone gets a chat line with their chips and types
 stake. A `BETTING` leaderboard hangs on the empty fourth side of the watch
 spot.
 
+Chips can be spent on one thing: a hero reservation (`/reserve <hero>`,
+1,000 chips for the player's next 3 fighting rounds, a waiting line per
+hero). The rules live in `RandomMode/HeroReservations`; this feature only
+provides `BetBook.TrySpend` and mentions `/reserve` in the betting-open line
+(players with 1,000+ chips and no reservation) and in `/chips`.
+
 ## Public operations
 
 See `BettingService.md` (lifecycle and commands), `BetBook.md` (chip
@@ -24,7 +30,7 @@ DLL load, reset at every match start. Chips last one match.
 
 | File | Role |
 |---|---|
-| `BetBook.cs` | Chips, all-in bets, own-team rule, settle / refund (pure, tested) |
+| `BetBook.cs` | Chips, all-in bets, own-team rule, settle / refund, spending (pure, tested) |
 | `BetBoardText.cs` | Leaderboard text (pure, tested) |
 | `BettingService.cs` | Open / close, chat lines, kill chips, payouts, board |
 | `BettingPlugin.cs` | `OnChatMessage` team words, `/bet`, `/chips`, `/bet_status` |

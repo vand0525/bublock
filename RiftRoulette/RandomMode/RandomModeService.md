@@ -32,6 +32,10 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
   `_returning`: last round's bench player, placed into the gap this round.
   `_benchRound`: the `MatchState.Round` the bench was chosen for, so a
   reroll in the same intermission keeps the bench.
+- `Reservations` (public): the `HeroReservations` waiting lines bought with
+  betting chips (whole match; reset with the rest in `BeginMatch` /
+  `EndMatch`, like the chips at match start). Kept by Steam ID across a
+  disconnect.
 
 ## Operations
 
@@ -39,7 +43,7 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
 |---|---|---|
 | `BeginMatch(mode)` | Clears state; `TeamBalance.Even` over connected humans' current teams (keeps them when already even); logs sizes and how many moved | — |
 | `PrepareRound(timer, mode, forceBalance = false)` | See below | players swapped now |
-| `AddJoiner(player, team, timer, mode)` | Records the joiner's team and adds them to the back of the bench rotation. During a round: hero at the next intermission. In an intermission, keeping the fighters even: an odd number of fighters: the joiner plays on the smaller fighting team; else a bench player is connected: both play (bench player on the other team, swapped now; logged `Subbed in with a joiner`); else the joiner sits out (`Joiner sitting out this round`, sitting-out banner if the build banner already went out). A late hero (`AssignLate`): a hero not assigned this round (any hero if none are left), a random build, pending, `ApplyPending` fallback after 2 s | — |
+| `AddJoiner(player, team, timer, mode)` | Records the joiner's team and adds them to the back of the bench rotation. During a round: hero at the next intermission. In an intermission, keeping the fighters even: an odd number of fighters: the joiner plays on the smaller fighting team; else a bench player is connected: both play (bench player on the other team, swapped now; logged `Subbed in with a joiner`); else the joiner sits out (`Joiner sitting out this round`, sitting-out banner if the build banner already went out). A late hero (`AssignLate`): the player's reserved hero when `Reservations.TakeLate` allows it (nobody plays it this round; counts one of their rounds, chat `TurnLine`), else a hero not assigned this round (any hero if none are left); a random build, pending, `ApplyPending` fallback after 2 s | — |
 | `OnLeave(steamId, timer, mode)` | From `LobbyService.RemovePlayer` during a Random match, before the pawn is removed. `Forget`s the leaver. If they were fighting and it is an intermission and a bench player is connected: the bench player takes the leaver's team with a late hero, swapped now (`Subbed in for a player who left`). Mid-round the round plays on uneven; the next intermission evens it | — |
 | `ApplyPending(player, timer, mode)` | In Random mode, for a pending player now alive: starts their swap and clears pending | `bool` started |
 | `TryGetAssignment(steamId, out assignment)` | Current assignment lookup | `bool` |
@@ -49,7 +53,9 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
 | `AnnounceBuilds(mode)` | Marks the build banner as sent, then shows each player whose loadout has landed: title = hero game name, description `BuildDescription(build, souls)`. The bench player gets `SitOutTitle` / `SitOutDescription` (`Sitting out` / `You play next round`). Called by `MatchService` 3 s into the intermission | players shown |
 | `BuildDescription(buildName, souls)` | `<build> - 12,345 souls` (invariant culture) | string |
 | `EndMatch(mode)` | `ResetHero()` for alive assigned players (clears the build before the lobby reset), then clears state | heroes reset |
-| `Describe()` | Config line with `Bench=`, then one line per player: slot, name, team, hero, build, `PENDING`, `SITTING OUT` | lines |
+| `Describe()` | Config line with `Bench=`, then one line per player: slot, name, team, hero, build, `PENDING`, `SITTING OUT`, and `Reserved=<hero> (N left)` (front of a line) or `Waiting=<hero> #N` | lines |
+| `Reserve(player, heroText, mode)` | `/reserve`. Refuses outside a running Random match (`BettingService.Active`) and for spectators. Empty text: `DescribeReservation`. Parses the hero (`TryParseHero`, also with spaces removed; must have stored builds); refuses a player who already holds or waits for one; spends `HeroReservations.Cost` (1,000) unstaked chips (`BetBook.TrySpend`; short: the price, their chips, and a note when chips are on a bet); joins the hero's line; logs `Hero reserved Hero= Result= Ahead= RoundsAhead= Chips=`; refreshes the betting board. Reply: `Reserved <hero> for your next 3 rounds, starting the round after this one / the next round you play (N chips left).`, or `HeroReservations.WaitingLine` with the holder's name (`Another player` if they are offline) | reply |
+| `DescribeReservation(player)` | No reservation: price, usage, and their chips. Front of the line: hero and rounds left. Waiting: place, rounds ahead, own rounds | reply |
 
 ### PrepareRound
 
@@ -69,7 +75,12 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
    players between teams (see `Balance/`; with equal teams it swaps a pair,
    so the teams stay even). The fighters' teams are written back to
    `Teams`; the bench player keeps their old entry.
-5. `HeroDraw.Draw(fighters, catalog.Heroes, LastHero)`: the bench player
+5. `Reservations.Take(fighters, MatchState.Round)`: for each reserved hero,
+   the first fighter in its line (a reroll in the same intermission reuses
+   the result without counting again). Then
+   `HeroDraw.Draw(fighters, catalog.Heroes, LastHero, fixedHeroes)`:
+   reserved fighters get their hero, everyone else is drawn randomly from
+   the rest. The bench player
    gets no hero, no assignment and no `DraftState` pick, so `RoundFlow`
    leaves them up top, restrained, for the round.
 6. Clears `Assignments`, `Values`, `Pending`, `DraftState`, and the
@@ -84,7 +95,11 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
      When applied (and still the current assignment), the player is marked
      `Applied` and the build's soul value is stored; no chat line. If the
      build banner already went out, the player's banner shows now.
-8. `StatsService.RefreshBoards` (teams may have changed).
+8. Each reserved fighter gets one chat line, `HeroReservations.TurnLine`
+   (`Your reserved hero is up: Haze (round 1 of 3).` /
+   `Reserved hero: Haze (round 2 of 3).`), logged `Reserved hero used`.
+   `Round prepared` logs `Reserved=` (turns this round).
+9. `StatsService.RefreshBoards` (teams may have changed).
 
 ### GuardHero (hero swap guard)
 
@@ -104,8 +119,9 @@ Called from `DraftService.EnforceHero` on `player_hero_changed` (after
 ## Logs
 
 `Random` feature log (`random-YYYYMMDD.log`): teams, late joiners, joiners,
-sitting out and subbed in, round prepared (players / swapped / pending),
-pending starts, hero swap punishments, match end. Loadout details are in `loadout-*.log`.
+sitting out and subbed in, round prepared (players / swapped / pending /
+reserved), hero reservations bought and used, pending starts, hero swap
+punishments, match end. Loadout details are in `loadout-*.log`.
 
 ## Deadworks constraints
 

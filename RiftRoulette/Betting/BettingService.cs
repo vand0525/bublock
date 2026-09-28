@@ -147,6 +147,7 @@ public static class BettingService
       lines.Add($"Your bet: {BetBoardText.Format(bet.Stake)} chips on {RiftRouletteTeams.Name(bet.Team)}.");
 
     lines.Add(IsOpen ? "Betting is open: type sapphire or amber." : "Betting opens between rounds.");
+    lines.Add(RandomModeService.DescribeReservation(player));
     return lines;
   }
 
@@ -176,7 +177,11 @@ public static class BettingService
       ? $"type {RiftRouletteTeams.Name(teams[0]).ToLowerInvariant()} to bet on your team"
       : "type sapphire or amber";
 
-    return $"Bet on the next round: {how} (open until {LingerSeconds}s into the round). You have {chips} chips; a win doubles them.";
+    var reserve = Book.Chips(player.PlayerSteamId) >= HeroReservations.Cost && RandomModeService.Reservations.Position(player.PlayerSteamId) == null
+      ? $" Or /reserve <hero> for {BetBoardText.Format(HeroReservations.Cost)}."
+      : "";
+
+    return $"Bet on the next round: {how} (open until {LingerSeconds}s into the round). You have {chips} chips; a win doubles them.{reserve}";
   }
 
   private static int Pay(IReadOnlyList<BetSettlement> settled, string reason, ExecutionMode mode)

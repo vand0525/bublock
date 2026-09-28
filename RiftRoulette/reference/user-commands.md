@@ -77,7 +77,7 @@ below work.
 - **Who:** players, in game (`LobbyPlugin`)
 - **Calls:** `CommandList.PlayerCommands` (reads the `[Command]` attributes in RiftRoulette.dll)
 - **Mode:** Clean; read-only; not logged
-- **Side effects:** one chat line per player command (`/name - Description`, sorted: `/bet`, `/chips`, `/commands`, `/heroes`, `/pick`, `/picks`, `/queue`, `/score`, `/stats`, `/status`, `/unpick`, `/unqueue`), then `Full list: dw_help in console`
+- **Side effects:** one chat line per player command (`/name - Description`, sorted: `/bet`, `/chips`, `/commands`, `/heroes`, `/pick`, `/picks`, `/queue`, `/reserve`, `/score`, `/stats`, `/status`, `/unpick`, `/unqueue`), then `Full list: dw_help in console`
 - **Notes:** new in Stage 12. Deadworks' built-in `dw_help` only runs from the game console (there is no chat `/help`) and lists every visible command, admin ones included; `/commands` gives players a chat list of just their commands
 
 ### /score
@@ -131,5 +131,14 @@ below work.
 - **Who:** players, in game (`BettingPlugin`)
 - **Calls:** `BettingService.DescribePlayer`
 - **Mode:** Clean; read-only; not logged
-- **Side effects:** chat lines: `You have N chips.`, your open bet if any, and whether betting is open
+- **Side effects:** chat lines: `You have N chips.`, your open bet if any, whether betting is open, and your hero reservation (or how to buy one with `/reserve`)
 - **Notes:** new 2026-09-27
+
+### /reserve [hero]
+
+- **Invocation:** chat `/reserve <hero>` or `!reserve <hero>` | console `dw_reserve <hero>`. The hero's name, any case; spaces allowed (`/reserve lady geist`). No argument: shows your reservation
+- **Who:** players, in game (`RandomPlugin`); Random mode match only
+- **Calls:** `RandomModeService.Reserve` → `BetBook.TrySpend`, `HeroReservations.TryReserve`
+- **Mode:** Clean; logged in `random-*.log`
+- **Side effects:** spends 1,000 chips (not chips riding on a bet) and puts you in line for that hero. Nobody ahead: `Reserved Haze for your next 3 rounds, starting the round after this one (250 chips left).` Someone ahead: `Kamilk has reserved Haze. When their 3 rounds are done, it will be your turn.` (with more ahead: `2 players are ahead of you for Haze (5 rounds). Then it will be your turn.`). From the next hero draw, the first player in the hero's line who is fighting that round gets it with a random stored build, and a chat line: `Your reserved hero is up: Haze (round 1 of 3).`, then `Reserved hero: Haze (round 2 of 3).` Everyone else is drawn randomly from the other heroes. The betting board total drops by 1,000
+- **Notes:** new 2026-09-27. One reservation per player (holding or waiting). Rounds you sit out don't count; if the holder sits out or is away, the next fighter in line plays the hero that round. Refused outside a Random match, for spectators, for an unknown hero, and with fewer than 1,000 free chips. No refunds: an unused reservation ends with the match (chips reset at every match start)

@@ -16,7 +16,7 @@ Thin host for round betting (`BettingService`).
 | Command | Who | Calls | Reply |
 |---|---|---|---|
 | `/bet <sapphire\|amber>` | players | `BettingService.TryBet` | the bet reply in chat; `Bet on sapphire or amber.` for another word |
-| `/chips` | players | `BettingService.DescribePlayer` | chips, open bet, whether betting is open |
+| `/chips` | players | `BettingService.DescribePlayer` | chips, open bet, whether betting is open, hero reservation |
 | `/bet_status` | admin | `BettingService.RefreshBoard` + `Describe` (Debug) | every participant's chips and bet |
 
 ## Deadworks constraints

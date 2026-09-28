@@ -127,7 +127,7 @@ they call each other with typed C# (no command/convar messaging):
 - GameLoop (`GameLoopPlugin`): player `/score`; admin `match_start`,
   `match_end`, `match_auto`, `match_status`, `match_intermission`, `match_mode`,
   `match_format`, `match_config`
-- Random (`RandomPlugin`): admin `random_status`, `random_reroll`
+- Random (`RandomPlugin`): player `/reserve [hero]`; admin `random_status`, `random_reroll`
 - Duel (`DuelPlugin`): player `/queue`, `/unqueue`; admin `duel_copy`,
   `duel_clear`, `duel_status`, `duel_queue`, `duel_queue_add`,
   `duel_queue_remove`

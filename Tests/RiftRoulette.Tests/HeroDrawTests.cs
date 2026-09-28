@@ -57,6 +57,34 @@ public class HeroDrawTests
   }
 
   [Fact]
+  public void Draw_gives_fixed_heroes_and_never_draws_them_for_anyone_else()
+  {
+    var players = new ulong[] { 1, 2, 3, 4, 5 };
+    var fixedHeroes = new Dictionary<ulong, Heroes> { [1] = Heroes.Haze, [9] = Heroes.Shiv };
+    var previous = new Dictionary<ulong, Heroes> { [1] = Heroes.Haze };
+
+    for (var seed = 0; seed < 50; seed++)
+    {
+      var drawn = HeroDraw.Draw(players, Pool, previous, new Random(seed), fixedHeroes);
+
+      Assert.Equal(players.Order(), drawn.Keys.Order());
+      Assert.Equal(Heroes.Haze, drawn[1]);
+      Assert.DoesNotContain(players.Skip(1), player => drawn[player] == Heroes.Haze);
+      Assert.Equal(drawn.Count, drawn.Values.Distinct().Count());
+    }
+  }
+
+  [Fact]
+  public void Draw_with_no_fixed_heroes_matches_the_plain_draw()
+  {
+    var players = new ulong[] { 1, 2, 3 };
+
+    Assert.Equal(
+      HeroDraw.Draw(players, Pool, None, new Random(7)),
+      HeroDraw.Draw(players, Pool, None, new Random(7), new Dictionary<ulong, Heroes>()));
+  }
+
+  [Fact]
   public void Draw_with_an_empty_pool_assigns_nobody()
   {
     Assert.Empty(HeroDraw.Draw([1, 2], [], None, new Random(0)));

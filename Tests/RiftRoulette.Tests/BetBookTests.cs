@@ -19,6 +19,26 @@ public class BetBookTests
   }
 
   [Fact]
+  public void TrySpend_takes_only_unstaked_chips()
+  {
+    var book = new BetBook();
+
+    for (var kill = 0; kill < 10; kill++)
+      book.AwardKill(1);
+
+    Assert.True(book.TrySpend(1, 1000));
+    Assert.Equal(100, book.Chips(1));
+    Assert.False(book.TrySpend(1, 1000));
+    Assert.False(book.TrySpend(1, 0));
+    Assert.Equal(100, book.Chips(1));
+
+    book.Place(1, S, Both);
+
+    Assert.False(book.TrySpend(1, 100));
+    Assert.Equal(100, book.Total(1));
+  }
+
+  [Fact]
   public void A_kill_adds_chips()
   {
     var book = new BetBook();
