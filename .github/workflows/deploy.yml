@@ -10,6 +10,14 @@ on:
         description: Back up the server's DLLs first (rollback.sh needs this)
         type: boolean
         default: true
+      plugins:
+        description: Plugin set to upload (one game type + tools)
+        type: string
+        default: GunGame DevTools CleanSlate
+      parked:
+        description: Other game types to back up and remove from the server
+        type: string
+        default: RiftRoulette
 
 concurrency:
   group: deploy-production
@@ -52,6 +60,8 @@ jobs:
       - name: Deploy
         env:
           DW_PASSWORD: ${{ secrets.DW_PASSWORD }}
+          DW_PLUGINS: ${{ inputs.plugins }}
+          DW_PARKED: ${{ inputs.parked }}
           BACKUP_FLAG: ${{ inputs.backup && '' || '--no-backup' }}
         run: scripts/deploy.sh --confirm $BACKUP_FLAG
 

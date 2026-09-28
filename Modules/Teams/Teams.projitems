@@ -1,0 +1,12 @@
+<Project>
+
+  <PropertyGroup>
+    <HasSharedItems>true</HasSharedItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)DeadlockTeams.cs" Link="Modules/Teams/DeadlockTeams.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ChoiceGuard.cs" Link="Modules/Teams/ChoiceGuard.cs" />
+  </ItemGroup>
+
+</Project>

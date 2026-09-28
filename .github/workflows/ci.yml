@@ -29,6 +29,7 @@ jobs:
           name: plugins-${{ github.sha }}
           path: |
             RiftRoulette/bin/Release/net10.0/RiftRoulette.dll
+            GunGame/bin/Release/net10.0/GunGame.dll
             DevTools/bin/Release/net10.0/DevTools.dll
             CleanSlate/bin/Release/net10.0/CleanSlate.dll
           retention-days: 14

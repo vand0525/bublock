@@ -1,0 +1,13 @@
+<Project>
+
+  <PropertyGroup>
+    <HasSharedItems>true</HasSharedItems>
+  </PropertyGroup>
+
+  <!-- Needs Shared.projitems, Movement.projitems and Teams.projitems in the same project. -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ArenaSpots.cs" Link="Modules/Arena/ArenaSpots.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ArenaService.cs" Link="Modules/Arena/ArenaService.cs" />
+  </ItemGroup>
+
+</Project>

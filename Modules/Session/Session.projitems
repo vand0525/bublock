@@ -1,0 +1,14 @@
+<Project>
+
+  <PropertyGroup>
+    <HasSharedItems>true</HasSharedItems>
+  </PropertyGroup>
+
+  <!-- TimedSession needs Shared.projitems (logging) in the same project; the rest is pure. -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Scoreboard.cs" Link="Modules/Session/Scoreboard.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SessionRule.cs" Link="Modules/Session/SessionRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimedSession.cs" Link="Modules/Session/TimedSession.cs" />
+  </ItemGroup>
+
+</Project>

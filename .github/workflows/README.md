@@ -3,7 +3,7 @@
 | Workflow | Runs on | Does | Server access |
 |---|---|---|---|
 | `ci.yml` | every push to `main`, every PR, manual | `fetch-deadworks.sh`, `update.sh` (build), `test.sh`; uploads the three plugin DLLs as an artifact | none |
-| `deploy.yml` | manual only (Actions → Deploy → Run workflow), `main` only | tests, then `scripts/deploy.sh --confirm` (backup, upload, retired-DLL cleanup); keeps `server-backups/<stamp>/` as an artifact for 90 days | SFTP |
+| `deploy.yml` | manual only (Actions → Deploy → Run workflow), `main` only | tests, then `scripts/deploy.sh --confirm` with the chosen plugin set (inputs `plugins`, default `GunGame DevTools CleanSlate`, and `parked`, default `RiftRoulette`); keeps `server-backups/<stamp>/` as an artifact for 90 days | SFTP |
 
 Deploy is manual on purpose: `.rules` §0.2 says nothing reaches the live
 server without an explicit approval per upload. Pressing "Run workflow" is

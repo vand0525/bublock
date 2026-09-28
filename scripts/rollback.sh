@@ -60,4 +60,19 @@ for dll in "${DLLS[@]}"; do
   echo "  restored $name"
 done
 
+# One game type at a time: when the backup holds a game type, other game types' DLLs come off the server.
+read -r -a GAME_TYPES <<< "${DW_GAME_TYPES:-RiftRoulette GunGame}"
+restored_game=false
+for game in "${GAME_TYPES[@]}"; do
+  [[ -f "$BACKUP_DIR/$game.dll" ]] && restored_game=true
+done
+if [[ "$restored_game" == true ]]; then
+  for game in "${GAME_TYPES[@]}"; do
+    if [[ ! -f "$BACKUP_DIR/$game.dll" ]]; then
+      lftp --env-password -u "$DW_USER" "sftp://$DW_HOST:$DW_PORT" \
+        -e "rm '$REMOTE_DIR/$game.dll'; bye" >/dev/null 2>&1 && echo "  removed $game.dll (not in this backup's game type)" || true
+    fi
+  done
+fi
+
 echo "Rollback OK. Plugins without a backup in $STAMP were left as they are."

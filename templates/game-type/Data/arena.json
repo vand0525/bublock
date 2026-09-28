@@ -1,0 +1,23 @@
+{
+  "name": "mid lane brawl",
+  "source": "dl_midtown build 6698 middle lane (lanenum 4, citadel_active_lane 4). Street level z 376 at y +/-2000, probed with scripts/check-arena.py --probe; spots checked with scripts/check-arena.py",
+  "active_lane": 4,
+  "amber": { "position": [0.0, -2000.0, 376.0], "angle": [0.0, 90.0, 0.0] },
+  "sapphire": { "position": [0.0, 2000.0, 376.0], "angle": [0.0, -90.0, 0.0] },
+  "bounds": { "min": [-1500.0, -2800.0, -900.0], "max": [1500.0, 2800.0, 1600.0] },
+  "offsets": [
+    [0, 0, 0],
+    [0, 100, 0],
+    [0, -100, 0],
+    [0, 200, 0],
+    [0, -200, 0],
+    [-100, 50, 0],
+    [-100, -50, 0],
+    [-100, 150, 0],
+    [-100, -150, 0],
+    [-200, 0, 0],
+    [-200, 100, 0],
+    [-200, -100, 0],
+    [-200, 200, 0]
+  ]
+}

@@ -30,3 +30,11 @@ Same as `deploy.sh` (`scripts/server.env`, `lftp`, password from
 `DW_REMOTE_GAME` in `server.env` overrides the remote game folder
 (default `/server/game`; `""` means the SFTP root, as on the deadworks.net
 panel). `server-check.sh` prints the right value.
+
+## Game types
+
+When the backup holds a game type's DLL (`DW_GAME_TYPES`, default
+`RiftRoulette GunGame`), every other game type's DLL is removed from the
+server after the restore, so rolling back across a switch never leaves two
+game types loaded. Backups with only tool plugins leave game types alone.
+

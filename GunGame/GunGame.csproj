@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="DeadworksManaged.Api">
+      <HintPath>$(DeadworksLibDir)/DeadworksManaged.Api.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="Google.Protobuf">
+      <HintPath>$(DeadworksLibDir)/Google.Protobuf.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- A game type: Shared + engine modules only, never another game type's code.
+       Services only; the modules' *Commands.projitems stay out so command names never clash. -->
+  <Import Project="..\Shared\Shared.projitems" />
+  <Import Project="..\Modules\Loadout\Loadout.projitems" />
+  <Import Project="..\Modules\RandomLoadout\RandomLoadout.projitems" />
+  <Import Project="..\Modules\Hud\Hud.projitems" />
+  <Import Project="..\Modules\Movement\Movement.projitems" />
+  <Import Project="..\Modules\Teams\Teams.projitems" />
+  <Import Project="..\Modules\Arena\Arena.projitems" />
+  <Import Project="..\Modules\Session\Session.projitems" />
+  <Import Project="..\Modules\Economy\Economy.projitems" />
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data\arena.json" LogicalName="GunGame.arena.json" />
+  </ItemGroup>
+
+</Project>

@@ -27,16 +27,14 @@
   </ItemGroup>
 
   <Import Project="..\..\Shared\Shared.projitems" />
-  <Import Project="..\..\Modules\WorldText\WorldText.projitems" />
   <Import Project="..\..\Modules\Movement\Movement.projitems" />
-  <Import Project="..\..\Modules\Hud\Hud.projitems" />
-  <Import Project="..\..\Modules\Loadout\Loadout.projitems" />
-  <Import Project="..\..\Modules\Queue\Queue.projitems" />
-  <Import Project="..\..\Modules\Spectate\Spectate.projitems" />
   <Import Project="..\..\Modules\Teams\Teams.projitems" />
   <Import Project="..\..\Modules\Arena\Arena.projitems" />
   <Import Project="..\..\Modules\Session\Session.projitems" />
-  <Import Project="..\..\Modules\Economy\Economy.projitems" />
-  <Import Project="..\..\Modules\RandomLoadout\RandomLoadout.projitems" />
+
+  <ItemGroup>
+    <Compile Include="..\..\__NAME__\__NAME__Rules.cs" Link="__NAME__\__NAME__Rules.cs" />
+    <EmbeddedResource Include="..\..\__NAME__\Data\arena.json" LogicalName="__NAME__.arena.json" Link="__NAME__\Data\arena.json" />
+  </ItemGroup>
 
 </Project>

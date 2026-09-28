@@ -63,3 +63,19 @@ change). Roll back with `rollback.sh <stamp>`.
 `DW_REMOTE_GAME` in `server.env` overrides the remote game folder
 (default `/server/game`; `""` means the SFTP root, as on the deadworks.net
 panel). `server-check.sh` prints the right value.
+
+## Plugin sets (one game type per server)
+
+`server.env` picks what goes up:
+
+- `DW_PLUGINS`: the DLLs to build-check and upload (default
+  `RiftRoulette DevTools CleanSlate`). A game type folder `X/` builds
+  `X/bin/Release/net10.0/X.dll`.
+- `DW_PARKED`: other game types' DLLs. They are backed up with the rest,
+  then removed from `plugins/` before the upload (`parked X.dll`), so two
+  game types never load together; their log folders stay.
+
+Example (the redock server): `DW_PLUGINS="GunGame DevTools CleanSlate"`,
+`DW_PARKED="RiftRoulette"`. Switching back is the same with the names
+swapped.
+

@@ -14,7 +14,10 @@ source "$ROOT/scripts/server.env"
 # Game folder over SFTP: Theo's host /server/game; DW_REMOTE_GAME="" means the SFTP root.
 REMOTE_GAME="${DW_REMOTE_GAME-/server/game}"
 REMOTE_DIR="$REMOTE_GAME/bin/win64/managed/plugins"
-PLUGINS=(RiftRoulette DevTools CleanSlate)
+# The plugin set this server runs (server.env DW_PLUGINS); one game type plus the tool plugins.
+read -r -a PLUGINS <<< "${DW_PLUGINS:-RiftRoulette DevTools CleanSlate}"
+# Other game types' DLLs (server.env DW_PARKED): backed up, then removed so two game types never load; logs kept.
+read -r -a PARKED_PLUGINS <<< "${DW_PARKED:-}"
 # Old DLL names still on the server after a rename; deleted so two copies never load.
 RETIRED_PLUGINS=(RiftRumble)
 REMOTE_LOG_DIR="$REMOTE_GAME/bin/win64/bublock/logs"
@@ -61,7 +64,7 @@ mkdir -p "$BACKUP_DIR"
 
 if [[ "$BACKUP" == true ]]; then
   echo "Backing up server plugins to $BACKUP_DIR ..."
-  for plugin in "${PLUGINS[@]}" "${RETIRED_PLUGINS[@]}"; do
+  for plugin in "${PLUGINS[@]}" "${RETIRED_PLUGINS[@]}" ${PARKED_PLUGINS[@]+"${PARKED_PLUGINS[@]}"}; do
     if sftp_run "cls -1 '$REMOTE_DIR/$plugin.dll'" >/dev/null 2>&1; then
       sftp_run "get '$REMOTE_DIR/$plugin.dll' -o '$BACKUP_DIR/$plugin.dll'"
       echo "  backed up $plugin.dll"
@@ -79,6 +82,13 @@ for plugin in "${RETIRED_PLUGINS[@]}"; do
     sftp_run "rm '$REMOTE_DIR/$plugin.dll'"
     RETIRED_REMOVED=true
     echo "  removed retired $plugin.dll"
+  fi
+done
+
+for plugin in ${PARKED_PLUGINS[@]+"${PARKED_PLUGINS[@]}"}; do
+  if sftp_run "cls -1 '$REMOTE_DIR/$plugin.dll'" >/dev/null 2>&1; then
+    sftp_run "rm '$REMOTE_DIR/$plugin.dll'"
+    echo "  parked $plugin.dll (removed from the server; backup and logs kept)"
   fi
 done
 

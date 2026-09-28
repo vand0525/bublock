@@ -1,0 +1,13 @@
+<Project>
+
+  <PropertyGroup>
+    <HasSharedItems>true</HasSharedItems>
+  </PropertyGroup>
+
+  <!-- Needs Shared.projitems and Loadout.projitems in the same project. -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)HeroRoll.cs" Link="Modules/RandomLoadout/HeroRoll.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RandomLoadouts.cs" Link="Modules/RandomLoadout/RandomLoadouts.cs" />
+  </ItemGroup>
+
+</Project>
