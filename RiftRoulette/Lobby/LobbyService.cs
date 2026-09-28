@@ -33,7 +33,7 @@ public static class LobbyService
     ServerConVars.TrySet("citadel_hero_demo_unlock_flex_slots", 1, LobbyLog);
     FlexSlots.UnlockAll(mode);
     ShopAccess.Sync(mode);
-    PauseGuard.Apply(mode);
+    PauseGuard.FollowAccess(mode);
 
     LobbyLog.WithMode(mode).Info(
       "Server convars applied TeamSize={TeamSize} MaxPlayers={MaxPlayers} Visible={Visible}",

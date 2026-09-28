@@ -70,12 +70,14 @@ statues are restrained only. `DevTools/ModifierProbe` logs modifier names
 to find it (have someone cast Vyper's Petrify, then read
 `modifiers-*.log`).
 
-Pausing: off after every load (`PauseGuard`). The game's pause convars are
-set to 0 with the other server convars, pause console commands are blocked
-in `OnClientConCommand`, the two pause net messages are blocked with
+Pausing follows join access (`PauseGuard.FollowAccess`): on in private mode
+(an organised event), off when open, set on every load and by
+`/access_mode`. While off, the game's pause convars are set to 0 with the
+other server convars, pause console commands are blocked in
+`OnClientConCommand`, the two pause net messages are blocked with
 `NetMessages.HookIncoming`, and a game that is paused anyway is unpaused
-with the server `pause` toggle. `/pause_allow on` turns pausing back on
-until the next load.
+with the server `pause` toggle. `/pause_allow on|off` overrides it until
+the next load or mode change.
 
 Flex slots (`FlexSlots`): every flex item slot is open for both teams, so a
 hero holds 12 items (9 by default). The team entities

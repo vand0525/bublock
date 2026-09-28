@@ -127,13 +127,65 @@ public class HeroReservationsTests
     Assert.Empty(book.Take([A], 1));
   }
 
-  [Theory]
-  [InlineData(1, 3, "Kamilk has reserved Haze. When their 3 rounds are done, it will be your turn.")]
-  [InlineData(1, 1, "Kamilk has reserved Haze. When their 1 round is done, it will be your turn.")]
-  [InlineData(2, 5, "2 players are ahead of you for Haze (5 rounds). Then it will be your turn.")]
-  public void WaitingLine_names_the_holder_or_counts_the_line(int ahead, int roundsAhead, string expected)
+  [Fact]
+  public void A_banned_hero_uses_the_front_fighters_round_without_a_turn()
   {
-    Assert.Equal(expected, HeroReservations.WaitingLine("Kamilk", "Haze", ahead, roundsAhead));
+    var book = new HeroReservations();
+    book.TryReserve(A, Heroes.Haze);
+    book.TryReserve(B, Heroes.Haze);
+    book.TryReserve(C, Heroes.Shiv);
+
+    var turns = book.Take([A, B, C], 1, new HashSet<Heroes> { Heroes.Haze });
+
+    Assert.Equal([new ReservedTurn(C, Heroes.Shiv, 1)], turns);
+    Assert.Equal([new ReservedTurn(A, Heroes.Haze, 1)], book.Burned);
+    Assert.Equal(2, book.Position(A)!.RoundsLeft);
+    Assert.Equal(3, book.Position(B)!.RoundsLeft);
+
+    Assert.Equal([new ReservedTurn(A, Heroes.Haze, 2)], book.Take([A, B, C], 2).Where(turn => turn.Hero == Heroes.Haze));
+    Assert.Empty(book.Burned);
+  }
+
+  [Fact]
+  public void A_ban_on_the_last_round_ends_the_reservation()
+  {
+    var book = new HeroReservations();
+    book.TryReserve(A, Heroes.Haze);
+    book.Take([A], 1);
+    book.Take([A], 2);
+
+    book.Take([A], 3, new HashSet<Heroes> { Heroes.Haze });
+
+    Assert.Equal([new ReservedTurn(A, Heroes.Haze, 3)], book.Burned);
+    Assert.Null(book.Position(A));
+  }
+
+  [Fact]
+  public void TakeLate_refuses_a_banned_hero()
+  {
+    var book = new HeroReservations();
+    book.TryReserve(A, Heroes.Haze);
+    book.Take([B], 1);
+
+    Assert.Null(book.TakeLate(A, 1, new HashSet<Heroes>(), new HashSet<Heroes> { Heroes.Haze }));
+    Assert.Equal(3, book.Position(A)!.RoundsLeft);
+  }
+
+  [Theory]
+  [InlineData(1, 3, "Someone has reserved Haze. When their 3 rounds are done, it will be your turn.")]
+  [InlineData(1, 1, "Someone has reserved Haze. When their 1 round is done, it will be your turn.")]
+  [InlineData(2, 5, "2 players are ahead of you for Haze (5 rounds). Then it will be your turn.")]
+  public void WaitingLine_never_names_the_holder(int ahead, int roundsAhead, string expected)
+  {
+    Assert.Equal(expected, HeroReservations.WaitingLine("Haze", ahead, roundsAhead));
+  }
+
+  [Fact]
+  public void BurnedLine_says_which_round_was_used()
+  {
+    Assert.Equal(
+      "Your reserved Haze was banned this round (round 2 of 3 used).",
+      HeroReservations.BurnedLine("Haze", 2));
   }
 
   [Theory]

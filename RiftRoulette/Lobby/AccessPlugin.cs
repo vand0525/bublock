@@ -124,13 +124,15 @@ public class AccessPlugin : DeadworksPluginBase
         return;
 
       case "open":
-        AdminCommand.Reply(caller, $"[Access] {AccessService.SetPrivate(false, ExecutionMode.Debug)}");
+        var opened = AccessService.SetPrivate(false, ExecutionMode.Debug);
+        AdminCommand.Reply(caller, $"[Access] {opened} {PauseGuard.SetAllowed(false, ExecutionMode.Debug)}");
         return;
 
       case "private":
         var reply = AccessService.SetPrivate(true, ExecutionMode.Debug);
         var kicked = AccessService.KickDenied(ExecutionMode.Debug);
-        AdminCommand.Reply(caller, $"[Access] {reply}{KickedSuffix(kicked)}");
+        var pausing = PauseGuard.SetAllowed(true, ExecutionMode.Debug);
+        AdminCommand.Reply(caller, $"[Access] {reply} {pausing}{KickedSuffix(kicked)}");
         return;
 
       default:

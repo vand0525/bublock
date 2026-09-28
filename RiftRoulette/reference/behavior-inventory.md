@@ -209,6 +209,7 @@ column); `new` = no archive equivalent.
 | `/bet <sapphire\|amber>` (or type the team name in chat) | — | Betting | `BettingService.TryBet` | Bet all your souls on the next round (own team only while fighting) | new |
 | `/souls` | — | Betting | `BettingService.DescribePlayer` | Your souls, open bet, whether betting is open, your hero reservation | new |
 | `/reserve [hero]` | — | Random | `RandomModeService.Reserve` | Spend 1,000 souls to play a hero in your next 3 fighting rounds; a waiting line per hero (Random mode match only) | new |
+| `/heroban [hero]` | — | Random | `RandomModeService.Ban` | Spend 1,000 souls to ban a hero from the next draw for both teams; one per team per round, revealed at round start (Random mode match only) | new |
 | `/queue` | — | Duel | `DuelService.JoinQueue` | Join the 1v1 queue (winner stays on), or see your place (1v1 mode only) | new |
 | `/unqueue` | — | Duel | `DuelService.LeaveQueue` | Leave the 1v1 queue (not while fighting) | new |
 
@@ -222,7 +223,7 @@ column); `new` = no archive equivalent.
 | `/player_team <slot> <sapphire\|amber>` | — | Lobby | `SetTeam` | Move a player to a team (Sapphire 3, Amber 2) | new |
 | `/lobby_setup` | — | Lobby | `ApplyServerConvars` | Re-apply the startup convars and commands | new |
 | `/lobby_flex` | — | Lobby | `FlexSlots.UnlockAll` / `Describe` | Open every flex slot on both teams and show each team's flags | new |
-| `/pause_allow [on\|off]` | — | Lobby | `PauseGuard.Describe` / `SetAllowed` | Show whether players can pause, or turn pausing on / off (off after every load) | new |
+| `/pause_allow [on\|off]` | — | Lobby | `PauseGuard.Describe` / `SetAllowed` | Show whether players can pause, or turn pausing on / off (every load sets it from private mode) | new |
 | `dw_seat_spec` | — | Lobby | `AdminSeat.Sit` | Admin (caller, else the admin Steam ID) to the spectator seat, outside teams. Console only (`ConsoleOnly`); any time (spectator team + `MakeObserver`). Admins are seated on every connect | new |
 | `/seat_play` | — | Lobby | `AdminSeat.Stand` | Admin (caller, else the admin Steam ID) out of the seat and onto a team (console: `dw_seat_play`, no arguments) | new |
 | `/seat_status` | — | Lobby | `AdminSeat.Describe` | Player slots, admin seat, `maxplayers` | new |
@@ -237,7 +238,7 @@ column); `new` = no archive equivalent.
 | `/allow_add <steamid>` | — | Lobby (Access) | `AccessService.Allow` | Whitelist a Steam64 ID for private mode | new |
 | `/allow_remove <steamid>` | — | Lobby (Access) | `AccessService.Disallow` | Remove from the whitelist (no kick) | new |
 | `/allow_list` | — | Lobby (Access) | `AccessService.DescribeAllowed` | List whitelisted IDs | new |
-| `/access_mode [open\|private]` | — | Lobby (Access) | `AccessService.Describe` / `SetPrivate`, `KickDenied` | Show access, or switch open / private (private kicks players without access) | new |
+| `/access_mode [open\|private]` | — | Lobby (Access) | `AccessService.Describe` / `SetPrivate`, `KickDenied`, `PauseGuard.SetAllowed` | Show access, or switch open / private (private kicks players without access and turns pausing on; open turns it off) | new |
 | `/session_info` | — | Session | — | RiftRoulette session id, round id, map, log folder, file-logging state | new |
 | `/selftest_run [all]` | — | SelfTest | `SelfTestService.Run` | Check every game dependency after a patch (PASS / WARN / FAIL) | new |
 | `/selftest_live <slot>` | — | SelfTest | `SelfTestService.Live` | Teleport, restraint, banner and loadout check on one player | new |
@@ -246,6 +247,7 @@ column); `new` = no archive equivalent.
 | `/draft_release <slot>` | — | Draft | `UnselectHero` | Unpick for a player (same effects as `/unpick`) | new |
 | `/draft_reset` | `/reset` | Draft | `ResetDraft` | Clear the whole draft (archive effects) | archive |
 | `/draft_boards` | — | Draft | `RedrawBoards` | Redraw the draft boards | new |
+| `/draft_note [text]` | — | Draft | `WelcomeNoteStore.Set` + `RedrawBoards` | Set or clear the saved note under the welcome board | new |
 | `/rift_start` | `/koth` | Rift | `RunRift` | Run the known-good rift sequence | archive |
 | `/rift_status` | — | Rift | `DescribeRift` | Next side, phase (idle / waiting for spawn / live / ending), last outcome | new |
 | `/rift_next <green\|yellow>` | — | Rift | `SetNextSide`, `WatchSpot.MoveAllUp` | Force the next side; players and boards move above it | new |

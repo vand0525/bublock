@@ -14,6 +14,10 @@ Unit tests for `RiftRoulette/RandomMode/HeroReservations`.
 - Never two players on one hero in a round.
 - `TakeLate` does nothing before the round's draw, refuses a hero someone
   plays this round, and counts a late turn once.
+- A banned hero uses the front fighter's round without a turn (`Burned`),
+  the next player in line waits, and a ban on the last round ends the
+  reservation. `TakeLate` refuses a banned hero without counting.
 - `Reset` clears everything.
-- `WaitingLine` names the holder (one ahead) or counts the line;
-  `TurnLine` says which of the 3 rounds this is.
+- `WaitingLine` never names the holder ("Someone has reserved ...") or
+  counts the line; `TurnLine` says which of the 3 rounds this is;
+  `BurnedLine` says which round the ban used.

@@ -31,9 +31,14 @@ public sealed class HeroReservations
 
   private readonly Dictionary<ulong, ReservedTurn> _taken = [];
 
+  private readonly List<ReservedTurn> _burned = [];
+
   private int? _takenRound;
 
   public int Count => _lines.Values.Sum(line => line.Count);
+
+  // Reservations whose hero was banned in the last Take: the round was used without the hero.
+  public IReadOnlyList<ReservedTurn> Burned => _burned;
 
   public ReserveOutcome TryReserve(ulong steamId, Heroes hero)
   {
@@ -51,29 +56,39 @@ public sealed class HeroReservations
     return new ReserveOutcome(ahead == 0 ? ReserveResult.Holding : ReserveResult.Waiting, hero, ahead, roundsAhead, holder);
   }
 
-  // For each hero, the first fighter in its line plays it and uses one round. A reroll in the same round reuses the result.
-  public IReadOnlyList<ReservedTurn> Take(IReadOnlyCollection<ulong> fighters, int round)
+  // For each hero, the first fighter in its line plays it and uses one round. A banned hero's first fighter
+  // loses that round without the hero (see Burned). A reroll in the same round reuses the result.
+  public IReadOnlyList<ReservedTurn> Take(IReadOnlyCollection<ulong> fighters, int round, IReadOnlySet<Heroes>? banned = null)
   {
     if (_takenRound == round)
       return _taken.Values.Where(turn => fighters.Contains(turn.SteamId)).ToList();
 
     _takenRound = round;
     _taken.Clear();
+    _burned.Clear();
 
     foreach (var (hero, line) in _lines)
     {
       var entry = line.FirstOrDefault(candidate => fighters.Contains(candidate.SteamId));
 
-      if (entry != null)
-        Use(hero, line, entry);
+      if (entry == null)
+        continue;
+
+      var turn = Use(hero, line, entry);
+
+      if (banned?.Contains(hero) == true)
+      {
+        _taken.Remove(entry.SteamId);
+        _burned.Add(turn);
+      }
     }
 
     RemoveEmptyLines();
     return _taken.Values.ToList();
   }
 
-  // A player who starts fighting mid-intermission gets their hero when nobody plays it this round.
-  public ReservedTurn? TakeLate(ulong steamId, int round, IReadOnlySet<Heroes> playedThisRound)
+  // A player who starts fighting mid-intermission gets their hero when nobody plays it and it is not banned this round.
+  public ReservedTurn? TakeLate(ulong steamId, int round, IReadOnlySet<Heroes> playedThisRound, IReadOnlySet<Heroes>? banned = null)
   {
     if (_takenRound != round)
       return null;
@@ -88,7 +103,7 @@ public sealed class HeroReservations
       if (entry == null)
         continue;
 
-      if (playedThisRound.Contains(hero))
+      if (playedThisRound.Contains(hero) || banned?.Contains(hero) == true)
         return null;
 
       var turn = Use(hero, line, entry);
@@ -123,15 +138,20 @@ public sealed class HeroReservations
   {
     _lines.Clear();
     _taken.Clear();
+    _burned.Clear();
     _takenRound = null;
   }
 
   public static string RoundCount(int count) => count == 1 ? "1 round" : $"{count} rounds";
 
-  public static string WaitingLine(string holderName, string heroName, int ahead, int roundsAhead) =>
+  // Never names the holder: a reservation is secret, so the other team cannot plan around it.
+  public static string WaitingLine(string heroName, int ahead, int roundsAhead) =>
     ahead <= 1
-      ? $"{holderName} has reserved {heroName}. When their {RoundCount(roundsAhead)} {(roundsAhead == 1 ? "is" : "are")} done, it will be your turn."
+      ? $"Someone has reserved {heroName}. When their {RoundCount(roundsAhead)} {(roundsAhead == 1 ? "is" : "are")} done, it will be your turn."
       : $"{ahead} players are ahead of you for {heroName} ({RoundCount(roundsAhead)}). Then it will be your turn.";
+
+  public static string BurnedLine(string heroName, int use) =>
+    $"Your reserved {heroName} was banned this round (round {use} of {Rounds} used).";
 
   public static string TurnLine(string heroName, int use) =>
     use == 1

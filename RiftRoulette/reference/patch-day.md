@@ -123,8 +123,8 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | `citadel_allow_duplicate_heroes` | 1 | `LobbyService` |
 | `citadel_hero_demo_unlock_flex_slots` | 1 (did not open the slots alone; `Lobby/FlexSlots` does) | `LobbyService` |
 | `citadel_allow_purchasing_anywhere` | 0, or 1 in 1v1 setup | `GameLoop/ShopAccess.cs` |
-| `citadel_allow_pausing` | 0, or 1 after `/pause_allow on` (devonly, replicated) | `Lobby/PauseRule.cs` `ConVars`, set by `PauseGuard.Apply` |
-| `citadel_allow_pause_in_match` | 0, or 1 after `/pause_allow on` | same |
+| `citadel_allow_pausing` | 0 when open, 1 in private mode or after `/pause_allow on` (devonly, replicated) | `Lobby/PauseRule.cs` `ConVars`, set by `PauseGuard.Apply` |
+| `citadel_allow_pause_in_match` | 0 when open, 1 in private mode or after `/pause_allow on` | same |
 | `citadel_pause_allow_in_pregame` | 0 | same |
 | `pause` | command (toggle), automatic unpause | `Lobby/PauseGuard.cs` `Tick` |
 | `citadel_trooper_spawn_enabled` | 0 | `CleanSlate/CleanSlateService.cs` |

@@ -326,6 +326,9 @@ public static class MatchService
     _bettingClose = _timer!.Once(BettingService.LingerSeconds.Seconds(), () => CloseBetting(round, mode));
 
     log.Info("Round started Round={Round} Side={Side}", State.Round, RiftSides.Name(side));
+
+    if (MatchConfig.IsRandom)
+      RandomModeService.AnnounceBans(mode);
   }
 
   private static void CloseBetting(int round, ExecutionMode mode)

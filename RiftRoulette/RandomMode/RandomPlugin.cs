@@ -48,6 +48,12 @@ public class RandomPlugin : DeadworksPluginBase
     PlayerChat.Send(player, RandomModeService.Reserve(player, string.Join(' ', hero)));
   }
 
+  [Command("heroban", Description = "Spend 1,000 souls to ban a hero for both teams for one round: heroban <hero>")]
+  public void CmdHeroBan(CCitadelPlayerController player, params string[] hero)
+  {
+    PlayerChat.Send(player, RandomModeService.Ban(player, string.Join(' ', hero)));
+  }
+
   [Command("random_status", Description = "Show Random mode teams, heroes, builds, and pending swaps")]
   public void CmdRandomStatus(CCitadelPlayerController? caller)
   {

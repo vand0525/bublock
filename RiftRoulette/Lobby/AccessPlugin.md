@@ -24,8 +24,8 @@ commands. Ops live on `AccessService`. The connect gate itself stays in
 | `/allow_remove <steamid>` | `AccessService.Disallow` (does not kick) |
 | `/allow_list` | `AccessService.DescribeAllowed` |
 | `/access_mode` | `AccessService.Describe`: mode, file path, both lists |
-| `/access_mode open` | `AccessService.SetPrivate(false)`; nobody is kicked |
-| `/access_mode private` | `AccessService.SetPrivate(true)`, then `KickDenied` (connected players neither whitelisted nor admin are kicked) |
+| `/access_mode open` | `AccessService.SetPrivate(false)`, then `PauseGuard.SetAllowed(false)`; nobody is kicked. Reply ends `Pausing is off.` |
+| `/access_mode private` | `AccessService.SetPrivate(true)`, `KickDenied` (connected players neither whitelisted nor admin are kicked), then `PauseGuard.SetAllowed(true)`. Reply ends `Pausing is on.` before the kicked list |
 
 Every command calls `AdminCommand.Authorize` first (server console
 trusted), replies with `AdminCommand.Reply` prefixed `[Access]`, and throws

@@ -37,6 +37,7 @@ reply with `DraftService.RandomModeReply` and change nothing.
 | `/draft_release <slot>` | `Unpick` for that player (same rules as `/unpick`); the player also gets the chat line |
 | `/draft_reset` | `Reset`; replies with the number of players returned |
 | `/draft_boards` | `RedrawBoards(Debug)` (Random mode: welcome + stats boards) |
+| `/draft_note [text]` | `WelcomeNoteStore.Set` (args joined with spaces, `\n` is a line break; no text clears it), then `RedrawBoards(Debug)`; replies with a preview or "Note cleared" |
 
 `/draft_reset` is admin-only.
 

@@ -49,6 +49,8 @@ public static class RandomModeService
 
   public static HeroReservations Reservations { get; } = new();
 
+  public static HeroBans Bans { get; } = new();
+
   public static int PendingCount => Lock.PendingCount;
 
   public static ulong? Benched => _benched;
@@ -109,9 +111,10 @@ public static class RandomModeService
     if (_benched is { } benchedId && Find(benchedId) is { } benchedPlayer)
       log.Info(benchedPlayer.ToPlayerRef(), "Sitting out this round Players={Players}", connected.Count);
 
-    var turns = Reservations.Take(fighters.Keys, MatchService.State.Round);
+    var banned = Bans.Take(MatchService.State.Round);
+    var turns = Reservations.Take(fighters.Keys, MatchService.State.Round, banned);
     var reserved = turns.ToDictionary(turn => turn.SteamId, turn => turn.Hero);
-    var heroes = HeroDraw.Draw(fighters.Keys.ToList(), catalog.Heroes, LastHero, Random.Shared, reserved);
+    var heroes = HeroDraw.Draw(fighters.Keys.ToList(), Unbanned(catalog.Heroes), LastHero, Random.Shared, reserved);
 
     Assignments.Clear();
     Values.Clear();
@@ -135,12 +138,17 @@ public static class RandomModeService
     foreach (var turn in turns)
       TellTurn(turn, log);
 
+    foreach (var burned in Reservations.Burned)
+      TellBurned(burned, log);
+
     log.Info(
-      "Round prepared Players={Players} Swapped={Swapped} Pending={Pending} Reserved={Reserved}",
+      "Round prepared Players={Players} Swapped={Swapped} Pending={Pending} Reserved={Reserved} Banned={Banned} Burned={Burned}",
       Assignments.Count,
       swapped,
       Lock.PendingCount,
-      turns.Count);
+      turns.Count,
+      banned.Count,
+      Reservations.Burned.Count);
     StatsService.RefreshBoards(mode);
     return swapped;
   }
@@ -152,6 +160,22 @@ public static class RandomModeService
 
     PlayerChat.Send(player, HeroReservations.TurnLine(HeroBuildCatalog.Default.DisplayName(turn.Hero), turn.Use));
     log.Info(player.ToPlayerRef(), "Reserved hero used Hero={Hero} Use={Use} Of={Of}", turn.Hero, turn.Use, HeroReservations.Rounds);
+  }
+
+  private static void TellBurned(ReservedTurn turn, Logger log)
+  {
+    if (Find(turn.SteamId) is not { } player)
+      return;
+
+    PlayerChat.Send(player, HeroReservations.BurnedLine(HeroBuildCatalog.Default.DisplayName(turn.Hero), turn.Use));
+    log.Info(player.ToPlayerRef(), "Reserved hero banned, round used Hero={Hero} Use={Use} Of={Of}", turn.Hero, turn.Use, HeroReservations.Rounds);
+  }
+
+  // When the bans cover the whole pool (a tiny test catalog), they are ignored so the draw still works.
+  private static IReadOnlyList<Heroes> Unbanned(IReadOnlyList<Heroes> heroes)
+  {
+    var allowed = heroes.Where(hero => !Bans.Current.Contains(hero)).ToList();
+    return allowed.Count > 0 ? allowed : heroes;
   }
 
   private static void LogEvened(Logger log, IReadOnlyDictionary<ulong, int> fighters)
@@ -237,13 +261,14 @@ public static class RandomModeService
     var steamId = player.PlayerSteamId;
     var catalog = HeroBuildCatalog.Default;
     var taken = Assignments.Values.Select(assignment => assignment.Hero).ToHashSet();
-    var free = catalog.Heroes.Where(hero => !taken.Contains(hero)).ToList();
-    var pool = free.Count > 0 ? free : catalog.Heroes;
+    var unbanned = Unbanned(catalog.Heroes);
+    var free = unbanned.Where(hero => !taken.Contains(hero)).ToList();
+    var pool = free.Count > 0 ? free : unbanned;
 
     if (pool.Count == 0)
       return;
 
-    var turn = Reservations.TakeLate(steamId, MatchService.State.Round, taken);
+    var turn = Reservations.TakeLate(steamId, MatchService.State.Round, taken, Bans.Current);
     var hero = turn?.Hero ?? HeroDraw.Draw([steamId], pool, LastHero, Random.Shared)[steamId];
     Assign(steamId, hero, catalog);
 
@@ -389,7 +414,9 @@ public static class RandomModeService
     var lines = new List<string>
     {
       $"{MatchConfig.Describe()} | Assigned={Assignments.Count} | Pending={Lock.PendingCount} | Teams={Teams.Count} | " +
-      $"Bench={(_benched is { } benched ? Find(benched)?.PlayerName ?? benched.ToString() : "none")}"
+      $"Bench={(_benched is { } benched ? Find(benched)?.PlayerName ?? benched.ToString() : "none")}",
+      $"Bans: this round={HeroList(Bans.Current)} | pending " +
+      $"Sapphire={PendingBan(RiftRouletteTeams.Sapphire)} Amber={PendingBan(RiftRouletteTeams.Amber)}"
     };
 
     foreach (var player in Players.GetAll())
@@ -413,6 +440,17 @@ public static class RandomModeService
 
     return lines;
   }
+
+  private static string HeroList(IEnumerable<Heroes> heroes)
+  {
+    var names = heroes.Select(HeroBuildCatalog.Default.DisplayName).Order().ToList();
+    return names.Count == 0 ? "none" : string.Join(", ", names);
+  }
+
+  private static string PendingBan(int team) =>
+    Bans.TryGetPending(team, out var hero, out var by)
+      ? $"{HeroBuildCatalog.Default.DisplayName(hero)} ({PlayerName(by)})"
+      : "none";
 
   public static string Reserve(CCitadelPlayerController player, string heroText, ExecutionMode mode = ExecutionMode.Clean)
   {
@@ -459,7 +497,7 @@ public static class RandomModeService
     BettingService.RefreshBoard(mode);
 
     if (outcome.Result == ReserveResult.Waiting)
-      return $"{HeroReservations.WaitingLine(HolderName(outcome.Holder), name, outcome.Ahead, outcome.RoundsAhead)} ({left})";
+      return $"{HeroReservations.WaitingLine(name, outcome.Ahead, outcome.RoundsAhead)} ({left})";
 
     var from = MatchService.State.Phase == MatchPhase.Intermission ? "the round after this one" : "the next round you play";
     return $"Reserved {name} for your next {HeroReservations.Rounds} rounds, starting {from} ({left}).";
@@ -481,12 +519,90 @@ public static class RandomModeService
         $"then {HeroReservations.RoundCount(position.RoundsLeft)} for you.";
   }
 
+  // One ban per team per round; the hero leaves the next draw for both teams. Bought mid-intermission, it waits a round.
+  public static string Ban(CCitadelPlayerController player, string heroText, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    if (!BettingService.Active)
+      return "Hero bans are only open during a Random mode match.";
+
+    if (!Participants.IsParticipant(player))
+      return "Spectators can't ban heroes.";
+
+    var steamId = player.PlayerSteamId;
+
+    if (!Teams.TryGetValue(steamId, out var team))
+      return "You need a team to ban a hero. Try again next round.";
+
+    var text = heroText.Trim();
+
+    if (text.Length == 0)
+      return DescribeBan(player, team);
+
+    var catalog = HeroBuildCatalog.Default;
+
+    if (!TryParseReservable(catalog, text, out var hero))
+      return $"No hero called '{text}'. Use the hero's name, for example /heroban haze.";
+
+    if (Bans.TryGetPending(team, out var pending, out var by))
+      return $"Your team already banned {catalog.DisplayName(pending)} ({PlayerName(by)}). One ban per team per round.";
+
+    var book = BettingService.Book;
+
+    if (!book.TrySpend(steamId, HeroBans.Cost))
+    {
+      var riding = book.TryGetBet(steamId, out _) ? " Your souls are on a bet until the round ends." : "";
+      return $"A hero ban costs {BetBoardText.Format(HeroBans.Cost)} souls; you have {BetBoardText.Format(book.Chips(steamId))}.{riding}";
+    }
+
+    Bans.TryBan(team, steamId, hero);
+    Log.WithMode(mode).Info(
+      player.ToPlayerRef(),
+      "Hero banned Hero={Hero} Team={Team} Chips={Chips}",
+      hero,
+      RiftRouletteTeams.Name(team),
+      book.Chips(steamId));
+    BettingService.RefreshBoard(mode);
+
+    var when = MatchService.State.Phase == MatchPhase.Intermission ? "the round after this one" : "next round";
+    return $"Banned {catalog.DisplayName(hero)} for both teams {when} " +
+           $"({BetBoardText.Format(book.Chips(steamId))} souls left). Everyone sees it when that round starts.";
+  }
+
+  private static string DescribeBan(CCitadelPlayerController player, int team)
+  {
+    if (Bans.TryGetPending(team, out var hero, out var by))
+      return $"Your team's ban: {HeroBuildCatalog.Default.DisplayName(hero)} ({PlayerName(by)}), for the next draw.";
+
+    return $"Ban a hero for both teams for one round: /heroban <hero> " +
+           $"({BetBoardText.Format(HeroBans.Cost)} souls; you have {BetBoardText.Format(BettingService.Book.Chips(player.PlayerSteamId))}).";
+  }
+
+  // Chat only: the heroes, never who banned them.
+  public static int AnnounceBans(ExecutionMode mode = ExecutionMode.Clean)
+  {
+    if (Bans.Current.Count == 0)
+      return 0;
+
+    var catalog = HeroBuildCatalog.Default;
+    var line = HeroBans.RevealLine(Bans.Current.Select(catalog.DisplayName).Order());
+    var told = 0;
+
+    foreach (var player in Players.GetAll())
+    {
+      PlayerChat.Send(player, line);
+      told++;
+    }
+
+    Log.WithMode(mode).Info("Bans revealed Heroes={Heroes} Told={Told}", string.Join(",", Bans.Current), told);
+    return told;
+  }
+
   private static bool TryParseReservable(HeroBuildCatalog catalog, string text, out Heroes hero) =>
     (catalog.TryParseHero(text, out hero) || catalog.TryParseHero(text.Replace(" ", ""), out hero))
     && catalog.Heroes.Contains(hero);
 
-  private static string HolderName(ulong? steamId) =>
-    steamId is { } id && Find(id) is { } holder ? holder.PlayerName : "Another player";
+  private static string PlayerName(ulong steamId) =>
+    Find(steamId) is { } found ? found.PlayerName : "a teammate";
 
   private static RandomAssignment Assign(ulong steamId, Heroes hero, HeroBuildCatalog catalog)
   {
@@ -554,5 +670,6 @@ public static class RandomModeService
     _returning = null;
     _benchRound = null;
     Reservations.Reset();
+    Bans.Reset();
   }
 }

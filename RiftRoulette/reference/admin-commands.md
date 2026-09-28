@@ -222,7 +222,7 @@ position, entity index.
 - **Calls:** `PauseGuard.Describe` (no argument) or `PauseGuard.SetAllowed` (`on` / `off`, also `1` / `0`)
 - **Mode:** Debug
 - **Side effects:** no argument: one line with pausing on / off, `GamePaused`, `ServerPaused`, blocked requests and automatic unpauses since load. `on` / `off`: sets `citadel_allow_pausing` and `citadel_allow_pause_in_match` to 1 / 0 (`citadel_pause_allow_in_pregame` stays 0) and writes a master line `Pausing turned on/off`. While off, pause console commands (`pause`, `setpause`, `citadel_pause`, `citadel_toggle_server_pause`) and the pause net messages (`CCLCMsg_RequestPause`, `CCitadelClientMsg_Pause`) are blocked for everyone, admins included; the player gets the chat line `Pausing is off on this server.` (at most once per 5 s), and a game that is paused anyway gets the server `pause` toggle every 2 s until it runs again (`pause-*.log`)
-- **Notes:** a player kept pausing the lobby (2026-09-27). Off after every load and hot reload; `on` lasts until the next one. Error for any other argument
+- **Notes:** a player kept pausing the lobby (2026-09-27). Every load and hot reload sets pausing from join access (on when `access.json` is private, off when open), and `/access_mode open|private` switches it with the mode; this command overrides that until the next load or mode change. Never touches `citadel_pause_count` / `citadel_num_team_pauses_allowed`. Error for any other argument
 
 #### dw_seat_spec
 
@@ -374,9 +374,9 @@ numbers are refused.
 
 - **Invocation:** chat `/access_mode`, `/access_mode private`, `/access_mode open` | console `dw_access_mode [open|private]`
 - **Who:** admin
-- **Calls:** no argument: `AccessService.Describe`; `open` / `private`: `AccessService.SetPrivate`, and for `private` `AccessService.KickDenied`
+- **Calls:** no argument: `AccessService.Describe`; `open` / `private`: `AccessService.SetPrivate`, for `private` `AccessService.KickDenied`, then `PauseGuard.SetAllowed` (private: on, open: off)
 - **Mode:** Debug
-- **Side effects:** no argument prints the mode, the file path, and both lists. `private` saves the mode and kicks every connected player who is neither whitelisted nor an admin (reply lists who). `open` saves the mode and kicks nobody; anyone not banned can join again (the 12-player seat cap still applies)
+- **Side effects:** no argument prints the mode, the file path, and both lists. `private` saves the mode, kicks every connected player who is neither whitelisted nor an admin (reply lists who) and turns pausing on (`Pausing is on.` in the reply; for an organised event). `open` saves the mode, kicks nobody and turns pausing off; anyone not banned can join again (the 12-player seat cap still applies). Pausing follows the saved mode on every load too; `/pause_allow` overrides it until then
 
 ### Draft (`DraftPlugin`, in RiftRoulette.dll)
 
@@ -434,6 +434,15 @@ hero and build (the death is not counted in stats).
 - **Mode:** Debug
 - **Side effects:** removes **every** `point_worldtext` on the map, then redraws the three draft boards from the current picks (Random mode: welcome board plus the two stats boards)
 - **Notes:** use after `/wt_clear` or manual `/wt_update` edits
+
+#### /draft_note
+
+- **Invocation:** chat `/draft_note [text]` | console `dw_draft_note [text]`
+- **Who:** admin
+- **Calls:** `WelcomeNoteStore.Set`, then `DraftService.RedrawBoards`
+- **Mode:** Debug
+- **Side effects:** sets the note under the welcome board (`draft.note`; words joined with spaces, `\n` is a line break) and saves it to `bublock/welcomenote.txt` on the server, then redraws the boards; no text clears the note. Replies `[Draft] Note set: <preview>` or `[Draft] Note cleared`
+- **Notes:** the note survives redraws, uploads and restarts; edits to `draft.welcome` made with `/wt_update` do not
 
 ### Rift (`RiftPlugin`, in RiftRoulette.dll)
 
@@ -611,7 +620,7 @@ trusted). Debug mode; `[Random]` replies.
 - **Who:** admin
 - **Calls:** `RandomModeService.Describe`
 - **Mode:** Debug; read-only
-- **Side effects:** a config line (mode, format, assigned, pending, teams, `Bench=` who sits out this round or `none`), then one line per player: slot, name, team, hero, build name and ID, `PENDING` if their swap waits for a respawn, `SITTING OUT` for the bench player
+- **Side effects:** a config line (mode, format, assigned, pending, teams, `Bench=` who sits out this round or `none`), a bans line (`Bans: this round=<heroes or none> | pending Sapphire=<hero (buyer)> Amber=...`; admins see both teams' pending bans), then one line per player: slot, name, team, hero, build name and ID, `PENDING` if their swap waits for a respawn, `SITTING OUT` for the bench player, and their reservation
 
 #### /random_reroll
 

@@ -10,9 +10,11 @@ intermission everyone gets a chat line with their souls and types
 stake. A `BETTING` leaderboard hangs on the empty fourth side of the watch
 spot.
 
-Betting souls can be spent on one thing: a hero reservation (`/reserve <hero>`,
+Betting souls can be spent on two things: a hero reservation (`/reserve <hero>`,
 1,000 souls for the player's next 3 fighting rounds, a waiting line per
-hero). The rules live in `RandomMode/HeroReservations`; this feature only
+hero) and a hero ban (`/heroban <hero>`, 1,000 souls, one hero out of the
+next draw for both teams, one per team per round). The rules live in
+`RandomMode/HeroReservations` and `RandomMode/HeroBans`; this feature only
 provides `BetBook.TrySpend` and mentions `/reserve` in the betting-open line
 (players with 1,000+ souls and no reservation) and in `/souls`.
 

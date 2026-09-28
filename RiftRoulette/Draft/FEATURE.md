@@ -16,10 +16,11 @@ In Random mode the stats boards (`Stats/`) take the pool boards'
 spots (`BoardLayout`), `EnforceHero` defers to the Random mode hero guard,
 and `Reset` keeps each player's team.
 
-Note board: `RedrawBoards` draws `DraftService.WelcomeNote` (`draft.note`)
+Note board: `RedrawBoards` draws the `WelcomeNoteStore` note (`draft.note`)
 under the welcome board whenever it is not empty. It moves with the welcome
-board (watch spot) and is redrawn with it. The note is currently empty, so
-none is drawn.
+board (watch spot) and is redrawn with it. `/draft_note` sets it; the text
+is saved in `bublock/welcomenote.txt` on the server, so it survives
+uploads and restarts.
 
 ## Files
 
@@ -30,6 +31,7 @@ none is drawn.
 | `DraftBoardText.cs` | Board and pool-line text (pure) |
 | `BoardLayout.cs` | Welcome, note (under the welcome) and side-board positions, angles, colors (pure) |
 | `DraftService.cs` | Ops: `Pick`, `Unpick`, `Reset`, `EnforceHero`, `GiveStartingProgression`, `RedrawBoards`, `CanChangeHero`, `DescribePicks` / `DescribePools` / `DescribeDraft` |
+| `WelcomeNoteStore.cs` | The note under the welcome board, saved in `bublock/welcomenote.txt` |
 | `DraftPlugin.cs` | Hooks and commands (thin wrappers) |
 
 ## Public operations
@@ -38,13 +40,14 @@ See `DraftService.md`. Commands:
 
 - Player: `/pick`, `/unpick`, `/picks`, `/heroes`.
 - Admin: `/draft_status`, `/draft_assign`, `/draft_release`, `/draft_reset`,
-  `/draft_boards`.
+  `/draft_boards`, `/draft_note`.
 
 Catalogued in `reference/user-commands.md` and `reference/admin-commands.md`.
 
 ## State
 
-`DraftState` only (one set of picks per DLL load).
+`DraftState` (one set of picks per DLL load) and the `WelcomeNoteStore`
+note (loaded from its file).
 
 ## Dependencies
 

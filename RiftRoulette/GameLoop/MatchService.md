@@ -31,7 +31,9 @@ caller of `Start` (`GameLoopPlugin`) and is kept for the whole match.
      `BettingService.LingerSeconds` (10 s) later, so bets can still come in
      at the start of the round; the close is skipped if that round already
      ended (the round end closes and settles), and `CancelCountdown`
-     cancels it.
+     cancels it. In Random mode it then calls
+     `RandomModeService.AnnounceBans` (chat `Banned this round: ...` to
+     everyone when a hero is banned; never a banner).
 3. Round end: `RiftService` calls `RoundFlow`'s `RoundEnded` step, which
    calls `OnRoundEnded`. Score applied, banner `Sapphire 1 - 0 Amber` /
    `Sapphire took the rift` (1v1 mode: no team score; the streak

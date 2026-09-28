@@ -28,6 +28,13 @@ public static class PauseGuard
     Log.WithMode(mode).Info("Pause convars applied Allowed={Allowed}", Allowed);
   }
 
+  // A private server (an organised event) may pause; an open one may not.
+  public static void FollowAccess(ExecutionMode mode = ExecutionMode.Clean)
+  {
+    Allowed = AccessService.Load().Private;
+    Apply(mode);
+  }
+
   public static string SetAllowed(bool allowed, ExecutionMode mode = ExecutionMode.Clean)
   {
     Allowed = allowed;

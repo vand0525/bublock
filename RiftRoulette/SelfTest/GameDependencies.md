@@ -14,8 +14,8 @@ by `SelfTestTests`.
   which `ConVar.Find` may not see), `citadel_active_lane` and
   `citadel_crate_disable_early_spawn` (may not exist), and the three pause
   convars (`citadel_allow_pausing`, `citadel_allow_pause_in_match`,
-  `citadel_pause_allow_in_pregame`, expected 0; a WARN on value after
-  `/pause_allow on` is expected); `Fail` otherwise.
+  `citadel_pause_allow_in_pregame`, expected 0; a WARN on value in private
+  mode or after `/pause_allow on` is expected); `Fail` otherwise.
 - `RequiredEntities`: must exist (`citadel_gamerules`; `citadel_team_manager`,
   the team entities `Lobby/FlexSlots` writes to open the flex slots; the
   name is repeated as a literal because the tests build without Deadworks).

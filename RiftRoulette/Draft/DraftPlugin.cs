@@ -1,3 +1,4 @@
+using Bublock.Modules.WorldText;
 using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.SelfTest;
@@ -108,6 +109,18 @@ public class DraftPlugin : DeadworksPluginBase
 
     DraftService.RedrawBoards(ExecutionMode.Debug);
     AdminCommand.Reply(caller, "[Draft] Boards redrawn");
+  }
+
+  [Command("draft_note", Description = "Set the note under the welcome board: draft_note <text> (no text clears it)")]
+  public void CmdDraftNote(CCitadelPlayerController? caller, params string[] text)
+  {
+    AdminCommand.Authorize(caller, DraftLog, "draft_note");
+
+    WelcomeNoteStore.Set(WorldTextFormat.FromArgs(text), ExecutionMode.Debug);
+    DraftService.RedrawBoards(ExecutionMode.Debug);
+
+    var note = WelcomeNoteStore.Text;
+    AdminCommand.Reply(caller, note.Length > 0 ? $"[Draft] Note set: {WorldTextFormat.Preview(note)}" : "[Draft] Note cleared");
   }
 
   private static CCitadelPlayerController ResolvePlayer(int slot) =>

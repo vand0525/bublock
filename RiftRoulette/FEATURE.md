@@ -112,7 +112,7 @@ they call each other with typed C# (no command/convar messaging):
 
 - Draft (`DraftPlugin`): player `/pick`, `/unpick`, `/picks`, `/heroes`;
   admin `draft_status`, `draft_assign`, `draft_release`, `draft_reset`,
-  `draft_boards`
+  `draft_boards`, `draft_note`
 - Rift (`RiftPlugin`): admin `rift_start`, `rift_status`, `rift_next`,
   `rift_cancel`, `rift_cleanup`
 - Lobby (`LobbyPlugin`): player `/status`, `/commands`; admin
@@ -121,7 +121,7 @@ they call each other with typed C# (no command/convar messaging):
 - GameLoop (`GameLoopPlugin`): player `/score`; admin `match_start`,
   `match_end`, `match_auto`, `match_status`, `match_intermission`, `match_mode`,
   `match_format`, `match_config`
-- Random (`RandomPlugin`): player `/reserve [hero]`; admin `random_status`, `random_reroll`
+- Random (`RandomPlugin`): player `/reserve [hero]`, `/heroban [hero]`; admin `random_status`, `random_reroll`
 - Duel (`DuelPlugin`): player `/queue`, `/unqueue`; admin `duel_copy`,
   `duel_clear`, `duel_status`, `duel_queue`, `duel_queue_add`,
   `duel_queue_remove`

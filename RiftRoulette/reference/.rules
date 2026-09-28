@@ -164,12 +164,20 @@ Assume the git repo is rooted at `Bublock/`.
   come from chat lines that are exactly `sapphire` / `amber`
   (`BettingPlugin.OnChatMessage`) or `/bet`. Betting messages are chat
   only, never a banner. The leaderboard is `BoardLayout.Back`, the empty
-  side of the watch spot. The only thing souls buy is a hero reservation
+  side of the watch spot. Souls buy only two things. A hero reservation
   (`/reserve <hero>`, `RandomMode/HeroReservations`): 1,000 souls for the
   player's next 3 fighting rounds, a waiting line per hero, and each round
   the first fighter in a hero's line gets it (never two on one hero).
   Reserved heroes go into `HeroDraw.Draw` as fixed heroes; everyone else
-  stays random. Rounds sat out don't count; no refunds.
+  stays random. Rounds sat out don't count; no refunds. The waiting line
+  never names the holder. A hero ban (`/heroban <hero>`,
+  `RandomMode/HeroBans`): 1,000 souls, the hero leaves the next draw for
+  both teams for one round; one ban per team per round, first come (a
+  teammate is told the team's ban, not charged). The other team's ban is
+  never revealed early; at round start everyone gets the chat line
+  `Banned this round: <heroes>` (heroes only, never who, never a banner).
+  A ban on a reserved hero uses one of the holder's rounds (random hero,
+  private chat line).
 - 1v1 mode has no team score: the only score is the best-streak
   leaderboard (`Duel/StreakBoard`), shown on both stats boards and in
   `/score`.
@@ -192,10 +200,13 @@ Assume the git repo is rooted at `Bublock/`.
   every call (only the host console shows it). Map-change disconnects
   (`ClientDisconnectedEvent.IsMapChange`) are not leaves; never remove
   those players.
-- Pausing is off after every load (`Lobby/PauseGuard`): pause convars 0,
-  pause console commands and both pause net messages blocked, and a game
-  paused anyway gets the server `pause` toggle. `/pause_allow on` turns it
-  back on until the next load. Never set `citadel_pause_count` or
+- Pausing follows private mode (`Lobby/PauseGuard.FollowAccess`): on
+  every load it is on when `access.json` is private (organised events) and
+  off when open; `/access_mode open|private` switches it with the mode.
+  While off: pause convars 0, pause console commands and both pause net
+  messages blocked, and a game paused anyway gets the server `pause`
+  toggle. `/pause_allow on|off` overrides it until the next load or mode
+  change. Never set `citadel_pause_count` or
   `citadel_num_team_pauses_allowed` to 0 (0 means unlimited).
 - `GameLoop/AutoStartService` starts the match (Clean) when 2
   human players are connected and ends it when fewer than 2 remain, checked

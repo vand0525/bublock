@@ -31,9 +31,10 @@ closed flag; sends the chat lines and draws the leaderboard board. Log:
 - Players in the coming round's fight (a `RandomModeService` assignment)
   may only bet on their own team; the player sitting out and anyone
   without an assignment may bet on either.
-- Betting itself never changes gameplay. The only thing souls buy is a hero
+- Betting itself never changes gameplay. Souls buy only a hero
   reservation (`/reserve`, `RandomModeService.Reserve`, 1,000 souls for 3
-  fighting rounds); spent souls leave the board total.
+  fighting rounds) or a hero ban (`/heroban`, `RandomModeService.Ban`,
+  1,000 souls, one round); spent souls leave the board total.
 - Messages are chat only (`PlayerChat`), never a HUD banner.
 - A round that fails to start keeps its bets; the reopened window skips
   players who already bet.
