@@ -16,7 +16,9 @@ by `SelfTestTests`.
   convars (`citadel_allow_pausing`, `citadel_allow_pause_in_match`,
   `citadel_pause_allow_in_pregame`, expected 0; a WARN on value after
   `/pause_allow on` is expected); `Fail` otherwise.
-- `RequiredEntities`: must exist (`citadel_gamerules`).
+- `RequiredEntities`: must exist (`citadel_gamerules`; `citadel_team_manager`,
+  the team entities `Lobby/FlexSlots` writes to open the flex slots; the
+  name is repeated as a literal because the tests build without Deadworks).
 - `KeptEntities`: map entities we rely on staying (`info_super_trooper_spawn`,
   `item_crate_spawn`, the two shop triggers, `info_koth_spawn_location`).
 - `CleanedEntities`: what CleanSlate removes; should be 0 on the map.

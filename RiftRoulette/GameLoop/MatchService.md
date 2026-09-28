@@ -11,7 +11,8 @@ caller of `Start` (`GameLoopPlugin`) and is kept for the whole match.
    on); buying synced (`ShopAccess.Sync`: off during any match); banner
    `Match starting` / `Round 1 in Ns` (1v1: `1v1` / `<pairing>`); countdown
    scheduled; `MatchProbe.Snapshot("match-start")`.
-2. Countdown (`ScheduleNextRound`): in Random mode, first
+2. Countdown (`ScheduleNextRound`): `Lobby/FlexSlots.UnlockAll` (every
+   flex slot open, so builds get 12 slots), then in Random mode
    `RandomModeService.PrepareRound` (new hero and build for everyone); in
    1v1 mode `DuelService.PrepareRound` (both players reset to the copied
    build with 0 souls). Then `BettingService.Open` (Random mode: betting

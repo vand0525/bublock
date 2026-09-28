@@ -87,7 +87,8 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Round never ends on capture | `npc_trooper` renamed or capture no longer spawns troopers | `dw_ent_diff` after a capture | update `RiftService` capture detection |
 | Heroes get no / few items | item class names renamed / removed | self-test Items FAIL; `loadout-*.log` `Unknown=` / `Failed=`; patch-check Items HIT | `fetch-builds.py`, rebuild |
 | Abilities not levelled | ability names changed or upgrade bits changed | `loadout-*.log` Trace `missing ability` | `fetch-builds.py`; check `UpgradeBits` in `/tmp/dwapi.cs` |
-| Loadout level or ranks look wrong for the build's value | boon / point thresholds or tier costs changed | `loadout-*.log` `Loadout applied` `Level=` `Points=` `Ranks=` vs the hero panel; wiki soul table | update `Modules/Loadout/Progression.cs` and `LoadoutPlanner.UpgradeCosts`, then `ProgressionTests` |
+| Loadouts stop at 9 items (`Loadout incomplete` `Failed=` 1-3) | team entity renamed, `m_nFlexSlotsUnlocked` renamed / re-typed, flag count changed, or the slot count changed | `dw_lobby_flex` (each team should show 15); self-test Entities `citadel_team_manager` / Schema `CCitadelTeam.m_nFlexSlotsUnlocked`; `lobby-*.log` `Flex slots not unlocked` | new names from `CCitadelTeam.h` / `EFlexSlotTypes_t` into `Lobby/FlexSlots`; update `LoadoutPlanner.DefaultSlots` |
+| Loadout level or ranks look wrong for the cap | boon / point thresholds or tier costs changed | `loadout-*.log` `Loadout applied` `Level=` `Points=` `Ranks=` vs the hero panel; wiki soul table | update `Modules/Loadout/Progression.cs` and `LoadoutPlanner.UpgradeCosts`, then `ProgressionTests` |
 | Random mode never gives some hero / new hero missing | new hero id not in enum or builds | patch-check Heroes HIT; self-test Heroes WARN | update `lib/`, `fetch-builds.py` |
 | Joining fails / players stuck in hero select | `Heroes.Skyrunner` removed or not selectable | patch-check `Skyrunner`; `lobby-*.log` | pick another lobby hero in `LobbyService` / `DraftService` |
 | Players fall from the watch spot | skybox floor moved or removed | self-test Map floor WARN (compare to baseline); `watch-*.log` rescues | new map dump; move the watch anchors; `check-spots.py` |
@@ -119,6 +120,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | `citadel_koth_early_warning_time` | 1 (console) | `LobbyService` |
 | `citadel_player_override_spawn_time` | 1 (console) | `LobbyService` |
 | `citadel_allow_duplicate_heroes` | 1 | `LobbyService` |
+| `citadel_hero_demo_unlock_flex_slots` | 1 (did not open the slots alone; `Lobby/FlexSlots` does) | `LobbyService` |
 | `citadel_allow_purchasing_anywhere` | 0, or 1 in 1v1 setup | `GameLoop/ShopAccess.cs` |
 | `citadel_allow_pausing` | 0, or 1 after `/pause_allow on` (devonly, replicated) | `Lobby/PauseRule.cs` `ConVars`, set by `PauseGuard.Apply` |
 | `citadel_allow_pause_in_match` | 0, or 1 after `/pause_allow on` | same |
@@ -139,6 +141,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Name | Use | Where |
 |---|---|---|
 | `citadel_gamerules` | gamerules proxy | `Rift/RiftGameRules.cs` |
+| `citadel_team_manager` | team entities (`CCitadelTeam`), flex slots written on teams 2 and 3 | `Lobby/FlexSlots.cs` |
 | `citadel_item_koth_spawner` | rift spawner | `Rift/RiftService.cs` |
 | `citadel_koth_cashin` | live rift | `Rift/RiftService.cs` |
 | `npc_trooper` | capture detection, cleanup | `Rift/RiftService.cs` |
@@ -160,6 +163,7 @@ Map dump counts (build 6698): `info_koth_spawn_location` 2, `info_super_trooper_
 | `CCitadelGameRules.m_timeNextKothSpawnWindowTime` | float | same |
 | `CCitadelGameRules.m_timeNextKothSpawn` | float | same |
 | `CCitadelGameRules.m_timeKothGiveUp` | float | same (read only) |
+| `CCitadelTeam.m_nFlexSlotsUnlocked` | `EFlexSlotTypes_t` (uint16 flags, 15 = all four flex slots) | `Lobby/FlexSlots.cs` |
 | `CGameRules.m_bGamePaused`, `CCitadelGameRules.m_bServerPaused` | bool (API `GameRules.GamePaused` / `ServerPaused`) | `Lobby/PauseGuard.cs` |
 
 ### Net messages
@@ -194,7 +198,8 @@ a red wireframe; if the hero enum or the ability moves, update
 ### Enums and hero data
 
 - `Heroes.Skyrunner` is the lobby hero (`LobbyService`, `DraftService`); draft pools in `Draft/DraftPools.cs`.
-- `hero-builds.json` (38 heroes, 161 items, 154 abilities), banned items in `Modules/Loadout/LoadoutPlanner.cs`.
+- `hero-builds.json` (38 heroes, 161 items, 154 abilities, per-build sell priorities), banned items in `Modules/Loadout/LoadoutPlanner.cs`.
+- Item slots: universal (any item in any slot), 9 open by default (one flex slot already open), 12 with every flex slot (`LoadoutPlanner.DefaultSlots`).
 - `EAbilitySlot.Signature1..4`, `ECurrencyType.EGold` / `EAbilityPoints` / `EAbilityUnlocks`, `ECurrencySource.ECheats` / `EStartingAmount` / `EItemSale` (the sources `GameLoop/SoulRule` lets through for gold; for ability points and unlocks only `ECheats` passes in Random and 1v1 matches), `ImbueResult.Success`.
 - Level table: 36 soul thresholds, unlock rows and 32 points in `Modules/Loadout/Progression.cs`, from the wiki's [Data:SoulUnlockData.json](https://deadlock.wiki/index.php?title=Data:SoulUnlockData.json&action=raw) (+600 each). Upgrade tier costs 1 / 2 / 5 in `LoadoutPlanner.UpgradeCosts`. An economy patch that moves boons or points needs both updated (`ProgressionTests` pins the current values).
 - Teams: Amber 2, Sapphire 3, spectator 1.

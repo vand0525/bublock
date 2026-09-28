@@ -21,7 +21,12 @@ public sealed record HeroBuild(
   IReadOnlyList<string>? Items,
   IReadOnlyDictionary<string, string>? Imbues,
   IReadOnlyList<AbilityStep>? Abilities,
-  IReadOnlyList<BuildCategory>? Categories = null);
+  IReadOnlyList<BuildCategory>? Categories = null,
+  IReadOnlyDictionary<string, int>? SellPriority = null)
+{
+  public int SellPriorityOf(string item) =>
+    SellPriority != null && SellPriority.TryGetValue(item, out var priority) ? priority : 0;
+}
 
 public sealed record HeroBuildSet(int Id, string ClassName, string Name, IReadOnlyList<HeroBuild>? Builds);
 

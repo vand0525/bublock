@@ -12,6 +12,7 @@ public class HeroBuildCatalogTests
         { "id": 13, "className": "hero_haze", "name": "Haze",
           "builds": [{ "buildId": 1, "version": 2, "name": "Fast", "rank": "matches", "matches": 10, "wins": 6,
             "favorites": 0, "items": ["upgrade_a", "upgrade_b"], "imbues": {"upgrade_b": "ability_x"},
+            "sellPriority": {"upgrade_a": 100},
             "abilities": [{ "ability": "ability_x", "kind": "unlock" }] }] },
         { "id": 9999, "className": "hero_future", "name": "Future", "builds": [{ "buildId": 2, "name": "x", "rank": "matches" }] },
         { "id": 19, "className": "hero_shiv", "name": "Shiv", "builds": [] }
@@ -32,6 +33,67 @@ public class HeroBuildCatalogTests
     Assert.Equal(new AbilityStep("ability_x", AbilityStep.Unlock), Assert.Single(build.Abilities!));
     Assert.Equal(["upgrade_a"], catalog.ComponentsOf("upgrade_b"));
     Assert.Empty(catalog.ComponentsOf("upgrade_a"));
+    Assert.Equal(["upgrade_b"], catalog.UpgradesOf("upgrade_a"));
+    Assert.Empty(catalog.UpgradesOf("upgrade_b"));
+    Assert.Equal(100, build.SellPriorityOf("upgrade_a"));
+    Assert.Equal(0, build.SellPriorityOf("upgrade_b"));
+  }
+
+  [Fact]
+  public void Builds_without_sell_priority_parse_with_none()
+  {
+    var catalog = new HeroBuildCatalog(HeroBuildData.Parse(Sample.Replace("\"sellPriority\": {\"upgrade_a\": 100},", "")));
+    var build = Assert.Single(catalog.BuildsFor(Heroes.Haze));
+
+    Assert.Null(build.SellPriority);
+    Assert.Equal(0, build.SellPriorityOf("upgrade_a"));
+  }
+
+  [Fact]
+  public void Plan_follows_the_budget()
+  {
+    const string json = """
+      {
+        "fetchedAt": "x", "source": "test", "windowDays": 14,
+        "heroes": [{ "id": 13, "className": "hero_haze", "name": "Haze", "builds": [
+          { "buildId": 1, "name": "a", "rank": "matches", "items": ["cheap", "mid", "big"] }
+        ] }],
+        "itemCosts": { "cheap": 800, "mid": 3200, "big": 6400 }
+      }
+      """;
+
+    var catalog = new HeroBuildCatalog(HeroBuildData.Parse(json));
+    var build = Assert.Single(catalog.BuildsFor(Heroes.Haze));
+
+    Assert.Equal(800, catalog.PlannedValue(build, budget: 1000));
+    Assert.Equal(4000, catalog.PlannedValue(build, budget: 5000));
+    Assert.Equal(10400, catalog.PlannedValue(build));
+  }
+
+  [Fact]
+  public void Plan_fills_from_optional_items_then_upgrades_components()
+  {
+    const string json = """
+      {
+        "fetchedAt": "x", "source": "test", "windowDays": 14,
+        "heroes": [{ "id": 13, "className": "hero_haze", "name": "Haze", "builds": [
+          { "buildId": 1, "name": "a", "rank": "matches", "categories": [
+            { "name": "Early", "optional": false, "items": ["t1"] },
+            { "name": "Options", "optional": true, "items": ["o1", "o2"] }
+          ] }
+        ] }],
+        "components": { "t2": ["t1"] },
+        "itemCosts": { "t1": 800, "t2": 1600, "o1": 800, "o2": 3200 }
+      }
+      """;
+
+    var catalog = new HeroBuildCatalog(HeroBuildData.Parse(json));
+    var plan = catalog.Plan(Assert.Single(catalog.BuildsFor(Heroes.Haze)), budget: 1_000_000);
+
+    Assert.Equal(["o1", "o2", "t2"], plan.Items);
+    Assert.Equal(["o2"], plan.Filled);
+    Assert.Equal(["t2"], plan.Upgraded);
+    Assert.Equal(5600, plan.Value);
   }
 
   [Fact]

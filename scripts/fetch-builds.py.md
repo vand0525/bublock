@@ -34,18 +34,21 @@ Takes about 1–2 minutes (about 160 requests, 0.35 s apart; retries on HTTP 429
      random item per optional group.
    - `BANNED_ITEMS` (Monster Rounds `upgrade_non_player_bonus`, Cultist
      Sacrifice `upgrade_non_player_bonus_sacrifice`, Golden Goose Egg
-     `upgrade_goose_egg`, Trophy Collector `upgrade_trophy_collector`) are
-     dropped from `items` and
+     `upgrade_goose_egg`, Trophy Collector `upgrade_trophy_collector`,
+     Healing Rite `upgrade_health_stimpak`) are dropped from `items` and
      `categories`; the build is kept and later items fill the slot. The run
      prints how many entries were dropped.
    - `imbues`: item to target ability class name, when the build names one.
+   - `sellPriority`: item to the mod's `sell_priority`, only values above 0
+     (most builds leave every item at 0; higher sells first). Empty `{}`
+     when the build marks none.
    - `abilities`: `ability_order` steps as `unlock` / `upgrade`; each
      ability keeps its first unlock and first 3 upgrades (some builds
      repeat the whole order).
    - Builds with no usable items are skipped.
 6. `components`: `component_items` for every item used by any build.
 7. `itemCosts`: the item's `cost` in souls (tier 1 800, 2 1600, 3 3200,
-   4 6400, 5 9999) for every item used; drives the value baseline and cap.
+   4 6400, 5 9999) for every item used; drives the budget planner and baseline.
 
 ## Output
 
@@ -58,6 +61,7 @@ Takes about 1–2 minutes (about 160 requests, 0.35 s apart; retries on HTTP 429
       "items": ["upgrade_..."],
       "categories": [{"name": "Early Options", "optional": true, "items": ["upgrade_..."]}],
       "imbues": {"upgrade_...": "ability_..."},
+      "sellPriority": {"upgrade_...": 100},
       "abilities": [{"ability": "ability_...", "kind": "unlock"}] }] }],
   "components": {"upgrade_...": ["upgrade_..."]},
   "itemCosts": {"upgrade_...": 800}

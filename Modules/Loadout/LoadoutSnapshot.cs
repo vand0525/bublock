@@ -19,6 +19,16 @@ public sealed record LoadoutSnapshot(
     $"Hero={Hero} | Level={Level} | AP={AbilityPoints} | Unlocks={AbilityUnlocks} | " +
     $"Abilities={string.Join(",", Abilities.Select(ability => $"{ability.Slot}:{Convert.ToString(ability.UpgradeBits, 2)}"))} | " +
     $"Items={Items.Count} | From={Source}";
+
+  public IReadOnlyList<string> HeldLines(Func<string, int> costOf) =>
+  [
+    $"Hero={Hero} | Level={Level} | Items={Items.Count} | Value={Items.Sum(item => costOf(item.Name))} | " +
+    $"AP={AbilityPoints} | Unlocks={AbilityUnlocks} | " +
+    $"Abilities={string.Join(",", Abilities.Select(ability => $"{ability.Slot}:{Convert.ToString(ability.UpgradeBits, 2)}"))}",
+    .. Items.Select((item, index) =>
+      $"{index + 1}. {item.Name} ({costOf(item.Name)})" +
+      (item.ImbuedAbilities.Count > 0 ? $" imbued {string.Join(",", item.ImbuedAbilities)}" : ""))
+  ];
 }
 
 public sealed record SnapshotResult(int ItemsAdded, int ItemsFailed, int Imbued, int AbilitiesSet, int AbilitiesMissing);

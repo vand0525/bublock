@@ -3,36 +3,43 @@
 ## Purpose
 
 Reusable Deadlock hero loadouts built from real build data: the top 3 builds
-per hero (by matches played, from the Deadlock API), applied to a pawn as the
-first 9 items in build order plus the build's ability order. Game-agnostic
-(no Rift Roulette dependency). Added in Stage 13b.
+per hero (by matches played, from the Deadlock API), applied to a pawn by
+shopping the build's item order within a soul cap, plus the build's ability
+order. Game-agnostic (no Rift Roulette dependency). Added in Stage 13b.
 
-Stage 13c rules: every required item plus one random item per optional
-group; Monster Rounds, Cultist Sacrifice and Golden Goose Egg are never bought (the next item
-takes the slot); a loadout's items may be worth at most 20,000 souls (the
-most expensive items are dropped, keeping at least 6). The median planned
-value of all builds is the informational baseline.
+Item rules: every required item plus one random item per optional
+group; Monster Rounds, Cultist Sacrifice, Golden Goose Egg, Trophy
+Collector and Healing Rite are never bought (the next item takes the
+slot). Budget planner (2026-09-28, `LoadoutPlanner.Plan`): items are bought
+in order while the held items' value stays within the cap (20,000 souls by
+default; unaffordable items are skipped, later cheaper ones still fit),
+into 12 universal slots (Rift Roulette opens every flex slot). With the
+slots full it sells the build's marked sell-priority items first, else the
+cheapest and earliest, to make room for pricier items. After the build
+list, empty slots are filled from the build's optional items, most
+expensive first, and a final pass upgrades every held component item
+(T1 to T2 to T3) while the cap allows. The median planned
+value of all builds at 20,000 is the informational baseline.
 
 The cap is adjustable at runtime (2026-09-28): `/loadout_cap <souls>`
 (1,000 to 200,000, or `default`) sets `LoadoutService.MaxValue` for the
 next builds handed out. It is in memory only and resets to 20,000 on every
-upload or restart. A lower cap also means a lower level and fewer ability
-ranks (both follow the kept items' value).
+upload or restart.
 
-Budgeted power (2026-09-27): a stored build's level, boons and ability ranks
-match a real hero at the same net worth. The items' soul value goes through
-`Progression.ForSouls` (Deadlock's level table), and the build's ability
-order is applied only as far as that level's unlocks and points pay for
-(`LoadoutPlanner.AbilityPrefix`). Both ability wallets are left at 0.
-Copies (`ApplySnapshot`) stay exact.
+Budgeted power: the level, boons and ability ranks come from the cap, not
+the items' value, so every build at the same cap has the same level. The
+cap goes through `Progression.ForSouls` (Deadlock's level table), and the
+build's ability order is applied only as far as that level's unlocks and
+points pay for (`LoadoutPlanner.AbilityPrefix`). Both ability wallets are
+left at 0. Copies (`ApplySnapshot`) stay exact.
 
 ## Public operations
 
 | Op | Doc |
 |---|---|
-| `HeroBuildCatalog.Default` / `Heroes` / `BuildsFor` / `DisplayName` / `ComponentsOf` / `CostOf` / `PlannedValue` / `BaselineValue` / `TryParseHero` | `HeroBuildCatalog.md` |
-| `HeroBuildData.Parse` | `HeroBuildData.md` |
-| `LoadoutPlanner.ItemOrder` / `FirstSlots` / `Value` / `CapValue` / `TryParseCap` / `AbilityBits` / `AbilityPrefix` / `BitsFor` | `LoadoutPlanner.md` |
+| `HeroBuildCatalog.Default` / `Heroes` / `BuildsFor` / `DisplayName` / `ComponentsOf` / `UpgradesOf` / `CostOf` / `Plan` / `PlannedValue` / `BaselineValue` / `TryParseHero` | `HeroBuildCatalog.md` |
+| `HeroBuildData.Parse`, `HeroBuild.SellPriorityOf` | `HeroBuildData.md` |
+| `LoadoutPlanner.ItemOrder` / `OptionalItems` / `Plan` / `SellCandidate` / `Value` / `TryParseCap` / `AbilityBits` / `AbilityPrefix` / `BitsFor` | `LoadoutPlanner.md` |
 | `Progression.ForSouls` / `Max` / `MaxLevel` | `Progression.md` |
 | `LoadoutService.Apply` / `Swap` / `Capture` / `ApplySnapshot` / `SwapSnapshot` / `MaxValue` / `SetMaxValue` | `LoadoutService.md` |
 | `LoadoutSnapshot`, `SnapshotAbility`, `SnapshotItem`, `SnapshotResult` | `LoadoutSnapshot.md` |
@@ -54,11 +61,11 @@ and `LoadoutService.MaxValue` (the current cap, reset on every load).
 |---|---|
 | `HeroBuildData.cs` | JSON records and parser (pure) |
 | `HeroBuildCatalog.cs` | Embedded data and lookups |
-| `LoadoutPlanner.cs` | Item slot and ability bit planning, including the budgeted ability prefix (pure) |
+| `LoadoutPlanner.cs` | Budgeted item shopping (buy, sell, skip, fill, upgrade) and ability bit planning, including the budgeted ability prefix (pure) |
 | `Progression.cs` | Deadlock level table: boons, unlocks and ability points per soul count (pure) |
 | `LoadoutSnapshot.cs` | Exact hero-state records for copying (Stage 13g) |
 | `LoadoutService.cs` | Apply a build to a pawn; swap hero, then apply; capture / apply / swap a snapshot |
-| `LoadoutPlugin.cs` | `/loadout_give`, `/loadout_copy`, `/loadout_list`, `/loadout_info`, `/loadout_cap` |
+| `LoadoutPlugin.cs` | `/loadout_give`, `/loadout_show`, `/loadout_copy`, `/loadout_list`, `/loadout_info`, `/loadout_cap` |
 | `Loadout.projitems` | Service and data (no commands) |
 | `LoadoutCommands.projitems` | Plugin class |
 
@@ -80,4 +87,4 @@ and `LoadoutService.MaxValue` (the current cap, reset on every load).
 
 - `RiftRoulette.dll` imports both projitems.
 - `Tests/Modules.Tests` imports `Loadout.projitems` (`LoadoutPlannerTests`,
-  `ProgressionTests`, `HeroBuildCatalogTests`).
+  `ProgressionTests`, `HeroBuildCatalogTests`, `LoadoutSnapshotTests`).

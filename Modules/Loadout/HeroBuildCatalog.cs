@@ -11,6 +11,8 @@ public sealed class HeroBuildCatalog
 
   private readonly Dictionary<Heroes, HeroBuildSet> _byHero = [];
 
+  private readonly Dictionary<string, List<string>> _upgrades = [];
+
   public HeroBuildCatalog(HeroBuildData data)
   {
     Data = data;
@@ -28,6 +30,15 @@ public sealed class HeroBuildCatalog
       _byHero[(Heroes)set.Id] = set;
     }
 
+    foreach (var (upgrade, components) in data.Components ?? new Dictionary<string, IReadOnlyList<string>>())
+    foreach (var component in components.Distinct())
+    {
+      if (!_upgrades.TryGetValue(component, out var upgrades))
+        _upgrades[component] = upgrades = [];
+
+      upgrades.Add(upgrade);
+    }
+
     Heroes = _byHero.Keys.OrderBy(hero => (int)hero).ToList();
     SkippedHeroIds = skipped;
     BaselineValue = Median(_byHero.Values.SelectMany(set => set.Builds ?? []).Select(build => PlannedValue(build)));
@@ -38,8 +49,19 @@ public sealed class HeroBuildCatalog
   public int CostOf(string item) =>
     Data.ItemCosts != null && Data.ItemCosts.TryGetValue(item, out var cost) ? cost : 0;
 
-  public int PlannedValue(HeroBuild build, int slots = LoadoutPlanner.DefaultSlots) =>
-    LoadoutPlanner.Value(LoadoutPlanner.FirstSlots(LoadoutPlanner.ItemOrder(build), ComponentsOf, slots), CostOf);
+  public ShopPlan Plan(HeroBuild build, int budget = LoadoutPlanner.DefaultCap, int slots = LoadoutPlanner.DefaultSlots) =>
+    LoadoutPlanner.Plan(
+      LoadoutPlanner.ItemOrder(build),
+      ComponentsOf,
+      CostOf,
+      budget,
+      slots,
+      build.SellPriorityOf,
+      fillers: LoadoutPlanner.OptionalItems(build),
+      upgradesOf: UpgradesOf);
+
+  public int PlannedValue(HeroBuild build, int budget = LoadoutPlanner.DefaultCap, int slots = LoadoutPlanner.DefaultSlots) =>
+    Plan(build, budget, slots).Value;
 
   public static HeroBuildCatalog Default => Embedded.Value;
 
@@ -57,6 +79,9 @@ public sealed class HeroBuildCatalog
 
   public IReadOnlyList<string> ComponentsOf(string item) =>
     Data.Components != null && Data.Components.TryGetValue(item, out var components) ? components : [];
+
+  public IReadOnlyList<string> UpgradesOf(string item) =>
+    _upgrades.TryGetValue(item, out var upgrades) ? upgrades : [];
 
   public bool TryParseHero(string text, out Heroes hero)
   {

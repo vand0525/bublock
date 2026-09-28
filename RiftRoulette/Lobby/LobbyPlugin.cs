@@ -248,6 +248,18 @@ public class LobbyPlugin : DeadworksPluginBase
     AdminCommand.Reply(caller, "[Lobby] Server convars applied");
   }
 
+  [Command("lobby_flex", Description = "Unlock every flex slot for both teams and show each team's flex slot flags")]
+  public void CmdLobbyFlex(CCitadelPlayerController? caller)
+  {
+    AdminCommand.Authorize(caller, LobbyLog, "lobby_flex");
+
+    var teams = FlexSlots.UnlockAll(ExecutionMode.Debug);
+    AdminCommand.Reply(caller, $"[Lobby] Flex slots unlocked on {teams} team(s) ({FlexSlots.TeamManager})");
+
+    foreach (var line in FlexSlots.Describe())
+      AdminCommand.Reply(caller, $"[Lobby] {line}");
+  }
+
   [Command("pause_allow", Description = "Show whether players can pause, or set it: pause_allow [on|off]")]
   public void CmdPauseAllow(CCitadelPlayerController? caller, string state = "")
   {

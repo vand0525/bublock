@@ -6,11 +6,12 @@ hero state (`LoadoutSnapshot`) and applies it to another pawn. Game-agnostic.
 
 ## Types
 
-- `LoadoutOptions(Gold = 0, Slots = 9, MaxValue = null)`. There is no
-  level option: the level follows the item value. `MaxValue` null means
+- `LoadoutOptions(Gold = 0, Slots = 12, MaxValue = null)`. There is no
+  level option: the level follows the cap. `MaxValue` null means
   the current `LoadoutService.MaxValue`; a caller's own value wins (none
   pass one today).
-- `LoadoutResult(ItemsAdded, ItemsFailed, Imbued, AbilitiesSet, AbilitiesMissing, Unknown, Value, ItemsCapped, Progression, AbilityPlan)`
+- `LoadoutResult(ItemsAdded, ItemsFailed, Imbued, AbilitiesSet, AbilitiesMissing, Unknown, Value, Cap, ItemsSold, ItemsSkipped, Progression, AbilityPlan)`.
+  `Value` is the items' soul cost (at most `Cap`); `Progression` comes from `Cap`.
 - `DefaultMaxValue` = `LoadoutPlanner.DefaultCap` (20,000 souls).
 - `MaxValue`: the most a loadout's items may be worth now. Static, starts
   at `DefaultMaxValue`, so every upload or restart (a hot reload re-creates
@@ -31,14 +32,18 @@ Gives a hero the power a real player of that build has at the same net
 worth. Plans first, then follows the Deadworks Deathmatch example's
 known-good order:
 
-1. Plan the items: `LoadoutPlanner.ItemOrder(build, rng)` (one random pick
-   per optional group), then `FirstSlots(order, catalog.ComponentsOf,
-   options.Slots, ItemInfo.Exists)`, then `CapValue(slots, catalog.CostOf,
-   cap)` with `cap = options.MaxValue ?? MaxValue` (drops the most expensive items while over the cap,
-   keeping at least 6). Unknown items are collected. `value` is the kept
-   items' soul cost.
-2. Plan the power: `Progression.ForSouls(value)` gives the level, boons,
-   unlocks and ability points at that net worth; `AbilityPrefix(build.Abilities,
+1. Plan the items: `cap = options.MaxValue ?? MaxValue`, then
+   `LoadoutPlanner.Plan(ItemOrder(build, rng), catalog.ComponentsOf,
+   catalog.CostOf, cap, options.Slots, build.SellPriorityOf,
+   ItemInfo.Exists, OptionalItems(build), catalog.UpgradesOf)`: buys in
+   build order within the cap and the 12 slots, and once the slots are full
+   sells (by the build's sell priority, else cheapest and earliest) to make
+   room for pricier items; then fills empty slots with the build's optional
+   items (most expensive first), then upgrades held component items while
+   the cap allows. Unknown items are collected. `value` is the held items' soul cost, never above `cap`.
+2. Plan the power: `Progression.ForSouls(cap)` gives the level, boons,
+   unlocks and ability points at the cap, so two builds at the same cap get
+   the same level whatever their items cost; `AbilityPrefix(build.Abilities,
    unlocks, points)` gives the ranks the build's order has bought by then.
 3. `pawn.ResetHero()`: wipes items and abilities.
 4. `pawn.Level = progression.Level`, then `ModifyCurrency(EGold, 0, ECheats,
@@ -46,7 +51,7 @@ known-good order:
 5. Abilities: for each prefix entry, `AbilityComponent.FindAbilityByName`,
    then `UpgradeBits = bits`. Abilities missing on the hero are counted and
    logged at Trace.
-6. Items: `pawn.AddItem(name)` for each kept item. For imbuable items
+6. Items: `pawn.AddItem(name)` for each planned item. For imbuable items
    (`ItemInfo.CanBeImbued`), it imbues into the build's target ability
    (`build.Imbues`), else into the first signature slot that accepts it
    (`CanImbue`).
@@ -55,12 +60,14 @@ known-good order:
    points left over after the prefix stopped are not handed out. Then
    `Heal(GetMaxHealth())`.
 
-Returns a `LoadoutResult`. Logs `Loadout over cap, removed ...` (with value,
-cap, and baseline) when items were capped, one Information line per loadout
-(`Loadout applied`, with `PlayerRef`, value, baseline, capped count,
-`Level`, `Boons`, `Unlocks`, `Points`, `PointsLeft`, `Steps` / `StepsTotal`
-and `Ranks` as `ability:bits`), and a Warning when any item failed or was
-unknown.
+Returns a `LoadoutResult`. Logs Information `Loadout shopping Sold= Skipped=
+Filled= Upgraded= Value= Cap=` (item names) when anything was sold, skipped,
+filled or upgraded, one Information
+line per loadout (`Loadout applied`, with `PlayerRef`, `Value`, `Cap`,
+baseline, `Sold` / `Skipped` counts, `Level`, `Boons`, `Unlocks`, `Points`,
+`PointsLeft`, `Steps` / `StepsTotal`, `Ranks` as `ability:bits` and
+`ItemNames`, the planned items in order), and a
+Warning when any item failed or was unknown.
 
 ### `Swap(player, hero, build, timer, options, mode, applied)`
 
@@ -124,7 +131,9 @@ Warning when an item failed or an ability was missing. Returns a
 - `ResetHero` triggers the game's starting-souls grant; gold is set last so
   `options.Gold` wins.
 - `AddItem` grants the item as owned, for free. It returns null when the
-  game refuses (for example, category slots full).
+  game refuses (for example, every open slot full). Slots are universal;
+  9 are open unless every flex slot is unlocked (12). Items 10-12 fail
+  while flex slots are locked.
 - Setting `Level` directly avoids the per-level UI events of
   `ModifyCurrency` level-ups (see the Deathmatch example comment). It also
   grants no ability points, and `UpgradeBits` deducts none, so the wallets

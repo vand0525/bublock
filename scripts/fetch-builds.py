@@ -23,9 +23,15 @@ ABILITY_UNLOCK = 2
 ABILITY_POINTS = 1
 MAX_UPGRADES = 3
 
-# Laning / farming items that do nothing in rift rounds: never stored, so the
-# next item in the build takes the slot.
-BANNED_ITEMS = {"upgrade_non_player_bonus", "upgrade_non_player_bonus_sacrifice", "upgrade_goose_egg", "upgrade_trophy_collector"}
+# Laning / farming items that do nothing in rift rounds, and Healing Rite:
+# never stored, so the next item in the build takes the slot.
+BANNED_ITEMS = {
+    "upgrade_non_player_bonus",
+    "upgrade_non_player_bonus_sacrifice",
+    "upgrade_goose_egg",
+    "upgrade_trophy_collector",
+    "upgrade_health_stimpak",
+}
 
 dropped_items = 0
 
@@ -85,7 +91,7 @@ def convert(entry, rank, matches, wins, upgrades, abilities):
     hero_build = entry["hero_build"]
     details = hero_build.get("details") or {}
 
-    items, imbues, categories = [], {}, []
+    items, imbues, categories, sell_priority = [], {}, [], {}
     for category in details.get("mod_categories") or []:
         category_items = []
         for mod in category.get("mods") or []:
@@ -103,6 +109,10 @@ def convert(entry, rank, matches, wins, upgrades, abilities):
             target = abilities.get(mod.get("imbue_target_ability_id"))
             if target:
                 imbues[name] = target
+            # Only non-zero values mean anything; higher sells first.
+            priority = mod.get("sell_priority") or 0
+            if priority > 0 and name not in sell_priority:
+                sell_priority[name] = priority
         if category_items:
             categories.append({
                 "name": (category.get("name") or "").strip(),
@@ -139,6 +149,7 @@ def convert(entry, rank, matches, wins, upgrades, abilities):
         "items": items,
         "categories": categories,
         "imbues": imbues,
+        "sellPriority": sell_priority,
         "abilities": steps,
     }
 

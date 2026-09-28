@@ -16,9 +16,9 @@ server. Never deployed to the server.
   `Google.Protobuf` because `MovementService` sends a camera message):
   WorldText placement math and text formatting, the Movement
   `LocationRegistry`, the Hud banner text parser, the Loadout planner
-  (9 slots, components, optional groups, banned items, value cap, ability
-  bits), the build catalog (inline sample plus the committed data,
-  baseline value), the `PlayerQueue` join queue, and the spectate choice
+  (budgeted shopping: 12 slots, components, selling, optional groups,
+  banned items, ability bits), the build catalog (inline sample plus the
+  committed data, sell priorities, baseline value), the `PlayerQueue` join queue, and the spectate choice
   (keep, killer, any, park) and straight-down angle. Service ops that touch entities or players are
   not tested here.
 - `RiftRoulette.Tests/` — xUnit tests for pure Rift Roulette pieces, compiled in

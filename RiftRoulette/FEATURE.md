@@ -75,7 +75,8 @@ rounds, return to draft. See `reference/chat-handoff.md` and
 - Compiles in `Modules/Loadout` (`Loadout.projitems` +
   `LoadoutCommands.projitems`): the embedded top-3 builds per hero
   (`Data/hero-builds.json`, from `scripts/fetch-builds.py`) and
-  `LoadoutService` (reset, level, abilities, first 9 items); `LoadoutPlugin`
+  `LoadoutService` (reset, level from the cap, abilities, items shopped
+  within the cap into 12 slots); `LoadoutPlugin`
   hosts `/loadout_*` (Stage 13b).
 - `Session/SessionPlugin.cs` writes session lifecycle lines to
   `bublock/logs/RiftRoulette/master-*.log`; every feature writes its own

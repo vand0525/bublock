@@ -62,7 +62,7 @@ command set below follows SourceMod / CounterStrikeSharp conventions.
 
 | Behavior | Source | Owner | Op | Command | Gate | Log | Stage |
 |---|---|---|---|---|---|---|---|
-| Set convars: `citadel_team_size 6`, `maxplayers 12` (13 since Stage 13f: admin seat), `sv_visiblemaxplayers 12`, `citadel_koth_enabled 0`, `citadel_allow_purchasing_anywhere 1`, `citadel_allow_duplicate_heroes 1` | 123–133 | `RiftRoulette/Lobby` | `ApplyServerConvars` | hook `OnStartupServer`; `/lobby_setup` (new) | admin | lobby | 8 |
+| Set convars: `citadel_team_size 6`, `maxplayers 12` (13 since Stage 13f: admin seat), `sv_visiblemaxplayers 12`, `citadel_koth_enabled 0`, `citadel_allow_purchasing_anywhere 1`, `citadel_allow_duplicate_heroes 1` (since 2026-09-28 also `citadel_hero_demo_unlock_flex_slots 1` and `FlexSlots.UnlockAll`: `CCitadelTeam.m_nFlexSlotsUnlocked = 15` on both team entities) | 123–133 | `RiftRoulette/Lobby` | `ApplyServerConvars` | hook `OnStartupServer`; `/lobby_setup` (new) | admin | lobby | 8 |
 | Execute `citadel_koth_warning_time 1`, `citadel_koth_early_warning_time 1`, `citadel_player_override_spawn_time 1` | 129–131 | `RiftRoulette/Lobby` | `ApplyServerConvars` | hook `OnStartupServer` | — | lobby | 8 |
 | Draw draft boards next tick after startup | 134 | `RiftRoulette/Draft` (via WorldText) | `RedrawBoards` | hook `OnStartupServer` | — | draft | 6 (WorldText), 9 (Draft) |
 
@@ -226,6 +226,7 @@ The target command list. **Status:** `archive` = renames an archive command
 | `/player_kick <slot>` | `/kick` | Lobby | `KickPlayer` | Release pick, redraw boards, `kickid` | archive | 8 |
 | `/player_team <slot> <sapphire\|amber>` | — | Lobby | `SetTeam` | Move a player to a team (Sapphire 3, Amber 2) | new | 8 |
 | `/lobby_setup` | — | Lobby | `ApplyServerConvars` | Re-apply the startup convars and commands | new | 8 |
+| `/lobby_flex` | — | Lobby | `FlexSlots.UnlockAll` / `Describe` | Open every flex slot on both teams and show each team's flags | new | flex |
 | `/pause_allow [on\|off]` | — | Lobby | `PauseGuard.Describe` / `SetAllowed` | Show whether players can pause, or turn pausing on / off (off after every load) | new | pause |
 | `dw_seat_spec` | — | Lobby | `AdminSeat.Sit` | Admin (caller, else the admin Steam ID) to the spectator seat, outside teams. Console only (`ConsoleOnly`); any time (spectator team + `MakeObserver`). Admins are seated on every connect | new | 13f |
 | `/seat_play` | — | Lobby | `AdminSeat.Stand` | Admin (caller, else the admin Steam ID) out of the seat and onto a team (console: `dw_seat_play`, no arguments) | new | 13f |
@@ -302,8 +303,9 @@ Game-agnostic: no Rift Roulette names in arguments (teams are team numbers).
 | `/hud_announce <title> [\| description]` | — | Hud | `AnnounceAll` | On-screen banner to every player | new | 13a |
 | `/hud_say <message>` | — | Hud | `AnnounceAll` | Admin talks to the server: message as the big banner title, `Server admin` below (console `dw_hud_say`, works while spectating) | new | admin say |
 | `/loadout_give <slot> <hero> [build]` | — | Loadout | `LoadoutService.Swap` | Swap a player to a hero and apply stored build 1-3 (0 = random) | new | 13b |
+| `/loadout_show <slot>` | — | Loadout | `LoadoutService.Capture` / `LoadoutSnapshot.HeldLines` | Show a player's held items with soul costs, level and ability ranks (also logged) | new | loadout |
 | `/loadout_copy <from> <to>` | — | Loadout | `LoadoutService.Capture` / `SwapSnapshot` | Copy one player's exact hero, items, abilities and level onto another | new | 13g |
-| `/loadout_list <hero>` | — | Loadout | `HeroBuildCatalog.BuildsFor` | A hero's stored builds, the 9 items each grants, planned value, optional groups | new | 13b |
+| `/loadout_list <hero>` | — | Loadout | `HeroBuildCatalog.BuildsFor` / `Plan` | A hero's stored builds at the current cap: the items each ends with (up to 12), planned value, sold / skipped counts, optional groups | new | 13b |
 | `/loadout_info` | — | Loadout | `HeroBuildCatalog.Default` | Build data date, source, hero count, baseline value, cap, banned items | new | 13b |
 | `/loadout_cap [souls\|default]` | — | Loadout | `LoadoutService.SetMaxValue` | Show or set the loadout soul cap (1,000-200,000; resets to 20,000 on every load) | new | cap |
 | `/restrain <slot>` | — | Restraint | `RestraintService.Restrain` | Silence, disarm and block melee until released | new | 13h |

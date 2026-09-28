@@ -7,8 +7,9 @@ Random hero mode for the continuous match (Stage 13b, the default
 teams are evened out (current teams kept where possible), and every
 intermission each player is swapped to a new random hero with one of that
 hero's top 3 real builds (the build's items, one random pick per optional
-group, capped at 20,000 souls; the level and boons a real hero has at that
-item value, and the build's ability order as far as that level's unlocks and
+group, bought within the soul cap, 20,000 by default, into 12 slots with
+sells for pricier items once full; the level and boons a real hero has at
+the cap, and the build's ability order as far as that level's unlocks and
 points pay for; 0 souls and 0 unspent points). While the match runs,
 ability-point and unlock gains are blocked (`GameLoop/SoulRule`), so the
 ranks stay the build's. Later, heroes will come from a real match ID; only `HeroDraw`

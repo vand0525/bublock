@@ -17,7 +17,9 @@ public sealed record LoadoutResult(
   int AbilitiesMissing,
   IReadOnlyList<string> Unknown,
   int Value,
-  IReadOnlyList<string> ItemsCapped,
+  int Cap,
+  IReadOnlyList<string> ItemsSold,
+  IReadOnlyList<string> ItemsSkipped,
   ProgressionLevel Progression,
   AbilityPlan AbilityPlan);
 
@@ -66,10 +68,14 @@ public static class LoadoutService
     var who = pawn.Controller?.ToPlayerRef();
 
     var unknown = new List<string>();
-    var slots = LoadoutPlanner.FirstSlots(
+    var cap = options.MaxValue ?? MaxValue;
+    var shop = LoadoutPlanner.Plan(
       LoadoutPlanner.ItemOrder(build, rng),
       catalog.ComponentsOf,
+      catalog.CostOf,
+      cap,
       options.Slots,
+      build.SellPriorityOf,
       item =>
       {
         if (ItemInfo.Exists(item))
@@ -77,25 +83,28 @@ public static class LoadoutService
 
         unknown.Add(item);
         return false;
-      });
+      },
+      LoadoutPlanner.OptionalItems(build),
+      catalog.UpgradesOf);
 
-    var cap = options.MaxValue ?? MaxValue;
-    var (items, capped) = LoadoutPlanner.CapValue(slots, catalog.CostOf, cap);
-    var value = LoadoutPlanner.Value(items, catalog.CostOf);
+    var items = shop.Items;
+    var value = shop.Value;
 
-    if (capped.Count > 0)
+    if (shop.Sold.Count > 0 || shop.Skipped.Count > 0 || shop.Filled.Count > 0 || shop.Upgraded.Count > 0)
     {
       Info(
         log,
         who,
-        "Loadout over cap, removed Removed={Removed} Value={Value} Cap={Cap} Baseline={Baseline}",
-        string.Join(",", capped),
+        "Loadout shopping Sold={Sold} Skipped={Skipped} Filled={Filled} Upgraded={Upgraded} Value={Value} Cap={Cap}",
+        string.Join(",", shop.Sold),
+        string.Join(",", shop.Skipped),
+        string.Join(",", shop.Filled),
+        string.Join(",", shop.Upgraded),
         value,
-        cap,
-        catalog.BaselineValue);
+        cap);
     }
 
-    var progression = Progression.ForSouls(value);
+    var progression = Progression.ForSouls(cap);
     var plan = LoadoutPlanner.AbilityPrefix(build.Abilities ?? [], progression.Unlocks, progression.AbilityPoints);
 
     pawn.ResetHero();
@@ -147,20 +156,21 @@ public static class LoadoutService
     pawn.Heal(pawn.GetMaxHealth());
 
     var result = new LoadoutResult(
-      added, failed, imbued, abilitiesSet, abilitiesMissing, unknown, value, capped, progression, plan);
+      added, failed, imbued, abilitiesSet, abilitiesMissing, unknown, value, cap, shop.Sold, shop.Skipped, progression, plan);
 
     Info(
       log,
       who,
       "Loadout applied Hero={Hero} Build={Build} BuildId={BuildId} Items={Items} Failed={Failed} Imbued={Imbued} " +
-      "Abilities={Abilities} AbilitiesMissing={AbilitiesMissing} Unknown={Unknown} Value={Value} Baseline={Baseline} " +
-      "Capped={Capped} Level={Level} Boons={Boons} Unlocks={Unlocks} Points={Points} PointsLeft={PointsLeft} " +
-      "Steps={Steps} StepsTotal={StepsTotal} Ranks={Ranks} Gold={Gold}",
+      "Abilities={Abilities} AbilitiesMissing={AbilitiesMissing} Unknown={Unknown} Value={Value} Cap={Cap} Baseline={Baseline} " +
+      "Sold={Sold} Skipped={Skipped} Level={Level} Boons={Boons} Unlocks={Unlocks} Points={Points} PointsLeft={PointsLeft} " +
+      "Steps={Steps} StepsTotal={StepsTotal} Ranks={Ranks} Gold={Gold} ItemNames={ItemNames}",
       pawn.HeroID, build.Name, build.BuildId, added, failed, imbued,
-      abilitiesSet, abilitiesMissing, string.Join(",", unknown), value, catalog.BaselineValue,
-      capped.Count, progression.Level, progression.Boons, progression.Unlocks, progression.AbilityPoints,
+      abilitiesSet, abilitiesMissing, string.Join(",", unknown), value, cap, catalog.BaselineValue,
+      shop.Sold.Count, shop.Skipped.Count, progression.Level, progression.Boons, progression.Unlocks, progression.AbilityPoints,
       progression.AbilityPoints - plan.PointsUsed, plan.StepsTaken, plan.StepsTotal,
-      string.Join(",", plan.Bits.Select(entry => $"{entry.Ability}:{Convert.ToString(entry.Bits, 2)}")), options.Gold);
+      string.Join(",", plan.Bits.Select(entry => $"{entry.Ability}:{Convert.ToString(entry.Bits, 2)}")), options.Gold,
+      string.Join(",", items));
 
     if (unknown.Count > 0 || failed > 0)
       log.Warn("Loadout incomplete BuildId={BuildId} Failed={Failed} Unknown={Unknown}", build.BuildId, failed, string.Join(",", unknown));

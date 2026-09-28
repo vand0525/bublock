@@ -27,6 +27,8 @@ public static class LobbyService
     Server.ExecuteCommand("citadel_koth_early_warning_time 1");
     Server.ExecuteCommand("citadel_player_override_spawn_time 1");
     ServerConVars.TrySet("citadel_allow_duplicate_heroes", 1, LobbyLog);
+    ServerConVars.TrySet("citadel_hero_demo_unlock_flex_slots", 1, LobbyLog);
+    FlexSlots.UnlockAll(mode);
     ShopAccess.Sync(mode);
     PauseGuard.Apply(mode);
 
@@ -45,6 +47,7 @@ public static class LobbyService
       .Select(other => other.TeamNum);
     var team = TeamBalance.SmallerTeam(others, Random.Shared);
 
+    FlexSlots.UnlockAll(mode);
     player.SelectHero(Heroes.Skyrunner);
     player.ChangeTeam(team, true);
     WatchSpot.SendUp(player, mode);

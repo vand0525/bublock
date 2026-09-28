@@ -59,6 +59,23 @@ public class LoadoutPlugin : DeadworksPluginBase
     AdminCommand.Reply(caller, $"[Loadout] {source.PlayerName} -> {target.PlayerName}: {snapshot.Describe()}");
   }
 
+  [Command("loadout_show", Description = "Show a player's held items with soul costs, level and ability ranks: loadout_show <slot>")]
+  public void CmdShow(CCitadelPlayerController? caller, int slot)
+  {
+    AdminCommand.Authorize(caller, CommandsLog, "loadout_show");
+
+    var player = BySlot(slot);
+    var pawn = player.GetHeroPawn()
+      ?? throw new CommandException($"{player.PlayerName} has no hero.");
+
+    var lines = LoadoutService.Capture(pawn, player.PlayerName).HeldLines(HeroBuildCatalog.Default.CostOf);
+
+    CommandsLog.Info(player.ToPlayerRef(), "Held items {Items}", string.Join(" | ", lines));
+
+    foreach (var line in lines)
+      AdminCommand.Reply(caller, $"[Loadout] {line}");
+  }
+
   [Command("loadout_list", Description = "List the stored top builds for a hero: loadout_list <hero>")]
   public void CmdList(CCitadelPlayerController? caller, string hero)
   {
@@ -70,19 +87,21 @@ public class LoadoutPlugin : DeadworksPluginBase
       throw new CommandException($"Unknown hero '{hero}'.");
 
     var builds = catalog.BuildsFor(parsed);
-    AdminCommand.Reply(caller, $"[Loadout] {catalog.DisplayName(parsed)}: {builds.Count} build(s)");
+    var cap = LoadoutService.MaxValue;
+    AdminCommand.Reply(caller, $"[Loadout] {catalog.DisplayName(parsed)}: {builds.Count} build(s) at Cap={Format(cap)}");
 
     for (var i = 0; i < builds.Count; i++)
     {
       var entry = builds[i];
-      var first = LoadoutPlanner.FirstSlots(LoadoutPlanner.ItemOrder(entry), catalog.ComponentsOf);
+      var shop = catalog.Plan(entry, cap);
       var optional = entry.Categories?.Count(category => category.Optional) ?? 0;
 
       AdminCommand.Reply(
         caller,
         $"[Loadout] {i + 1}. {entry.Name} | BuildId={entry.BuildId} | Rank={entry.Rank} | Matches={entry.Matches} | " +
-        $"Wins={entry.Wins} | Value={catalog.PlannedValue(entry)} | OptionalGroups={optional}");
-      AdminCommand.Reply(caller, $"[Loadout]    {string.Join(", ", first)}");
+        $"Wins={entry.Wins} | Value={shop.Value} | Sold={shop.Sold.Count} | Skipped={shop.Skipped.Count} | " +
+        $"Filled={shop.Filled.Count} | Upgraded={shop.Upgraded.Count} | OptionalGroups={optional}");
+      AdminCommand.Reply(caller, $"[Loadout]    {string.Join(", ", shop.Items)}");
     }
   }
 
@@ -99,7 +118,7 @@ public class LoadoutPlugin : DeadworksPluginBase
       $"[Loadout] Fetched={data.FetchedAt} | Source={data.Source} | Window={data.WindowDays}d | Heroes={catalog.Heroes.Count}");
     AdminCommand.Reply(
       caller,
-      $"[Loadout] Baseline={catalog.BaselineValue} (median first-{LoadoutPlanner.DefaultSlots} value) | Cap={LoadoutService.MaxValue} | " +
+      $"[Loadout] Baseline={catalog.BaselineValue} (median planned value at {Format(LoadoutPlanner.DefaultCap)}, {LoadoutPlanner.DefaultSlots} slots) | Cap={LoadoutService.MaxValue} | " +
       $"Banned={string.Join(",", LoadoutPlanner.Banned)}");
   }
 

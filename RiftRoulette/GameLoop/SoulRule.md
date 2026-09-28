@@ -4,7 +4,7 @@ Pure rule for which currency gains are blocked. Souls earned mid-round
 made one team snowball: kill bounties and passive income grow with the game
 clock, which keeps running for hours on this server (2026-09-27 2v2
 playtest). While a match runs, a player's power comes only from the round's
-build: its items, and the level and ability ranks that item value buys
+build: its items, and the level and ability ranks the loadout cap buys
 (`Modules/Loadout/Progression`, `LoadoutPlanner.AbilityPrefix`).
 
 ## Operations

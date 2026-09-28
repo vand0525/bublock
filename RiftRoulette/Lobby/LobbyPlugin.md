@@ -34,6 +34,7 @@ lifecycle, server setup, and the lobby commands. Ops live on
 | `/player_kick <slot>` | admin | `LobbyService.KickPlayer`; error if the slot is empty |
 | `/player_team <slot> <sapphire\|amber>` | admin | `LobbyService.SetTeam`; errors for an unknown team, empty slot, or a player with a pick |
 | `/lobby_setup` | admin | `LobbyService.ApplyServerConvars(Debug)` |
+| `/lobby_flex` | admin | `FlexSlots.UnlockAll(Debug)`, replies with the team count, then `FlexSlots.Describe()` (each team's flex slot flags; 15 = all open) |
 | `/pause_allow [on\|off]` | admin | No argument: `PauseGuard.Describe` (on/off, paused state, counts). `on` / `off` (or `1` / `0`): `PauseGuard.SetAllowed(Debug)`, which sets the pause convars and writes a master line; error for another value. Resets to off on every load |
 | `dw_seat_spec` | admin, console only (`ConsoleOnly`; chat `/seat_spec` does not run) | `AdminSeat.Sit`: the admin moves to the spectator seat (`MakeObserver` on the next tick); works any time, including mid-round |
 | `/seat_play` | admin | `AdminSeat.Stand`: the admin goes back onto a team through `AdmitPlayer`; refused when 12 are playing |

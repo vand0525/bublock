@@ -126,7 +126,8 @@ public static class SelfTestService
       ("CCitadelGameRules.m_vNextKothLocation", RiftGameRules.NextLocation),
       ("CCitadelGameRules.m_timeNextKothSpawnWindowTime", RiftGameRules.NextWindow),
       ("CCitadelGameRules.m_timeNextKothSpawn", RiftGameRules.NextSpawn),
-      ("CCitadelGameRules.m_timeKothGiveUp", RiftGameRules.KothGiveUp)
+      ("CCitadelGameRules.m_timeKothGiveUp", RiftGameRules.KothGiveUp),
+      ("CCitadelTeam.m_nFlexSlotsUnlocked", FlexSlots.Unlocked)
     };
 
     var allFound = true;

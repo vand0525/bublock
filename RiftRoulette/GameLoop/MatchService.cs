@@ -257,6 +257,8 @@ public static class MatchService
     var timer = _timer!;
     var seconds = IntermissionSeconds;
 
+    FlexSlots.UnlockAll(mode);
+
     if (prepareHeroes && MatchConfig.IsRandom)
       RandomModeService.PrepareRound(timer, mode);
     else if (prepareHeroes && MatchConfig.IsDuel)

@@ -207,7 +207,16 @@ position, entity index.
 - **Who:** admin
 - **Calls:** `LobbyService.ApplyServerConvars`
 - **Mode:** Debug
-- **Side effects:** re-applies the startup convars and commands (team size 6, max players 13 with 12 shown in the browser (the 13th is the admin seat), KOTH off and warning times 1, override spawn time 1, purchasing anywhere, duplicate heroes, pause convars from `PauseGuard`). Note `citadel_koth_enabled 0` would close the KOTH gate if run mid-rift
+- **Side effects:** re-applies the startup convars and commands (team size 6, max players 13 with 12 shown in the browser (the 13th is the admin seat), KOTH off and warning times 1, override spawn time 1, purchasing anywhere, duplicate heroes, `citadel_hero_demo_unlock_flex_slots 1` and every flex slot opened on both teams (`FlexSlots.UnlockAll`), pause convars from `PauseGuard`). Note `citadel_koth_enabled 0` would close the KOTH gate if run mid-rift
+
+#### /lobby_flex
+
+- **Invocation:** chat `/lobby_flex` | console `dw_lobby_flex`
+- **Who:** admin
+- **Calls:** `FlexSlots.UnlockAll`, then `FlexSlots.Describe`
+- **Mode:** Debug
+- **Side effects:** sets `CCitadelTeam.m_nFlexSlotsUnlocked` to 15 (all four flex slots) on the Sapphire and Amber team entities (`citadel_team_manager`), so every hero holds 12 items. Replies with the number of teams written, then one line per team entity with its flags (15 = all open). Logs `Flex slots unlocked Team= Before= After=` on the `lobby` log when a value changed
+- **Notes:** the same unlock runs by itself on startup, hot reload, every join and every intermission; use this to check it. `No citadel_team_manager entity found` or `Schema field ... not found` means a game patch renamed something (see `patch-day.md`); nothing is written then
 
 #### /pause_allow [on|off]
 
@@ -765,8 +774,17 @@ Added in Stage 13b.
 - **Who:** admin
 - **Calls:** `HeroBuildCatalog.TryParseHero` / `BuildsFor`, `LoadoutService.Swap` (→ `Apply`)
 - **Mode:** Debug (per-ability and per-item detail in `loadout-*.log`)
-- **Side effects:** swaps the player in that slot to the hero (enum name like `inferno` or game name like `Infernus`), then 1 s later plans the build's first 9 items in order (every required item plus one random item per optional group; Monster Rounds, Cultist Sacrifice and Golden Goose Egg skipped; upgrades replace their components; the most expensive items dropped while the total is over 20,000 souls), resets the hero, sets the level a real hero has at that item value (Deadlock's soul table: for example 18,000 souls is level 24 with 4 unlocks and 20 ability points), applies the build's ability order only as far as those unlocks and points pay for (tiers cost 1, 2, 5; it stops at the first step that does not fit), grants the items with imbues, sets souls, ability points and unlocks to 0, and heals to full. The `Loadout applied` line in `loadout-*.log` shows `Level`, `Boons`, `Unlocks`, `Points`, `PointsLeft`, `Steps` / `StepsTotal` and the ranks set. `build` is 1-3; 0 or omitted picks one at random
+- **Side effects:** swaps the player in that slot to the hero (enum name like `inferno` or game name like `Infernus`), then 1 s later shops the build's items in order within the cap (20,000 souls unless `/loadout_cap` changed it) and 12 slots: every required item plus one random item per optional group; Monster Rounds, Cultist Sacrifice, Golden Goose Egg, Trophy Collector and Healing Rite skipped; upgrades replace their components; unaffordable items skipped (later cheaper ones still bought); with the slots full it sells the build's marked sell-priority items first, else the cheapest and earliest, for pricier ones; empty slots left after the build are filled from its optional items, most expensive first; a final pass upgrades every held component item (T1 to T2 to T3) while the cap allows. It then resets the hero, sets the level a real hero has at the cap, whatever the items cost (Deadlock's soul table: for example 20,000 souls is level 25 with 4 unlocks and 21 ability points), applies the build's ability order only as far as those unlocks and points pay for (tiers cost 1, 2, 5; it stops at the first step that does not fit), grants the items with imbues, sets souls, ability points and unlocks to 0, and heals to full. The `Loadout applied` line in `loadout-*.log` shows `Value`, `Cap`, `Sold` / `Skipped` counts, `Level`, `Boons`, `Unlocks`, `Points`, `PointsLeft`, `Steps` / `StepsTotal` and the ranks set; `Loadout shopping` names the sold, skipped, filled and upgraded items. Items past 9 need every flex slot open (`Lobby/FlexSlots`, check with `/lobby_flex`). `build` is 1-3; 0 or omitted picks one at random
 - **Notes:** test tool. Errors: empty slot, unknown hero, no builds, bad build number, dead player. In Draft mode, Draft's hero enforcement switches a player without a matching pick back to their pick or Skyrunner, so use it in Random mode or on a player whose pick is that hero
+
+#### /loadout_show <slot>
+
+- **Invocation:** chat `/loadout_show <slot>` | console `dw_loadout_show <slot>`
+- **Who:** admin
+- **Calls:** `LoadoutService.Capture`, `LoadoutSnapshot.HeldLines` (costs from `HeroBuildCatalog.CostOf`)
+- **Mode:** Debug
+- **Side effects:** none on the player. Replies with a summary (hero, level, item count, total soul value of the held items, AP, unlocks, ability bits) and one line per held item with its soul cost and imbue target. The same lines go to `loadout-*.log` (`Held items`)
+- **Notes:** reads the live hero, so it shows what the player really holds (including items bought by hand). Error: empty slot or no hero. Items unknown to the build data show cost 0
 
 #### /loadout_copy <from> <to>
 
@@ -781,9 +799,9 @@ Added in Stage 13b.
 
 - **Invocation:** chat `/loadout_list <hero>` | console `dw_loadout_list <hero>`
 - **Who:** admin
-- **Calls:** `HeroBuildCatalog.BuildsFor` / `PlannedValue`, `LoadoutPlanner.ItemOrder` / `FirstSlots`
+- **Calls:** `HeroBuildCatalog.BuildsFor` / `Plan` (→ `LoadoutPlanner.ItemOrder` / `Plan`)
 - **Mode:** Debug; read-only
-- **Side effects:** lists the hero's stored builds (name, build ID, rank, matches, wins, planned value, optional groups), each followed by the 9 items it grants with the first pick of each optional group (before the 20,000 cap)
+- **Side effects:** at the current cap, lists the hero's stored builds (name, build ID, rank, matches, wins, planned value, sold, skipped, filled and upgraded counts, optional groups), each followed by the items (up to 12) it ends with, using the first pick of each optional group
 
 #### /loadout_info
 
@@ -791,7 +809,7 @@ Added in Stage 13b.
 - **Who:** admin
 - **Calls:** `HeroBuildCatalog.Default`
 - **Mode:** Debug; read-only
-- **Side effects:** two lines: when the data was fetched, source, window (days), hero count; then the baseline value (median planned value of all builds), the current cap (20,000 unless `/loadout_cap` changed it), and the banned items
+- **Side effects:** two lines: when the data was fetched, source, window (days), hero count; then the baseline value (median planned value of all builds at 20,000 with 12 slots), the current cap (20,000 unless `/loadout_cap` changed it), and the banned items
 
 #### /loadout_cap
 
@@ -799,7 +817,7 @@ Added in Stage 13b.
 - **Who:** admin
 - **Calls:** `LoadoutPlanner.TryParseCap`, then `LoadoutService.SetMaxValue`
 - **Mode:** Debug
-- **Side effects:** no argument: shows the current cap and the default (20,000). With a value (1,000 to 200,000, or `default`): the most a Random mode build's items may be worth from the next build handed out; a lower cap also lowers the level and ability ranks. Builds already on players stay until the next intermission (`/random_reroll` in an intermission applies it now). Logged in `loadout-*.log` and master. In memory only: every upload or restart resets it to 20,000. Bad input: error naming the range
+- **Side effects:** no argument: shows the current cap and the default (20,000). With a value (1,000 to 200,000, or `default`): the most a Random mode build's items may be worth from the next build handed out, and the net worth the hero's level and ability ranks are set to (every build at the same cap gets the same level). A 1,000 cap gives one 800 item. Builds already on players stay until the next intermission (`/random_reroll` in an intermission applies it now). Logged in `loadout-*.log` and master. In memory only: every upload or restart resets it to 20,000. Bad input: error naming the range
 - **Notes:** new 2026-09-28. 1v1 copies and 1v1 setup gold do not use the cap
 
 ### Restraint (`RestraintPlugin`, in RiftRoulette.dll)

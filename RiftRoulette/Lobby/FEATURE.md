@@ -73,6 +73,12 @@ in `OnClientConCommand`, the two pause net messages are blocked with
 with the server `pause` toggle. `/pause_allow on` turns pausing back on
 until the next load.
 
+Flex slots (`FlexSlots`): every flex item slot is open for both teams, so a
+hero holds 12 items (9 by default). The team entities
+(`citadel_team_manager`) get `CCitadelTeam.m_nFlexSlotsUnlocked = 15` on
+startup, hot reload, every join and every intermission;
+`citadel_hero_demo_unlock_flex_slots 1` alone lets the server hold 12 items but the HUD keeps drawing 9; the team field fixes the display from the next hero rebuild.
+
 ## Files
 
 | File | Role |
@@ -97,12 +103,13 @@ until the next load.
 | `BanStatueService.cs` | Statue: out of the game, up top, modifier, chat, timed kick; rejoin strikes; `Sustain` |
 | `PauseRule.cs` | Pure pause rules: pause commands, pause convars, unpause and chat throttles (tested) |
 | `PauseGuard.cs` | Pause service: convars, blocking pause requests, automatic unpause, `/pause_allow` state |
+| `FlexSlots.cs` | Opens every flex slot on both team entities (`m_nFlexSlotsUnlocked = 15`), `Describe` |
 
 ## Public operations
 
 See `LobbyService.md`. Player commands: `/status`, `/commands` (Stage 12,
 built by `CommandList`). Admin commands: `/player_list`, `/player_info`,
-`/player_kick`, `/player_team`, `/lobby_setup`, `/pause_allow`, `dw_seat_spec` (console
+`/player_kick`, `/player_team`, `/lobby_setup`, `/lobby_flex`, `/pause_allow`, `dw_seat_spec` (console
 only, any time), `/seat_play`, `/seat_status`, `/spec_auto`,
 `/spec_status`, `/spec_overview` (stream camera).
 Access (admin): `/player_ban <slot>`, `/ban_add`, `/ban_remove`,
@@ -138,7 +145,7 @@ redraws boards with `Draft/DraftService.RedrawBoards`.
 
 ## Logs
 
-- `lobby-YYYYMMDD.log`: setup, connect, disconnect, kick, team changes,
+- `lobby-YYYYMMDD.log`: setup, flex slot unlocks, connect, disconnect, kick, team changes,
   admin command gate, stream camera moves (`Stream camera Reason=`), first
   sighting of each ability name.
 - `spectate-YYYYMMDD.log`: `Modules/Spectate` follow / park details

@@ -20,6 +20,7 @@ public static class GameDependencies
     new("citadel_koth_early_warning_time", 1, CheckStatus.Warn, "Lobby, set through the console"),
     new("citadel_player_override_spawn_time", 1, CheckStatus.Warn, "Lobby, set through the console"),
     new("citadel_allow_duplicate_heroes", 1, CheckStatus.Fail, "Lobby"),
+    new("citadel_hero_demo_unlock_flex_slots", 1, CheckStatus.Fail, "Lobby, 12 loadout slots"),
     new("citadel_allow_purchasing_anywhere", null, CheckStatus.Fail, "GameLoop shop"),
     new("citadel_allow_pausing", 0, CheckStatus.Warn, "Lobby pause, 1 after /pause_allow on"),
     new("citadel_allow_pause_in_match", 0, CheckStatus.Warn, "Lobby pause, 1 after /pause_allow on"),
@@ -34,7 +35,7 @@ public static class GameDependencies
     new("citadel_crate_respawn_interval", 999999, CheckStatus.Fail, "CleanSlate")
   ];
 
-  public static IReadOnlyList<string> RequiredEntities { get; } = ["citadel_gamerules"];
+  public static IReadOnlyList<string> RequiredEntities { get; } = ["citadel_gamerules", "citadel_team_manager"];
 
   public static IReadOnlyList<string> KeptEntities { get; } =
   [

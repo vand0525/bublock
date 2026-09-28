@@ -24,8 +24,9 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
   the hero guard), the applied set (only these can be punished, so our own
   hero changes in flight never trigger the guard), and enforcement kills
   (`StatsService` consumes the entry and skips that death).
-- `Options`: `LoadoutOptions(Gold: 0)` (9 slots, 20,000 cap). The level and
-  ability ranks follow the item value (`LoadoutService.Apply`).
+- `Options`: `LoadoutOptions(Gold: 0)` (12 slots, the current
+  `LoadoutService.MaxValue` cap). The level and ability ranks follow the
+  cap (`LoadoutService.Apply`).
 - `BenchRotation`: a `Modules/Queue` `PlayerQueue`, next to sit out first
   (`BenchRule.Next`).
 - `_benched` (public `Benched`): who sits out this round, or null.

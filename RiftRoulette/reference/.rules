@@ -132,6 +132,16 @@ Assume the git repo is rooted at `Bublock/`.
   and pick commands are off. Build data is fetched offline by
   `scripts/fetch-builds.py` and embedded in the DLL; the server never calls
   the Deadlock API.
+- Loadouts (`Modules/Loadout`, `LoadoutPlanner.Plan`) shop the build in
+  order into 12 universal slots (every flex slot open: `Lobby/FlexSlots`
+  writes `m_nFlexSlotsUnlocked = 15` on both team entities; the demo
+  convar alone does nothing)
+  and never go over the soul cap (`/loadout_cap`); once the slots are full
+  they sell by the build's sell priority, else the cheapest and earliest,
+  for pricier items. Slots still empty after the build are filled from its
+  optional items (most expensive first); a final pass upgrades held
+  component items while the cap allows. The hero's level, boons and ability ranks come from
+  the cap, never from the items' value.
 - Stage 13c: `Stats/StatsService` counts match kills, deaths and assists
   from `player_death` and draws them on the Sapphire / Amber boards (Random
   mode). `Balance/BalanceService` decides swaps at the start of each Random
