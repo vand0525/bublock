@@ -35,14 +35,15 @@ Compiles in: Shared
 
 Gun Game, a game type of its own (`GunGame.dll`, redock fork).
 
-Compiles in: Arena, Economy, Hud, Loadout, Movement, RandomLoadout, Session, Teams, Shared
+Compiles in: Arena, DevMode, Economy, Hud, Loadout, Movement, RandomLoadout, Session, Teams, Shared
 
 <pre>
 ├── <b>ArenaPlugin.cs</b> — Thin host for the arena.  <i>[cmds: /gg_arena; game: player_respawned, player_spawn, OnLoad]</i>
+├── <b>DevPlugin.cs</b> — Dev / prod for Gun Game (`Modules/DevMode`), plus the dev-only environment tools.  <i>[cmds: /gg_bots /gg_exec /gg_map /pause /play /stop]</i>
 ├── <b>GunGameRules.cs</b> — Gun Game's own rules and player-facing text.
-├── <b>GunGameService.cs</b> — The whole Gun Game game type as a composition of engine modules; the plugin classes only forward hooks here.  <i>[game: citadel_active_lane, citadel_allow_duplicate_heroes, citadel_allow_purchasing_anywhere, citadel_koth_enabled, citadel_team_size]</i>
+├── <b>GunGameService.cs</b> — The whole Gun Game game type as a composition of engine modules; the plugin classes only forward hooks here.  <i>[game: bot_kick_all, citadel_active_lane, citadel_allow_duplicate_heroes, citadel_allow_purchasing_anywhere, citadel_koth_enabled, citadel_spawn_practice_bots, citadel_spawn_practice_bots_count, citadel_team_size]</i>
 ├── <b>LobbyPlugin.cs</b> — Thin host for joins, leaves and the server rules.  <i>[game: OnClientConCommand, OnClientDisconnect, OnClientFullConnect, OnLoad, OnModifyCurrency, OnStartupServer]</i>
-└── <b>MatchPlugin.cs</b> — Thin host for kills and match commands.  <i>[cmds: /gg_end /gg_reroll /gg_start /gg_status /gg_time /points; game: player_death]</i>
+└── <b>MatchPlugin.cs</b> — Thin host for kills and match commands.  <i>[cmds: /gg_end /gg_reroll /gg_status /gg_time /points; game: player_death]</i>
 </pre>
 
 ## RiftRoulette.dll (plugin)
@@ -149,6 +150,16 @@ Contained fight areas for brawler-style game types: each team gets an anchor, ea
 <pre>
 ├── <b>ArenaService.cs</b> — Sends a player to their own arena spot through `Modules/Movement`.
 └── <b>ArenaSpots.cs</b> — Where a game type's players spawn: one anchor per team plus a per-slot offset, read from a JSON asset the game type embeds.
+</pre>
+
+## DevMode (module)
+
+Dev and prod for game types (redock fork).
+
+<pre>
+├── <b>DebugSnapshot.cs</b> — A point-in-time dump for debugging a live session: map, player and bot counts, then one line per player (slot, name, bot, team, alive and health, position), then the game type's own lines.
+├── <b>DevRules.cs</b> — Dev / prod for game types.
+└── <b>PositionMemory.cs</b> — Remembers where players stood in dev so ending a live session puts them back there.
 </pre>
 
 ## Economy (module)
@@ -285,7 +296,7 @@ Reusable, game-agnostic in-game text boards (`point_worldtext`): create, update,
 
 ## GunGame.Tests (test-project)
 
-Compiles in: Arena, Movement, Session, Teams, Shared
+Compiles in: Arena, DevMode, Movement, Session, Teams, Shared
 
 <pre>
 └── <b>GunGameRulesTests.cs</b> — Unit tests for `GunGame/GunGameRules` and the game type's embedded arena asset.
@@ -293,10 +304,11 @@ Compiles in: Arena, Movement, Session, Teams, Shared
 
 ## Modules.Tests (test-project)
 
-Compiles in: Arena, Economy, Hud, Loadout, Movement, Queue, RandomLoadout, Session, Spectate, Teams, WorldText, Shared
+Compiles in: Arena, DevMode, Economy, Hud, Loadout, Movement, Queue, RandomLoadout, Session, Spectate, Teams, WorldText, Shared
 
 <pre>
 ├── <b>ArenaSpotsTests.cs</b> — Unit tests for `Modules/Arena/ArenaSpots` with an inline arena.
+├── <b>DevModeTests.cs</b> — Unit tests for `Modules/DevMode/DevRules`: a dev-only command is allowed in dev and refused in prod with the `/stop first` message; mode names parse (`dev`, `prod`, any case, trimmed; anything else is refused).
 ├── <b>EconomyTests.cs</b> — Unit tests for `Modules/Economy/SoulRule`.
 ├── <b>HeroBuildCatalogTests.cs</b> — Unit tests for `Modules/Loadout/HeroBuildData` and `HeroBuildCatalog`.
 ├── <b>HeroRollTests.cs</b> — Unit tests for `Modules/RandomLoadout/HeroRoll` with a three-hero pool.

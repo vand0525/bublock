@@ -122,4 +122,6 @@ and add the dependency to `SelfTest/GameDependencies` and `patch-day.md` §5.
 | Survive hot reload | redo startup work in `OnLoad(isReload: true)` | verified | `CleanSlate/CleanSlatePlugin.cs` |
 | Start a match inside `OnClientFullConnect` | hero swaps are lost | **avoid** | `.rules` §0.2 |
 | Start a match on disconnect | crashed the server | **avoid** | `.rules` §0.2 |
+| Add bots to a dedicated server | `citadel_spawn_practice_bots 1` + `citadel_spawn_practice_bots_count N` (`gg_bots N`) | verified (count 3 gave 4 bots) | `GunGame/GunGameService.cs` (`SetBots`) |
+| Run any server command from in game | admin `gg_exec <command>` (dev only, logged) | built | `GunGame/DevPlugin.cs` |
 | Remove a game type by deleting its DLL only | the loaded plugin keeps running until a restart | **avoid** (restart after parking) | `resources.md` 2026-09-28 |

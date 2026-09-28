@@ -16,6 +16,20 @@ we work.
 
 ## 2026-09-28
 
+**Dev / prod, bots, and CI/CD process**
+
+- Gun Game starts in dev: `/play` starts the live session, `/pause` freezes
+  it and writes a debug snapshot, `/stop` returns everyone to where they
+  stood in dev. Environment tools (`gg_bots`, `gg_map`, `gg_exec`,
+  `gg_reroll`, `gg_arena`) are dev-only. Engine: `Modules/DevMode`,
+  `TimedSession` pause / resume / auto-start.
+- Practice bots work on a dedicated server (`citadel_spawn_practice_bots`,
+  `gg_bots`): 4 bots from a count of 3.
+- Process: labels (type, area, priority, status), issues #4-#12, issue
+  forms for bugs / ideas / playtest feedback, release workflow for tags,
+  CI failure issues on `main`. Project board waits on the `project` token
+  scope (#7).
+
 **Gun Game becomes its own game type**
 
 - Rift Roulette is a game type, not the engine: Gun Game moved out of it

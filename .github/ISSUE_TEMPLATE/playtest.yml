@@ -1,0 +1,21 @@
+name: Playtest feedback
+description: How a session felt, from playing or watching the stream
+labels: ["type: playtest", "area: community"]
+body:
+  - type: dropdown
+    id: game
+    attributes:
+      label: Game type
+      options: ["Gun Game", "Rift Roulette", "Other"]
+    validations:
+      required: true
+  - type: textarea
+    id: felt
+    attributes:
+      label: What felt good, and what felt bad
+    validations:
+      required: true
+  - type: input
+    id: stream
+    attributes:
+      label: Stream or clip link (optional)

@@ -37,6 +37,7 @@ Deadworks (host)  ─>  engine: Shared/ + Modules/*   ─>  game types: RiftRoul
 | `RandomLoadout` | random hero + stored top build, pending until spawn | mid-fight swap verified in playtest |
 | `Loadout` | a stored build on a pawn (items, imbues, level, ranks) | verified (Rift Roulette) |
 | `Economy` | soul rule: power only from builds | tested |
+| `DevMode` | dev / prod (`/play`, `/stop`, `/pause`), position memory, debug snapshot | Gun Game live |
 | `Hud` | banners | verified |
 | `Movement` | teleports, camera angle | verified |
 | `WorldText` | boards in the world | verified |

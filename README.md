@@ -43,6 +43,7 @@ Game types run one at a time per server (`DW_PLUGINS` / `DW_PARKED` in
 - [Session](Modules/Session/FEATURE.md): continuous timed matches and a scoreboard
 - [Economy](Modules/Economy/FEATURE.md): soul rules (power only from builds)
 - [RandomLoadout](Modules/RandomLoadout/FEATURE.md): random hero + stored build per player
+- [DevMode](Modules/DevMode/FEATURE.md): dev / prod for game types (`/play`, `/stop`, `/pause`)
 
 ## Build
 

@@ -9,7 +9,7 @@ Every command, game dependency, hook and type in the code, with where it lives.
 Generated from source; the command catalogs (`reference/user-commands.md`,
 `admin-commands.md`) stay the authority for behavior.
 
-## Commands (107)
+## Commands (112)
 
 | Command | Who | Description | File |
 |---|---|---|---|
@@ -44,9 +44,11 @@ Generated from source; the command catalogs (`reference/user-commands.md`,
 | `/ent_remove` | admin | Remove every entity with a designer name: ent_remove <designerName> | `DevTools/DevToolsPlugin.cs` |
 | `/ent_snapshot` | admin | Remember every entity for a later ent_diff | `DevTools/DevToolsPlugin.cs` |
 | `/gg_arena` | admin | Send a player to their arena spot now: gg_arena <slot> | `GunGame/ArenaPlugin.cs` |
+| `/gg_bots` | admin | Dev: practice bots for solo testing, gg_bots <0-11> (0 kicks them); bots then count as players | `GunGame/DevPlugin.cs` |
 | `/gg_end` | admin | End the current Gun Game match now and show the result | `GunGame/MatchPlugin.cs` |
+| `/gg_exec` | admin | Dev: run a server console command from in game (logged), gg_exec <command ...> | `GunGame/DevPlugin.cs` |
+| `/gg_map` | admin | Dev: reload the current map (spawn settings like practice bots); players stay connected | `GunGame/DevPlugin.cs` |
 | `/gg_reroll` | admin | Give a player a new random hero and build now, as a kill does: gg_reroll <slot> | `GunGame/MatchPlugin.cs` |
-| `/gg_start` | admin | Start a Gun Game match now, even with one player | `GunGame/MatchPlugin.cs` |
 | `/gg_status` | admin | Gun Game: phase, match, time left, kills, arena, heroes | `GunGame/MatchPlugin.cs` |
 | `/gg_time` | admin | Set the Gun Game match length from the next match: gg_time <30-1800 seconds> | `GunGame/MatchPlugin.cs` |
 | `/hud_announce` | admin | Show an on-screen banner to everyone: hud_announce <title> [\| description] | `Modules/Hud/HudPlugin.cs` |
@@ -72,6 +74,8 @@ Generated from source; the command catalogs (`reference/user-commands.md`,
 | `/mv_tp_all` | admin | Teleport every player to a location: mv_tp_all <location> | `Modules/Movement/MovementPlugin.cs` |
 | `/mv_tp_team` | admin | Teleport a team to a location: mv_tp_team <team number> <location> | `Modules/Movement/MovementPlugin.cs` |
 | `/mv_where` | admin | Show a player's position and view angle: mv_where [slot] | `Modules/Movement/MovementPlugin.cs` |
+| `/pause` | admin | Pause the live match and write a debug snapshot (admin) | `GunGame/DevPlugin.cs` |
+| `/play` | admin | Start the live session (prod) from dev, or resume a paused match (admin) | `GunGame/DevPlugin.cs` |
 | `/player_ban` | admin | Ban a connected player by slot and kick them: player_ban <slot> | `RiftRoulette/Lobby/AccessPlugin.cs` |
 | `/player_info` | admin | Show one player's status: player_info <slot> | `RiftRoulette/Lobby/LobbyPlugin.cs` |
 | `/player_kick` | admin | Kick a player and release their pick: player_kick <slot> | `RiftRoulette/Lobby/LobbyPlugin.cs` |
@@ -102,6 +106,7 @@ Generated from source; the command catalogs (`reference/user-commands.md`,
 | `/stats_reset` | admin | Zero every player's match kills, deaths, and assists | `RiftRoulette/Stats/StatsPlugin.cs` |
 | `/status_add` | admin | Test a game modifier by name on a player: status_add <slot> <modifier> [seconds] | `Modules/Restraint/RestraintPlugin.cs` |
 | `/status_remove` | admin | Remove a game modifier by name from a player: status_remove <slot> <modifier> | `Modules/Restraint/RestraintPlugin.cs` |
+| `/stop` | admin | Stop the live session and go back to dev, where everyone stood (admin) | `GunGame/DevPlugin.cs` |
 | `/wt_clear` | admin | Remove every text board on the map | `Modules/WorldText/WorldTextPlugin.cs` |
 | `/wt_create` | admin | Create a text board in front of you: wt_create <id> <text> | `Modules/WorldText/WorldTextPlugin.cs` |
 | `/wt_list` | admin | List text boards created through WorldText | `Modules/WorldText/WorldTextPlugin.cs` |
@@ -152,10 +157,11 @@ What the code touches in the game. A new entry here needs a self-test and a row 
 | `OnTakeDamage` | `RiftRoulette/GameLoop/GameLoopPlugin.cs` |
 | `OnUnload` | `DevTools/DevToolsPlugin.cs`, `RiftRoulette/Session/SessionPlugin.cs` |
 
-### Convars (16)
+### Convars (19)
 
 | Name | Used in |
 |---|---|
+| `bot_kick_all` | `GunGame/GunGameService.cs` |
 | `citadel_active_lane` | `CleanSlate/CleanSlateService.cs`, `GunGame/GunGameService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_allow_duplicate_heroes` | `GunGame/GunGameService.cs`, `RiftRoulette/Lobby/LobbyService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_allow_purchasing_anywhere` | `GunGame/GunGameService.cs`, `RiftRoulette/GameLoop/ShopAccess.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
@@ -169,6 +175,8 @@ What the code touches in the game. A new entry here needs a self-test and a row 
 | `citadel_midboss_initial_spawn_time_override` | `CleanSlate/CleanSlateService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_npc_spawn_enabled` | `CleanSlate/CleanSlateService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_player_override_spawn_time` | `RiftRoulette/SelfTest/GameDependencies.cs` |
+| `citadel_spawn_practice_bots` | `GunGame/GunGameService.cs` |
+| `citadel_spawn_practice_bots_count` | `GunGame/GunGameService.cs` |
 | `citadel_team_size` | `GunGame/GunGameService.cs`, `RiftRoulette/Lobby/LobbyService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_trooper_spawn_enabled` | `CleanSlate/CleanSlateService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `sv_cheats` | `Shared/Cheats/Cheats.cs` |
@@ -273,7 +281,7 @@ From `RiftRoulette/reference/master-plan.md`; each links to the code its entry n
 | Quiet banners, reload, leftover rift | awaiting playtest | /match_end, citadel_koth_cashin, RiftService, RiftSide, RiftSidesTests |
 | Per-slot spots | awaiting playtest | /spots_list, /spots_walk, MovementLocation, RoundFlow, SlotSpots, SpotCheck, SpotsPlugin, WatchSpot, MovementLocationTests, SlotSpotsTests, check-spots.py |
 | Patch-day readiness | open | /selftest_live, /selftest_run, Patch day runbook, SelfTest, HeroBuildCatalog, ServerConVars, patch-baseline.sh, patch-check.py |
-| Stage G1: Gun Game, continuous timed arena | awaiting playtest | ArenaPlugin, GunGameRules, GunGameService, LobbyPlugin, MatchPlugin, RandomLoadouts, TimedSession, GunGame.dll, check-arena.py, new-game-type.sh |
+| Stage G1: Gun Game, continuous timed arena | awaiting playtest | /pause, /play, /stop, ArenaPlugin, GunGameRules, GunGameService, LobbyPlugin, MatchPlugin, RandomLoadouts, TimedSession, DevMode, GunGame.dll ... |
 
 ## Game modes (9)
 
@@ -297,12 +305,12 @@ Game types run one per server; tools run beside any of them.
 
 | Plugin | Role | Engine modules |
 |---|---|---|
-| GunGame.dll | game type | Arena, Economy, Hud, Loadout, Movement, RandomLoadout, Session, Teams, Shared |
+| GunGame.dll | game type | Arena, DevMode, Economy, Hud, Loadout, Movement, RandomLoadout, Session, Teams, Shared |
 | RiftRoulette.dll | game type | Hud, Loadout, Movement, Queue, Restraint, Spectate, WorldText, Shared |
 | CleanSlate.dll | tool | Shared |
 | DevTools.dll | tool | Shared |
 
-## Types (191)
+## Types (196)
 
 | Type | File | Summary |
 |---|---|---|
@@ -311,6 +319,7 @@ Game types run one per server; tools run beside any of them.
 | `CleanupResult` | `CleanSlate/CleanupResult.cs` | Immutable result of one `CleanSlateService.RemoveMapEntities` run. |
 | `DevToolsPlugin` | `DevTools/DevToolsPlugin.cs` | Deadworks admin/diagnostics plugin: entity find/inspect/remove, snapshot and diff, hero watch, log path. |
 | `ArenaPlugin` | `GunGame/ArenaPlugin.cs` | Thin host for the arena. |
+| `DevPlugin` | `GunGame/DevPlugin.cs` | Dev / prod for Gun Game (`Modules/DevMode`), plus the dev-only environment tools. |
 | `GunGameRules` | `GunGame/GunGameRules.cs` | Gun Game's own rules and player-facing text. |
 | `GunGameService` | `GunGame/GunGameService.cs` | The whole Gun Game game type as a composition of engine modules; the plugin classes only forward hooks here. |
 | `LobbyPlugin` | `GunGame/LobbyPlugin.cs` | Thin host for joins, leaves and the server rules. |
@@ -318,6 +327,10 @@ Game types run one per server; tools run beside any of them.
 | `ArenaService` | `Modules/Arena/ArenaService.cs` | Sends a player to their own arena spot through `Modules/Movement`. |
 | `ArenaBounds` | `Modules/Arena/ArenaSpots.cs` | Where a game type's players spawn: one anchor per team plus a per-slot offset, read from a JSON asset the game type embeds. |
 | `ArenaSpots` | `Modules/Arena/ArenaSpots.cs` | Where a game type's players spawn: one anchor per team plus a per-slot offset, read from a JSON asset the game type embeds. |
+| `DebugSnapshot` | `Modules/DevMode/DebugSnapshot.cs` | A point-in-time dump for debugging a live session: map, player and bot counts, then one line per player (slot, name, bot, team, alive and health, position), then the game type's own lines. |
+| `DevRules` | `Modules/DevMode/DevRules.cs` | Dev / prod for game types. |
+| `RunMode` | `Modules/DevMode/DevRules.cs` | Dev / prod for game types. |
+| `PositionMemory` | `Modules/DevMode/PositionMemory.cs` | Remembers where players stood in dev so ending a live session puts them back there. |
 | `SoulRule` | `Modules/Economy/SoulRule.cs` | Which currency gains to block in a game type where power comes only from the build a player is given. |
 | `HudPlugin` | `Modules/Hud/HudPlugin.cs` | Thin Deadworks plugin class (`Name` = `Hud`) exposing the admin `/hud_announce` and `/hud_say` commands. |
 | `HudService` | `Modules/Hud/HudService.cs` | Static service that shows the game's on-screen announcement banner (title plus smaller description) to one player or to everyone. |
@@ -498,12 +511,13 @@ Game types run one per server; tools run beside any of them.
 | `PlayerRefExtensions` | `Shared/Logging/PlayerRefExtensions.cs` | `controller.ToPlayerRef()` builds a `PlayerRef` from any `CBasePlayerController` (including `CCitadelPlayerController`). |
 | `RollingFileWriter` | `Shared/Logging/RollingFileWriter.cs` | Appends lines to one rolling log file family (`<base>-YYYYMMDD[.N].log`). |
 
-## Docs (43)
+## Docs (44)
 
 | Doc | Title | Summary |
 |---|---|---|
 | `CLAUDE.md` | Bublock (redock fork) | Theo (GitHub `vand0525`) built this repo. |
 | `Modules/Arena/Arena.md` | Arena.projitems | MSBuild shared-items file that compiles `ArenaSpots` and `ArenaService` into a consuming project. |
+| `Modules/DevMode/DevMode.md` | DevMode.projitems | MSBuild shared-items file that compiles `DevRules`, `PositionMemory` and `DebugSnapshot` into a consuming project. |
 | `Modules/Economy/Economy.md` | Economy.projitems | MSBuild shared-items file that compiles `SoulRule` into a consuming project. |
 | `Modules/Hud/Hud.md` | Hud.projitems | MSBuild shared-items file that compiles `HudService` (no commands) into a consuming project. |
 | `Modules/Hud/HudCommands.md` | HudCommands.projitems | MSBuild shared-items file that adds `HudPlugin` (the `/hud_announce` and `/hud_say` admin commands) to a consuming project. |

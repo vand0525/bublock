@@ -1,0 +1,20 @@
+name: Feature or game mode idea
+description: A new mechanic, mode, or change to how a game type plays
+labels: ["type: feature"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What should happen in game? Link a mode it is like (Halo Grifball, CS zombie escape, ...) if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it would be fun
+  - type: dropdown
+    id: game
+    attributes:
+      label: For
+      options: ["Gun Game", "Rift Roulette", "A new game type", "Anything"]

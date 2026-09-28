@@ -450,3 +450,10 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Verified fact (map dump, build 6698):** 12 `lane_marker_path` entities (`lanenum` / `laneslot` keys) at the south base: lane **1** west (x ≈ -1000), **4** middle (x ≈ ±800), **6** east (x ≈ +1000). `citadel_active_lane` (sv, rep, release): "Which lane should be active? 0 means all"; the Deadworks Deathmatch example sets 4; Gun Game's arena sets 4 (effect in game unverified). `citadel_gamemode_streetbrawl_enabled` exists (Valve's Street Brawl flow; not used). The middle lane street is z 376 from y ±1200 to ±2400 (probed with `scripts/check-arena.py --probe`); the center is layered (a platform at 576 with native `info_team_spawn` points for team 2 at y -128 and team 3 at y +128, bridges, the mid-boss pit at -768).
 - **Link / path:** `RiftRoulette/reference/maps/dl_midtown/entities.json`, `GunGame/Data/arena.json`, `scripts/check-arena.py`
 
+### 2026-09-28 — Practice bots: citadel_spawn_practice_bots adds bots to a dedicated server
+
+- **Why hard / useful:** Solo testing of any game type; Theo's 2026-09-27 note found no command that adds one bot (still true).
+- **Verified fact (redock server):** `citadel_spawn_practice_bots_count 3` then `citadel_spawn_practice_bots 1` (sv, release; set over the panel's RCON console at 04:48 UTC) gave **4** bots, `Bot0`-`Bot3`, in `status` at 04:51, with no map reload. Why 4 for a count of 3, their teams, and whether `bot_kick_all` (cheat) removes them are open (issue #10). Gun Game wraps it as the dev command `gg_bots <0-11>`; bots count as players for starting matches, kills on bots score.
+- **Also:** the deadworks.net panel's live console freezes a browser tab under heavy output; use in-game admin commands (`gg_exec`) instead.
+- **Link / path:** `GunGame/GunGameService.cs` (`SetBots`), `reference/cvarlist.md`
+

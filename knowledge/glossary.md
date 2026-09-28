@@ -69,6 +69,8 @@ term is defined or used.
 | **Bench** | With an odd player count, one player sits out a round so teams stay even. | `RandomMode/BenchRule.cs` |
 | **Admin seat** | The 13th connection, admin only, on the spectator side. Admins land here on connect. | `Lobby/AdminSeat.cs` |
 | **Stream camera** | Automatic camera for a seated admin: follows fights, cuts to kills, top-down on big ults. | `Lobby/StreamCam.cs` |
+| **Dev mode / prod mode** | A game type's sandbox (no live session, environment tools allowed) and its live session; switched with `/play`, `/stop`; `/pause` freezes a match for debugging. | `Modules/DevMode/FEATURE.md` |
+| **Practice bots** | Deadlock's own bots on a dedicated server (`citadel_spawn_practice_bots`, `gg_bots`). | `resources.md` 2026-09-28 |
 | **Engine** | `Shared/` + `Modules/*`: game-agnostic code every game type compiles in. | `knowledge/mental-models/building-a-game-type.md` |
 | **Game type** | A game as its own DLL on the engine (Rift Roulette, Gun Game). One runs per server. | `scripts/new-game-type.sh` |
 | **Parked** | A game type's DLL backed up and removed from the server (`DW_PARKED`); needs a restart to unload. | `scripts/deploy.sh.md` |

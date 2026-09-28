@@ -1,0 +1,28 @@
+name: Bug
+description: Something broke on the server or in a game type
+labels: ["type: bug", "status: ready"]
+body:
+  - type: dropdown
+    id: game
+    attributes:
+      label: Where
+      options: ["Gun Game", "Rift Roulette", "Server / connecting", "Other"]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to make it happen again
+      placeholder: "1. /play  2. kill a bot  3. ..."
+  - type: input
+    id: when
+    attributes:
+      label: When (UTC time, roughly)
+      description: Helps us find it in the server logs.
