@@ -24,6 +24,9 @@ public static class BanStatueService
 
   public const string BannedMessage = "You are banned. Do better.";
 
+  // modifier_citadel_petrify renders as a red wireframe unless Vyper's assets are loaded.
+  public const Heroes StatueLookHero = Heroes.Viper;
+
   private static readonly Logger Log = BublockLog.For("Access");
 
   private static readonly Dictionary<ulong, BanRecord> Records = [];

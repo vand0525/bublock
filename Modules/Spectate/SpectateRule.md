@@ -16,6 +16,9 @@ unit tested (`Tests/Modules.Tests/SpectateRuleTests`).
 | `Choose(currentId, killerId, candidates)` | `Keep` the current target if it is a candidate; else `Killer` if the killer is a candidate; else `Any` (the first candidate); else `Park`. |
 | `LookDown(yaw)` | The straight-down view angle: pitch `StraightDownPitch` (89), the given yaw, roll 0. |
 | `ParkCheck(roaming, hasTarget, distance, tolerance)` | True only when the observer is roaming, has no observer target, and is within `tolerance` of the park spot (inclusive). |
+| `IsManualMove(roaming, hasTarget, distance, tolerance)` | True when the observer is roaming with no target but farther than `tolerance`: the viewer flew away, the park did not fail. |
+| `ManualActive(until, now)` | True while `now` is before the manual hold's end; false with no hold. |
+| `FollowReady(spawnedAt, now, grace)` | True when no spawn was seen or at least `grace` has passed since it. |
 
 ## Invariants
 

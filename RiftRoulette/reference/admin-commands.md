@@ -263,7 +263,7 @@ client console (`dw_spec_*`).
 - **Who:** admin
 - **Calls:** `StreamCam.SetAuto`
 - **Mode:** Debug
-- **Side effects:** turns the automatic camera on or off for that admin (default on) and clears any top-down in progress. Off leaves the camera where it is for manual control. `on`/`1`, `off`/`0`; anything else errors. Resets to on when the admin stands up or disconnects
+- **Side effects:** turns the automatic camera on or off for that admin (default on) and clears any top-down in progress and any manual hold. Off leaves the camera where it is for manual control. With auto on, the camera already steps aside for 60 s on its own when you fly away or leave a follow (manual hold), so `off` is only needed for longer manual stretches. `on`/`1`, `off`/`0`; anything else errors. Resets to on when the admin stands up or disconnects
 - **Notes:** new with the stream camera (2026-09-27)
 
 #### /spec_status
@@ -272,7 +272,7 @@ client console (`dw_spec_*`).
 - **Who:** admin
 - **Calls:** `StreamCam.Describe`
 - **Mode:** Debug; read-only
-- **Side effects:** three lines: auto, seated, observer, observer mode; who is on camera, parked and side; top-down showing or off, return-to player, round number, whether a round is running, whether this round's top-down is used
+- **Side effects:** three lines: auto, manual hold (`Manual=until HH:mm:ss UTC` or `off`), seated, observer, observer mode; who is on camera, parked and side; top-down showing or off, return-to player, round number, whether a round is running, whether this round's top-down is used
 - **Notes:** new with the stream camera (2026-09-27)
 
 #### /spec_overview

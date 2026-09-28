@@ -16,9 +16,11 @@ angle. Built for the admin's stream camera.
 | `SpectateService.SetFlyCam(player, mode)` | `SpectateService.md` |
 | `SpectateService.Park(player, position, angle, timer, mode)` | `SpectateService.md` |
 | `SpectateService.IsParkedAt(player, position, tolerance)` | `SpectateService.md` |
+| `SpectateService.IsManualMove(player, position, tolerance)` | `SpectateService.md` |
 | `SpectateRule.Choose(currentId, killerId, candidates)` | `SpectateRule.md` |
 | `SpectateRule.LookDown(yaw)` | `SpectateRule.md` |
 | `SpectateRule.ParkCheck(roaming, hasTarget, distance, tolerance)` | `SpectateRule.md` |
+| `SpectateRule.IsManualMove` / `ManualActive` / `FollowReady` | `SpectateRule.md` |
 
 ## State
 

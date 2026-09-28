@@ -32,6 +32,12 @@ Unset: Warning once per statue `Statue modifier not set, restraint only`;
 refused by the game: Warning once `Statue modifier refused`. Either way the
 player is still restrained, protected from damage and kicked on time.
 
+The stone look is `modifier_citadel_petrify` (Vyper's Petrifying Bola; the
+game accepts that class name). Without Vyper in the match it showed as a red
+wireframe, so `LobbyPlugin.OnPrecacheResources` precaches
+`StatueLookHero` (`Heroes.Viper`) at every map load. A hot reload does not
+precache; the next map load does.
+
 ## State
 
 `Records` (Steam ID to `BanRecord`), `Statues`, `Arriving`,

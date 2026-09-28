@@ -18,6 +18,7 @@ where to park (Rift Roulette: `RiftRoulette/Lobby/StreamCam`).
 | `SetFlyCam(player, mode)` | `Server.ClientCommand(player.Slot, "spec_mode 4")` (`FlyCamMode`): puts the client in fly cam. Logs Debug. |
 | `Park(player, position, angle, timer, mode)` | Timed sequence. Now: `ObserverMode_t.Roaming` on the server and `SetFlyCam`. +`TeleportDelaySeconds` (0.25 s): teleports the observer pawn to `position` with no angles and zero velocity. +`AngleDelaySeconds` (0.5 s) and +`AngleRepeatSeconds` (1.0 s): `MovementService.SetViewAngle(player, angle)`. Each step re-finds the player by Steam ID and does nothing if they left or are no longer observing. Logs Debug `Park started` and, after the last step, `Parked Position= Angle= After= Mode=`. Returns false (nothing sent) when not observing. |
 | `IsParkedAt(player, position, tolerance)` | `SpectateRule.ParkCheck` on the observer: roaming, no `ObserverTarget`, within `tolerance` (default `ParkTolerance`, 1500 units) of `position`. False when not observing. |
+| `IsManualMove(player, position, tolerance)` | `SpectateRule.IsManualMove` on the observer: roaming, no `ObserverTarget`, farther than `tolerance` from `position` (the viewer flew away). False when not observing. |
 
 ## Side effects
 

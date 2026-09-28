@@ -6,13 +6,17 @@ server's current copies first. The only push path for Bublock plugins.
 ## Usage
 
 ```bash
-./Bublock/scripts/deploy.sh --confirm [--no-backup]
+./Bublock/scripts/deploy.sh --confirm [--no-backup] [--push-access]
 ```
 
 Without `--confirm` (or with an unknown argument) it prints usage and exits
 1 (nothing built or sent). `--no-backup` skips step 2; the stamp folder then
 only holds `uploaded.sha256` and `access.json`, and `rollback.sh` has
 nothing to restore.
+
+`--push-access` also replaces the server's `access.json` (ban list,
+whitelist) with the local `Bublock/server-data/access.json`. Edit the local
+file first; the deploy refuses to start when it is not valid JSON.
 
 ## Steps
 
@@ -29,6 +33,13 @@ nothing to restore.
    into the stamp folder, so every deploy keeps the ban list and whitelist
    as they were. Runs even with `--no-backup`. A failed pull is a warning
    and the deploy goes on.
+   With `--push-access`: the local file is copied to
+   `<stamp>/access.pushed.json` before the pull (which overwrites the local
+   copy), then after the pull it is uploaded to
+   `/server/game/bin/win64/bublock/access.json` and put back as the local
+   copy. If the server's copy was not saved to `<stamp>/access.json`, it
+   stops before uploading anything (the local edit is restored). The server
+   re-reads the file when its write time changes, so no reload is needed.
 4. Retired DLLs: deletes each `RETIRED_PLUGINS` DLL still in the plugins
    folder, before uploading. A renamed plugin otherwise keeps loading under
    its old name and every command registers twice.
@@ -51,6 +62,9 @@ delete the loop instead of emptying it.
 - Writes backups under `deadworks/server-backups/` (workspace root, outside
   the Bublock git repo, so never committed), including `access.json`.
 - Updates the local log and `server-data/` copies (`pull-logs.sh`).
+- With `--push-access`, replaces the live ban list and whitelist. Roll back
+  by copying `<stamp>/access.json` over `server-data/access.json` and
+  deploying with `--push-access` again.
 
 ## Requirements
 

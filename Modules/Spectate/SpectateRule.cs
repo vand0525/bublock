@@ -35,4 +35,13 @@ public static class SpectateRule
 
   public static bool ParkCheck(bool roaming, bool hasTarget, float distance, float tolerance) =>
     roaming && !hasTarget && distance <= tolerance;
+
+  // In fly cam with no target but far from the spot: the viewer flew there, the park did not fail.
+  public static bool IsManualMove(bool roaming, bool hasTarget, float distance, float tolerance) =>
+    roaming && !hasTarget && distance > tolerance;
+
+  public static bool ManualActive(DateTime? until, DateTime now) => until is { } end && now < end;
+
+  public static bool FollowReady(DateTime? spawnedAt, DateTime now, TimeSpan grace) =>
+    spawnedAt is not { } spawned || now - spawned >= grace;
 }

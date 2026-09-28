@@ -412,12 +412,28 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **To confirm in game:** that `Stop` blocks turret damage (self-test counter `damage_blocked_restrained`), and whether turrets honor `IgnoredByNpcTargeting`.
 - **Link / path:** `Bublock/RiftRoulette/GameLoop/GameLoopPlugin.cs`, `Bublock/Modules/Restraint/RestraintService.cs`
 
+### 2026-09-28 — Client crash when the server and the admin both move the spectator camera (to confirm)
+
+- **Why hard / useful:** The server log shows only a disconnect; the crash is on the admin's PC. Two crashes on 2026-09-28: 02:27:45, 10 s after the stream camera followed a player whose hero was 1 s old; 02:31:59, after the admin flew off while the camera was reparking (parked cameras more than 1500 units away were teleported back every 6 s).
+- **Assumption acted on:** server-side observer changes (`SetObserverMode`, `SetObserverTarget`, observer teleport, view angle, client `spec_mode` / `spec_player`) while the client is moving its own camera can crash the client. `StreamCam` now pauses on manual control and waits 5 s before following a fresh hero.
+- **To confirm:** no crash after flying off in game; which console commands the client sends when the admin takes the camera (`Admin client command` in `spectate-*.log`).
+- **Link / path:** `Bublock/RiftRoulette/Lobby/StreamCam.cs`, `Bublock/Modules/Spectate/SpectateRule.cs`
+
 ### 2026-09-27 — Finding modifier names (OnAddModifier)
 
 - **Why hard / useful:** Ability modifiers (Vyper's Petrify for the banned-player statue) are in no data we have: not the API assets, the schema snapshot or the cvar list. Guessing names is not allowed.
 - **Verified fact (decompiled API):** `PluginBase.OnAddModifier(AddModifierEvent args)` returns `HookResult`. `args.ModifierVData` is `CCitadelModifierVData` (base `CModifierVData`: `Name`, `Duration`, `IsHidden`); `args.ModifierProperty.Owner` is the entity getting it; also `Caster`, `Ability`, `AbilityHandle`, `Team`, `KeyValues`. `pawn.AddModifier(name, KeyValues3? kv, caster, ability, team)` adds one by name (`kv.SetFloat("duration", s)`). `CModifierProperty.HasModifier(name)` checks it.
 - **Used as:** DevTools `ModifierProbe` logs each name once per load to `modifiers-*.log`; cast the ability in game, then read the name. Deadlock API asset ids: Petrify is `ability_viper_ult`, Rabbit Hex `ability_magician_animalcurse` (`api.deadlock-api.com/v1/assets/items`).
 - **Link / path:** `Bublock/DevTools/ModifierProbe.cs`, `Bublock/RiftRoulette/Lobby/BanStatueService.cs`
+
+### 2026-09-27 — Modifier names from the datamined ability data
+
+- **Why hard / useful:** Ability modifiers are embedded in the ability entry, not listed in `scripts/modifiers.vdata`, so no local data has them. The public game-file mirror does.
+- **Verified fact (datamined, 2026-09-27):** SteamTracking `GameTracking-Deadlock`, `game/citadel/pak01_dir/scripts/abilities.vdata` (raw on `raw.githubusercontent.com`, about 7 MB). Under `ability_viper_petrifybola`, `m_PetrifyModifier` is `_class = "modifier_citadel_petrify"`, `_my_subclass_name = "petrifybola_petrify"` (schema class `CCitadel_Modifier_Petrify`, a `CCitadel_Modifier_Stunned`). The stone particles (`viper_petrify_debuff.vpcf`) live on that embedded entry. `modifier_citadel_silenced` is also absent from `modifiers.vdata` yet `AddModifier` accepts it, so class names work.
+- **Verified in game (2026-09-27):** `/status_add <slot> modifier_citadel_petrify 10` works (petrified), but with no Vyper in the match the player rendered as a red wireframe.
+- **Precache API (decompiled):** `IDeadworksPlugin.OnPrecacheResources()` runs at map load (not on hot reload); inside it `Precache.AddHero(Heroes hero | string name)` and `Precache.AddResource(string path)` (e.g. a `.vpcf`). `LobbyPlugin` precaches `Heroes.Viper` for the statue look.
+- **To confirm:** the stone look after a map load with Vyper precached.
+- **Link / path:** [GameTracking-Deadlock](https://github.com/SteamTracking/GameTracking-Deadlock), [schema](https://s2v.app/SchemaExplorer/deadlock/server/CCitadel_Modifier_Petrify)
 
 ### 2026-09-27 — Reading player chat (OnChatMessage)
 

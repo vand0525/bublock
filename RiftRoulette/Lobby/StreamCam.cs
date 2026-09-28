@@ -21,9 +21,27 @@ public static class StreamCam
   // The client needs a moment after MakeObserver before it takes spectator commands.
   public static readonly TimeSpan SeatGrace = TimeSpan.FromSeconds(3);
 
+  // Moving the camera by hand while the server also drives it has crashed the client.
+  public static readonly TimeSpan ManualHold = TimeSpan.FromSeconds(60);
+
+  // Client commands the camera sends itself can echo back as console commands.
+  public static readonly TimeSpan OwnCommandEcho = TimeSpan.FromSeconds(2);
+
+  // A hero pawn only seconds old may still be set up; following it preceded a client crash.
+  public static readonly TimeSpan FollowGrace = TimeSpan.FromSeconds(5);
+
+  private const string SpectatorCommandPrefix = "spec_";
+
+  // Observer movement between 2 s ticks that counts as the viewer still flying.
+  private const float ManualMoveUnits = 50f;
+
   private static readonly Logger Log = BublockLog.For("Lobby");
 
+  private static readonly Logger SpectateLog = BublockLog.For("Spectate");
+
   private static readonly Dictionary<ulong, CamState> States = [];
+
+  private static readonly Dictionary<ulong, DateTime> SpawnedAt = [];
 
   private sealed class CamState
   {
@@ -38,6 +56,9 @@ public static class StreamCam
     public int? LastShownRound;
     public DateTime? LastParkAt;
     public DateTime? SeatedAt;
+    public DateTime? ManualUntil;
+    public Vector3? ManualPosition;
+    public DateTime? LastClientCommandAt;
   }
 
   public static void Tick(ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
@@ -48,12 +69,39 @@ public static class StreamCam
     {
       var state = State(admin.PlayerSteamId);
 
-      if (state.Auto && !(state.SeatedAt is { } seated && now - seated < SeatGrace))
-        Update(admin, state, timer, mode);
+      if (!state.Auto || (state.SeatedAt is { } seated && now - seated < SeatGrace) || Held(admin, state, now, mode))
+        continue;
+
+      Update(admin, state, timer, mode);
     }
   }
 
   public static void Seated(ulong steamId) => State(steamId).SeatedAt = DateTime.UtcNow;
+
+  public static void NoteSpawn(ulong steamId) => SpawnedAt[steamId] = DateTime.UtcNow;
+
+  // Every console command from a seated admin is logged; a spectator command means they took the camera.
+  public static void OnAdminCommand(CCitadelPlayerController admin, string command, string[] args, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    if (!AdminSeat.IsSeated(admin.PlayerSteamId))
+      return;
+
+    SpectateLog.WithMode(mode).Info(admin.ToPlayerRef(), "Admin client command Command={Command} Args={Args}", command, string.Join(" ", args));
+
+    if (!command.StartsWith(SpectatorCommandPrefix, StringComparison.OrdinalIgnoreCase))
+      return;
+
+    var state = State(admin.PlayerSteamId);
+    var now = DateTime.UtcNow;
+
+    if (state.LastClientCommandAt is { } sent && now - sent < OwnCommandEcho)
+      return;
+
+    if (state.SeatedAt is { } seated && now - seated < SeatGrace)
+      return;
+
+    StartManual(admin, state, "command", now, mode);
+  }
 
   public static void OnDeath(CCitadelPlayerController victim, CCitadelPlayerController? attacker, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
@@ -86,7 +134,7 @@ public static class StreamCam
     {
       var state = State(admin.PlayerSteamId);
 
-      if (!state.Auto)
+      if (!state.Auto || SpectateRule.ManualActive(state.ManualUntil, now))
         continue;
 
       if (OverviewRule.Showing(state.OverviewEnd, now))
@@ -126,12 +174,15 @@ public static class StreamCam
     state.Auto = on;
     state.OverviewEnd = null;
     state.Parked = false;
+    state.ManualUntil = null;
     Log.WithMode(mode).Info(admin.ToPlayerRef(), "Stream camera auto Auto={Auto}", on);
     return changed;
   }
 
   public static void Forget(ulong steamId)
   {
+    SpawnedAt.Remove(steamId);
+
     if (States.TryGetValue(steamId, out var state))
       States[steamId] = new CamState { Auto = state.Auto };
   }
@@ -143,10 +194,11 @@ public static class StreamCam
     var watching = Players.GetAll().FirstOrDefault(player => SpectateService.IsWatching(admin, player.GetHeroPawn()));
     var showing = OverviewRule.Showing(state.OverviewEnd, DateTime.UtcNow);
     var roundUsed = state.LastShownRound != null && state.LastShownRound == RiftService.RoundNumber;
+    var manual = SpectateRule.ManualActive(state.ManualUntil, DateTime.UtcNow) ? $"until {state.ManualUntil:HH:mm:ss} UTC" : "off";
 
     return
     [
-      $"Auto={state.Auto} | Seated={AdminSeat.IsSeated(admin.PlayerSteamId)} | Observer={SpectateService.IsObserving(admin)} | Mode={SpectateService.Mode(admin)}",
+      $"Auto={state.Auto} | Manual={manual} | Seated={AdminSeat.IsSeated(admin.PlayerSteamId)} | Observer={SpectateService.IsObserving(admin)} | Mode={SpectateService.Mode(admin)}",
       $"Watching={watching?.PlayerName ?? (target == null ? "none" : target.DesignerName)} | Parked={state.Parked} Side={(state.ParkedSide is { } side ? RiftSides.Name(side) : "-")}",
       $"TopDown={(showing ? "showing" : "off")} | ReturnTo={NameOf(state.ReturnTo)} | Round={RiftService.RoundNumber} Live={RiftService.IsRunning} RoundTopDownUsed={roundUsed}"
     ];
@@ -177,6 +229,12 @@ public static class StreamCam
     }
 
     state.ReturnTo = null;
+
+    if (!returning && LeftFollow(admin, state, candidates))
+    {
+      StartManual(admin, state, "left-follow", now, mode);
+      return;
+    }
 
     var currentId = returning ? null : CurrentId(admin, candidates) ?? PendingFollow(admin, state, candidates, mode);
     var choice = SpectateRule.Choose(currentId, state.PendingKiller, ids);
@@ -220,6 +278,7 @@ public static class StreamCam
 
     if (!state.FallbackSent)
     {
+      state.LastClientCommandAt = DateTime.UtcNow;
       SpectateService.ClientFollow(admin, target, mode);
       state.FallbackSent = true;
     }
@@ -229,6 +288,7 @@ public static class StreamCam
 
   private static void Follow(CCitadelPlayerController admin, CamState state, CCitadelPlayerController target, string reason, ExecutionMode mode)
   {
+    state.LastClientCommandAt = DateTime.UtcNow;
     var accepted = SpectateService.Follow(admin, target, mode);
 
     state.LastFollowed = target.PlayerSteamId;
@@ -256,6 +316,12 @@ public static class StreamCam
       if (SpectateService.IsParkedAt(admin, OverheadSpot(side)))
         return;
 
+      if (SpectateService.IsManualMove(admin, OverheadSpot(side)))
+      {
+        StartManual(admin, state, "moved", now, mode);
+        return;
+      }
+
       reason = "repark";
     }
 
@@ -280,8 +346,57 @@ public static class StreamCam
     timer.Once(OverviewRule.Duration.TotalSeconds.Seconds(), () => Tick(timer, mode));
   }
 
-  private static bool ParkOverhead(CCitadelPlayerController admin, RiftSide side, ITimer timer, ExecutionMode mode) =>
-    SpectateService.Park(admin, OverheadSpot(side), SpectateRule.LookDown(WatchSpot.Location(side).Angle.Y), timer, mode);
+  private static bool ParkOverhead(CCitadelPlayerController admin, RiftSide side, ITimer timer, ExecutionMode mode)
+  {
+    State(admin.PlayerSteamId).LastClientCommandAt = DateTime.UtcNow;
+    return SpectateService.Park(admin, OverheadSpot(side), SpectateRule.LookDown(WatchSpot.Location(side).Angle.Y), timer, mode);
+  }
+
+  // The camera was following a player who is still alive, but the viewer is now in fly cam with no target.
+  private static bool LeftFollow(CCitadelPlayerController admin, CamState state, List<CCitadelPlayerController> candidates) =>
+    state.LastFollowed is { } followed &&
+    candidates.Any(player => player.PlayerSteamId == followed) &&
+    SpectateService.Mode(admin) == ObserverMode_t.Roaming &&
+    SpectateService.Current(admin) == null;
+
+  private static void StartManual(CCitadelPlayerController admin, CamState state, string reason, DateTime now, ExecutionMode mode)
+  {
+    var wasHeld = SpectateRule.ManualActive(state.ManualUntil, now);
+
+    state.ManualUntil = now + ManualHold;
+    state.ManualPosition = SpectateService.Observer(admin)?.Position;
+    state.OverviewEnd = null;
+    state.ReturnTo = null;
+    state.PendingKiller = null;
+    state.LastFollowed = null;
+    state.Parked = false;
+
+    if (!wasHeld)
+      Log.WithMode(mode).Info(admin.ToPlayerRef(), "Stream camera paused, manual control Reason={Reason} HoldSeconds={HoldSeconds}", reason, ManualHold.TotalSeconds);
+  }
+
+  // While held, any camera movement extends the hold; the camera resumes after ManualHold of stillness.
+  private static bool Held(CCitadelPlayerController admin, CamState state, DateTime now, ExecutionMode mode)
+  {
+    if (state.ManualUntil == null)
+      return false;
+
+    var position = SpectateService.Observer(admin)?.Position;
+
+    if (position is { } current && state.ManualPosition is { } last && Vector3.Distance(current, last) > ManualMoveUnits)
+    {
+      state.ManualUntil = now + ManualHold;
+      state.ManualPosition = current;
+    }
+
+    if (SpectateRule.ManualActive(state.ManualUntil, now))
+      return true;
+
+    state.ManualUntil = null;
+    state.ManualPosition = null;
+    Log.WithMode(mode).Info(admin.ToPlayerRef(), "Stream camera resumed after manual control");
+    return false;
+  }
 
   private static Vector3 OverheadSpot(RiftSide side) =>
     WatchSpot.Location(side).Position + new Vector3(0f, 0f, OverheadHeight);
@@ -289,8 +404,10 @@ public static class StreamCam
   // During a round, restrained players are waiting up top; the camera prefers players who can fight.
   private static List<CCitadelPlayerController> Candidates()
   {
+    var now = DateTime.UtcNow;
     var live = Participants.Humans()
       .Where(player => player.GetHeroPawn() is { } pawn && pawn.IsAlive)
+      .Where(player => SpectateRule.FollowReady(SpawnedAt.GetValueOrDefault(player.PlayerSteamId), now, FollowGrace))
       .OrderBy(_ => Random.Shared.Next())
       .ToList();
 

@@ -179,8 +179,13 @@ Banned-player statue: the modifier name is data, not code: `statueModifier`
 in `bublock/access.json` on the server (`/ban_modifier`), added by
 `Lobby/BanStatueService.cs` with a `duration`. After a patch, if statues
 stop turning to stone (Warning `Statue modifier refused` in `access-*.log`),
-have someone cast Vyper's Petrify, read the new name in DevTools
-`modifiers-*.log` (`ModifierProbe`), and `/ban_modifier <name>`.
+look up `m_PetrifyModifier` `_class` under `ability_viper_petrifybola` in
+GameTracking-Deadlock `scripts/abilities.vdata` (or have someone cast
+Vyper's Petrify and read DevTools `modifiers-*.log`), then
+`/ban_modifier <name>`. Current: `modifier_citadel_petrify`. It needs Vyper
+precached (`LobbyPlugin.OnPrecacheResources`, `Heroes.Viper`) or it shows as
+a red wireframe; if the hero enum or the ability moves, update
+`BanStatueService.StatueLookHero`.
 
 ### Events and hooks
 

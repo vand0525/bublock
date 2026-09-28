@@ -109,6 +109,8 @@ Assume the git repo is rooted at `Bublock/`.
   (logs, and `access.json` into `Bublock/server-data/` and the stamp
   folder), so the ban list and whitelist have a local copy until they
   move to database storage. Never commit `server-data/` (Steam IDs).
+  To change the live lists, edit `server-data/access.json` and deploy with
+  `--push-access` (the server's old copy stays in the stamp folder).
 - When a stage changes architecture decisions, update `master-plan.md` and this
   `.rules` file in the same change.
 - Extraction stages (6–10) followed the strangler pattern: each moved one
@@ -267,6 +269,10 @@ Assume the git repo is rooted at `Bublock/`.
   round (`OverviewRule`, `RiftService.RoundNumber`). Never use
   `IsValidObserverTarget` (it rejects team 3, Sapphire). A hot reload
   re-seats an admin still on the observer pawn (`AdminSeat.Restore`).
+  Never move the camera while the admin moves it (the client crashed):
+  flying away from a park, leaving a follow, or a `spec_*` console
+  command starts a 60 s manual hold with no camera calls. Never follow
+  a hero spawned less than 5 s ago (`StreamCam.FollowGrace`).
 
 ---
 

@@ -44,6 +44,12 @@ public class LobbyPlugin : DeadworksPluginBase
     _pauseHooks.Clear();
   }
 
+  public override void OnPrecacheResources()
+  {
+    Precache.AddHero(BanStatueService.StatueLookHero);
+    LobbyLog.Info("Precached hero Hero={Hero}", BanStatueService.StatueLookHero);
+  }
+
   public override void OnStartupServer()
   {
     LobbyService.ApplyServerConvars();
@@ -56,6 +62,9 @@ public class LobbyPlugin : DeadworksPluginBase
 
   public override HookResult OnClientConCommand(ClientConCommandEvent args)
   {
+    if (args.Controller is { } caller)
+      StreamCam.OnAdminCommand(caller, args.Command, args.Args);
+
     if (!PauseRule.IsPauseCommand(args.Command) || !PauseGuard.Block(args.Controller, "command", args.Command))
       return HookResult.Continue;
 
@@ -115,6 +124,7 @@ public class LobbyPlugin : DeadworksPluginBase
       return HookResult.Continue;
 
     WatchGuard.Grace(player.PlayerSteamId);
+    StreamCam.NoteSpawn(player.PlayerSteamId);
     Timer.NextTick(() => WatchSpot.SendUp(player));
 
     return HookResult.Continue;

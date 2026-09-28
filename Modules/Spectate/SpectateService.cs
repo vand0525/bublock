@@ -126,6 +126,17 @@ public static class SpectateService
       tolerance);
   }
 
+  public static bool IsManualMove(CCitadelPlayerController player, Vector3 position, float tolerance = ParkTolerance)
+  {
+    var observer = Observer(player);
+
+    return observer != null && SpectateRule.IsManualMove(
+      observer.ObserverMode == ObserverMode_t.Roaming,
+      observer.ObserverTarget != null,
+      Vector3.Distance(observer.Position, position),
+      tolerance);
+  }
+
   private static CCitadelPlayerController? Find(ulong steamId) =>
     Players.GetAll().FirstOrDefault(player => player.PlayerSteamId == steamId);
 }

@@ -16,19 +16,23 @@ PLUGINS=(RiftRoulette DevTools CleanSlate)
 # Old DLL names still on the server after a rename; deleted so two copies never load.
 RETIRED_PLUGINS=(RiftRumble)
 REMOTE_LOG_DIR="/server/game/bin/win64/bublock/logs"
+REMOTE_ACCESS="/server/game/bin/win64/bublock/access.json"
+LOCAL_ACCESS="$ROOT/server-data/access.json"
 
 CONFIRMED=false
 BACKUP=true
+PUSH_ACCESS=false
 for arg in "$@"; do
   case "$arg" in
     --confirm) CONFIRMED=true ;;
     --no-backup) BACKUP=false ;;
+    --push-access) PUSH_ACCESS=true ;;
     *) CONFIRMED=false; break ;;
   esac
 done
 
 if [[ "$CONFIRMED" != true ]]; then
-  echo "usage: deploy.sh --confirm [--no-backup]" >&2
+  echo "usage: deploy.sh --confirm [--no-backup] [--push-access]" >&2
   echo "Builds, backs up the server's ${PLUGINS[*]} DLLs, then uploads the Bublock builds." >&2
   exit 1
 fi
@@ -58,6 +62,15 @@ STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_DIR="$BACKUP_ROOT/$STAMP"
 mkdir -p "$BACKUP_DIR"
 
+# The pull below overwrites the local access.json, so the edited copy is set aside first.
+if [[ "$PUSH_ACCESS" == true ]]; then
+  if [[ ! -f "$LOCAL_ACCESS" ]] || ! python3 -m json.tool "$LOCAL_ACCESS" >/dev/null; then
+    echo "error: --push-access needs valid JSON in $LOCAL_ACCESS" >&2
+    exit 1
+  fi
+  cp "$LOCAL_ACCESS" "$BACKUP_DIR/access.pushed.json"
+fi
+
 if [[ "$BACKUP" == true ]]; then
   echo "Backing up server plugins to $BACKUP_DIR ..."
   for plugin in "${PLUGINS[@]}" "${RETIRED_PLUGINS[@]}"; do
@@ -80,6 +93,17 @@ if "$ROOT/scripts/pull-logs.sh"; then
   fi
 else
   echo "  warning: pull-logs.sh failed; logs and access.json were not saved locally" >&2
+fi
+
+if [[ "$PUSH_ACCESS" == true ]]; then
+  if [[ ! -f "$BACKUP_DIR/access.json" ]]; then
+    echo "error: the server's access.json was not saved to $BACKUP_DIR; not replacing it" >&2
+    cp "$BACKUP_DIR/access.pushed.json" "$LOCAL_ACCESS"
+    exit 1
+  fi
+  sftp_run "put '$BACKUP_DIR/access.pushed.json' -o '$REMOTE_ACCESS'"
+  cp "$BACKUP_DIR/access.pushed.json" "$LOCAL_ACCESS"
+  echo "  uploaded access.json (server's previous copy: $BACKUP_DIR/access.json)"
 fi
 
 RETIRED_REMOVED=false
