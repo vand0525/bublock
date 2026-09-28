@@ -17,8 +17,13 @@ Single Steam-ID admin gate for every Bublock DLL.
 
 ## State
 
-- Static, read-only authorized set: `76561198192980843`, copied from the
-  archive DevTools oracle (`archive/DevTools/DevToolsPlugin.cs`).
+- Static, read-only authorized set:
+  - `76561198192980843` (Theo), copied from the archive DevTools oracle
+    (`archive/DevTools/DevToolsPlugin.cs`).
+  - `76561198001002148`, the owner of the redock fork's server, given by
+    the owner (2026-09-27).
+- Every admin connects into the admin seat (spectating, `AdminSeatRule.SeatOnJoin`)
+  and may always connect (`AdminSeatRule.CanConnect`); `dw_seat_play` joins a team.
 
 ## Invariants
 

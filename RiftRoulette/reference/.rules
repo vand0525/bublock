@@ -52,6 +52,13 @@ deadworks/                 # Cursor workspace root
     scripts/check-spots.py # check the per-slot spots against the map mesh (offline)
     scripts/patch-baseline.sh # save a known-good snapshot before a game patch
     scripts/patch-check.py # diff game data / API vs that snapshot (offline)
+    scripts/fetch-deadworks.sh # pinned Deadworks API into lib/ when there is no workspace ../lib (CI)
+    scripts/sftp-password.sh # SFTP password: DW_PASSWORD, macOS keychain or Linux keyring
+    scripts/server-check.sh # read-only SFTP look: layout, Deadworks version vs lib/, plugins, logs
+    scripts/knowledge.sh   # regenerate knowledge/generated/ and site/ (api-index.cs, knowledge-graph.py, docs-site.py)
+    knowledge/             # glossary, mental models, effects catalog, recipes, changelog; generated/ indexes + graph
+    .github/workflows/     # ci.yml (build + test), deploy.yml (manual; runs deploy.sh --confirm)
+    CLAUDE.md              # Claude Code entry: imports this file, points at knowledge/
   server-backups/          # deploy.sh backups (<UTC stamp>/), outside git
 ```
 

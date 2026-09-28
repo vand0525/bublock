@@ -24,5 +24,9 @@ in `server-backups/latest`). Without a stamp it prints usage and exits 1.
 
 ## Requirements
 
-Same as `deploy.sh` (`scripts/server.env`, `lftp`, keychain
-`deadworks-sftp`, password via `--env-password`).
+Same as `deploy.sh` (`scripts/server.env`, `lftp`, password from
+`sftp-password.sh`, passed via `--env-password`).
+
+`DW_REMOTE_GAME` in `server.env` overrides the remote game folder
+(default `/server/game`; `""` means the SFTP root, as on the deadworks.net
+panel). `server-check.sh` prints the right value.

@@ -1,0 +1,65 @@
+# Push the plugins to the live server through scripts/deploy.sh.
+# Manual only: running it is the per-upload approval .rules asks for.
+# See .github/workflows/README.md for the secrets it needs.
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      backup:
+        description: Back up the server's DLLs first (rollback.sh needs this)
+        type: boolean
+        default: true
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  DEADWORKS_VERSION: v0.4.18 # keep in step with scripts/fetch-deadworks.sh and the server
+  DOTNET_NOLOGO: "1"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      - run: scripts/fetch-deadworks.sh
+      - run: scripts/test.sh
+
+      - name: Server details from secrets
+        env:
+          DW_HOST: ${{ secrets.DW_HOST }}
+          DW_PORT: ${{ secrets.DW_PORT }}
+          DW_USER: ${{ secrets.DW_USER }}
+          DW_KNOWN_HOSTS: ${{ secrets.DW_KNOWN_HOSTS }}
+        run: |
+          for name in DW_HOST DW_PORT DW_USER DW_KNOWN_HOSTS; do
+            if [[ -z "${!name}" ]]; then echo "::error::missing secret $name"; exit 1; fi
+          done
+          umask 077
+          printf 'DW_HOST=%q\nDW_PORT=%q\nDW_USER=%q\n' "$DW_HOST" "$DW_PORT" "$DW_USER" > scripts/server.env
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DW_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Deploy
+        env:
+          DW_PASSWORD: ${{ secrets.DW_PASSWORD }}
+          BACKUP_FLAG: ${{ inputs.backup && '' || '--no-backup' }}
+        run: scripts/deploy.sh --confirm $BACKUP_FLAG
+
+      - name: Keep the backup (rollback.sh needs it)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: server-backups-${{ github.run_id }}
+          path: ${{ github.workspace }}/../server-backups/
+          if-no-files-found: ignore
+          retention-days: 90

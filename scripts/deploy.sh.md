@@ -50,11 +50,16 @@ delete the loop instead of emptying it.
 - `scripts/server.env` (git-ignored; copy `server.env.example`) sets
   `DW_HOST`, `DW_PORT` and `DW_USER`. Missing file: exits 1 with a hint.
   Server details never go in committed files.
-- `lftp`; keychain item `deadworks-sftp` for account `DW_USER`. The
-  password goes through `LFTP_PASSWORD` / `--env-password`, never on the
-  command line or in output.
+- `lftp`; the SFTP password from `sftp-password.sh` (`DW_PASSWORD`,
+  macOS keychain or Linux keyring `deadworks-sftp` for account `DW_USER`).
+  It goes through `LFTP_PASSWORD` / `--env-password`, never on the command
+  line or in output.
 
 ## Policy
 
 Run only after the user approves the upload (Stage 12 gate; afterwards per
 change). Roll back with `rollback.sh <stamp>`.
+
+`DW_REMOTE_GAME` in `server.env` overrides the remote game folder
+(default `/server/game`; `""` means the SFTP root, as on the deadworks.net
+panel). `server-check.sh` prints the right value.

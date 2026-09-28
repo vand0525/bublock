@@ -11,11 +11,13 @@ if [[ ! -f "$ROOT/scripts/server.env" ]]; then
   exit 1
 fi
 source "$ROOT/scripts/server.env"
-REMOTE_DIR="/server/game/bin/win64/managed/plugins"
+# Game folder over SFTP: Theo's host /server/game; DW_REMOTE_GAME="" means the SFTP root.
+REMOTE_GAME="${DW_REMOTE_GAME-/server/game}"
+REMOTE_DIR="$REMOTE_GAME/bin/win64/managed/plugins"
 PLUGINS=(RiftRoulette DevTools CleanSlate)
 # Old DLL names still on the server after a rename; deleted so two copies never load.
 RETIRED_PLUGINS=(RiftRumble)
-REMOTE_LOG_DIR="/server/game/bin/win64/bublock/logs"
+REMOTE_LOG_DIR="$REMOTE_GAME/bin/win64/bublock/logs"
 
 CONFIRMED=false
 BACKUP=true
@@ -47,8 +49,7 @@ for plugin in "${PLUGINS[@]}"; do
   fi
 done
 
-LFTP_PASSWORD="$(security find-generic-password -a "$DW_USER" -s 'deadworks-sftp' -w)"
-export LFTP_PASSWORD
+source "$ROOT/scripts/sftp-password.sh"
 
 sftp_run() {
   lftp --env-password -u "$DW_USER" "sftp://$DW_HOST:$DW_PORT" -e "set cmd:fail-exit yes; $1; bye"

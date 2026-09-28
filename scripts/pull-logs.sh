@@ -11,15 +11,15 @@ if [[ ! -f "$ROOT/scripts/server.env" ]]; then
   exit 1
 fi
 source "$ROOT/scripts/server.env"
-REMOTE_DIR="/server/game/bin/win64/bublock/logs"
+REMOTE_GAME="${DW_REMOTE_GAME-/server/game}"
+REMOTE_DIR="$REMOTE_GAME/bin/win64/bublock/logs"
 
 if ! command -v lftp >/dev/null 2>&1; then
   echo "error: lftp is not installed (brew install lftp)." >&2
   exit 1
 fi
 
-LFTP_PASSWORD="$(security find-generic-password -a "$DW_USER" -s 'deadworks-sftp' -w)"
-export LFTP_PASSWORD
+source "$ROOT/scripts/sftp-password.sh"
 
 if ! lftp --env-password -u "$DW_USER" "sftp://$DW_HOST:$DW_PORT" \
      -e "set cmd:fail-exit yes; cd '$REMOTE_DIR'; bye" >/dev/null 2>&1; then
