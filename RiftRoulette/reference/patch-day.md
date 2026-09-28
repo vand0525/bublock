@@ -77,6 +77,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 
 | Symptom | Likely cause | Check | Fix |
 |---|---|---|---|
+| Players who leave stay in game as disconnected, pawns standing | a hook method uses an API member whose type changed on the server (Deadworks v0.4.18: `ClientDisconnectedEvent.Reason` int to enum), so the method throws before its first line | self-test Events `client_disconnect` none after a leave; no `Player disconnected` in `lobby-*.log` | copy the server's `managed/DeadworksManaged.Api.dll` into `lib/`, rebuild, upload |
 | Server crashes on boot only with our DLLs | Deadworks API changed under an old build | host console | update `lib/`, rebuild, upload |
 | Server crashes without our DLLs | Deadworks not updated for the patch | host console | wait for Deadworks |
 | Build fails after updating `lib/` | API member renamed / removed | compiler error | find the new name in `/tmp/dwapi.cs` |

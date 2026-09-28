@@ -35,6 +35,10 @@ public static class StreamCam
 
   private static readonly Dictionary<ulong, DateTime> SpawnedAt = [];
 
+  public static readonly TimeSpan SpotlightHold = TimeSpan.FromSeconds(10);
+
+  private static (ulong SteamId, DateTime Until)? _spotlight;
+
   private sealed class CamState
   {
     public bool Auto = true;
@@ -71,6 +75,9 @@ public static class StreamCam
   public static void Seated(ulong steamId) => State(steamId).SeatedAt = DateTime.UtcNow;
 
   public static void NoteSpawn(ulong steamId) => SpawnedAt[steamId] = DateTime.UtcNow;
+
+  // Statues are not participants; for SpotlightHold the new statue is the only one the camera follows.
+  public static void ShowStatue(ulong steamId) => _spotlight = (steamId, DateTime.UtcNow + SpotlightHold);
 
   public static void OnDeath(CCitadelPlayerController victim, CCitadelPlayerController? attacker, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
@@ -341,15 +348,26 @@ public static class StreamCam
   private static List<CCitadelPlayerController> Candidates()
   {
     var now = DateTime.UtcNow;
+
+    if (_spotlight is { } spot && (now > spot.Until || !BanStatueService.IsStatue(spot.SteamId)))
+      _spotlight = null;
+
+    var statue = _spotlight is { } lit ? Players.GetAll().Where(player => player.PlayerSteamId == lit.SteamId).Where(Followable(now)).FirstOrDefault() : null;
+
+    if (statue != null)
+      return [statue];
+
     var live = Participants.Humans()
-      .Where(player => player.GetHeroPawn() is { } pawn && pawn.IsAlive)
-      .Where(player => SpectateRule.FollowReady(SpawnedAt.GetValueOrDefault(player.PlayerSteamId), now, FollowGrace))
+      .Where(Followable(now))
       .OrderBy(_ => Random.Shared.Next())
       .ToList();
 
     var fighting = live.Where(player => !RestraintService.IsRestrained(player.PlayerSteamId)).ToList();
     return fighting.Count > 0 ? fighting : live;
   }
+
+  private static Func<CCitadelPlayerController, bool> Followable(DateTime now) => player =>
+    player.GetHeroPawn() is { IsAlive: true } && SpectateRule.FollowReady(SpawnedAt.GetValueOrDefault(player.PlayerSteamId), now, FollowGrace);
 
   private static ulong? CurrentId(CCitadelPlayerController admin, List<CCitadelPlayerController> candidates) =>
     candidates.FirstOrDefault(player => SpectateService.IsWatching(admin, player.GetHeroPawn()))?.PlayerSteamId;

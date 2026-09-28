@@ -105,7 +105,10 @@ public class LobbyPlugin : DeadworksPluginBase
   {
     EventCounters.Hit("client_disconnect");
 
-    if (args.Controller != null)
+    // Deadworks keeps the player through a map change: they reconnect to the next map.
+    if (args.IsMapChange)
+      LobbyLog.Debug("Map change disconnect, player kept Slot={Slot}", args.Slot);
+    else if (args.Controller != null)
       LobbyService.RemovePlayer(args.Controller, Timer);
     else
       LobbyService.OnDisconnectWithoutController(args.Slot, args.Reason, Timer);

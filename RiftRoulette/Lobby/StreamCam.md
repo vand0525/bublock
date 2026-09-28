@@ -5,6 +5,9 @@ as soon as the admin is seated: no command needed. Camera calls go through
 `Modules/Spectate`; this file decides what to show.
 
 - Players to watch: follow one (in-eye), cut to the killer when they die.
+- A player just turned to stone (`ShowStatue`, from
+  `BanStatueService.Petrify`): for `SpotlightHold` (10 s) the statue is the
+  only one followed.
 - Nobody to watch: park at the framing for the current watch spot side
   (`WatchSpot.Side`). The default framing is straight down, 264 units
   above the watch spot anchor. Move the camera after that park and let go:
@@ -24,6 +27,9 @@ as soon as the admin is seated: no command needed. Camera calls go through
 - `LastPosition` / `LastAngles`: the observer's position and view angle at
   the last update, to see the admin moving it.
 - `SpawnedAt` (per player Steam ID): last `player_spawn`, from `NoteSpawn`.
+- `_spotlight` (one, shared): the statue's Steam ID and until when; a
+  newer ban replaces it, and it ends early once the player is no longer a
+  statue (kicked, left).
 - `Forget(steamId)` resets everything but `Auto` and drops the spawn time
   (stand up, disconnect). A hot reload clears it (static);
   `AdminSeat.Restore` re-seats the admin. The saved framing is in a file,
@@ -37,6 +43,7 @@ as soon as the admin is seated: no command needed. Camera calls go through
 | `Seated(steamId)` | Called by `AdminSeat.BecomeObserver` right after `MakeObserver`; starts the seat grace. |
 | `NoteSpawn(steamId)` | From the `player_spawn` handler: records the spawn time for the follow delay. |
 | `OnDeath(victim, attacker, timer, mode)` | If an admin's camera follows the victim, stores the attacker as `PendingKiller` (none for a suicide or a non-player) and runs `Tick` on the next tick. |
+| `ShowStatue(steamId)` | Sets the spotlight to that statue until `SpotlightHold` (10 s) from now. |
 | `SetAuto(admin, on, mode)` | Sets `Auto` and resets the rest of that admin's state. |
 | `ResetFraming(mode)` | `spec_reset`: `StreamFramingStore.Reset` and every admin's `Placed` / `Adjusting` cleared, so the next update parks at the default. |
 | `Describe(admin)` | Three lines for `spec_status`: auto, seat, observer mode, fly cam, the view angle read (or `unreadable`); who is watched, parked side, placed, adjusting, watch side; the saved framing per side (or `default`). |
@@ -51,9 +58,11 @@ more than 50 units or 3 degrees since the last update
 1. A fly cam park sent: wait `ParkSettle` (1.25 s) for its teleport and
    angles, then check it once: within `PlacedUnits` (100) of the target
    and still in fly cam means `Placed`. Nothing else that update.
-2. Candidates: participants (`Participants.Humans()`) with a live hero
-   pawn spawned at least `FollowGrace` (5 s) ago, shuffled; only the
-   fighting (not restrained) ones if there are any.
+2. Candidates: during a spotlight, only the statue once its hero pawn is
+   alive and at least `FollowGrace` (5 s) old (a rejoining statue gets a
+   new Skyrunner pawn). Otherwise participants (`Participants.Humans()`)
+   with a live hero pawn spawned at least `FollowGrace` ago, shuffled;
+   only the fighting (not restrained) ones if there are any.
 3. Candidates: follow.
    - Moved: do nothing this update.
    - A follow was sent but the camera is not on that player (still a

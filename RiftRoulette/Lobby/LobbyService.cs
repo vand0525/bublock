@@ -118,7 +118,7 @@ public static class LobbyService
     extra?.Remove();
   }
 
-  public static void OnDisconnectWithoutController(int slot, int reason, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
+  public static void OnDisconnectWithoutController(int slot, ENetworkDisconnectionReason reason, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
     LobbyLog.WithMode(mode).Warn("Disconnect without a controller Slot={Slot} Reason={Reason}", slot, reason);
     timer.Once(OrphanSweepSeconds.Seconds(), () => SweepOrphanObservers(mode));

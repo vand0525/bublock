@@ -317,7 +317,7 @@ numbers are refused.
 - **Who:** admin
 - **Calls:** `AccessService.Ban`, `AccessService.PetrifyBanned`
 - **Mode:** Debug
-- **Side effects:** adds the connected player's Steam ID to `banned` and saves the file. The player turns to stone up top (out of the game, restrained, statue modifier), is told `You are banned. Do better. You will be kicked in 30s.`, everyone else sees `<name> is banned.`, and they are kicked 30 s later. Refuses an empty slot, a bot, or yourself
+- **Side effects:** adds the connected player's Steam ID to `banned` and saves the file. The player turns to stone up top (out of the game, restrained, statue modifier), is told `You are banned. Do better. You will be kicked in 30s.`, everyone sees the HUD banner `<name> is banned` with a stone joke under it, the stream camera follows the statue for 10 s, and they are kicked 30 s later. Refuses an empty slot, a bot, or yourself
 
 #### /ban_add <steamid>
 

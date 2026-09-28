@@ -1,3 +1,4 @@
+using Bublock.Modules.Hud;
 using Bublock.Modules.Loadout;
 using Bublock.Modules.Restraint;
 using Bublock.Shared;
@@ -23,6 +24,17 @@ public static class BanStatueService
   private const float ModifierSeconds = LiveBanKickSeconds + 5;
 
   public const string BannedMessage = "You are banned. Do better.";
+
+  public static string BannedTitle(string name) => $"{name} is banned";
+
+  public static readonly IReadOnlyList<string> StoneJokes =
+  [
+    "Turned to stone. Great for the decor.",
+    "Rock solid decision.",
+    "Stone cold. Literally.",
+    "Now a statue. Pigeons welcome.",
+    "Taking some time to think about it... as a rock."
+  ];
 
   // modifier_citadel_petrify renders as a red wireframe unless Vyper's assets are loaded.
   public const Heroes StatueLookHero = Heroes.Viper;
@@ -98,8 +110,8 @@ public static class BanStatueService
       PlayerChat.Send(current, own);
     });
 
-    foreach (var other in Players.GetAll().Where(other => !other.IsBot && other.PlayerSteamId != steamId))
-      PlayerChat.Send(other, $"{player.PlayerName} is banned.");
+    HudService.AnnounceAll(BannedTitle(player.PlayerName), StoneJokes[Random.Shared.Next(StoneJokes.Count)], mode);
+    StreamCam.ShowStatue(steamId);
 
     log.Info(player.ToPlayerRef(), "Banned player turned to stone KickAfter={KickAfter} LiveBan={LiveBan}", kickAfterSeconds, liveBan);
     BublockLog.Master.Info(player.ToPlayerRef(), "Banned player turned to stone KickAfter={KickAfter}", kickAfterSeconds);

@@ -188,7 +188,15 @@ Assume the git repo is rooted at `Bublock/`.
   ban, 10 s after a reconnect. Each reconnect is a strike
   (`Lobby/BanJoinRule`): refused 10 min, then 30 min, then until restart.
   Statues are not participants. Never kick inside `OnClientConnect` /
-  `OnClientFullConnect`; kick from a timer.
+  `OnClientFullConnect`; kick from a timer. A new statue gets the HUD
+  banner `<name> is banned` with a stone joke under it, and the stream
+  camera follows it for 10 s (`StreamCam.ShowStatue`).
+- Build against the server's Deadworks: after any Deadworks update copy
+  its `managed/DeadworksManaged.Api.dll` into `lib/`. A hook that uses a
+  member whose type changed on the server throws before its first line on
+  every call (only the host console shows it). Map-change disconnects
+  (`ClientDisconnectedEvent.IsMapChange`) are not leaves; never remove
+  those players.
 - Pausing is off after every load (`Lobby/PauseGuard`): pause convars 0,
   pause console commands and both pause net messages blocked, and a game
   paused anyway gets the server `pause` toggle. `/pause_allow on` turns it
