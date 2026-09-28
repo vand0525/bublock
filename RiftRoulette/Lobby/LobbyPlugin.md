@@ -37,6 +37,7 @@ lifecycle, server setup, and the lobby commands. Ops live on
 | `/pause_allow [on\|off]` | admin | No argument: `PauseGuard.Describe` (on/off, paused state, counts). `on` / `off` (or `1` / `0`): `PauseGuard.SetAllowed(Debug)`, which sets the pause convars and writes a master line; error for another value. Lasts until the next load or `/access_mode` change, which set pausing from the private flag |
 | `dw_seat_spec` | admin, console only (`ConsoleOnly`; chat `/seat_spec` does not run) | `AdminSeat.Sit`: the admin moves to the spectator seat (`MakeObserver` on the next tick); works any time, including mid-round; a roaming admin stops roaming and spectates |
 | `/seat_play` | admin | `AdminSeat.Stand`: the admin goes back onto a team through `AdmitPlayer`; refused when 12 are playing |
+| `/seat_roam` | admin | `AdminSeat.RoamNow`: roam now (invisible Abrams in front of the welcome sign), or back in front of the sign if already roaming; refused when not seated or anyone plays |
 | `/seat_status` | admin | `AdminSeat.Describe` |
 | `/spec_auto <on\|off>` | admin | `StreamCam.SetAuto`: the automatic stream camera on or off (default on; resets that admin's camera state); error for another value |
 | `/spec_status` | admin | `StreamCam.Describe`: auto, seated, observer mode, fly cam, the view angle read; who is on camera, parked side, placed / adjusting, watch side; the saved framing per side |

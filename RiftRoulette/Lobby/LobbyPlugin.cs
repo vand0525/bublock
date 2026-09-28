@@ -292,6 +292,15 @@ public class LobbyPlugin : DeadworksPluginBase
     AdminCommand.Reply(caller, $"[Lobby] {AdminSeat.Stand(player, Timer, ExecutionMode.Debug)}");
   }
 
+  [Command("seat_roam", Description = "Admin seat: roam as invisible Abrams in front of the welcome sign while nobody plays (console: dw_seat_roam)")]
+  public void CmdSeatRoam(CCitadelPlayerController? caller)
+  {
+    AdminCommand.Authorize(caller, LobbyLog, "seat_roam");
+
+    var player = SeatTarget(caller);
+    AdminCommand.Reply(caller, $"[Lobby] {AdminSeat.RoamNow(player, Timer, ExecutionMode.Debug)}");
+  }
+
   [Command("seat_status", Description = "Show player slots, the admin seat, and maxplayers")]
   public void CmdSeatStatus(CCitadelPlayerController? caller)
   {

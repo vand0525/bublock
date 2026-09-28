@@ -231,7 +231,8 @@ Assume the git repo is rooted at `Bublock/`.
   (`WatchLayout.WelcomeFront`; back to the watch slot if they fall), not
   restrained, invisible (`modifier_invis`, one 3600 s modifier put back
   when it runs out and on respawn / reload, never every frame). Roaming
-  admins stay seated (never participants). `AdminSeat.SyncSoon` switches
+  admins stay seated (never participants). `/seat_roam` starts roaming (or
+  re-places at the sign) only while nobody plays. `AdminSeat.SyncSoon` switches
   2 s after a join / leave / statue (never inside `OnClientFullConnect`).
 - Hero mode `duel` (`/match_mode 1v1`) copies one player's exact
   hero state (`Modules/Loadout` `LoadoutSnapshot`) onto both players with

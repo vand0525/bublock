@@ -231,7 +231,7 @@ position, entity index.
 - **Calls:** `AdminSeat.Sit` (→ `DraftState.Release`, `RandomModeService.Forget`, `DuelService.Forget`, `RestraintService.Release`, `WatchGuard.Forget`, `StatsService.RefreshBoards`, `AutoStartService.Check`; next tick `ChangeTeam(1, false)` + `MakeObserver()`)
 - **Mode:** Debug
 - **Side effects:** works at any time, also during a rift round. Moves the admin to the spectator side, outside Sapphire and Amber, and removes their hero pawn (observer camera). They stop counting for teams, auto-start, stats, Random mode and 1v1; a running match may auto-end if fewer than 2 players remain, and the teams are evened at the next Random mode intermission. Logs `Admin seat taken, spectating next tick Phase=...`, then `Admin spectating TeamNum=... HeroPawn=... Observer=...`, and a master line
-- **Notes:** `ChangeTeam(1)` alone leaves the hero pawn alive and dropped the admin's client 12-23 s later (two crashes on 2026-09-27); `MakeObserver` prevents that. Spectators cannot type in game chat, so getting back out needs the console. Every admin is seated automatically on connect (use `dw_seat_play` to play). While no participants are connected a seated admin roams as an invisible, unrestrained Abrams at the watch spot and switches to spectating 2 s after someone joins; `dw_seat_spec` while roaming switches to spectating right away (the next join or leave may roam them again if the server is still empty)
+- **Notes:** `ChangeTeam(1)` alone leaves the hero pawn alive and dropped the admin's client 12-23 s later (two crashes on 2026-09-27); `MakeObserver` prevents that. Spectators cannot type in game chat, so getting back out needs the console. Every admin is seated automatically on connect (use `dw_seat_play` to play). While no participants are connected a seated admin roams as an invisible, unrestrained Abrams in front of the welcome sign (`/seat_roam` forces it) and switches to spectating 2 s after someone joins; `dw_seat_spec` while roaming switches to spectating right away (the next join or leave may roam them again if the server is still empty)
 
 #### /seat_play
 
@@ -241,6 +241,15 @@ position, entity index.
 - **Mode:** Debug
 - **Side effects:** takes the admin out of the seat (ending roaming and its cloak) and admits them like a new connection: smaller team, Skyrunner, watch spot (restrained), Random mode joiner or 1v1 setup souls, auto-start check. 2 s later logs whether a hero spawned (`Admin hero after leaving the seat`, or the Warning `Admin has no hero after leaving the seat`)
 - **Notes:** refused when not seated, or when 12 players are already playing. Takes no slot argument: a seated admin's console command can arrive without a caller (seen 2026-09-27), so both seat commands fall back to the admin Steam ID
+
+#### /seat_roam
+
+- **Invocation:** chat `/seat_roam` (while roaming) | console `dw_seat_roam` (client or server console; the only way while spectating), no arguments
+- **Who:** admin. Same target as `dw_seat_spec`: the caller, else the connected player with the admin Steam ID
+- **Calls:** `AdminSeat.RoamNow` (→ `Roam`, or `PlaceAndCloak` when already roaming)
+- **Mode:** Debug
+- **Side effects:** a spectating admin becomes Abrams on Amber and, 2 s later, is teleported straight in front of the welcome sign facing it and cloaked (`modifier_invis`, 3600 s), not restrained. An admin already roaming is teleported back in front of the sign and cloaked again. Still seated, so never a participant. Logs `Admin roaming, server empty` (and a master line) or the placement / cloak lines
+- **Notes:** refused when not seated (`Use dw_seat_spec first`) or when anyone is playing. The next join still switches the admin to spectating 2 s later
 
 #### /seat_status
 

@@ -226,6 +226,7 @@ column); `new` = no archive equivalent.
 | `/pause_allow [on\|off]` | — | Lobby | `PauseGuard.Describe` / `SetAllowed` | Show whether players can pause, or turn pausing on / off (every load sets it from private mode) | new |
 | `dw_seat_spec` | — | Lobby | `AdminSeat.Sit` | Admin (caller, else the admin Steam ID) to the spectator seat, outside teams. Console only (`ConsoleOnly`); any time (spectator team + `MakeObserver`). Admins are seated on every connect | new |
 | `/seat_play` | — | Lobby | `AdminSeat.Stand` | Admin (caller, else the admin Steam ID) out of the seat and onto a team (console: `dw_seat_play`, no arguments) | new |
+| `/seat_roam` | — | Lobby | `AdminSeat.RoamNow` | Seated admin roams now as invisible Abrams in front of the welcome sign, or is put back there if already roaming; only while nobody plays (console: `dw_seat_roam`) | new |
 | `/seat_status` | — | Lobby | `AdminSeat.Describe` | Player slots, admin seat, `maxplayers` | new |
 | `/spec_auto <on\|off>` | — | Lobby | `StreamCam.SetAuto` | Automatic stream camera on or off for the seated admin (default on; console `dw_spec_auto`) | new |
 | `/spec_status` | — | Lobby | `StreamCam.Describe` | Who is on camera, fly cam, view angle read, saved framing per side | new |

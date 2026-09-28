@@ -135,6 +135,27 @@ public static class AdminSeat
     }
   }
 
+  public static string RoamNow(CCitadelPlayerController player, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    var steamId = player.PlayerSteamId;
+    var playing = Participants.Humans().Count;
+
+    if (!Seated.Contains(steamId))
+      return $"{player.PlayerName} is not in the admin seat. Use dw_seat_spec first.";
+
+    if (!AdminSeatRule.ShouldRoam(playing))
+      return $"{playing} playing: roaming is only while nobody plays.";
+
+    if (Roaming.Contains(steamId))
+    {
+      PlaceAndCloak(steamId, timer, mode);
+      return $"{player.PlayerName} moved back in front of the welcome sign.";
+    }
+
+    Roam(player, timer, mode);
+    return $"{player.PlayerName} is roaming (invisible Abrams in front of the welcome sign in 2 s).";
+  }
+
   private static void Roam(CCitadelPlayerController player, ITimer timer, ExecutionMode mode)
   {
     var steamId = player.PlayerSteamId;

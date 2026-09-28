@@ -124,7 +124,7 @@ startup, hot reload, every join and every intermission;
 See `LobbyService.md`. Player commands: `/status`, `/commands` (built by
 `CommandList`). Admin commands: `/player_list`, `/player_info`,
 `/player_kick`, `/player_team`, `/lobby_setup`, `/lobby_flex`, `/pause_allow`, `dw_seat_spec` (console
-only, any time), `/seat_play`, `/seat_status`, `/spec_auto`,
+only, any time), `/seat_play`, `/seat_roam`, `/seat_status`, `/spec_auto`,
 `/spec_status`, `/spec_reset` (stream camera).
 Access (admin): `/player_ban <slot>`, `/ban_add`, `/ban_remove`,
 `/ban_list`, `/ban_modifier`, `/allow_add`, `/allow_remove`, `/allow_list`,
