@@ -42,6 +42,7 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
 | `AddJoiner(player, team, timer, mode)` | Records the joiner's team and adds them to the back of the bench rotation. During a round: hero at the next intermission. In an intermission, keeping the fighters even: an odd number of fighters: the joiner plays on the smaller fighting team; else a bench player is connected: both play (bench player on the other team, swapped now; logged `Subbed in with a joiner`); else the joiner sits out (`Joiner sitting out this round`, sitting-out banner if the build banner already went out). A late hero (`AssignLate`): a hero not assigned this round (any hero if none are left), a random build, pending, `ApplyPending` fallback after 2 s | — |
 | `OnLeave(steamId, timer, mode)` | From `LobbyService.RemovePlayer` during a Random match, before the pawn is removed. `Forget`s the leaver. If they were fighting and it is an intermission and a bench player is connected: the bench player takes the leaver's team with a late hero, swapped now (`Subbed in for a player who left`). Mid-round the round plays on uneven; the next intermission evens it | — |
 | `ApplyPending(player, timer, mode)` | In Random mode, for a pending player now alive: starts their swap and clears pending | `bool` started |
+| `Reroll(player, timer, mode, applied = null)` | Gun Game (Stage 13k). Random mode only, for a player with an assignment: draws one new hero (not their current one, preferring heroes nobody else holds, no repeat of their last via `HeroDraw`), releases their `DraftState` pick, assigns a random build of it (`Assign`, which also unapplies the hero lock so the swap is not punished) and starts the swap now (`Start`); dead: marks pending (`ApplyPending` on spawn). Logs `Rerolled` or `Reroll pending spawn` with `Previous=`. When the loadout lands, `applied(player, assignment, souls)` runs instead of the build banner | new assignment, or null |
 | `TryGetAssignment(steamId, out assignment)` | Current assignment lookup | `bool` |
 | `GuardHero(player, pawn, timer, mode)` | See below | `bool` handled |
 | `ConsumeEnforcementKill(steamId)` | Removes and returns the enforcement-kill flag | `bool` |
@@ -100,6 +101,15 @@ Called from `DraftService.EnforceHero` on `player_hero_changed` (after
   logs, and tells the player they respawn as their hero. On respawn,
   `ApplyPending` swaps them back and applies the full build. If the pawn
   survives the damage, the flags are undone and the swap runs in place.
+
+### Swap start (`Start`)
+
+Private. Refuses dead players (pending instead), moves the player to the
+assignment's team, unapplies the lock, then `LoadoutService.Swap`. When the
+loadout lands and the assignment is still current: marks the lock applied,
+stores the soul value, then calls the optional `applied` callback (Gun Game's
+level banner) or, when the build banner already went out this intermission,
+shows it for this player.
 
 ## Logs
 

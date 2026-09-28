@@ -8,8 +8,10 @@ caller of `Start` (`GameLoopPlugin`) and is kept for the whole match.
 
 1. `Start`: score reset; in Random mode `RandomModeService.BeginMatch`
    (teams), in 1v1 mode `DuelService.BeginMatch` (opposite teams, hero lock
-   on); buying synced (`ShopAccess.Sync`: off during any match); banner
-   `Match starting` / `Round 1 in Ns` (1v1: `1v1` / `<pairing>`); countdown
+   on), with the Gun Game format `GunGameService.BeginMatch` (ladder reset,
+   Stage 13k); buying synced (`ShopAccess.Sync`: off during any match); banner
+   `Match starting` / `Round 1 in Ns` (1v1: `1v1` / `<pairing>`; Gun Game:
+   `Gun Game` / `First to 10 kills - round 1 in 5s`); countdown
    scheduled; `MatchProbe.Snapshot("match-start")`.
 2. Countdown (`ScheduleNextRound`): in Random mode, first
    `RandomModeService.PrepareRound` (new hero and build for everyone); in
@@ -46,11 +48,11 @@ round countdown); no debug-style text.
 | Op | Behavior | Returns |
 |---|---|---|
 | `Start(timer, mode)` | Refuses if a match is running, a rift is running, or 1v1 mode has no copied build (`1v1 needs a build first: /duel_copy <slot>.`). Else keeps the timer, `State.Start()`, `ShopAccess.Sync`, `StatsService.Reset`, `BalanceService.Reset` and `BettingService.Reset`, `BeginMatch` in Random or 1v1 mode, logs with the config (feature + master), banner (1v1 mode names the first pairing), schedules round 1, match-start probe | reply line |
-| `End(timer, mode)` | Refuses if idle. Cancels the countdown, `State.Reset()` (so the round-ended step is ignored), `ShopAccess.Sync` (opens buying again in 1v1 mode), cancels a running rift through `RoundFlow.CancelRound`, in Random mode `BettingService.EndMatch` (open bets refunded) then `RandomModeService.EndMatch` (builds cleared), `DraftService.Reset` (everyone alive to the lobby as Skyrunner, picks cleared), then in 1v1 mode `DuelService.EndMatch` (lock off, build kept, setup souls, no separate setup banner), banner `Match over` / final score (1v1: `DuelService.StreakSummary()`, taken before `EndMatch` clears it), logs | reply line |
+| `End(timer, mode)` | Refuses if idle. Cancels the countdown, `State.Reset()` (so the round-ended step is ignored), `ShopAccess.Sync` (opens buying again in 1v1 mode), cancels a running rift through `RoundFlow.CancelRound`, with the Gun Game format `GunGameService.EndMatch` (final ladder logged, reset), in Random mode `BettingService.EndMatch` (open bets refunded) then `RandomModeService.EndMatch` (builds cleared), `DraftService.Reset` (everyone alive to the lobby as Skyrunner, picks cleared), then in 1v1 mode `DuelService.EndMatch` (lock off, build kept, setup souls, no separate setup banner), banner `Match over` / final score (1v1: `DuelService.StreakSummary()`; Gun Game: `GunGameService.Summary()`, e.g. `Theo wins - 10 kills`; both taken before `EndMatch` clears them), logs. Gun Game calls it itself on the winning kill | reply line |
 | `SetHeroMode(heroMode, timer, mode)` | Refuses during a match or when unchanged. Leaving 1v1: `DuelService.Leave` (build dropped). Sets `MatchConfig.HeroMode`, `ShopAccess.Sync`, then `DraftService.Reset` (lobby reset; boards redrawn for the new mode); entering 1v1: `DuelService.EnterSetup(announce: false)` (100,000 souls). Then the `ModeBanner` to everyone. Logs (feature + master) | reply line |
 | `ModeBanner(heroMode)` | Random: `Random mode` / `Random hero and build every round`. 1v1: `1v1 mode` / `DuelService.SetupDescription`. Draft: `Draft mode` / `Pick your heroes` | (title, description) |
-| `SetFormat(format, mode)` | Refuses during a match. Sets `MatchConfig.Format`, logs | reply line |
-| `DescribeConfig()` | Config line, then the allowed modes (with `1v1 = duel`) / formats and intermission | 2 lines |
+| `SetFormat(format, mode)` | Refuses during a match. Sets `MatchConfig.Format`, logs. `gungame` outside Random mode is kept but the reply says it only runs in Random mode | reply line |
+| `DescribeConfig()` | Config line, then the allowed modes (with `1v1 = duel`) / formats, intermission and `GunGameTarget=` | 2 lines |
 | `OnRoundEnded(result, mode)` | Ignored when idle. 1v1 mode: only `DuelService.RecordResult` (streak, best streak, loser to the back of the queue, boards), logs with king and streak (feature + master), the 1v1 banner, next round; no `State.Apply`, `SetRounds`, or `RecordRound`. Otherwise: `State.Apply`; `BalanceService.RecordRound(pointTo)`; `StatsService.SetRounds` (board round counts); `BettingService.OnRoundEnded(pointTo)` (bets paid, lost, or refunded on no point); Warning if `finished` had no known team; logs (feature + master); score banner; schedules the next round | — |
 | `SetIntermission(seconds, mode)` | 5 to 120 s (default 5); applies from the next countdown | `bool` |
 | `DescribeMatch()` | Phase, round, score and ties (1v1: `King=<name> xN`), auto-start on/off (`AutoStartService.Enabled`); config, intermission, rift phase, next side; 1v1 adds the `DuelService.DescribeStreaks()` lines | 2+ lines |

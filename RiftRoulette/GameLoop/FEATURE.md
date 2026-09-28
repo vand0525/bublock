@@ -25,8 +25,10 @@ connected (Stage 13j), and also checks after every queue join / leave.
 ## Configuration (Stage 13b)
 
 `MatchConfig`: hero mode `random` (default), `draft`, or `duel` (`1v1`,
-Stage 13g), and format
-`continuous` (the only one for now). Set with `/match_mode` and
+Stage 13g), and format `continuous` or `gungame` (Stage 13k, Random mode
+only: every credited kill gives the killer a new random hero and build and
+a ladder step; the first to the target wins, then the next match
+auto-starts; see `GunGame/FEATURE.md`). Set with `/match_mode` and
 `/match_format` between matches; `/match_config` shows it. In Random mode,
 `RandomMode/RandomModeService` balances teams at match start and gives
 everyone a new hero and build at the start of each intermission; 3 s in, a
@@ -41,6 +43,9 @@ and the banners name the winner, streak and next pairing.
 
 - Continuous: no match target; `/match_end` or dropping below 2 players
   (auto-start on) stops it.
+- Gun Game format: the same rounds and rifts; the match also ends on the
+  first player to reach the kill target (`GunGameService`), with the
+  winner in the `Match over` banner.
 - A captured rift (`finished`) gives 1 point to the team that owns the
   first new rift trooper. Ties, cancels, and spawn timeouts give no point.
 - A player who dies during a round respawns in the draft area and is out

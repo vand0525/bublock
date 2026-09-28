@@ -30,10 +30,12 @@ public class MatchConfigTests
   }
 
   [Fact]
-  public void TryParseFormat_accepts_continuous_only()
+  public void TryParseFormat_accepts_continuous_and_gungame_only()
   {
     Assert.True(MatchConfig.TryParseFormat("continuous", out var format));
     Assert.Equal(MatchFormat.Continuous, format);
+    Assert.True(MatchConfig.TryParseFormat("GunGame", out format));
+    Assert.Equal(MatchFormat.GunGame, format);
     Assert.False(MatchConfig.TryParseFormat("bestof3", out _));
   }
 
@@ -41,6 +43,7 @@ public class MatchConfigTests
   public void Names_and_Describe_are_lowercase()
   {
     Assert.Equal("random|draft|duel", MatchConfig.Names<HeroMode>());
+    Assert.Equal("continuous|gungame", MatchConfig.Names<MatchFormat>());
     Assert.Equal("Mode=draft | Format=continuous", MatchConfig.Describe(HeroMode.Draft, MatchFormat.Continuous));
   }
 }

@@ -9,7 +9,8 @@ public enum HeroMode
 
 public enum MatchFormat
 {
-  Continuous
+  Continuous,
+  GunGame
 }
 
 public static class MatchConfig
@@ -25,6 +26,9 @@ public static class MatchConfig
   public static bool IsDuel => HeroMode == HeroMode.Duel;
 
   public static bool UsesDraft => HeroMode == HeroMode.Draft;
+
+  // Gun Game (Stage 13k) rides on Random mode: the format only applies with random heroes.
+  public static bool IsGunGame => Format == MatchFormat.GunGame && IsRandom;
 
   public static void SetHeroMode(HeroMode mode) => HeroMode = mode;
 

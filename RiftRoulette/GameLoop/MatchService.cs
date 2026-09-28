@@ -5,6 +5,7 @@ using RiftRoulette.Balance;
 using RiftRoulette.Betting;
 using RiftRoulette.Draft;
 using RiftRoulette.Duel;
+using RiftRoulette.GunGame;
 using RiftRoulette.Lobby;
 using RiftRoulette.RandomMode;
 using RiftRoulette.Rift;
@@ -61,11 +62,16 @@ public static class MatchService
     else if (MatchConfig.IsDuel)
       DuelService.BeginMatch(mode);
 
+    if (MatchConfig.IsGunGame)
+      GunGameService.BeginMatch(timer, mode);
+
     log.Info("Match started {Config} IntermissionSeconds={IntermissionSeconds}", MatchConfig.Describe(), IntermissionSeconds);
     BublockLog.Master.Info("Match started {Config}", MatchConfig.Describe());
 
     if (MatchConfig.IsDuel)
       HudService.AnnounceAll("1v1", DuelService.NextPairing(), mode);
+    else if (MatchConfig.IsGunGame)
+      HudService.AnnounceAll(GunGameService.Title, GunGameService.StartDescription(IntermissionSeconds), mode);
     else
       HudService.AnnounceAll("Match starting", $"Round 1 in {IntermissionSeconds}s", mode);
 
@@ -91,6 +97,9 @@ public static class MatchService
 
     if (RiftService.IsRunning)
       log.Info("Cancelling running rift for match end Result={Result}", RoundFlow.CancelRound(timer, mode));
+
+    if (MatchConfig.IsGunGame)
+      GunGameService.EndMatch(mode);
 
     if (MatchConfig.IsRandom)
     {
@@ -209,13 +218,15 @@ public static class MatchService
     MatchConfig.SetFormat(format);
     Log.WithMode(mode).Info("Match format set Format={Format}", name);
 
-    return $"Format set to {name}.";
+    return format == MatchFormat.GunGame && !MatchConfig.IsRandom
+      ? $"Format set to {name}. Gun Game only runs in Random mode: /match_mode random."
+      : $"Format set to {name}.";
   }
 
   public static IReadOnlyList<string> DescribeConfig() =>
   [
     MatchConfig.Describe(),
-    $"Modes={MatchConfig.Names<HeroMode>()} ({MatchConfig.DuelAlias} = duel) | Formats={MatchConfig.Names<MatchFormat>()} | Intermission={IntermissionSeconds}s"
+    $"Modes={MatchConfig.Names<HeroMode>()} ({MatchConfig.DuelAlias} = duel) | Formats={MatchConfig.Names<MatchFormat>()} | Intermission={IntermissionSeconds}s | GunGameTarget={GunGameService.Ladder.Target}"
   ];
 
   public static IReadOnlyList<string> DescribeMatch()
@@ -247,7 +258,9 @@ public static class MatchService
   }
 
   private static string CurrentScore() =>
-    MatchConfig.IsDuel ? DuelService.StreakSummary() : State.FormatScore();
+    MatchConfig.IsDuel ? DuelService.StreakSummary()
+    : MatchConfig.IsGunGame ? GunGameService.Summary()
+    : State.FormatScore();
 
   private static void ScheduleNextRound(ExecutionMode mode, bool prepareHeroes = true)
   {

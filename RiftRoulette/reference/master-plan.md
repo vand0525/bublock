@@ -90,6 +90,7 @@ Bublock/
     Stats/                 StatsPlugin + StatsService (match kills / deaths / assists, stats boards, Stage 13c)
     Balance/               BalancePlugin + BalanceService (auto-balance swaps, Stage 13c)
     Duel/                  DuelPlugin + DuelService (1v1 mode: copied build, hero lock, Stage 13g; queue, winner stays on, 13j)
+    GunGame/               GunGamePlugin + GunGameService + GunGameLadder (Gun Game format on Random mode, Stage 13k)
   DevTools/                DevTools.dll (consumes Shared)
   CleanSlate/              CleanSlate.dll (consumes Shared)
 ```
@@ -453,6 +454,17 @@ commands (including obvious supporting commands), colocated docs, a
 
 ---
 
+#### Stage 13k — Gun Game format (redock fork)
+
+- [ ] Slice 1 code, tests, and docs done 2026-09-28; not uploaded (the redock server's UDP game port is unreachable); awaiting a playtest
+
+- **Goal:** a Gun Game in Rift Roulette: every kill swaps the killer to a new random hero with one of its real top builds (the Random mode build style) and moves them up a kill ladder; the first to the target wins the match.
+- **Decision:** a match *format* (`/match_format gungame`) on top of Random mode, not a new hero mode or DLL: the intermission draw, hero lock, rounds, rifts, restraint, stats and betting all stay, and the reroll reuses Random mode's own assign-and-swap path so the hero lock never punishes it. `SelectHero` on a living pawn follows the Deadworks Deathmatch example.
+- **Slice 1 outputs:** `MatchFormat.GunGame`, `MatchConfig.IsGunGame` (format and Random mode); `GunGame/GunGameLadder` (pure: kills, target 1..50, winner, places); `GunGame/GunGameService` (`BeginMatch` / `EndMatch` from `MatchService`, `OnKill` from `StatsService.RecordDeath` for credited kills, win → next tick `MatchService.End` → 10 s → `AutoStartService.Check`, `Summary` as the Gun Game score, banners `Gun Game` / `First to N kills` and `Kill 3/10: <hero>` / build and souls); `RandomModeService.Reroll` (one fighter, new hero, random build, pending when dead; `Start` takes an optional landed callback instead of the build banner); `GunGame/GunGamePlugin`: player `/ladder`, admin `/gungame_status`, `/gungame_target`, `/gungame_reroll`; tests `GunGameLadderTests`, `MatchConfigTests` (format names)
+- **Verify:** `/match_format gungame`, 2 players, `/gungame_target 3`: each kill shows the level banner and the killer's hero and build change within about 1 s without an enforcement kill (`random-*.log` `Rerolled`, no `Hero swap punished`); the third kill ends the match with `<name> wins - 3 kills` and a new match starts 10 s later. `/gungame_reroll <slot>` alone swaps one player mid-round
+- **Next slices:** continuous arena (respawn into the fight instead of up top, no rift), ladder order options (fixed hero ladder, weaker builds higher up), a ladder board on the watch spot, `Forget` on disconnect
+- **Done when:** playtest confirms the mid-round swap, the banner, the win and the restart
+
 ## Backlog (deferred ideas)
 
 - Cleanup bot that captures a rift left by a cancelled round. Blocked: no
@@ -534,3 +546,4 @@ Rows before the 2026-09-27 rebrand row use the old name (Rift Rumble,
 | 2026-09-27 | faster breaks + waiting message (code) | Intermission default 10 to 5 s; betting now closes `BettingService.LingerSeconds` (10 s) into the round instead of at round start (`MatchService.CloseBetting`, skipped if that round already ended, cancelled with the countdown), and the open line says so. Lone joiners left within 10-20 s (lucas 23:20, Irna 23:23): the `Waiting for players` banner only showed after a match ended. `AutoStartService.Check` now shows it (`Match starts when 1 more player joins`) plus a chat line when a join / load check finds too few players, and `RemindWaiting` repeats the banner every 20 s (`LobbyPlugin` timer). Tests: Shared 23, Modules 82, RiftRoulette 252. Next: upload approval (includes the full HP / turret row). |
 | 2026-09-27 | Trophy Collector ban + waiting message in chat (code) | `upgrade_trophy_collector` added to `LoadoutPlanner.Banned` and `fetch-builds.py` `BANNED_ITEMS`; stripped offline from the embedded `hero-builds.json` (40 builds, none left empty; `components` / `itemCosts` pruned) instead of a full re-fetch. The waiting message is now a chat line only (banners went by too fast and did not fit), repeated every 30 s. Tests unchanged. Next: upload approval. |
 | 2026-09-27 | budgeted build power (code) | Stored loadouts now match a real hero at the same net worth instead of level 36 with every ability maxed. `Modules/Loadout/Progression` embeds Deadlock's level table (wiki `Data:SoulUnlockData.json` + 600: 36 rows, 35 boons, 4 unlocks, 32 points); `LoadoutPlanner.AbilityPrefix` walks the build's ability order against those unlocks and points (tiers 1 / 2 / 5, stops at the first step that does not fit); `LoadoutService.Apply` plans the items first, sets `Level` from the item value, stamps the prefix bits, and zeroes both ability wallets (`LoadoutOptions.Level` removed). 18,000 souls is level 24 with 20 of 32 points. `GameLoop/SoulRule` also blocks ability-point and unlock gains (all sources but `ECheats`) during Random and 1v1 matches; Draft mode unchanged. `ApplySnapshot` / 1v1 setup unchanged. Tests: Shared 23, Modules 99, RiftRoulette 259. Uploaded together with the three rows above (backup `20260927T235556Z`). Next: check in game that partial tiers (`0b11`, `0b111`) show correctly (`Ranks=` in `loadout-*.log`). |
+| 2026-09-28 | 13k slice 1 (code) | Gun Game format on Random mode (redock fork): `MatchFormat.GunGame` / `MatchConfig.IsGunGame`, `GunGame/GunGameLadder` (pure), `GunGameService` (credited kill from `StatsService` → ladder step + `RandomModeService.Reroll` + `Kill N/T: <hero>` banner; win ends the match, next one auto-starts 10 s later), `RandomModeService.Reroll`, `/ladder`, `/gungame_status`, `/gungame_target`, `/gungame_reroll`. Build clean, tests: Shared 23, Modules 99, RiftRoulette 266. Not uploaded: the redock server's UDP game port is unreachable. |

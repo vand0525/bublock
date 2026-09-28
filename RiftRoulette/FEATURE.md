@@ -72,6 +72,11 @@ rounds, return to draft. See `reference/chat-handoff.md` and
 - Stage 13j: 1v1 mode is winner-stays-on with a join queue (`/queue`,
   `/unqueue`; reusable `Modules/Queue`): the first two queued fight, the
   loser goes to the back, the winner builds a streak.
+- Stage 13k (redock fork): Gun Game format (`/match_format gungame`, Random
+  mode, `GunGame/`): every credited kill moves the killer up a kill ladder
+  and swaps them to a new random hero and top build
+  (`RandomModeService.Reroll`); the first to the target (default 10) wins,
+  and the next match auto-starts.
 - Compiles in `Modules/Loadout` (`Loadout.projitems` +
   `LoadoutCommands.projitems`): the embedded top-3 builds per hero
   (`Data/hero-builds.json`, from `scripts/fetch-builds.py`) and
@@ -140,6 +145,8 @@ they call each other with typed C# (no command/convar messaging):
   `/bet <team>`, `/chips`; admin `bet_status`
 - Loadout admin commands (`LoadoutPlugin`): `loadout_give`,
   `loadout_copy`, `loadout_list`, `loadout_info`
+- Gun Game (`GunGamePlugin`): player `/ladder`; admin `gungame_status`,
+  `gungame_target`, `gungame_reroll`
 - Hud admin commands (`HudPlugin`): `hud_announce`, `hud_say`
 - No archive command names remain (hidden aliases removed in Stage 12).
 - Session (`SessionPlugin`): admin `session_info`
@@ -165,6 +172,7 @@ match score and countdown (`GameLoop/MatchService`) and the config
 teams, queue and streak (`Duel/DuelService`), Restraint owns the
 restrained players (`Modules/Restraint`), Round's `WatchSpot` remembers the
 board side, Lobby owns the admin seat (`Lobby/AdminSeat`),
+GunGame owns the kill ladder and target (`GunGame/GunGameService`),
 Stats owns the match ledger
 (`Stats/StatsService`), Balance owns the swap counters
 (`Balance/BalanceService`), Loadout owns the read-only build catalog,

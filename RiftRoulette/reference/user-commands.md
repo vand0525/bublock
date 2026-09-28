@@ -77,7 +77,7 @@ below work.
 - **Who:** players, in game (`LobbyPlugin`)
 - **Calls:** `CommandList.PlayerCommands` (reads the `[Command]` attributes in RiftRoulette.dll)
 - **Mode:** Clean; read-only; not logged
-- **Side effects:** one chat line per player command (`/name - Description`, sorted: `/bet`, `/chips`, `/commands`, `/heroes`, `/pick`, `/picks`, `/queue`, `/score`, `/stats`, `/status`, `/unpick`, `/unqueue`), then `Full list: dw_help in console`
+- **Side effects:** one chat line per player command (`/name - Description`, sorted: `/bet`, `/chips`, `/commands`, `/heroes`, `/ladder`, `/pick`, `/picks`, `/queue`, `/score`, `/stats`, `/status`, `/unpick`, `/unqueue`), then `Full list: dw_help in console`
 - **Notes:** new in Stage 12. Deadworks' built-in `dw_help` only runs from the game console (there is no chat `/help`) and lists every visible command, admin ones included; `/commands` gives players a chat list of just their commands
 
 ### /score
@@ -133,3 +133,12 @@ below work.
 - **Mode:** Clean; read-only; not logged
 - **Side effects:** chat lines: `You have N chips.`, your open bet if any, and whether betting is open
 - **Notes:** new 2026-09-27
+
+### /ladder
+
+- **Invocation:** chat `/ladder` or `!ladder` | console `dw_ladder`
+- **Who:** players, in game (`GunGamePlugin`)
+- **Calls:** `GunGameService.DescribePlayer`
+- **Mode:** Clean; read-only; not logged
+- **Side effects:** chat lines: `You: 3/10 kills, place 2`, then the top 3 (`1  Name  5`). Outside a Gun Game match: `Gun Game is not running (/match_format gungame in Random mode).`
+- **Notes:** new in Stage 13k. In Gun Game every kill also swaps you to a new random hero and build (banner `Kill 3/10: <hero>`); the first to the target wins

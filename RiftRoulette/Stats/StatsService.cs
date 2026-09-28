@@ -5,6 +5,7 @@ using RiftRoulette.Balance;
 using RiftRoulette.Betting;
 using RiftRoulette.Draft;
 using RiftRoulette.Duel;
+using RiftRoulette.GunGame;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Lobby;
 using RiftRoulette.RandomMode;
@@ -79,6 +80,7 @@ public static class StatsService
     {
       BalanceService.RecordKill(team);
       BettingService.OnKill(attacker!.PlayerSteamId, mode);
+      GunGameService.OnKill(attacker, victim, mode);
     }
 
     log.Debug(
