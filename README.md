@@ -35,9 +35,19 @@ Join from the Deadlock console:
 ## Build
 
 Needs the Deadworks API next to this folder: `../lib/DeadworksManaged.Api.dll`,
-`../lib/Google.Protobuf.dll` and `../Directory.Build.props`.
+`../lib/Google.Protobuf.dll` and `../Directory.Build.props`. Without that
+workspace, `scripts/fetch-deadworks.sh` puts a pinned Deadworks release in
+`lib/` and the scripts use it.
 `scripts/update.sh` builds, `scripts/test.sh` runs the [tests](Tests/FEATURE.md).
-Deploying needs `scripts/server.env` (copy `server.env.example`).
+Deploying needs `scripts/server.env` (copy `server.env.example`). CI builds
+and tests every push; deploys are manual ([CI / CD](.github/workflows/README.md)).
+
+## Knowledge base
+
+[knowledge/README.md](knowledge/README.md): glossary, mental models, an
+effects catalog for building game modes, and generated indexes and a graph
+of the code. `scripts/knowledge.sh` rebuilds them and the docs webpage
+(`site/index.html`).
 
 ## License
 
