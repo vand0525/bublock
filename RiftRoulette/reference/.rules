@@ -227,7 +227,8 @@ Assume the git repo is rooted at `Bublock/`.
   `Lobby/Participants.Humans()`, which leaves out bots and seated admins;
   never build a new ad-hoc human list. A seated admin has two states:
   spectating while any participant is connected, roaming while none are
-  (`AdminSeatRule.ShouldRoam`): Abrams on Amber at their watch slot, not
+  (`AdminSeatRule.ShouldRoam`): Abrams on Amber facing the welcome sign
+  (`WatchLayout.WelcomeFront`; back to the watch slot if they fall), not
   restrained, invisible (`modifier_invis`, one 3600 s modifier put back
   when it runs out and on respawn / reload, never every frame). Roaming
   admins stay seated (never participants). `AdminSeat.SyncSoon` switches

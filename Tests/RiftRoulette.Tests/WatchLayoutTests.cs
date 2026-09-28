@@ -61,6 +61,22 @@ public class WatchLayoutTests
     Assert.Equal(0f, WatchLayout.Normalize(expected.Y - spot.Angle.Y), Tolerance);
   }
 
+  [Theory]
+  [InlineData(RiftSide.Green, 0f)]
+  [InlineData(RiftSide.Yellow, 180f)]
+  public void Welcome_front_faces_the_sign_head_on(RiftSide side, float yaw)
+  {
+    var anchor = RoundLocations.WatchFor(side);
+    var front = WatchLayout.WelcomeFront(anchor, side);
+    var center = anchor.Position + WatchLayout.Offset(side, WatchLayout.WelcomeCenter);
+
+    Assert.Equal(0f, WatchLayout.Normalize(front.Angle.Y - yaw), Tolerance);
+    Assert.True(front.Angle.X < 0f);
+    Assert.Equal(anchor.Position.Z, front.Position.Z, Tolerance);
+    Assert.Equal(center.Y, front.Position.Y, Tolerance);
+    Assert.Equal(WatchLayout.WelcomeViewDistance, MathF.Abs(center.X - front.Position.X), Tolerance);
+  }
+
   [Fact]
   public void LookAt_pitches_up_for_a_target_above()
   {

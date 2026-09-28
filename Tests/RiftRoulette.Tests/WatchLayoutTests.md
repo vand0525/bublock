@@ -12,3 +12,6 @@ Unit tests for `RiftRoulette/Round/WatchLayout`.
 - Each watch spot's view angle (`RiftRouletteLocations.WatchGreen` /
   `WatchYellow`) points at its welcome board, within 0.5°.
 - `LookAt` pitches negative (up) for a target above.
+- `WelcomeFront` faces the sign head on from each watch anchor: yaw 0 on
+  green, 180 on yellow, pitch up, floor height of the anchor, lined up with
+  the estimated text center and `WelcomeViewDistance` in front of it.

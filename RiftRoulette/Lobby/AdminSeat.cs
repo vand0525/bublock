@@ -23,6 +23,7 @@ public static class AdminSeat
   public const int RoamTeam = RiftRouletteTeams.Amber;
   public const string RoamModifier = "modifier_invis";
   public const int RoamModifierSeconds = 3600;
+  public const int FloorCheckSeconds = 2;
 
   private static readonly Logger Log = BublockLog.For("Lobby");
 
@@ -190,8 +191,27 @@ public static class AdminSeat
     if (retry && CloakGeneration.ContainsKey(steamId))
       return;
 
-    MovementService.TeleportTo(player, SlotSpots.Watch(WatchSpot.Location(WatchSpot.Side), player.Slot), mode);
+    var side = WatchSpot.BoardSide;
+    var anchor = WatchSpot.Location(side);
+    MovementService.TeleportTo(player, WatchLayout.WelcomeFront(anchor, side), mode);
     Cloak(player, timer, mode);
+    timer.Once(FloorCheckSeconds.Seconds(), () => CatchFall(steamId, anchor, mode));
+  }
+
+  // The skybox floor is invisible collision, missing from the map mesh: the front-of-sign spot may have none.
+  private static void CatchFall(ulong steamId, MovementLocation anchor, ExecutionMode mode)
+  {
+    var player = Find(steamId);
+    var pawn = player?.GetHeroPawn();
+
+    if (player == null || pawn == null || !pawn.IsAlive || !Roaming.Contains(steamId))
+      return;
+
+    if (!WatchGuardRule.IsBelow(pawn.Position.Z, anchor.Position.Z))
+      return;
+
+    Log.WithMode(mode).Warn(player.ToPlayerRef(), "Roaming admin fell from the welcome spot, back to the watch slot Z={Z}", pawn.Position.Z);
+    MovementService.TeleportTo(player, SlotSpots.Watch(anchor, player.Slot), mode);
   }
 
   // One long modifier, put back when it runs out; a newer cloak cancels the older timer.
