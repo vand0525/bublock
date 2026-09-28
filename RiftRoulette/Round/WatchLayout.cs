@@ -9,10 +9,10 @@ public static class WatchLayout
   public static readonly Vector3 WelcomeOffset = new(500f, 500f, 300f);
 
   // The welcome text starts at WelcomeOffset (its bottom-left) and runs toward -y on green, facing -x.
-  // "RIFT ROULETTE" at 64 px and 3 units per px is about 8.6 em of capitals: an estimate, not measured.
-  public const float WelcomeHalfWidth = 830f;
+  // Estimated from the font size (64 px, 3 units per px), then nudged by eye in game; not measured.
+  public const float WelcomeHalfWidth = 730f;
   public const float WelcomeHalfHeight = 70f;
-  public const float WelcomeViewDistance = 600f;
+  public const float WelcomeViewDistance = 750f;
   public const float EyeHeight = 64f;
 
   public static readonly Vector3 WelcomeCenter = WelcomeOffset + new Vector3(0f, -WelcomeHalfWidth, WelcomeHalfHeight);

@@ -10,9 +10,9 @@ and turned here for yellow.
 | Op | Returns |
 |---|---|
 | `WelcomeOffset` | (500, 500, 300): the welcome board's offset from the watch spot on green (toward the map edge). The watch view angles aim at it |
-| `WelcomeHalfWidth` / `WelcomeHalfHeight` | 830 / 70: half the size of the "RIFT ROULETTE" text (64 px, 3 units per px). An estimate from the font size, not measured |
-| `WelcomeCenter` | Estimated middle of the welcome text on green: the text starts at `WelcomeOffset` (its bottom-left) and runs toward -y, facing -x, so the center is `WelcomeOffset + (0, -830, 70)` |
-| `WelcomeFrontOffset` | Green offset of the spot straight in front of that center: `WelcomeViewDistance` (600) toward -x, same y, floor height (z 0) |
+| `WelcomeHalfWidth` / `WelcomeHalfHeight` | 730 / 70: half the size of the "RIFT ROULETTE" text. Estimated from the font size (64 px, 3 units per px), then the width nudged by eye in game (was 830, looked off to the right); not measured |
+| `WelcomeCenter` | Estimated middle of the welcome text on green: the text starts at `WelcomeOffset` (its bottom-left) and runs toward -y, facing -x, so the center is `WelcomeOffset + (0, -730, 70)` |
+| `WelcomeFrontOffset` | Green offset of the spot straight in front of that center: `WelcomeViewDistance` (750) toward -x, same y, floor height (z 0) |
 | `WelcomeFront(anchor, side)` | Location `<anchor>#welcome` at `anchor + Offset(side, WelcomeFrontOffset)`, angle `LookAt` from `EyeHeight` (64) above it to the turned center: yaw 0 on green, 180 on yellow, looking slightly up |
 | `Offset(side, greenOffset)` | Green: unchanged. Yellow: (-x, -y, z) |
 | `Yaw(side, greenYaw)` | Green: unchanged. Yellow: `greenYaw + 180`, normalized |
@@ -31,6 +31,7 @@ and turned here for yellow.
 ## Invariants
 
 - No Deadworks calls; safe to link into the test project.
-- `WelcomeFront` is about 300 units behind the watch rows, on the invisible
-  skybox floor, which is not in the map mesh: that the floor reaches it is
-  unverified (`AdminSeat` catches a fall).
+- `WelcomeFront` is behind the watch rows, on the invisible skybox floor,
+  which is not in the map mesh. The floor held at the first spot (600 back,
+  830 half-width; 2026-09-28); the current one is unverified (`AdminSeat`
+  catches a fall).
