@@ -468,7 +468,7 @@ Other game types are their own DLLs on the engine
 - **Goal:** `GunGame.dll`: no rounds, no rift. A mid-lane brawl arena (`GunGame/Data/arena.json`, all 26 spots pass `check-arena.py`), continuous 2-minute matches (`TimedSession`), a new random hero and top build on every kill (`RandomLoadouts`), most kills wins.
 - **Outputs:** `GunGame/` (`GunGameRules`, `GunGameService`, `LobbyPlugin`, `ArenaPlugin`, `MatchPlugin`), engine modules above, `Tests/GunGame.Tests`, module tests in `Modules.Tests`, `scripts/check-arena.py`, `scripts/new-game-type.sh` + `templates/`, deploy plugin sets
 - **Verify:** 2 players: spawns on the lane streets, a kill swaps the killer with a `N kills: <hero>` banner, leaving the bounds sends you back, the match ends at 2:00 with the winner, the next starts 5 s later
-- **Known issues:** souls reset on death (points should show as cumulative souls); one spawn spot per slot per team invites spawn camping (needs several random spots in the arena)
+- **Known issues:** souls reset on death, points should show as cumulative souls ([#2](https://github.com/scho0124/bublock_redock/issues/2)); one spawn spot per slot per team invites spawn camping, needs several random spots in the arena ([#3](https://github.com/scho0124/bublock_redock/issues/3))
 - **Done when:** playtest confirms the loop
 
 ## Backlog (deferred ideas)

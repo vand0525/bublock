@@ -55,9 +55,10 @@ kill swaps the killer to a new random hero with a real top build.
 - **Levers:** `player_death` (verified), `SelectHero` on a living pawn
   mid-fight (verified in the owner's playtest, 2026-09-28), the loadout
   path (verified), `citadel_active_lane 4` (untested effect).
-- **Open issues:** souls reset on death (the score should show as
-  cumulative souls); one spot per slot per team invites spawn camping
-  (several random spots in the arena).
+- **Open issues:** souls reset on death, the score should show as
+  cumulative souls ([#2](https://github.com/scho0124/bublock_redock/issues/2));
+  one spot per slot per team invites spawn camping, several random spots
+  in the arena ([#3](https://github.com/scho0124/bublock_redock/issues/3)).
 - **Next:** a fixed hero ladder option, weaker builds higher up, a world
   scoreboard (`WorldText`).
 

@@ -30,8 +30,10 @@ we work.
 - Deploy plugin sets (`DW_PLUGINS` / `DW_PARKED`); deployed Gun Game, parked
   Rift Roulette, restarted (a removed DLL stays loaded until then).
 - Tests: Shared 23, Modules 138, RiftRoulette 259, GunGame 9.
-- Open: souls reset on death (track points as cumulative souls); multiple
-  random spawn points against spawn camping (GitHub issues).
+- Open: souls reset on death, track points as cumulative souls
+  ([#2](https://github.com/scho0124/bublock_redock/issues/2)); multiple random
+  spawn points against spawn camping
+  ([#3](https://github.com/scho0124/bublock_redock/issues/3)).
 
 **Earlier the same day**
 
