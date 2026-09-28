@@ -10,9 +10,9 @@ public static class WatchLayout
 
   // The welcome text starts at WelcomeOffset (its bottom-left) and runs toward -y on green, facing -x.
   // Estimated from the font size (64 px, 3 units per px), then nudged by eye in game; not measured.
-  public const float WelcomeHalfWidth = 730f;
+  public const float WelcomeHalfWidth = 430f;
   public const float WelcomeHalfHeight = 70f;
-  public const float WelcomeViewDistance = 750f;
+  public const float WelcomeViewDistance = 900f;
   public const float EyeHeight = 64f;
 
   public static readonly Vector3 WelcomeCenter = WelcomeOffset + new Vector3(0f, -WelcomeHalfWidth, WelcomeHalfHeight);
