@@ -25,6 +25,9 @@ BARE_CONVARS = {"maxplayers"}  # convars without an underscore (most bare words 
 
 nodes = {}
 links = []
+DECLARED = {}  # C# type name -> file node that declares it
+MASTER_PLAN = os.path.join(ROOT, "RiftRoulette", "reference", "master-plan.md")
+RECIPES = os.path.join(ROOT, "knowledge", "game-mode-recipes.md")
 
 
 def rel(path):
@@ -162,7 +165,7 @@ def build_containers():
 # ------------------------------------------------------------------ sources
 
 def build_sources(convars, map_entities):
-    declared = {}
+    declared = DECLARED
     sources = {}
     for cs in walk((".cs",)):
         if rel(cs).startswith("scripts/"):
@@ -241,6 +244,117 @@ def build_sources(convars, map_entities):
 
 def rel_path(node_id):
     return node_id.split(":", 1)[1]
+
+
+# ------------------------------------------- feature deps, stages, game modes
+
+def slug(text):
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
+def build_feature_deps():
+    """Roll file-to-file type references up to the folders that hold them (feature, module)."""
+    owner = {l["target"]: l["source"] for l in links
+             if l["kind"] == "contains" and nodes[l["target"]]["kind"] == "source"}
+    weights = defaultdict(int)
+    for l in links:
+        if l["kind"] == "uses" and nodes[l["source"]]["kind"] == "source" and nodes[l["target"]]["kind"] == "source":
+            a, b = owner.get(l["source"]), owner.get(l["target"])
+            if a and b and a != b:
+                weights[(a, b)] += 1
+    for (a, b), weight in sorted(weights.items()):
+        before = len(links)
+        add_link(a, b, "feature-uses")
+        if len(links) > before:
+            links[-1]["weight"] = weight
+
+
+def resolve_ref(token):
+    """Map a backticked name from a doc to a graph node: path, folder, type, command, hook or game dependency."""
+    t = token.strip().strip("`").split("(")[0].strip().rstrip(".,;:")
+    if not t or " " in t.strip():
+        t = t.split(" ")[0] if t.startswith("/") else t
+    if not t:
+        return None
+    if t.startswith("/") and "command:" + t[1:].split(" ")[0] in nodes:
+        return "command:" + t[1:].split(" ")[0]
+    bare = t.rstrip("/")
+    for cand in (bare, "RiftRoulette/" + bare, bare + ".cs", "RiftRoulette/" + bare + ".cs"):
+        for prefix in ("file:", "script:", "workflow:", "feature:", "module:", "plugin:", "doc:"):
+            if prefix + cand in nodes:
+                return prefix + cand
+    if t.startswith("EModifierState.") and "modifier-state:" + t.split(".")[1] in nodes:
+        return "modifier-state:" + t.split(".")[1]
+    for kind in ("event", "hook", "convar", "entity", "modifier", "schema-field", "ability", "net-message"):
+        if f"{kind}:{t}" in nodes:
+            return f"{kind}:{t}"
+    head = bare.split("/")[-1].split(".")[0]
+    if head in DECLARED:
+        return DECLARED[head]
+    if "hook:" + head in nodes:
+        return "hook:" + head
+    return None
+
+
+def refs_in(text):
+    found = []
+    for token in re.findall(r"`([^`\n]+)`", text):
+        target = resolve_ref(token)
+        if target and target not in found:
+            found.append(target)
+    return found
+
+
+def build_stages():
+    """Master-plan stages (Theo's roadmap) with status, linked to the code each one names."""
+    if not os.path.exists(MASTER_PLAN):
+        return
+    text = read(MASTER_PLAN)
+    roadmap = text.split("## Staged roadmap", 1)[-1].split("\n## ", 1)[0]
+    sections = re.split(r"^(#{3,4} .+)$", roadmap, flags=re.M)
+    order = 0
+    for heading, body in zip(sections[1::2], sections[2::2]):
+        title = heading.lstrip("#").strip()
+        match = re.match(r"Stage (\d+[a-z]?)\b", title)
+        node_id = "stage:" + (match.group(1) if match else slug(title))
+        box = re.search(r"^- \[(x| )\] (.+)$", body, flags=re.M)
+        note = box.group(2) if box else ""
+        status = ("done" if box and box.group(1) == "x"
+                  else "open" if not box or "not uploaded" in note or "uploaded" not in note
+                  else "awaiting playtest")
+        goal = re.search(r"^- \*\*Goal:\*\* (.+)$", body, flags=re.M)
+        order += 1
+        add_node(node_id, "stage", title.replace(" — ", ": "), path="RiftRoulette/reference/master-plan.md",
+                 doc="RiftRoulette/reference/master-plan.md", status=status, order=order,
+                 summary=(goal.group(1) if goal else (box.group(2) if box else ""))[:220])
+        for target in refs_in(body):
+            add_link(node_id, target, "touches")
+
+
+def build_game_modes():
+    """Game-mode recipes (knowledge/game-mode-recipes.md) linked to the levers and code they use."""
+    if not os.path.exists(RECIPES):
+        return
+    status = "designed"
+    text = read(RECIPES)
+    for block in re.split(r"^(?=## |### )", text, flags=re.M):
+        heading = block.splitlines()[0] if block.strip() else ""
+        if heading.startswith("## "):
+            name = heading[3:].lower()
+            status = "shipped" if "shipped" in name else "in progress" if "progress" in name else "designed" if "design" in name else None
+            continue
+        if not heading.startswith("### ") or status is None:
+            continue
+        title = heading[4:].strip()
+        node_id = "mode:" + slug(title)
+        body = block[len(heading):]
+        para = next((p.strip().replace("\n", " ") for p in body.split("\n\n") if p.strip() and not p.strip().startswith(("-", "|", "```"))), "")
+        add_node(node_id, "game-mode", title, path="knowledge/game-mode-recipes.md",
+                 doc="knowledge/game-mode-recipes.md", status=status, summary=para[:220])
+        for target in refs_in(body):
+            add_link(node_id, target, "mode-uses")
+        for stage in set(re.findall(r"Stage (\d+[a-z]?)\b", body)):
+            add_link(node_id, "stage:" + stage, "planned-in")
 
 
 # ---------------------------------------------------------- scripts and CI
@@ -411,6 +525,22 @@ def write_indexes(path):
             lines.append(f"| `{n['label']}` | " + ", ".join(f"`{p}`" for p in sorted(users[n["id"]])) + " |")
         lines.append("")
 
+    stages = sorted((n for n in nodes.values() if n["kind"] == "stage"), key=lambda n: n["order"])
+    lines += [f"## Stages ({len(stages)})", "", "From `RiftRoulette/reference/master-plan.md`; each links to the code its entry names.", "",
+              "| Stage | Status | Touches |", "|---|---|---|"]
+    for n in stages:
+        touched = [nodes[t]["label"] for t in outgoing(n["id"], {"touches"})]
+        lines.append(f"| {cell(n['label'])} | {n['status']} | {cell(', '.join(touched[:12]) + (' ...' if len(touched) > 12 else ''))} |")
+    lines.append("")
+
+    modes = sorted((n for n in nodes.values() if n["kind"] == "game-mode"), key=lambda n: (n["status"] != "shipped", n["status"] != "in progress", n["label"]))
+    lines += [f"## Game modes ({len(modes)})", "", "From `knowledge/game-mode-recipes.md`; each links to the levers and code it uses.", "",
+              "| Mode | Status | Uses |", "|---|---|---|"]
+    for n in modes:
+        used = [nodes[t]["label"] for t in outgoing(n["id"], {"mode-uses", "planned-in"})]
+        lines.append(f"| {cell(n['label'])} | {n['status']} | {cell(', '.join(used))} |")
+    lines.append("")
+
     files = sorted((n for n in nodes.values() if n["kind"] == "source"), key=lambda n: n["path"])
     lines += [f"## Types ({sum(len(n.get('types', [])) for n in files)})", "", "| Type | File | Summary |", "|---|---|---|"]
     for n in files:
@@ -432,6 +562,9 @@ def main():
     build_sources(load_convars(), load_map_entities())
     build_scripts()
     build_docs()
+    build_feature_deps()
+    build_stages()
+    build_game_modes()
     seen = set()
     unique = []
     for l in links:

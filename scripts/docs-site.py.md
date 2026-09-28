@@ -23,7 +23,8 @@ from cdnjs).
 - Links between docs, and backticked repo paths, become in-page links; a
   `.cs` path opens its sibling `.md`.
 - Effects-catalog status cells render as chips (verified, untested, avoid).
-- Graph view: d3 force layout, filters by category, node search, a detail
+- Graph view: d3 force layout, filters by category (structure, code,
+  commands, game dependencies, stages and game modes, docs, scripts), node search, a detail
   panel with each node's links and an "Open doc" button. Filter choices are
   remembered per browser (`localStorage`, optional).
 

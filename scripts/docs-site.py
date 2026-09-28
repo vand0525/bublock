@@ -128,7 +128,7 @@ TEMPLATE = r"""<meta charset="utf-8">
   --ground: #eceef2; --surface: #ffffff; --sunk: #e3e6ec; --ink: #151922; --muted: #596172;
   --rule: #d3d8e0; --amber: #a35e0c; --sapphire: #2957a4; --ok: #2c7a4b; --bad: #b3261e;
   --code-bg: #e7eaf0; --focus: #2957a4; --shadow: 0 1px 2px rgba(21,25,34,.06), 0 4px 16px rgba(21,25,34,.06);
-  --n-structure: #a35e0c; --n-code: #2957a4; --n-command: #7a4fb5; --n-game: #2c7a4b; --n-docs: #6b7384; --n-ops: #b0457a;
+  --n-structure: #a35e0c; --n-code: #2957a4; --n-command: #7a4fb5; --n-game: #2c7a4b; --n-docs: #6b7384; --n-ops: #b0457a; --n-plan: #0f7c86;
   --display: "Federo", "Josefin Sans", "Futura", "Century Gothic", sans-serif;
   --body: "Atkinson Hyperlegible", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
@@ -140,7 +140,7 @@ TEMPLATE = r"""<meta charset="utf-8">
     --ground: #0e1014; --surface: #161920; --sunk: #1d2129; --ink: #e3e6ec; --muted: #98a0af;
     --rule: #282d37; --amber: #e2a24e; --sapphire: #7fa9ee; --ok: #6cc592; --bad: #f2837b;
     --code-bg: #1d2129; --focus: #7fa9ee; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
-    --n-structure: #e2a24e; --n-code: #7fa9ee; --n-command: #b894ee; --n-game: #6cc592; --n-docs: #98a0af; --n-ops: #ea8cbb;
+    --n-structure: #e2a24e; --n-code: #7fa9ee; --n-command: #b894ee; --n-game: #6cc592; --n-docs: #98a0af; --n-ops: #ea8cbb; --n-plan: #4fc3cf;
   }
 }
 :root[data-theme="dark"] {
@@ -148,7 +148,7 @@ TEMPLATE = r"""<meta charset="utf-8">
   --ground: #0e1014; --surface: #161920; --sunk: #1d2129; --ink: #e3e6ec; --muted: #98a0af;
   --rule: #282d37; --amber: #e2a24e; --sapphire: #7fa9ee; --ok: #6cc592; --bad: #f2837b;
   --code-bg: #1d2129; --focus: #7fa9ee; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
-  --n-structure: #e2a24e; --n-code: #7fa9ee; --n-command: #b894ee; --n-game: #6cc592; --n-docs: #98a0af; --n-ops: #ea8cbb;
+  --n-structure: #e2a24e; --n-code: #7fa9ee; --n-command: #b894ee; --n-game: #6cc592; --n-docs: #98a0af; --n-ops: #ea8cbb; --n-plan: #4fc3cf;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.6 var(--body); }
@@ -275,11 +275,12 @@ main { min-width: 0; padding-inline: 40px; padding-block: 32px 64px; }
   const CATEGORY = {
     plugin: 'structure', module: 'structure', feature: 'structure', 'test-project': 'structure',
     source: 'code', test: 'code', command: 'command', script: 'ops', workflow: 'ops', doc: 'docs', knowledge: 'docs',
+    stage: 'plan', 'game-mode': 'plan',
   };
   const catOf = k => CATEGORY[k] || 'game';
   const CATS = [
     ['structure', 'Plugins, modules, features'], ['code', 'Source files'], ['command', 'Commands'],
-    ['game', 'Game dependencies'], ['docs', 'Docs'], ['ops', 'Scripts & CI'],
+    ['game', 'Game dependencies'], ['plan', 'Stages & game modes'], ['docs', 'Docs'], ['ops', 'Scripts & CI'],
   ];
   const cssVar = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const color = cat => cssVar('--n-' + cat);
@@ -401,10 +402,10 @@ main { min-width: 0; padding-inline: 40px; padding-block: 32px 64px; }
     svg.call(zoom);
     let sim, nodeSel, linkSel, labelSel, selected = pendingSelect, visible = [];
     pendingSelect = null;
-    const radius = n => ({ plugin: 12, module: 10, feature: 8, 'test-project': 8, command: 4.5, source: 5, test: 3.5, script: 6, workflow: 7, knowledge: 6, doc: 5 }[n.kind] || 5.5);
+    const radius = n => ({ plugin: 12, module: 10, feature: 8, 'test-project': 8, command: 4.5, source: 5, test: 3.5, script: 6, workflow: 7, knowledge: 6, doc: 5, stage: 6, 'game-mode': 8 }[n.kind] || 5.5);
     function labelsFor(k) {
       if (!labelSel) return;
-      labelSel.attr('display', d => (d.id === selected || ['plugin', 'module', 'feature', 'workflow'].includes(d.kind) || k > 1.7 || (catOf(d.kind) === 'game' && k > 1.1)) ? null : 'none');
+      labelSel.attr('display', d => (d.id === selected || ['plugin', 'module', 'feature', 'workflow', 'game-mode'].includes(d.kind) || k > 1.7 || (catOf(d.kind) === 'game' && k > 1.1)) ? null : 'none');
     }
     function draw() {
       if (sim) sim.stop();
@@ -417,7 +418,7 @@ main { min-width: 0; padding-inline: 40px; padding-block: 32px 64px; }
       document.getElementById('count').textContent = `${visible.length} nodes, ${links.length} links`;
       root.selectAll('*').remove();
       linkSel = root.append('g').attr('stroke-opacity', .5).selectAll('line').data(links).join('line')
-        .attr('stroke', d => d.kind === 'contains' || d.kind === 'imports' ? cssVar('--n-structure') : cssVar('--rule'))
+        .attr('stroke', d => d.kind === 'contains' || d.kind === 'imports' || d.kind === 'feature-uses' ? cssVar('--n-structure') : cssVar('--rule'))
         .attr('stroke-width', d => d.kind === 'imports' ? 1.6 : 1).attr('stroke-dasharray', d => d.kind === 'imports' ? '4 3' : null);
       nodeSel = root.append('g').selectAll('circle').data(visible, d => d.id).join('circle')
         .attr('r', radius).attr('fill', d => color(catOf(d.kind))).attr('stroke', cssVar('--surface')).attr('stroke-width', 1.5)
@@ -456,13 +457,14 @@ main { min-width: 0; padding-inline: 40px; padding-block: 32px 64px; }
     }
     const VERBS = { contains: ['Contains', 'Inside'], imports: ['Compiles in', 'Compiled into'], uses: ['Uses', 'Used by'], tests: ['Tests', 'Tested by'],
       registers: ['Registers', 'Registered by'], 'depends-on': ['Depends on', 'Used by'], hooks: ['Hooks', 'Hooked by'], listens: ['Listens to', 'Heard by'],
-      sends: ['Sends', 'Sent by'], links: ['Links to', 'Linked from'], documents: ['Documented by', 'Documents'], 'refers-to': ['Refers to', 'Referred to by'] };
+      sends: ['Sends', 'Sent by'], links: ['Links to', 'Linked from'], documents: ['Documented by', 'Documents'], 'refers-to': ['Refers to', 'Referred to by'],
+      'feature-uses': ['Depends on', 'Needed by'], touches: ['Touches', 'Changed in stage'], 'mode-uses': ['Uses', 'Used by mode'], 'planned-in': ['Planned in', 'Plans'] };
     function panel() {
       const el = document.getElementById('panel');
       const n = nodesById.get(selected);
       if (!n) {
         el.innerHTML = `<p class="kind" style="color:var(--muted)">Legend</p><ul>${CATS.map(([k, l]) => `<li><button type="button" disabled><span class="legend-dot" style="background:${color(k)}"></span>${l}</button></li>`).join('')}</ul>
-          <h3>Start here</h3><ul>${['plugin:RiftRoulette', 'module:Modules/Restraint', 'feature:RiftRoulette/GameLoop', 'hook:OnTakeDamage', 'event:player_death', 'workflow:.github/workflows/deploy.yml']
+          <h3>Start here</h3><ul>${['mode:gun-game', 'stage:13k', 'plugin:RiftRoulette', 'feature:RiftRoulette/GunGame', 'module:Modules/Restraint', 'event:player_death', 'workflow:.github/workflows/deploy.yml']
             .filter(id => nodesById.has(id)).map(id => `<li><button type="button" data-id="${esc(id)}"><span class="legend-dot" style="background:${color(catOf(nodesById.get(id).kind))}"></span>${esc(nodesById.get(id).label)}</button></li>`).join('')}</ul>`;
       } else {
         const groups = new Map();
@@ -472,7 +474,7 @@ main { min-width: 0; padding-inline: 40px; padding-block: 32px 64px; }
           groups.get(label).push(other);
         });
         const doc = docForNode(n);
-        el.innerHTML = `<span class="kind" style="color:${color(catOf(n.kind))}">${esc(n.kind)}${n.audience ? ' · ' + esc(n.audience) : ''}</span>
+        el.innerHTML = `<span class="kind" style="color:${color(catOf(n.kind))}">${esc(n.kind)}${n.audience ? ' · ' + esc(n.audience) : ''}${n.status ? ' · ' + esc(n.status) : ''}</span>
           <h2>${esc(n.label)}</h2>${n.path ? `<div class="path">${esc(n.path)}</div>` : ''}
           ${n.description ? `<p>${esc(n.description)}</p>` : ''}${n.summary ? `<p>${esc(n.summary)}</p>` : ''}
           ${doc ? `<button class="btn" type="button" id="open-doc">Open doc</button>` : ''}

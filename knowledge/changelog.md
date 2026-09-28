@@ -16,6 +16,27 @@ we work.
 
 ## 2026-09-28
 
+**Gun Game, slice 1 (Stage 13k)**
+
+- `/match_format gungame` on Random mode: every credited kill gives the
+  killer a new random hero and top build (`RandomModeService.Reroll`,
+  hero-lock safe) and a ladder step; first to the target (default 10)
+  wins, the next match auto-starts 10 s later. `/ladder`,
+  `/gungame_status`, `/gungame_target`, `/gungame_reroll`. Build clean,
+  tests 23 / 99 / 266. Not uploaded yet (UDP game port unreachable).
+- Confirmed the deployed Rift Roulette is Theo's latest (`vand0525/bublock`
+  is still at `105f1b2`, our fork base).
+
+**Graph**
+
+- `knowledge-graph.py` now adds feature-to-feature dependency edges
+  (`feature-uses`, rolled up from file type references, with weights),
+  master-plan stage nodes with status and the code each names
+  (`touches`), and game-mode nodes from the recipes with the levers they
+  use (`mode-uses`, `planned-in`). `indexes.md` lists stages and modes.
+
+**Earlier the same day**
+
 - `scripts/server-check.sh`: read-only SFTP look at a server (login, layout,
   Deadworks install and API version vs `lib/`, plugins, logs). Waiting on
   the SFTP login in `scripts/server.env` to run it against the new server.
@@ -31,6 +52,14 @@ we work.
   the password comes from the panel's SFTP tab (owner-only step).
 - Designs for Grifball and Fat Boy / Zombie Escape in `game-mode-recipes.md`,
   mapped to verified and untested levers.
+- First deploy to the redock server (stamp `20260928T010529Z`, nothing to
+  back up). `server-check.sh`: SFTP layout is `/server/game` like Theo's
+  host, Deadworks API byte-identical to v0.4.18. All three DLLs hot-loaded
+  (`Reload=True`); logs at `Z:\gameserver\server\game\bin\win64\bublock\logs`.
+  Warnings: `citadel_crate_disable_early_spawn` missing (expected per
+  `patch-day.md`) and `maxplayers` missing as a convar on this host, so the
+  13th admin-only slot may not apply (unverified).
+- PR #1 on the fork: CI green (build and tests in 28 s).
 
 ## 2026-09-27
 

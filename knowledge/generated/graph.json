@@ -3,16 +3,17 @@
  "multigraph": false,
  "graph": {
   "name": "bublock",
-  "generated": "2026-09-28T00:58:26Z",
+  "generated": "2026-09-28T01:46:20Z",
   "generator": "scripts/knowledge-graph.py",
   "counts": {
    "ability": 7,
-   "command": 100,
+   "command": 104,
    "convar": 16,
    "doc": 24,
    "entity": 17,
    "event": 5,
-   "feature": 14,
+   "feature": 15,
+   "game-mode": 9,
    "hook": 11,
    "knowledge": 12,
    "modifier": 1,
@@ -22,8 +23,9 @@
    "plugin": 3,
    "schema-field": 5,
    "script": 16,
-   "source": 119,
-   "test": 49,
+   "source": 122,
+   "stage": 28,
+   "test": 50,
    "test-project": 3,
    "workflow": 2
   }
@@ -329,6 +331,30 @@
    "file": "DevTools/DevToolsPlugin.cs"
   },
   {
+   "id": "command:gungame_reroll",
+   "kind": "command",
+   "label": "/gungame_reroll",
+   "audience": "admin",
+   "description": "Give a player a new random hero and build now, as a Gun Game kill does: gungame_reroll <slot>",
+   "file": "RiftRoulette/GunGame/GunGamePlugin.cs"
+  },
+  {
+   "id": "command:gungame_status",
+   "kind": "command",
+   "label": "/gungame_status",
+   "audience": "admin",
+   "description": "Gun Game: on or off, target, winner, every player's kills",
+   "file": "RiftRoulette/GunGame/GunGamePlugin.cs"
+  },
+  {
+   "id": "command:gungame_target",
+   "kind": "command",
+   "label": "/gungame_target",
+   "audience": "admin",
+   "description": "Set the Gun Game kill target between matches: gungame_target <1-50>",
+   "file": "RiftRoulette/GunGame/GunGamePlugin.cs"
+  },
+  {
    "id": "command:heroes",
    "kind": "command",
    "label": "/heroes",
@@ -351,6 +377,14 @@
    "audience": "admin",
    "description": "Say something to everyone as a big on-screen banner: hud_say <message>",
    "file": "Modules/Hud/HudPlugin.cs"
+  },
+  {
+   "id": "command:ladder",
+   "kind": "command",
+   "label": "/ladder",
+   "audience": "player",
+   "description": "Show the Gun Game kill ladder and your place",
+   "file": "RiftRoulette/GunGame/GunGamePlugin.cs"
   },
   {
    "id": "command:loadout_copy",
@@ -1398,6 +1432,14 @@
    "summary": "Runs a continuous playtest match (Stage 13a)."
   },
   {
+   "id": "feature:RiftRoulette/GunGame",
+   "kind": "feature",
+   "label": "GunGame",
+   "path": "RiftRoulette/GunGame",
+   "doc": "RiftRoulette/GunGame/FEATURE.md",
+   "summary": "Gun Game for Rift Roulette (Stage 13k): a match format on top of Random mode (`/match_mode random`, `/match_format gungame`)."
+  },
+  {
    "id": "feature:RiftRoulette/Lobby",
    "kind": "feature",
    "label": "Lobby",
@@ -2113,6 +2155,40 @@
    "summary": "Pure rule for which currency gains are blocked.",
    "types": [
     "SoulRule"
+   ]
+  },
+  {
+   "id": "file:RiftRoulette/GunGame/GunGameLadder.cs",
+   "kind": "source",
+   "label": "GunGameLadder",
+   "path": "RiftRoulette/GunGame/GunGameLadder.cs",
+   "doc": "RiftRoulette/GunGame/GunGameLadder.md",
+   "summary": "Kill ladder for one Gun Game match (Stage 13k).",
+   "types": [
+    "GunGameLadder",
+    "LadderStep"
+   ]
+  },
+  {
+   "id": "file:RiftRoulette/GunGame/GunGamePlugin.cs",
+   "kind": "source",
+   "label": "GunGamePlugin",
+   "path": "RiftRoulette/GunGame/GunGamePlugin.cs",
+   "doc": "RiftRoulette/GunGame/GunGamePlugin.md",
+   "summary": "Thin host for Gun Game (`GunGameService`, Stage 13k).",
+   "types": [
+    "GunGamePlugin"
+   ]
+  },
+  {
+   "id": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "kind": "source",
+   "label": "GunGameService",
+   "path": "RiftRoulette/GunGame/GunGameService.cs",
+   "doc": "RiftRoulette/GunGame/GunGameService.md",
+   "summary": "Gun Game (Stage 13k): a match format on top of Random mode.",
+   "types": [
+    "GunGameService"
    ]
   },
   {
@@ -3093,6 +3169,17 @@
    ]
   },
   {
+   "id": "file:Tests/RiftRoulette.Tests/GunGameLadderTests.cs",
+   "kind": "test",
+   "label": "GunGameLadderTests",
+   "path": "Tests/RiftRoulette.Tests/GunGameLadderTests.cs",
+   "doc": "Tests/RiftRoulette.Tests/GunGameLadderTests.md",
+   "summary": "Unit tests for `RiftRoulette/GunGame/GunGameLadder`.",
+   "types": [
+    "GunGameLadderTests"
+   ]
+  },
+  {
    "id": "file:Tests/RiftRoulette.Tests/HeroDrawTests.cs",
    "kind": "test",
    "label": "HeroDrawTests",
@@ -3419,6 +3506,85 @@
    "label": "OnUnload"
   },
   {
+   "id": "mode:1v1-winner-stays-on-duel-mode",
+   "kind": "game-mode",
+   "label": "1v1 winner stays on (duel mode)",
+   "path": "knowledge/game-mode-recipes.md",
+   "doc": "knowledge/game-mode-recipes.md",
+   "status": "shipped"
+  },
+  {
+   "id": "mode:endless-mid-rift",
+   "kind": "game-mode",
+   "label": "Endless mid-rift",
+   "path": "knowledge/game-mode-recipes.md",
+   "doc": "knowledge/game-mode-recipes.md",
+   "status": "designed",
+   "summary": "Theo's shelved proposal: one rift at the middle, respawning forever, first to 25. Full notes, open questions and tests to run first: `RiftRoulette/reference/endless-mode.md`."
+  },
+  {
+   "id": "mode:fat-boy-zombie-escape",
+   "kind": "game-mode",
+   "label": "Fat Boy / Zombie Escape",
+   "path": "knowledge/game-mode-recipes.md",
+   "doc": "knowledge/game-mode-recipes.md",
+   "status": "designed",
+   "summary": "Reference: [Zombie Escape on the CSO wiki](https://cso.fandom.com/wiki/Zombie_Escape) (the owner's \"fat boy zombie mode\" from Counter-Strike Source). One random player starts as a huge, tanky \"origin\" zombie; zombies con"
+  },
+  {
+   "id": "mode:grifball",
+   "kind": "game-mode",
+   "label": "Grifball",
+   "path": "knowledge/game-mode-recipes.md",
+   "doc": "knowledge/game-mode-recipes.md",
+   "status": "designed",
+   "summary": "Reference: [Grifball on Halopedia](https://www.halopedia.org/Grifball). Two small teams on an enclosed court fight melee-only for one ball; carrying it into the enemy goal scores. One hit kills, respawns are fast and at "
+  },
+  {
+   "id": "mode:gun-game",
+   "kind": "game-mode",
+   "label": "Gun Game",
+   "path": "knowledge/game-mode-recipes.md",
+   "doc": "knowledge/game-mode-recipes.md",
+   "status": "in progress",
+   "summary": "Stage 13k in `RiftRoulette/reference/master-plan.md`; code in `RiftRoulette/GunGame/`. Every kill moves the killer up a kill ladder and swaps them, right away, to a new random hero with one of its real top builds; the fi"
+  },
+  {
+   "id": "mode:hold-the-zone",
+   "kind": "game-mode",
+   "label": "Hold the zone",
+   "path": "knowledge/game-mode-recipes.md",
+   "doc": "knowledge/game-mode-recipes.md",
+   "status": "designed",
+   "summary": "Rift Roulette without the rift: a team scores while it alone stands in a box."
+  },
+  {
+   "id": "mode:juggernaut",
+   "kind": "game-mode",
+   "label": "Juggernaut",
+   "path": "knowledge/game-mode-recipes.md",
+   "doc": "knowledge/game-mode-recipes.md",
+   "status": "designed",
+   "summary": "One player gets a huge build and damage protection; everyone else hunts them. Whoever kills the juggernaut becomes the next one."
+  },
+  {
+   "id": "mode:last-team-standing",
+   "kind": "game-mode",
+   "label": "Last team standing",
+   "path": "knowledge/game-mode-recipes.md",
+   "doc": "knowledge/game-mode-recipes.md",
+   "status": "designed",
+   "summary": "Rounds without respawns: dead players go up top until the round ends."
+  },
+  {
+   "id": "mode:rift-roulette-random-mode",
+   "kind": "game-mode",
+   "label": "Rift Roulette (random mode)",
+   "path": "knowledge/game-mode-recipes.md",
+   "doc": "knowledge/game-mode-recipes.md",
+   "status": "shipped"
+  },
+  {
    "id": "modifier-state:IgnoredByNpcTargeting",
    "kind": "modifier-state",
    "label": "EModifierState.IgnoredByNpcTargeting"
@@ -3725,6 +3891,286 @@
    "path": "scripts/update.sh",
    "doc": "scripts/update.sh.md",
    "summary": "Build-all entrypoint for Bublock plugins."
+  },
+  {
+   "id": "stage:1",
+   "kind": "stage",
+   "label": "Stage 1: RiftRoulette project shell + deploy tooling",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "done",
+   "order": 1,
+   "summary": "Bublock RiftRoulette builds against workspace `lib/`; update script rebuilds Bublock plugins; deploy tooling prepared but unused until Stage 12."
+  },
+  {
+   "id": "stage:10",
+   "kind": "stage",
+   "label": "Stage 10: Rift plugin class (RiftRoulette)",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "done",
+   "order": 10,
+   "summary": "Spawn / park / watch capture|tie / cleanup troopers / green-yellow alternation as separate ops, using Movement for team placement and Draft for team membership. Preserve the known-good KOTH sequence exactly."
+  },
+  {
+   "id": "stage:11",
+   "kind": "stage",
+   "label": "Stage 11: Parity composition",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "done",
+   "order": 11,
+   "summary": "A `koth`-equivalent compose path (Clean mode) built from Draft, Movement, and Rift ops; admin wrappers run the same ops in Debug mode. Delete `RiftRumble/Legacy/`."
+  },
+  {
+   "id": "stage:12",
+   "kind": "stage",
+   "label": "Stage 12: Parity harden + docs pass",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "done",
+   "order": 12,
+   "summary": "Archive behavior checklist green across Bublock plugins (RiftRoulette primary); FEATURE.md coverage; catalogs and Discoveries up to date. Command items from inventory §6 Stage 12: DevTools renames plus gating of the four"
+  },
+  {
+   "id": "stage:13",
+   "kind": "stage",
+   "label": "Stage 13: New gameplay (only then)",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "open",
+   "order": 13,
+   "summary": "Full GameLoop plugin class, BoX, give-up research, eliminated players, etc."
+  },
+  {
+   "id": "stage:13a",
+   "kind": "stage",
+   "label": "Stage 13a: Playtest match loop",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "awaiting playtest",
+   "order": 14,
+   "summary": "Quick, fun playtests. Continuous match: `/match_start` once, then intermission (15 s) → rift round → score on the on-screen HUD banner → repeat until `/match_end` (final score banner, draft reset). A captured rift scores"
+  },
+  {
+   "id": "stage:13b",
+   "kind": "stage",
+   "label": "Stage 13b: Random mode with real builds",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "awaiting playtest",
+   "order": 15,
+   "summary": "No shepherding: `/match_start` and everyone plays. `MatchConfig` hero mode `random` (default) or `draft`, format `continuous` (best-of later). Random mode balances teams once, then every intermission swaps each player to"
+  },
+  {
+   "id": "stage:13c",
+   "kind": "stage",
+   "label": "Stage 13c: Match stats boards, auto-balance, balanced joins",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "awaiting playtest",
+   "order": 16,
+   "summary": "Keep Random mode matches fair and readable. Count each player's kills, deaths and assists for the match and show them on the Sapphire and Amber boards. Auto-balance at each intermission: a 2+ round lead with a big kill g"
+  },
+  {
+   "id": "stage:13d",
+   "kind": "stage",
+   "label": "Stage 13d: Auto-start the match",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "awaiting playtest",
+   "order": 17,
+   "summary": "No admin needed online. The match starts the moment 2 human players are connected (round 1 after the normal intermission) and ends when fewer than 2 remain, then starts again when a 2nd player returns. `/match_auto <on|o"
+  },
+  {
+   "id": "stage:13e",
+   "kind": "stage",
+   "label": "Stage 13e: Ban Cultist Sacrifice",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "awaiting playtest",
+   "order": 18,
+   "summary": "Cultist Sacrifice (`upgrade_non_player_bonus_sacrifice`) is never in a Random mode build, like Monster Rounds and Golden Goose Egg; the next item fills the slot."
+  },
+  {
+   "id": "stage:13f",
+   "kind": "stage",
+   "label": "Stage 13f: Admin seat (13th connection)",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "awaiting playtest",
+   "order": 19,
+   "summary": "The server takes 13 connections and shows 12. Once 12 players are playing, only an admin may connect; that admin sits on the spectator side, outside both teams, and is left out of teams, heroes, rounds, stats and auto-st"
+  },
+  {
+   "id": "stage:13g",
+   "kind": "stage",
+   "label": "Stage 13g: 1v1 mode (exact copy, locked)",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "awaiting playtest",
+   "order": 20,
+   "summary": "`/match_mode 1v1`: the draft is off and hero switching is free; everyone gets 100,000 souls (and level 36) to build. `/duel_copy <slot>` copies that player's exact hero, items with imbues, ability upgrades, level, abilit"
+  },
+  {
+   "id": "stage:13h",
+   "kind": "stage",
+   "label": "Stage 13h: Restrain inactive players",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "awaiting playtest",
+   "order": 21,
+   "summary": "Whenever a player is up top (lobby, between rounds, after dying) they are silenced, disarmed and can't melee, using the game's real status effects, until they are moved into the rift."
+  },
+  {
+   "id": "stage:13i",
+   "kind": "stage",
+   "label": "Stage 13i: Watch spot above the rift",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "awaiting playtest",
+   "order": 22,
+   "summary": "The waiting spot sits above the rift being fought (or the next one), on the skybox floor at the old draft height. It only changes when players are sent back up after a round; dying mid-round puts you above the rift still"
+  },
+  {
+   "id": "stage:13j",
+   "kind": "stage",
+   "label": "Stage 13j: 1v1 queue, winner stays on",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "awaiting playtest",
+   "order": 23,
+   "summary": "1v1 mode gets a join queue: the first two in the queue fight, the winner stays on (streak), the loser goes to the back, a tie keeps both. The queue is a reusable module."
+  },
+  {
+   "id": "stage:13k",
+   "kind": "stage",
+   "label": "Stage 13k: Gun Game format (redock fork)",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "open",
+   "order": 28,
+   "summary": "a Gun Game in Rift Roulette: every kill swaps the killer to a new random hero with one of its real top builds (the Random mode build style) and moves them up a kill ladder; the first to the target wins the match."
+  },
+  {
+   "id": "stage:2",
+   "kind": "stage",
+   "label": "Stage 2: Multi-plugin shell (DevTools + CleanSlate)",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "done",
+   "order": 2,
+   "summary": "`Bublock.sln` builds RiftRoulette + DevTools + CleanSlate from archive snapshots; docs; still no push."
+  },
+  {
+   "id": "stage:3",
+   "kind": "stage",
+   "label": "Stage 3: Shared foundation + Legacy move",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "done",
+   "order": 3,
+   "summary": "`Bublock/Shared/` shared project (`Shared.projitems`) with Auth (Steam-ID gate from DevTools oracle), Cheats (`RunWithCheats`), and ExecutionMode (Clean/Debug). DevTools and CleanSlate consume it with unchanged behavior."
+  },
+  {
+   "id": "stage:4",
+   "kind": "stage",
+   "label": "Stage 4: Logging foundation (Shared)",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "done",
+   "order": 4,
+   "summary": "Structured file logging in `Shared/` (master + one log per feature, per-feature prefix, UTC timestamps, affected player name/Steam ID), sessionId/roundId, Clean vs Debug verbosity, retention, per-DLL folder; no `Console."
+  },
+  {
+   "id": "stage:5",
+   "kind": "stage",
+   "label": "Stage 5: Behavioral inventory + module map",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "done",
+   "order": 5,
+   "summary": "Every archive behavior (all Bublock plugins; deepest for RiftRoulette) is assigned to a module or plugin class, a named op, and a command. Propose supporting commands and the parity aliases (`/select`, `/unselect`, `/sel"
+  },
+  {
+   "id": "stage:6",
+   "kind": "stage",
+   "label": "Stage 6: WorldText module",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "done",
+   "order": 6,
+   "summary": "Generic in-game boards/text: create, update, clear, and list by id (position, angle, color, scale, font size). Legacy boards route through it with identical visuals."
+  },
+  {
+   "id": "stage:7",
+   "kind": "stage",
+   "label": "Stage 7: Movement module",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "done",
+   "order": 7,
+   "summary": "Named location registry (position + angle), teleport player / team / all, set view angle. Legacy draft and rift-start teleports route through it."
+  },
+  {
+   "id": "stage:8",
+   "kind": "stage",
+   "label": "Stage 8: Lobby plugin class (RiftRoulette)",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "done",
+   "order": 8,
+   "summary": "Connect/disconnect handling, team assignment, kick, starting progression / progression reset, server convar setup from `OnStartupServer`."
+  },
+  {
+   "id": "stage:9",
+   "kind": "stage",
+   "label": "Stage 9: Draft plugin class (RiftRoulette)",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "done",
+   "order": 9,
+   "summary": "Hero pools, `/pick` `/unpick` `/picks` `/heroes` (hidden aliases `/select` `/unselect` `/selected`), draft admin commands, hero enforcement on `player_hero_changed` (never `SelectHero` while dead), draft reset, boards vi"
+  },
+  {
+   "id": "stage:patch-day-readiness",
+   "kind": "stage",
+   "label": "Patch-day readiness",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "open",
+   "order": 27,
+   "summary": "when a big Deadlock patch lands, know within minutes what broke and follow a written fix path."
+  },
+  {
+   "id": "stage:per-slot-spots",
+   "kind": "stage",
+   "label": "Per-slot spots",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "awaiting playtest",
+   "order": 26,
+   "summary": "every player slot (0-12) has its own spot up top, around the main roulette board and facing it, and its own spot around its team's rift start, so nobody overlaps. Groups hang off the existing anchors so they can be moved"
+  },
+  {
+   "id": "stage:playtest-fixes-for-13h-13j",
+   "kind": "stage",
+   "label": "Playtest fixes for 13h-13j",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "awaiting playtest",
+   "order": 24,
+   "summary": "Code, tests, and docs done; uploaded 2026-09-27 (stamp `20260927T050450Z`); awaiting a playtest"
+  },
+  {
+   "id": "stage:quiet-banners-reload-leftover-rift",
+   "kind": "stage",
+   "label": "Quiet banners, reload, leftover rift",
+   "path": "RiftRoulette/reference/master-plan.md",
+   "doc": "RiftRoulette/reference/master-plan.md",
+   "status": "awaiting playtest",
+   "order": 25,
+   "summary": "Code, tests, and docs done; uploaded 2026-09-27 (stamp `20260927T052951Z`); awaiting a playtest"
   },
   {
    "id": "tests:Tests/Modules.Tests",
@@ -4145,6 +4591,21 @@
   {
    "source": "feature:RiftRoulette/GameLoop",
    "target": "file:RiftRoulette/GameLoop/SoulRule.cs",
+   "kind": "contains"
+  },
+  {
+   "source": "feature:RiftRoulette/GunGame",
+   "target": "file:RiftRoulette/GunGame/GunGameLadder.cs",
+   "kind": "contains"
+  },
+  {
+   "source": "feature:RiftRoulette/GunGame",
+   "target": "file:RiftRoulette/GunGame/GunGamePlugin.cs",
+   "kind": "contains"
+  },
+  {
+   "source": "feature:RiftRoulette/GunGame",
+   "target": "file:RiftRoulette/GunGame/GunGameService.cs",
    "kind": "contains"
   },
   {
@@ -4584,6 +5045,11 @@
   },
   {
    "source": "tests:Tests/RiftRoulette.Tests",
+   "target": "file:Tests/RiftRoulette.Tests/GunGameLadderTests.cs",
+   "kind": "contains"
+  },
+  {
+   "source": "tests:Tests/RiftRoulette.Tests",
    "target": "file:Tests/RiftRoulette.Tests/HeroDrawTests.cs",
    "kind": "contains"
   },
@@ -4709,12 +5175,7 @@
   },
   {
    "source": "file:CleanSlate/CleanSlatePlugin.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:CleanSlate/CleanSlatePlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
@@ -4724,12 +5185,17 @@
   },
   {
    "source": "file:CleanSlate/CleanSlatePlugin.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:CleanSlate/CleanSlatePlugin.cs",
    "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
    "source": "file:CleanSlate/CleanSlatePlugin.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -4739,13 +5205,18 @@
   },
   {
    "source": "file:CleanSlate/CleanSlatePlugin.cs",
-   "target": "hook:OnLoad",
+   "target": "hook:OnStartupServer",
    "kind": "hooks"
   },
   {
    "source": "file:CleanSlate/CleanSlatePlugin.cs",
-   "target": "hook:OnStartupServer",
+   "target": "hook:OnLoad",
    "kind": "hooks"
+  },
+  {
+   "source": "file:CleanSlate/CleanSlateService.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
   },
   {
    "source": "file:CleanSlate/CleanSlateService.cs",
@@ -4754,12 +5225,12 @@
   },
   {
    "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
    "kind": "uses"
   },
   {
    "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
@@ -4769,27 +5240,7 @@
   },
   {
    "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "entity:citadel_herotest_orbspawner",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "convar:citadel_crate_disable_early_spawn",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "entity:citadel_item_powerup_spawner",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "entity:npc_trooper_boss",
+   "target": "convar:citadel_crate_spawn_initial_delay",
    "kind": "depends-on"
   },
   {
@@ -4799,47 +5250,7 @@
   },
   {
    "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "convar:citadel_midboss_initial_spawn_time_override",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "entity:citadel_shop_prop_dynamic",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "convar:citadel_active_lane",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:CleanSlate/CleanSlateService.cs",
    "target": "entity:npc_boss_tier2",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "convar:citadel_crate_spawn_enabled",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "convar:citadel_crate_spawn_initial_delay",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "entity:npc_barrack_boss",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "entity:trigger_item_shop_safe_zone",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:CleanSlate/CleanSlateService.cs",
-   "target": "entity:trigger_item_shop",
    "kind": "depends-on"
   },
   {
@@ -4849,7 +5260,62 @@
   },
   {
    "source": "file:CleanSlate/CleanSlateService.cs",
+   "target": "entity:trigger_item_shop_safe_zone",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:CleanSlate/CleanSlateService.cs",
+   "target": "entity:npc_barrack_boss",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:CleanSlate/CleanSlateService.cs",
+   "target": "entity:citadel_herotest_orbspawner",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:CleanSlate/CleanSlateService.cs",
+   "target": "convar:citadel_active_lane",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:CleanSlate/CleanSlateService.cs",
+   "target": "entity:trigger_item_shop",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:CleanSlate/CleanSlateService.cs",
+   "target": "convar:citadel_crate_spawn_enabled",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:CleanSlate/CleanSlateService.cs",
    "target": "convar:citadel_crate_respawn_interval",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:CleanSlate/CleanSlateService.cs",
+   "target": "entity:citadel_item_powerup_spawner",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:CleanSlate/CleanSlateService.cs",
+   "target": "entity:citadel_shop_prop_dynamic",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:CleanSlate/CleanSlateService.cs",
+   "target": "entity:npc_trooper_boss",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:CleanSlate/CleanSlateService.cs",
+   "target": "convar:citadel_midboss_initial_spawn_time_override",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:CleanSlate/CleanSlateService.cs",
+   "target": "convar:citadel_crate_disable_early_spawn",
    "kind": "depends-on"
   },
   {
@@ -4859,12 +5325,12 @@
   },
   {
    "source": "file:DevTools/DevToolsPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
+   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
    "source": "file:DevTools/DevToolsPlugin.cs",
-   "target": "file:Shared/Logging/Logger.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -4904,7 +5370,7 @@
   },
   {
    "source": "file:DevTools/DevToolsPlugin.cs",
-   "target": "hook:OnLoad",
+   "target": "hook:OnUnload",
    "kind": "hooks"
   },
   {
@@ -4914,12 +5380,17 @@
   },
   {
    "source": "file:DevTools/DevToolsPlugin.cs",
-   "target": "hook:OnUnload",
+   "target": "hook:OnLoad",
    "kind": "hooks"
   },
   {
    "source": "file:Modules/Hud/HudPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Hud/HudPlugin.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
    "kind": "uses"
   },
   {
@@ -4929,17 +5400,12 @@
   },
   {
    "source": "file:Modules/Hud/HudPlugin.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Hud/HudPlugin.cs",
    "target": "file:Modules/Hud/HudService.cs",
    "kind": "uses"
   },
   {
    "source": "file:Modules/Hud/HudPlugin.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -4954,11 +5420,6 @@
   },
   {
    "source": "file:Modules/Hud/HudService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Hud/HudService.cs",
    "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
@@ -4968,13 +5429,18 @@
    "kind": "uses"
   },
   {
-   "source": "file:Modules/Loadout/HeroBuildCatalog.cs",
-   "target": "file:Modules/Loadout/HeroBuildData.cs",
+   "source": "file:Modules/Hud/HudService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
    "source": "file:Modules/Loadout/HeroBuildCatalog.cs",
    "target": "file:Modules/Loadout/LoadoutPlanner.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Loadout/HeroBuildCatalog.cs",
+   "target": "file:Modules/Loadout/HeroBuildData.cs",
    "kind": "uses"
   },
   {
@@ -4989,7 +5455,7 @@
   },
   {
    "source": "file:Modules/Loadout/LoadoutPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
@@ -4999,17 +5465,7 @@
   },
   {
    "source": "file:Modules/Loadout/LoadoutPlugin.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Loadout/LoadoutPlugin.cs",
    "target": "file:Modules/Loadout/LoadoutService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Loadout/LoadoutPlugin.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
@@ -5020,6 +5476,16 @@
   {
    "source": "file:Modules/Loadout/LoadoutPlugin.cs",
    "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Loadout/LoadoutPlugin.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Loadout/LoadoutPlugin.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -5044,7 +5510,7 @@
   },
   {
    "source": "file:Modules/Loadout/LoadoutService.cs",
-   "target": "file:Modules/Loadout/LoadoutPlanner.cs",
+   "target": "file:Modules/Loadout/LoadoutSnapshot.cs",
    "kind": "uses"
   },
   {
@@ -5054,17 +5520,12 @@
   },
   {
    "source": "file:Modules/Loadout/LoadoutService.cs",
-   "target": "file:Modules/Loadout/LoadoutSnapshot.cs",
+   "target": "file:Modules/Loadout/LoadoutPlanner.cs",
    "kind": "uses"
   },
   {
    "source": "file:Modules/Loadout/LoadoutService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Loadout/LoadoutService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
+   "target": "file:Modules/Loadout/HeroBuildData.cs",
    "kind": "uses"
   },
   {
@@ -5079,37 +5540,22 @@
   },
   {
    "source": "file:Modules/Loadout/LoadoutService.cs",
-   "target": "file:Modules/Loadout/HeroBuildCatalog.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
    "kind": "uses"
   },
   {
    "source": "file:Modules/Loadout/LoadoutService.cs",
-   "target": "file:Modules/Loadout/HeroBuildData.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Loadout/LoadoutService.cs",
+   "target": "file:Modules/Loadout/HeroBuildCatalog.cs",
    "kind": "uses"
   },
   {
    "source": "file:Modules/Movement/LocationRegistry.cs",
    "target": "file:Modules/Movement/MovementLocation.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Movement/MovementPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Movement/MovementPlugin.cs",
-   "target": "file:Modules/Movement/MovementService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Movement/MovementPlugin.cs",
-   "target": "file:Modules/Movement/LocationRegistry.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Movement/MovementPlugin.cs",
-   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
@@ -5124,7 +5570,27 @@
   },
   {
    "source": "file:Modules/Movement/MovementPlugin.cs",
+   "target": "file:Modules/Movement/LocationRegistry.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Movement/MovementPlugin.cs",
    "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Movement/MovementPlugin.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Movement/MovementPlugin.cs",
+   "target": "file:Modules/Movement/MovementService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Movement/MovementPlugin.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -5169,16 +5635,6 @@
   },
   {
    "source": "file:Modules/Movement/MovementService.cs",
-   "target": "file:Modules/Movement/LocationRegistry.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Movement/MovementService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Movement/MovementService.cs",
    "target": "file:Modules/Movement/MovementLocation.cs",
    "kind": "uses"
   },
@@ -5189,7 +5645,17 @@
   },
   {
    "source": "file:Modules/Movement/MovementService.cs",
+   "target": "file:Modules/Movement/LocationRegistry.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Movement/MovementService.cs",
    "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Movement/MovementService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
@@ -5199,7 +5665,7 @@
   },
   {
    "source": "file:Modules/Restraint/RestraintPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
@@ -5209,17 +5675,17 @@
   },
   {
    "source": "file:Modules/Restraint/RestraintPlugin.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Restraint/RestraintPlugin.cs",
    "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
    "source": "file:Modules/Restraint/RestraintPlugin.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Restraint/RestraintPlugin.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -5254,11 +5720,6 @@
   },
   {
    "source": "file:Modules/Restraint/RestraintService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Restraint/RestraintService.cs",
    "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
@@ -5269,22 +5730,12 @@
   },
   {
    "source": "file:Modules/Restraint/RestraintService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Restraint/RestraintService.cs",
    "target": "modifier:modifier_citadel_silenced",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:Modules/Restraint/RestraintService.cs",
-   "target": "modifier-state:IgnoredByNpcTargeting",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:Modules/Restraint/RestraintService.cs",
-   "target": "modifier-state:ShootingDisabled",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:Modules/Restraint/RestraintService.cs",
-   "target": "modifier-state:ItemsDisabled",
    "kind": "depends-on"
   },
   {
@@ -5298,8 +5749,33 @@
    "kind": "depends-on"
   },
   {
+   "source": "file:Modules/Restraint/RestraintService.cs",
+   "target": "modifier-state:IgnoredByNpcTargeting",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:Modules/Restraint/RestraintService.cs",
+   "target": "modifier-state:ItemsDisabled",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:Modules/Restraint/RestraintService.cs",
+   "target": "modifier-state:ShootingDisabled",
+   "kind": "depends-on"
+  },
+  {
    "source": "file:Modules/Spectate/SpectateService.cs",
-   "target": "file:Modules/Spectate/SpectateRule.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Spectate/SpectateService.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/Spectate/SpectateService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
@@ -5309,17 +5785,7 @@
   },
   {
    "source": "file:Modules/Spectate/SpectateService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Spectate/SpectateService.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/Spectate/SpectateService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "target": "file:Modules/Spectate/SpectateRule.cs",
    "kind": "uses"
   },
   {
@@ -5329,22 +5795,7 @@
   },
   {
    "source": "file:Modules/WorldText/WorldTextPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/WorldText/WorldTextPlugin.cs",
-   "target": "file:Modules/WorldText/WorldTextService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/WorldText/WorldTextPlugin.cs",
    "target": "file:Modules/WorldText/WorldTextFormat.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/WorldText/WorldTextPlugin.cs",
-   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
@@ -5354,12 +5805,17 @@
   },
   {
    "source": "file:Modules/WorldText/WorldTextPlugin.cs",
-   "target": "file:Modules/WorldText/WorldTextSpec.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
    "source": "file:Modules/WorldText/WorldTextPlugin.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/WorldText/WorldTextPlugin.cs",
+   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
@@ -5369,7 +5825,17 @@
   },
   {
    "source": "file:Modules/WorldText/WorldTextPlugin.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/WorldText/WorldTextPlugin.cs",
+   "target": "file:Modules/WorldText/WorldTextSpec.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/WorldText/WorldTextPlugin.cs",
+   "target": "file:Modules/WorldText/WorldTextService.cs",
    "kind": "uses"
   },
   {
@@ -5399,12 +5865,17 @@
   },
   {
    "source": "file:Modules/WorldText/WorldTextService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
    "source": "file:Modules/WorldText/WorldTextService.cs",
-   "target": "file:Modules/WorldText/WorldTextSpec.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Modules/WorldText/WorldTextService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
@@ -5414,12 +5885,7 @@
   },
   {
    "source": "file:Modules/WorldText/WorldTextService.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Modules/WorldText/WorldTextService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "target": "file:Modules/WorldText/WorldTextSpec.cs",
    "kind": "uses"
   },
   {
@@ -5439,17 +5905,12 @@
   },
   {
    "source": "file:RiftRoulette/Balance/BalancePlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
+   "target": "file:RiftRoulette/Balance/BalanceService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Balance/BalancePlugin.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Balance/BalancePlugin.cs",
-   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
@@ -5464,22 +5925,27 @@
   },
   {
    "source": "file:RiftRoulette/Balance/BalancePlugin.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Balance/BalancePlugin.cs",
    "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Balance/BalancePlugin.cs",
-   "target": "file:RiftRoulette/Balance/BalanceService.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Balance/BalancePlugin.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Balance/BalancePlugin.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -5499,7 +5965,32 @@
   },
   {
    "source": "file:RiftRoulette/Balance/BalanceService.cs",
+   "target": "file:RiftRoulette/Balance/BalanceTracker.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Balance/BalanceService.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Balance/BalanceService.cs",
+   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Balance/BalanceService.cs",
    "target": "file:Shared/Chat/PlayerChat.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Balance/BalanceService.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Balance/BalanceService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
@@ -5513,32 +6004,17 @@
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Balance/BalanceService.cs",
-   "target": "file:RiftRoulette/Balance/BalanceTracker.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Balance/BalanceService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Balance/BalanceService.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Balance/BalanceService.cs",
+   "source": "file:RiftRoulette/Balance/BalanceTracker.cs",
    "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Balance/BalanceService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "source": "file:RiftRoulette/Betting/BettingPlugin.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Balance/BalanceTracker.cs",
+   "source": "file:RiftRoulette/Betting/BettingPlugin.cs",
    "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
    "kind": "uses"
   },
@@ -5549,7 +6025,12 @@
   },
   {
    "source": "file:RiftRoulette/Betting/BettingPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
+   "target": "file:RiftRoulette/Betting/BettingService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Betting/BettingPlugin.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
    "kind": "uses"
   },
   {
@@ -5559,22 +6040,7 @@
   },
   {
    "source": "file:RiftRoulette/Betting/BettingPlugin.cs",
-   "target": "file:RiftRoulette/Betting/BettingService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Betting/BettingPlugin.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Betting/BettingPlugin.cs",
-   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Betting/BettingPlugin.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -5599,12 +6065,7 @@
   },
   {
    "source": "file:RiftRoulette/Betting/BettingService.cs",
-   "target": "file:Modules/WorldText/WorldTextService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Betting/BettingService.cs",
-   "target": "file:RiftRoulette/Draft/BoardLayout.cs",
+   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
    "kind": "uses"
   },
   {
@@ -5614,22 +6075,12 @@
   },
   {
    "source": "file:RiftRoulette/Betting/BettingService.cs",
+   "target": "file:RiftRoulette/Lobby/Participants.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Betting/BettingService.cs",
    "target": "file:RiftRoulette/Betting/BetBoardText.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Betting/BettingService.cs",
-   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Betting/BettingService.cs",
-   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Betting/BettingService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
    "kind": "uses"
   },
   {
@@ -5639,12 +6090,7 @@
   },
   {
    "source": "file:RiftRoulette/Betting/BettingService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Betting/BettingService.cs",
-   "target": "file:RiftRoulette/Lobby/Participants.cs",
+   "target": "file:Modules/WorldText/WorldTextService.cs",
    "kind": "uses"
   },
   {
@@ -5654,12 +6100,42 @@
   },
   {
    "source": "file:RiftRoulette/Betting/BettingService.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Betting/BettingService.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Betting/BettingService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Betting/BettingService.cs",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Betting/BettingService.cs",
    "target": "file:Shared/Chat/PlayerChat.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Betting/BettingService.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "target": "file:RiftRoulette/Draft/BoardLayout.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Draft/BoardLayout.cs",
+   "target": "file:RiftRoulette/Round/WatchLayout.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Draft/BoardLayout.cs",
+   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
    "kind": "uses"
   },
   {
@@ -5678,18 +6154,8 @@
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Draft/BoardLayout.cs",
-   "target": "file:RiftRoulette/Round/WatchLayout.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Draft/BoardLayout.cs",
-   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
-   "kind": "uses"
-  },
-  {
    "source": "file:RiftRoulette/Draft/DraftPlugin.cs",
-   "target": "file:RiftRoulette/Draft/DraftService.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
@@ -5699,12 +6165,12 @@
   },
   {
    "source": "file:RiftRoulette/Draft/DraftPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
+   "target": "file:RiftRoulette/Draft/DraftService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Draft/DraftPlugin.cs",
-   "target": "file:RiftRoulette/SelfTest/EventCounters.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
    "kind": "uses"
   },
   {
@@ -5714,12 +6180,12 @@
   },
   {
    "source": "file:RiftRoulette/Draft/DraftPlugin.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:RiftRoulette/SelfTest/EventCounters.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Draft/DraftPlugin.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -5769,12 +6235,12 @@
   },
   {
    "source": "file:RiftRoulette/Draft/DraftPlugin.cs",
-   "target": "hook:OnLoad",
+   "target": "hook:OnStartupServer",
    "kind": "hooks"
   },
   {
    "source": "file:RiftRoulette/Draft/DraftPlugin.cs",
-   "target": "hook:OnStartupServer",
+   "target": "hook:OnLoad",
    "kind": "hooks"
   },
   {
@@ -5789,32 +6255,7 @@
   },
   {
    "source": "file:RiftRoulette/Draft/DraftService.cs",
-   "target": "file:Modules/WorldText/WorldTextService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Draft/DraftService.cs",
-   "target": "file:RiftRoulette/Stats/StatsService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Draft/DraftService.cs",
-   "target": "file:RiftRoulette/Round/WatchSpot.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Draft/DraftService.cs",
-   "target": "file:RiftRoulette/Betting/BettingService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Draft/DraftService.cs",
-   "target": "file:RiftRoulette/Draft/BoardLayout.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Draft/DraftService.cs",
-   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "target": "file:RiftRoulette/Draft/DraftPools.cs",
    "kind": "uses"
   },
   {
@@ -5824,17 +6265,17 @@
   },
   {
    "source": "file:RiftRoulette/Draft/DraftService.cs",
+   "target": "file:RiftRoulette/Betting/BettingService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Draft/DraftService.cs",
+   "target": "file:RiftRoulette/Lobby/Participants.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Draft/DraftService.cs",
    "target": "file:RiftRoulette/Duel/DuelService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Draft/DraftService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Draft/DraftService.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
    "kind": "uses"
   },
   {
@@ -5844,17 +6285,37 @@
   },
   {
    "source": "file:RiftRoulette/Draft/DraftService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Draft/DraftService.cs",
-   "target": "file:RiftRoulette/Lobby/Participants.cs",
+   "target": "file:Modules/WorldText/WorldTextService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Draft/DraftService.cs",
    "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Draft/DraftService.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Draft/DraftService.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Draft/DraftService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Draft/DraftService.cs",
+   "target": "file:RiftRoulette/Stats/StatsService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Draft/DraftService.cs",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
    "kind": "uses"
   },
   {
@@ -5864,47 +6325,12 @@
   },
   {
    "source": "file:RiftRoulette/Draft/DraftService.cs",
-   "target": "file:RiftRoulette/Draft/DraftPools.cs",
+   "target": "file:RiftRoulette/Round/WatchSpot.cs",
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
-   "target": "file:Shared/Chat/PlayerChat.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
-   "target": "file:RiftRoulette/GameLoop/AutoStartService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
-   "target": "file:RiftRoulette/Duel/DuelService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
-   "target": "file:RiftRoulette/Lobby/Participants.cs",
+   "source": "file:RiftRoulette/Draft/DraftService.cs",
+   "target": "file:RiftRoulette/Draft/BoardLayout.cs",
    "kind": "uses"
   },
   {
@@ -5914,7 +6340,47 @@
   },
   {
    "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
+   "target": "file:Shared/Chat/PlayerChat.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
+   "target": "file:RiftRoulette/Lobby/Participants.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
    "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
+   "target": "file:RiftRoulette/Duel/DuelService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
+   "target": "file:RiftRoulette/GameLoop/AutoStartService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -5959,13 +6425,18 @@
   },
   {
    "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
-   "target": "event:player_respawned",
+   "target": "event:player_spawn",
    "kind": "listens"
   },
   {
    "source": "file:RiftRoulette/Duel/DuelPlugin.cs",
-   "target": "event:player_spawn",
+   "target": "event:player_respawned",
    "kind": "listens"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelService.cs",
+   "target": "file:RiftRoulette/Rift/RiftService.cs",
+   "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Duel/DuelService.cs",
@@ -5974,12 +6445,12 @@
   },
   {
    "source": "file:RiftRoulette/Duel/DuelService.cs",
-   "target": "file:RiftRoulette/Stats/StatsService.cs",
+   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Duel/DuelService.cs",
-   "target": "file:RiftRoulette/Rift/RiftRoundResult.cs",
+   "target": "file:RiftRoulette/Lobby/Participants.cs",
    "kind": "uses"
   },
   {
@@ -5994,62 +6465,7 @@
   },
   {
    "source": "file:RiftRoulette/Duel/DuelService.cs",
-   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelService.cs",
    "target": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelService.cs",
-   "target": "file:RiftRoulette/Rift/RiftService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelService.cs",
-   "target": "file:Modules/Queue/PlayerQueue.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelService.cs",
-   "target": "file:RiftRoulette/Lobby/Participants.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelService.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelService.cs",
-   "target": "file:RiftRoulette/Duel/KothRule.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelService.cs",
-   "target": "file:Modules/Loadout/HeroBuildCatalog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelService.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Duel/DuelService.cs",
-   "target": "file:RiftRoulette/Duel/StreakBoard.cs",
    "kind": "uses"
   },
   {
@@ -6059,7 +6475,57 @@
   },
   {
    "source": "file:RiftRoulette/Duel/DuelService.cs",
+   "target": "file:RiftRoulette/Duel/StreakBoard.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelService.cs",
+   "target": "file:RiftRoulette/Duel/KothRule.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelService.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelService.cs",
+   "target": "file:RiftRoulette/Rift/RiftRoundResult.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelService.cs",
    "target": "file:Modules/Loadout/LoadoutService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelService.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelService.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelService.cs",
+   "target": "file:RiftRoulette/Stats/StatsService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelService.cs",
+   "target": "file:Modules/Loadout/HeroBuildCatalog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Duel/DuelService.cs",
+   "target": "file:Modules/Queue/PlayerQueue.cs",
    "kind": "uses"
   },
   {
@@ -6069,17 +6535,12 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/AutoStartService.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/AutoStartService.cs",
    "target": "file:Shared/Chat/PlayerChat.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/AutoStartService.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/AutoStartService.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
    "kind": "uses"
   },
   {
@@ -6089,7 +6550,7 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/AutoStartService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
    "kind": "uses"
   },
   {
@@ -6099,7 +6560,12 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/AutoStartService.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/AutoStartService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
@@ -6109,12 +6575,12 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/AutoStartService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
-   "target": "file:RiftRoulette/SelfTest/EventCounters.cs",
+   "target": "file:RiftRoulette/GameLoop/AutoStartService.cs",
    "kind": "uses"
   },
   {
@@ -6124,17 +6590,7 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
-   "target": "file:Modules/Restraint/RestraintService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
-   "target": "file:RiftRoulette/Round/WatchGuard.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "target": "file:RiftRoulette/GameLoop/SoulRule.cs",
    "kind": "uses"
   },
   {
@@ -6144,12 +6600,7 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
-   "target": "file:RiftRoulette/GameLoop/AutoStartRule.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
-   "target": "file:Shared/Logging/Logger.cs",
+   "target": "file:RiftRoulette/Round/WatchGuard.cs",
    "kind": "uses"
   },
   {
@@ -6159,22 +6610,37 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
-   "target": "file:Shared/Chat/PlayerChat.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
    "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
-   "target": "file:RiftRoulette/GameLoop/SoulRule.cs",
+   "target": "file:Modules/Restraint/RestraintService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
-   "target": "file:RiftRoulette/GameLoop/AutoStartService.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
+   "target": "file:RiftRoulette/GameLoop/AutoStartRule.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
+   "target": "file:Shared/Chat/PlayerChat.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
+   "target": "file:RiftRoulette/SelfTest/EventCounters.cs",
    "kind": "uses"
   },
   {
@@ -6224,6 +6690,11 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
+   "target": "hook:OnTakeDamage",
+   "kind": "hooks"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
    "target": "hook:OnLoad",
    "kind": "hooks"
   },
@@ -6234,7 +6705,7 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
-   "target": "hook:OnTakeDamage",
+   "target": "hook:OnClientConCommand",
    "kind": "hooks"
   },
   {
@@ -6243,43 +6714,8 @@
    "kind": "hooks"
   },
   {
-   "source": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
-   "target": "hook:OnClientConCommand",
-   "kind": "hooks"
-  },
-  {
    "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
-   "target": "file:Modules/Restraint/RestraintService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
-   "target": "file:Modules/Movement/MovementService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
-   "target": "file:Modules/WorldText/WorldTextService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
-   "target": "file:RiftRoulette/Round/WatchSpot.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
-   "target": "file:Shared/Logging/Logger.cs",
+   "target": "file:RiftRoulette/Rift/RiftSide.cs",
    "kind": "uses"
   },
   {
@@ -6289,22 +6725,7 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
-   "target": "file:RiftRoulette/Lobby/Participants.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
    "target": "file:RiftRoulette/Round/WatchGuard.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
-   "target": "file:RiftRoulette/GameLoop/ShopAccess.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
-   "target": "file:RiftRoulette/Rift/RiftSide.cs",
    "kind": "uses"
   },
   {
@@ -6314,17 +6735,62 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
+   "target": "file:RiftRoulette/Round/WatchSpot.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
+   "target": "file:Modules/Restraint/RestraintService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
+   "target": "file:RiftRoulette/Lobby/Participants.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
    "target": "file:Shared/Logging/BublockLog.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
-   "target": "entity:citadel_shop_prop_dynamic",
-   "kind": "depends-on"
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
+   "target": "file:Modules/Movement/MovementService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
+   "target": "file:RiftRoulette/GameLoop/ShopAccess.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
+   "target": "file:Modules/WorldText/WorldTextService.cs",
+   "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
    "target": "entity:npc_barrack_boss",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchProbe.cs",
+   "target": "entity:citadel_shop_prop_dynamic",
    "kind": "depends-on"
   },
   {
@@ -6339,77 +6805,7 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:RiftRoulette/Draft/DraftService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:RiftRoulette/Round/RoundFlow.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:RiftRoulette/Stats/StatsService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:RiftRoulette/Rift/RiftRoundResult.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:RiftRoulette/Betting/BettingService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:Modules/Hud/HudService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
    "target": "file:RiftRoulette/Balance/BalanceService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:RiftRoulette/Rift/RiftSide.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:RiftRoulette/Duel/DuelService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchProbe.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchState.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
@@ -6419,12 +6815,87 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:RiftRoulette/Betting/BettingService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchProbe.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:RiftRoulette/Duel/DuelService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:RiftRoulette/Round/RoundFlow.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/GameLoop/MatchService.cs",
    "target": "file:RiftRoulette/GameLoop/ShopAccess.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:Modules/Hud/HudService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:RiftRoulette/Draft/DraftService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchState.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:RiftRoulette/Rift/RiftSide.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:RiftRoulette/Rift/RiftRoundResult.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:RiftRoulette/Stats/StatsService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
    "kind": "uses"
   },
   {
@@ -6439,17 +6910,7 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/ShopAccess.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/ShopAccess.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/ShopAccess.cs",
-   "target": "file:Shared/Logging/Logger.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
@@ -6459,7 +6920,22 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/ShopAccess.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/ShopAccess.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/ShopAccess.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GameLoop/ShopAccess.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
    "kind": "uses"
   },
   {
@@ -6469,32 +6945,107 @@
   },
   {
    "source": "file:RiftRoulette/GameLoop/ShopAccess.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/GameLoop/ShopAccess.cs",
    "target": "convar:citadel_allow_purchasing_anywhere",
    "kind": "depends-on"
   },
   {
-   "source": "file:RiftRoulette/Lobby/AccessList.cs",
-   "target": "file:RiftRoulette/Lobby/AccessRule.cs",
+   "source": "file:RiftRoulette/GunGame/GunGamePlugin.cs",
+   "target": "file:Shared/Chat/PlayerChat.cs",
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Lobby/AccessPlugin.cs",
+   "source": "file:RiftRoulette/GunGame/GunGamePlugin.cs",
+   "target": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGamePlugin.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGamePlugin.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGamePlugin.cs",
    "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Lobby/AccessPlugin.cs",
-   "target": "file:RiftRoulette/Lobby/AccessRule.cs",
+   "source": "file:RiftRoulette/GunGame/GunGamePlugin.cs",
+   "target": "command:ladder",
+   "kind": "registers"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGamePlugin.cs",
+   "target": "command:gungame_status",
+   "kind": "registers"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGamePlugin.cs",
+   "target": "command:gungame_target",
+   "kind": "registers"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGamePlugin.cs",
+   "target": "command:gungame_reroll",
+   "kind": "registers"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "target": "file:RiftRoulette/GameLoop/AutoStartService.cs",
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Lobby/AccessPlugin.cs",
+   "source": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "target": "file:Modules/Hud/HudService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "target": "file:RiftRoulette/GunGame/GunGameLadder.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGameService.cs",
    "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "target": "file:Modules/Loadout/HeroBuildCatalog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AccessList.cs",
+   "target": "file:RiftRoulette/Lobby/AccessRule.cs",
    "kind": "uses"
   },
   {
@@ -6504,17 +7055,32 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/AccessPlugin.cs",
-   "target": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AccessPlugin.cs",
    "target": "file:RiftRoulette/Lobby/AccessService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/AccessPlugin.cs",
+   "target": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AccessPlugin.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AccessPlugin.cs",
    "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AccessPlugin.cs",
+   "target": "file:RiftRoulette/Lobby/AccessRule.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AccessPlugin.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -6564,32 +7130,7 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/AccessService.cs",
-   "target": "file:RiftRoulette/Lobby/AccessList.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AccessService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AccessService.cs",
    "target": "file:Shared/Logging/LogPaths.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AccessService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AccessService.cs",
-   "target": "file:Shared/Auth/AdminAuth.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AccessService.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
@@ -6599,67 +7140,32 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/AccessService.cs",
-   "target": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:RiftRoulette/Draft/DraftService.cs",
+   "source": "file:RiftRoulette/Lobby/AccessService.cs",
+   "target": "file:RiftRoulette/Lobby/AccessList.cs",
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:RiftRoulette/Stats/StatsService.cs",
+   "source": "file:RiftRoulette/Lobby/AccessService.cs",
+   "target": "file:Shared/Auth/AdminAuth.cs",
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:Modules/Restraint/RestraintService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:RiftRoulette/Lobby/StreamCam.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:RiftRoulette/Round/WatchGuard.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:RiftRoulette/Duel/DuelService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "source": "file:RiftRoulette/Lobby/AccessService.cs",
    "target": "file:Shared/Logging/BublockLog.cs",
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:RiftRoulette/Draft/DraftState.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:RiftRoulette/Lobby/AdminSeatRule.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "source": "file:RiftRoulette/Lobby/AccessService.cs",
    "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AccessService.cs",
+   "target": "file:RiftRoulette/Lobby/LobbyService.cs",
    "kind": "uses"
   },
   {
@@ -6669,7 +7175,7 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:Shared/Auth/AdminAuth.cs",
+   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
    "kind": "uses"
   },
   {
@@ -6679,7 +7185,17 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:Modules/Spectate/SpectateService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "target": "file:RiftRoulette/Duel/DuelService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "target": "file:RiftRoulette/Draft/DraftState.cs",
    "kind": "uses"
   },
   {
@@ -6689,23 +7205,63 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:RiftRoulette/Lobby/StreamCam.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "target": "file:Modules/Spectate/SpectateService.cs",
+   "target": "file:RiftRoulette/Draft/DraftService.cs",
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Lobby/BigUlts.cs",
-   "target": "ability:citadel_ability_rocket_barrage",
-   "kind": "depends-on"
+   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "target": "file:RiftRoulette/Round/WatchGuard.cs",
+   "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Lobby/BigUlts.cs",
-   "target": "ability:citadel_ability_self_vacuum",
-   "kind": "depends-on"
+   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "target": "file:RiftRoulette/Lobby/AdminSeatRule.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "target": "file:Modules/Restraint/RestraintService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "target": "file:Shared/Auth/AdminAuth.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "target": "file:RiftRoulette/Stats/StatsService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "target": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/BigUlts.cs",
@@ -6719,7 +7275,12 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/BigUlts.cs",
-   "target": "ability:citadel_ability_bull_leap",
+   "target": "ability:citadel_ability_rocket_barrage",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/BigUlts.cs",
+   "target": "ability:citadel_ability_lash_ultimate",
    "kind": "depends-on"
   },
   {
@@ -6729,7 +7290,12 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/BigUlts.cs",
-   "target": "ability:citadel_ability_lash_ultimate",
+   "target": "ability:citadel_ability_bull_leap",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/BigUlts.cs",
+   "target": "ability:citadel_ability_self_vacuum",
    "kind": "depends-on"
   },
   {
@@ -6744,27 +7310,32 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "file:RiftRoulette/Lobby/CommandList.cs",
+   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "file:RiftRoulette/SelfTest/EventCounters.cs",
+   "target": "file:RiftRoulette/Lobby/Participants.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "file:RiftRoulette/Round/WatchSpot.cs",
+   "target": "file:RiftRoulette/GameLoop/AutoStartService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "target": "file:RiftRoulette/Draft/DraftState.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
    "target": "file:Shared/Auth/AdminCommand.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
+   "target": "file:RiftRoulette/Lobby/AdminSeat.cs",
    "kind": "uses"
   },
   {
@@ -6779,17 +7350,12 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "file:RiftRoulette/Draft/DraftState.cs",
+   "target": "file:RiftRoulette/Lobby/AccessService.cs",
    "kind": "uses"
   },
   {
@@ -6799,22 +7365,27 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
    "target": "file:Shared/Auth/AdminAuth.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "file:RiftRoulette/Lobby/Participants.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
+   "target": "file:RiftRoulette/Lobby/CommandList.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
+   "target": "file:RiftRoulette/Round/WatchSpot.cs",
    "kind": "uses"
   },
   {
@@ -6824,17 +7395,12 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "file:RiftRoulette/GameLoop/AutoStartService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
    "target": "file:RiftRoulette/Lobby/LobbyService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "file:RiftRoulette/Lobby/AccessService.cs",
+   "target": "file:RiftRoulette/SelfTest/EventCounters.cs",
    "kind": "uses"
   },
   {
@@ -6904,22 +7470,7 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "hook:OnClientFullConnect",
-   "kind": "hooks"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "hook:OnLoad",
-   "kind": "hooks"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
    "target": "hook:OnClientDisconnect",
-   "kind": "hooks"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "hook:OnClientConnect",
    "kind": "hooks"
   },
   {
@@ -6929,8 +7480,18 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
-   "target": "event:player_death",
-   "kind": "listens"
+   "target": "hook:OnLoad",
+   "kind": "hooks"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
+   "target": "hook:OnClientFullConnect",
+   "kind": "hooks"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
+   "target": "hook:OnClientConnect",
+   "kind": "hooks"
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
@@ -6943,43 +7504,18 @@
    "kind": "listens"
   },
   {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:RiftRoulette/Draft/DraftService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:RiftRoulette/Stats/StatsService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:RiftRoulette/Round/WatchSpot.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:Modules/Restraint/RestraintService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:RiftRoulette/Round/WatchGuard.cs",
-   "kind": "uses"
+   "source": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
+   "target": "event:player_death",
+   "kind": "listens"
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyService.cs",
    "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:RiftRoulette/Lobby/Participants.cs",
    "kind": "uses"
   },
   {
@@ -6989,52 +7525,12 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:RiftRoulette/Draft/DraftState.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:RiftRoulette/Lobby/AdminSeatRule.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:RiftRoulette/Lobby/Participants.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
    "target": "file:RiftRoulette/GameLoop/AutoStartService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "file:Shared/ConVars/ServerConVars.cs",
+   "target": "file:RiftRoulette/Draft/DraftState.cs",
    "kind": "uses"
   },
   {
@@ -7044,12 +7540,82 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:RiftRoulette/Draft/DraftService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:RiftRoulette/Round/WatchGuard.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:RiftRoulette/Lobby/AdminSeatRule.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:Modules/Restraint/RestraintService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:RiftRoulette/Stats/StatsService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:Shared/ConVars/ServerConVars.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "target": "file:RiftRoulette/Round/WatchSpot.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/LobbyService.cs",
    "target": "file:RiftRoulette/Lobby/TeamBalance.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "convar:citadel_team_size",
+   "target": "convar:citadel_koth_enabled",
    "kind": "depends-on"
   },
   {
@@ -7059,7 +7625,7 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/LobbyService.cs",
-   "target": "convar:citadel_koth_enabled",
+   "target": "convar:citadel_team_size",
    "kind": "depends-on"
   },
   {
@@ -7069,17 +7635,7 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/StreamCam.cs",
-   "target": "file:RiftRoulette/Round/WatchSpot.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/StreamCam.cs",
-   "target": "file:RiftRoulette/Lobby/AdminSeat.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/StreamCam.cs",
-   "target": "file:Modules/Restraint/RestraintService.cs",
+   "target": "file:RiftRoulette/Rift/RiftService.cs",
    "kind": "uses"
   },
   {
@@ -7089,32 +7645,17 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/StreamCam.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/StreamCam.cs",
-   "target": "file:RiftRoulette/Lobby/OverviewRule.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/StreamCam.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/StreamCam.cs",
-   "target": "file:RiftRoulette/Rift/RiftService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Lobby/StreamCam.cs",
    "target": "file:RiftRoulette/Lobby/Participants.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Lobby/StreamCam.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:Modules/Spectate/SpectateService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/StreamCam.cs",
+   "target": "file:RiftRoulette/Lobby/AdminSeat.cs",
    "kind": "uses"
   },
   {
@@ -7124,7 +7665,32 @@
   },
   {
    "source": "file:RiftRoulette/Lobby/StreamCam.cs",
-   "target": "file:Modules/Spectate/SpectateService.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/StreamCam.cs",
+   "target": "file:Modules/Restraint/RestraintService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/StreamCam.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/StreamCam.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/StreamCam.cs",
+   "target": "file:RiftRoulette/Lobby/OverviewRule.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Lobby/StreamCam.cs",
+   "target": "file:RiftRoulette/Round/WatchSpot.cs",
    "kind": "uses"
   },
   {
@@ -7134,12 +7700,12 @@
   },
   {
    "source": "file:RiftRoulette/Locations/RiftRouletteLocations.cs",
-   "target": "file:Modules/Movement/MovementService.cs",
+   "target": "file:Modules/Movement/MovementLocation.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Locations/RiftRouletteLocations.cs",
-   "target": "file:Modules/Movement/MovementLocation.cs",
+   "target": "file:Modules/Movement/MovementService.cs",
    "kind": "uses"
   },
   {
@@ -7150,26 +7716,6 @@
   {
    "source": "file:RiftRoulette/RandomMode/BenchRule.cs",
    "target": "file:RiftRoulette/Lobby/TeamBalance.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:RiftRoulette/Stats/StatsService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:Modules/Loadout/LoadoutService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:Modules/Hud/HudService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:RiftRoulette/RandomMode/BenchRule.cs",
    "kind": "uses"
   },
   {
@@ -7179,42 +7725,7 @@
   },
   {
    "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:RiftRoulette/Lobby/HeroLock.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
    "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:RiftRoulette/Draft/DraftState.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchState.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:Modules/Queue/PlayerQueue.cs",
    "kind": "uses"
   },
   {
@@ -7224,17 +7735,22 @@
   },
   {
    "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:RiftRoulette/Draft/DraftState.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:Modules/Loadout/HeroBuildCatalog.cs",
+   "target": "file:Modules/Hud/HudService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "target": "file:RiftRoulette/Lobby/HeroLock.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "target": "file:RiftRoulette/RandomMode/BenchRule.cs",
    "kind": "uses"
   },
   {
@@ -7244,7 +7760,42 @@
   },
   {
    "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "target": "file:RiftRoulette/Lobby/TeamBalance.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchState.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "target": "file:Modules/Loadout/LoadoutService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "target": "file:RiftRoulette/Stats/StatsService.cs",
    "kind": "uses"
   },
   {
@@ -7253,8 +7804,48 @@
    "kind": "uses"
   },
   {
+   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "target": "file:Modules/Loadout/HeroBuildCatalog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "target": "file:Modules/Queue/PlayerQueue.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "target": "file:RiftRoulette/Lobby/TeamBalance.cs",
+   "kind": "uses"
+  },
+  {
    "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchState.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
+   "target": "file:RiftRoulette/SelfTest/EventCounters.cs",
    "kind": "uses"
   },
   {
@@ -7269,32 +7860,7 @@
   },
   {
    "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
-   "target": "file:RiftRoulette/SelfTest/EventCounters.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchState.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -7309,13 +7875,18 @@
   },
   {
    "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
-   "target": "event:player_respawned",
+   "target": "event:player_spawn",
    "kind": "listens"
   },
   {
    "source": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
-   "target": "event:player_spawn",
+   "target": "event:player_respawned",
    "kind": "listens"
+  },
+  {
+   "source": "file:RiftRoulette/Rift/RiftGameRules.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Rift/RiftGameRules.cs",
@@ -7329,22 +7900,17 @@
   },
   {
    "source": "file:RiftRoulette/Rift/RiftGameRules.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
+   "target": "schema-field:m_vNextKothLocation",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/Rift/RiftGameRules.cs",
+   "target": "schema-field:m_pGameRules",
+   "kind": "depends-on"
   },
   {
    "source": "file:RiftRoulette/Rift/RiftGameRules.cs",
    "target": "entity:citadel_gamerules",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/Rift/RiftGameRules.cs",
-   "target": "schema-field:m_timeNextKothSpawn",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/Rift/RiftGameRules.cs",
-   "target": "schema-field:m_vNextKothLocation",
    "kind": "depends-on"
   },
   {
@@ -7359,7 +7925,7 @@
   },
   {
    "source": "file:RiftRoulette/Rift/RiftGameRules.cs",
-   "target": "schema-field:m_pGameRules",
+   "target": "schema-field:m_timeNextKothSpawn",
    "kind": "depends-on"
   },
   {
@@ -7369,17 +7935,7 @@
   },
   {
    "source": "file:RiftRoulette/Rift/RiftPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Rift/RiftPlugin.cs",
-   "target": "file:RiftRoulette/Round/WatchSpot.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Rift/RiftPlugin.cs",
-   "target": "file:Shared/Logging/Logger.cs",
+   "target": "file:RiftRoulette/Rift/RiftSide.cs",
    "kind": "uses"
   },
   {
@@ -7394,12 +7950,22 @@
   },
   {
    "source": "file:RiftRoulette/Rift/RiftPlugin.cs",
-   "target": "file:RiftRoulette/Rift/RiftSide.cs",
+   "target": "file:RiftRoulette/Round/WatchSpot.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Rift/RiftPlugin.cs",
    "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Rift/RiftPlugin.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Rift/RiftPlugin.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -7434,7 +8000,7 @@
   },
   {
    "source": "file:RiftRoulette/Rift/RiftService.cs",
-   "target": "file:RiftRoulette/Rift/RiftRoundResult.cs",
+   "target": "file:RiftRoulette/Rift/RiftSide.cs",
    "kind": "uses"
   },
   {
@@ -7449,7 +8015,12 @@
   },
   {
    "source": "file:RiftRoulette/Rift/RiftService.cs",
-   "target": "file:RiftRoulette/Rift/RiftSide.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Rift/RiftService.cs",
+   "target": "file:RiftRoulette/Rift/RiftRoundResult.cs",
    "kind": "uses"
   },
   {
@@ -7464,12 +8035,7 @@
   },
   {
    "source": "file:RiftRoulette/Rift/RiftService.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Rift/RiftService.cs",
-   "target": "entity:citadel_koth_cashin",
+   "target": "entity:npc_trooper",
    "kind": "depends-on"
   },
   {
@@ -7479,27 +8045,22 @@
   },
   {
    "source": "file:RiftRoulette/Rift/RiftService.cs",
-   "target": "entity:npc_trooper",
+   "target": "entity:citadel_koth_cashin",
    "kind": "depends-on"
   },
   {
    "source": "file:RiftRoulette/Round/RoundFlow.cs",
-   "target": "file:RiftRoulette/Round/WatchSpot.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/RoundFlow.cs",
-   "target": "file:Modules/Movement/MovementLocation.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/RoundFlow.cs",
-   "target": "file:Modules/Restraint/RestraintService.cs",
+   "target": "file:RiftRoulette/Rift/RiftService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Round/RoundFlow.cs",
    "target": "file:RiftRoulette/Rift/RiftSide.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/RoundFlow.cs",
+   "target": "file:Modules/Movement/MovementLocation.cs",
    "kind": "uses"
   },
   {
@@ -7509,47 +8070,7 @@
   },
   {
    "source": "file:RiftRoulette/Round/RoundFlow.cs",
-   "target": "file:RiftRoulette/Duel/DuelService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/RoundFlow.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/RoundFlow.cs",
-   "target": "file:RiftRoulette/Round/RoundLocations.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/RoundFlow.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/RoundFlow.cs",
    "target": "file:RiftRoulette/GameLoop/MatchProbe.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/RoundFlow.cs",
-   "target": "file:RiftRoulette/Round/SlotSpots.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/RoundFlow.cs",
-   "target": "file:RiftRoulette/Draft/DraftState.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/RoundFlow.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/RoundFlow.cs",
-   "target": "file:RiftRoulette/Rift/RiftService.cs",
    "kind": "uses"
   },
   {
@@ -7559,7 +8080,7 @@
   },
   {
    "source": "file:RiftRoulette/Round/RoundFlow.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:RiftRoulette/Duel/DuelService.cs",
    "kind": "uses"
   },
   {
@@ -7569,12 +8090,62 @@
   },
   {
    "source": "file:RiftRoulette/Round/RoundFlow.cs",
+   "target": "file:RiftRoulette/Draft/DraftState.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/RoundFlow.cs",
+   "target": "file:RiftRoulette/Round/SlotSpots.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/RoundFlow.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/RoundFlow.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/RoundFlow.cs",
    "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/RoundFlow.cs",
+   "target": "file:Modules/Restraint/RestraintService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/RoundFlow.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/RoundFlow.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/RoundFlow.cs",
+   "target": "file:RiftRoulette/Round/RoundLocations.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/RoundFlow.cs",
+   "target": "file:RiftRoulette/Round/WatchSpot.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Round/RoundLocations.cs",
    "target": "file:RiftRoulette/Rift/RiftSide.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/RoundLocations.cs",
+   "target": "file:Modules/Movement/MovementLocation.cs",
    "kind": "uses"
   },
   {
@@ -7583,11 +8154,6 @@
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Round/RoundLocations.cs",
-   "target": "file:Modules/Movement/MovementLocation.cs",
-   "kind": "uses"
-  },
-  {
    "source": "file:RiftRoulette/Round/SlotSpots.cs",
    "target": "file:Modules/Movement/MovementLocation.cs",
    "kind": "uses"
@@ -7595,46 +8161,6 @@
   {
    "source": "file:RiftRoulette/Round/SlotSpots.cs",
    "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/SpotCheck.cs",
-   "target": "file:RiftRoulette/Round/WatchSpot.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/SpotCheck.cs",
-   "target": "file:Modules/Movement/MovementLocation.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/SpotCheck.cs",
-   "target": "file:RiftRoulette/Round/WatchGuard.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/SpotCheck.cs",
-   "target": "file:RiftRoulette/Rift/RiftSide.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/SpotCheck.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/SpotCheck.cs",
-   "target": "file:RiftRoulette/Round/RoundLocations.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/SpotCheck.cs",
-   "target": "file:RiftRoulette/Round/SlotSpots.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/SpotCheck.cs",
-   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
@@ -7644,7 +8170,12 @@
   },
   {
    "source": "file:RiftRoulette/Round/SpotCheck.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:RiftRoulette/Rift/RiftSide.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/SpotCheck.cs",
+   "target": "file:Modules/Movement/MovementLocation.cs",
    "kind": "uses"
   },
   {
@@ -7653,13 +8184,38 @@
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Round/SpotsPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
+   "source": "file:RiftRoulette/Round/SpotCheck.cs",
+   "target": "file:RiftRoulette/Round/SlotSpots.cs",
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Round/SpotsPlugin.cs",
-   "target": "file:RiftRoulette/Round/SpotCheck.cs",
+   "source": "file:RiftRoulette/Round/SpotCheck.cs",
+   "target": "file:RiftRoulette/Round/WatchGuard.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/SpotCheck.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/SpotCheck.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/SpotCheck.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/SpotCheck.cs",
+   "target": "file:RiftRoulette/Round/RoundLocations.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/SpotCheck.cs",
+   "target": "file:RiftRoulette/Round/WatchSpot.cs",
    "kind": "uses"
   },
   {
@@ -7674,12 +8230,22 @@
   },
   {
    "source": "file:RiftRoulette/Round/SpotsPlugin.cs",
-   "target": "file:Shared/Logging/Logger.cs",
+   "target": "file:RiftRoulette/Round/SpotCheck.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Round/SpotsPlugin.cs",
    "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/SpotsPlugin.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/SpotsPlugin.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -7694,22 +8260,7 @@
   },
   {
    "source": "file:RiftRoulette/Round/WatchGuard.cs",
-   "target": "file:Modules/Restraint/RestraintService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/WatchGuard.cs",
-   "target": "file:RiftRoulette/Round/WatchSpot.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/WatchGuard.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/WatchGuard.cs",
-   "target": "file:RiftRoulette/Lobby/Participants.cs",
+   "target": "file:RiftRoulette/Rift/RiftSide.cs",
    "kind": "uses"
   },
   {
@@ -7724,7 +8275,12 @@
   },
   {
    "source": "file:RiftRoulette/Round/WatchGuard.cs",
-   "target": "file:RiftRoulette/Rift/RiftSide.cs",
+   "target": "file:RiftRoulette/Round/WatchSpot.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/WatchGuard.cs",
+   "target": "file:Modules/Restraint/RestraintService.cs",
    "kind": "uses"
   },
   {
@@ -7733,8 +8289,43 @@
    "kind": "uses"
   },
   {
+   "source": "file:RiftRoulette/Round/WatchGuard.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/WatchGuard.cs",
+   "target": "file:RiftRoulette/Lobby/Participants.cs",
+   "kind": "uses"
+  },
+  {
    "source": "file:RiftRoulette/Round/WatchLayout.cs",
    "target": "file:RiftRoulette/Rift/RiftSide.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/WatchSpot.cs",
+   "target": "file:RiftRoulette/Rift/RiftSide.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/WatchSpot.cs",
+   "target": "file:RiftRoulette/Rift/RiftService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/WatchSpot.cs",
+   "target": "file:Modules/Movement/MovementLocation.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/WatchSpot.cs",
+   "target": "file:RiftRoulette/Round/WatchGuard.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Round/WatchSpot.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
@@ -7754,22 +8345,12 @@
   },
   {
    "source": "file:RiftRoulette/Round/WatchSpot.cs",
-   "target": "file:Modules/Movement/MovementService.cs",
+   "target": "file:RiftRoulette/Lobby/Participants.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Round/WatchSpot.cs",
-   "target": "file:RiftRoulette/Round/SlotSpots.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/WatchSpot.cs",
-   "target": "file:RiftRoulette/Round/WatchSpotRule.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/WatchSpot.cs",
-   "target": "file:RiftRoulette/Rift/RiftSide.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
    "kind": "uses"
   },
   {
@@ -7779,32 +8360,17 @@
   },
   {
    "source": "file:RiftRoulette/Round/WatchSpot.cs",
-   "target": "file:RiftRoulette/Rift/RiftService.cs",
+   "target": "file:RiftRoulette/Round/WatchSpotRule.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Round/WatchSpot.cs",
-   "target": "file:Modules/Movement/MovementLocation.cs",
+   "target": "file:Modules/Movement/MovementService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Round/WatchSpot.cs",
-   "target": "file:RiftRoulette/Lobby/Participants.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/WatchSpot.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/WatchSpot.cs",
-   "target": "file:RiftRoulette/Round/WatchGuard.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Round/WatchSpot.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "target": "file:RiftRoulette/Round/SlotSpots.cs",
    "kind": "uses"
   },
   {
@@ -7824,37 +8390,7 @@
   },
   {
    "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "convar:citadel_team_size",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "convar:citadel_allow_duplicate_heroes",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "convar:citadel_allow_purchasing_anywhere",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "convar:citadel_crate_disable_early_spawn",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "entity:citadel_herotest_orbspawner",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "entity:info_super_trooper_spawn",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "convar:citadel_koth_early_warning_time",
+   "target": "convar:citadel_crate_spawn_initial_delay",
    "kind": "depends-on"
   },
   {
@@ -7864,22 +8400,7 @@
   },
   {
    "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "convar:citadel_player_override_spawn_time",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "convar:citadel_crate_spawn_enabled",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "entity:npc_barrack_boss",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "entity:trigger_item_shop",
+   "target": "convar:citadel_koth_warning_time",
    "kind": "depends-on"
   },
   {
@@ -7889,27 +8410,7 @@
   },
   {
    "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "entity:citadel_item_powerup_spawner",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "entity:npc_trooper_boss",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "entity:citadel_gamerules",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "convar:citadel_midboss_initial_spawn_time_override",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "entity:citadel_shop_prop_dynamic",
+   "target": "convar:citadel_koth_early_warning_time",
    "kind": "depends-on"
   },
   {
@@ -7919,17 +8420,57 @@
   },
   {
    "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "entity:info_koth_spawn_location",
+   "target": "entity:citadel_herotest_orbspawner",
    "kind": "depends-on"
   },
   {
    "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "entity:item_crate_spawn",
+   "target": "entity:trigger_item_shop",
    "kind": "depends-on"
   },
   {
    "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "convar:citadel_koth_warning_time",
+   "target": "convar:citadel_crate_spawn_enabled",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "convar:citadel_crate_respawn_interval",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "convar:citadel_allow_purchasing_anywhere",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "convar:citadel_midboss_initial_spawn_time_override",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "entity:citadel_item_powerup_spawner",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "convar:citadel_allow_duplicate_heroes",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "entity:citadel_shop_prop_dynamic",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "entity:info_super_trooper_spawn",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "convar:citadel_team_size",
    "kind": "depends-on"
   },
   {
@@ -7939,12 +8480,7 @@
   },
   {
    "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "convar:citadel_koth_enabled",
-   "kind": "depends-on"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "convar:citadel_crate_spawn_initial_delay",
+   "target": "entity:citadel_gamerules",
    "kind": "depends-on"
   },
   {
@@ -7954,12 +8490,47 @@
   },
   {
    "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "target": "convar:citadel_crate_respawn_interval",
+   "target": "entity:npc_barrack_boss",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "entity:item_crate_spawn",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "convar:citadel_player_override_spawn_time",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "convar:citadel_koth_enabled",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "entity:npc_trooper_boss",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "entity:info_koth_spawn_location",
+   "kind": "depends-on"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "convar:citadel_crate_disable_early_spawn",
    "kind": "depends-on"
   },
   {
    "source": "file:RiftRoulette/SelfTest/SelfTestPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/SelfTestPlugin.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
    "kind": "uses"
   },
   {
@@ -7974,17 +8545,12 @@
   },
   {
    "source": "file:RiftRoulette/SelfTest/SelfTestPlugin.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/SelfTest/SelfTestPlugin.cs",
    "target": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/SelfTestPlugin.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
    "kind": "uses"
   },
   {
@@ -7999,17 +8565,37 @@
   },
   {
    "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "target": "file:RiftRoulette/SelfTest/EventCounters.cs",
+   "target": "file:RiftRoulette/Rift/RiftService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "target": "file:RiftRoulette/Round/WatchSpot.cs",
+   "target": "file:RiftRoulette/Rift/RiftSide.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
    "target": "file:Modules/Movement/MovementLocation.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
+   "target": "file:Modules/Loadout/LoadoutPlanner.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
+   "target": "file:RiftRoulette/Lobby/Participants.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
+   "target": "file:RiftRoulette/Round/SlotSpots.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
+   "target": "file:RiftRoulette/SelfTest/SelfTestResult.cs",
    "kind": "uses"
   },
   {
@@ -8024,16 +8610,6 @@
   },
   {
    "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "target": "file:Modules/Restraint/RestraintService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "target": "file:RiftRoulette/SelfTest/GameDependencies.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
    "target": "file:RiftRoulette/Rift/RiftGameRules.cs",
    "kind": "uses"
   },
@@ -8044,52 +8620,7 @@
   },
   {
    "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "target": "file:RiftRoulette/SelfTest/SelfTestResult.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "target": "file:RiftRoulette/Rift/RiftSide.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "target": "file:RiftRoulette/Round/SlotSpots.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "target": "file:RiftRoulette/Rift/RiftService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "target": "file:RiftRoulette/Lobby/Participants.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
    "target": "file:Shared/Execution/ExecutionMode.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "target": "file:Modules/Loadout/LoadoutPlanner.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
-   "target": "file:Modules/Loadout/HeroBuildCatalog.cs",
    "kind": "uses"
   },
   {
@@ -8099,12 +8630,52 @@
   },
   {
    "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
+   "target": "file:Modules/Restraint/RestraintService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
+   "target": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
+   "target": "file:Modules/Loadout/HeroBuildCatalog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
+   "target": "file:RiftRoulette/Round/WatchSpot.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
+   "target": "file:RiftRoulette/SelfTest/EventCounters.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/SelfTest/SelfTestService.cs",
    "target": "schema-field:m_pGameRules",
    "kind": "depends-on"
   },
   {
    "source": "file:RiftRoulette/Session/SessionPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Session/SessionPlugin.cs",
+   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
@@ -8114,12 +8685,7 @@
   },
   {
    "source": "file:RiftRoulette/Session/SessionPlugin.cs",
-   "target": "file:Shared/Logging/Logger.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Session/SessionPlugin.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -8129,7 +8695,7 @@
   },
   {
    "source": "file:RiftRoulette/Session/SessionPlugin.cs",
-   "target": "hook:OnLoad",
+   "target": "hook:OnUnload",
    "kind": "hooks"
   },
   {
@@ -8139,13 +8705,8 @@
   },
   {
    "source": "file:RiftRoulette/Session/SessionPlugin.cs",
-   "target": "hook:OnUnload",
+   "target": "hook:OnLoad",
    "kind": "hooks"
-  },
-  {
-   "source": "file:RiftRoulette/Stats/StatsBoardText.cs",
-   "target": "file:RiftRoulette/Stats/StatsLedger.cs",
-   "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Stats/StatsBoardText.cs",
@@ -8153,23 +8714,8 @@
    "kind": "uses"
   },
   {
-   "source": "file:RiftRoulette/Stats/StatsPlugin.cs",
-   "target": "file:Shared/Chat/PlayerChat.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Stats/StatsPlugin.cs",
-   "target": "file:Shared/Auth/AdminCommand.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Stats/StatsPlugin.cs",
-   "target": "file:RiftRoulette/Stats/StatsService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Stats/StatsPlugin.cs",
-   "target": "file:Shared/Logging/Logger.cs",
+   "source": "file:RiftRoulette/Stats/StatsBoardText.cs",
+   "target": "file:RiftRoulette/Stats/StatsLedger.cs",
    "kind": "uses"
   },
   {
@@ -8179,7 +8725,27 @@
   },
   {
    "source": "file:RiftRoulette/Stats/StatsPlugin.cs",
+   "target": "file:Shared/Chat/PlayerChat.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Stats/StatsPlugin.cs",
    "target": "file:Shared/Logging/BublockLog.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Stats/StatsPlugin.cs",
+   "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Stats/StatsPlugin.cs",
+   "target": "file:RiftRoulette/Stats/StatsService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Stats/StatsPlugin.cs",
+   "target": "file:Shared/Auth/AdminCommand.cs",
    "kind": "uses"
   },
   {
@@ -8204,7 +8770,7 @@
   },
   {
    "source": "file:RiftRoulette/Stats/StatsService.cs",
-   "target": "file:RiftRoulette/Stats/StatsLedger.cs",
+   "target": "file:RiftRoulette/Balance/BalanceService.cs",
    "kind": "uses"
   },
   {
@@ -8214,7 +8780,12 @@
   },
   {
    "source": "file:RiftRoulette/Stats/StatsService.cs",
-   "target": "file:Modules/WorldText/WorldTextService.cs",
+   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Stats/StatsService.cs",
+   "target": "file:RiftRoulette/Stats/StatsLedger.cs",
    "kind": "uses"
   },
   {
@@ -8224,22 +8795,12 @@
   },
   {
    "source": "file:RiftRoulette/Stats/StatsService.cs",
-   "target": "file:RiftRoulette/Draft/BoardLayout.cs",
+   "target": "file:RiftRoulette/Lobby/Participants.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Stats/StatsService.cs",
-   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Stats/StatsService.cs",
-   "target": "file:RiftRoulette/Balance/BalanceService.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Stats/StatsService.cs",
-   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
+   "target": "file:RiftRoulette/GunGame/GunGameService.cs",
    "kind": "uses"
   },
   {
@@ -8249,22 +8810,17 @@
   },
   {
    "source": "file:RiftRoulette/Stats/StatsService.cs",
-   "target": "file:Shared/Logging/BublockLog.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:RiftRoulette/Stats/StatsService.cs",
    "target": "file:RiftRoulette/GameLoop/MatchService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Stats/StatsService.cs",
-   "target": "file:Shared/Logging/Logger.cs",
+   "target": "file:Modules/WorldText/WorldTextService.cs",
    "kind": "uses"
   },
   {
    "source": "file:RiftRoulette/Stats/StatsService.cs",
-   "target": "file:RiftRoulette/Lobby/Participants.cs",
+   "target": "file:RiftRoulette/Duel/StreakBoard.cs",
    "kind": "uses"
   },
   {
@@ -8279,17 +8835,32 @@
   },
   {
    "source": "file:RiftRoulette/Stats/StatsService.cs",
-   "target": "file:RiftRoulette/Duel/StreakBoard.cs",
+   "target": "file:Shared/Logging/BublockLog.cs",
    "kind": "uses"
   },
   {
-   "source": "file:Shared/Auth/AdminCommand.cs",
+   "source": "file:RiftRoulette/Stats/StatsService.cs",
    "target": "file:Shared/Logging/Logger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Stats/StatsService.cs",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:RiftRoulette/Stats/StatsService.cs",
+   "target": "file:RiftRoulette/Draft/BoardLayout.cs",
    "kind": "uses"
   },
   {
    "source": "file:Shared/Auth/AdminCommand.cs",
    "target": "file:Shared/Auth/AdminAuth.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Shared/Auth/AdminCommand.cs",
+   "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
@@ -8324,12 +8895,12 @@
   },
   {
    "source": "file:Shared/Logging/LogFormatter.cs",
-   "target": "file:Shared/Logging/PlayerRef.cs",
+   "target": "file:Shared/Logging/LogLevel.cs",
    "kind": "uses"
   },
   {
    "source": "file:Shared/Logging/LogFormatter.cs",
-   "target": "file:Shared/Logging/LogLevel.cs",
+   "target": "file:Shared/Logging/PlayerRef.cs",
    "kind": "uses"
   },
   {
@@ -8344,17 +8915,17 @@
   },
   {
    "source": "file:Shared/Logging/LogHub.cs",
-   "target": "file:Shared/Logging/LogRetention.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Shared/Logging/LogHub.cs",
    "target": "file:Shared/Logging/Logger.cs",
    "kind": "uses"
   },
   {
+   "source": "file:Shared/Logging/LogHub.cs",
+   "target": "file:Shared/Logging/LogRetention.cs",
+   "kind": "uses"
+  },
+  {
    "source": "file:Shared/Logging/Logger.cs",
-   "target": "file:Shared/Logging/PlayerRef.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
@@ -8369,7 +8940,7 @@
   },
   {
    "source": "file:Shared/Logging/Logger.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:Shared/Logging/PlayerRef.cs",
    "kind": "uses"
   },
   {
@@ -8404,12 +8975,12 @@
   },
   {
    "source": "file:Tests/Modules.Tests/LoadoutPlannerTests.cs",
-   "target": "file:Modules/Loadout/Progression.cs",
+   "target": "file:Modules/Loadout/HeroBuildData.cs",
    "kind": "uses"
   },
   {
    "source": "file:Tests/Modules.Tests/LoadoutPlannerTests.cs",
-   "target": "file:Modules/Loadout/HeroBuildData.cs",
+   "target": "file:Modules/Loadout/Progression.cs",
    "kind": "uses"
   },
   {
@@ -8419,13 +8990,13 @@
   },
   {
    "source": "file:Tests/Modules.Tests/LocationRegistryTests.cs",
-   "target": "file:Modules/Movement/LocationRegistry.cs",
-   "kind": "tests"
+   "target": "file:Modules/Movement/MovementLocation.cs",
+   "kind": "uses"
   },
   {
    "source": "file:Tests/Modules.Tests/LocationRegistryTests.cs",
-   "target": "file:Modules/Movement/MovementLocation.cs",
-   "kind": "uses"
+   "target": "file:Modules/Movement/LocationRegistry.cs",
+   "kind": "tests"
   },
   {
    "source": "file:Tests/Modules.Tests/MovementLocationTests.cs",
@@ -8484,13 +9055,13 @@
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/BalancePickerTests.cs",
-   "target": "file:RiftRoulette/Balance/BalancePicker.cs",
-   "kind": "tests"
+   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
+   "kind": "uses"
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/BalancePickerTests.cs",
-   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
-   "kind": "uses"
+   "target": "file:RiftRoulette/Balance/BalancePicker.cs",
+   "kind": "tests"
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/BalanceTrackerTests.cs",
@@ -8504,8 +9075,8 @@
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/BenchRuleTests.cs",
-   "target": "file:RiftRoulette/RandomMode/BenchRule.cs",
-   "kind": "tests"
+   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
+   "kind": "uses"
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/BenchRuleTests.cs",
@@ -8514,8 +9085,8 @@
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/BenchRuleTests.cs",
-   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
-   "kind": "uses"
+   "target": "file:RiftRoulette/RandomMode/BenchRule.cs",
+   "kind": "tests"
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/BetBoardTextTests.cs",
@@ -8558,6 +9129,11 @@
    "kind": "tests"
   },
   {
+   "source": "file:Tests/RiftRoulette.Tests/GunGameLadderTests.cs",
+   "target": "file:RiftRoulette/GunGame/GunGameLadder.cs",
+   "kind": "tests"
+  },
+  {
    "source": "file:Tests/RiftRoulette.Tests/HeroDrawTests.cs",
    "target": "file:RiftRoulette/RandomMode/HeroDraw.cs",
    "kind": "tests"
@@ -8579,11 +9155,6 @@
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/MatchStateTests.cs",
-   "target": "file:RiftRoulette/GameLoop/MatchState.cs",
-   "kind": "tests"
-  },
-  {
-   "source": "file:Tests/RiftRoulette.Tests/MatchStateTests.cs",
    "target": "file:RiftRoulette/Rift/RiftRoundResult.cs",
    "kind": "uses"
   },
@@ -8591,6 +9162,11 @@
    "source": "file:Tests/RiftRoulette.Tests/MatchStateTests.cs",
    "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
    "kind": "uses"
+  },
+  {
+   "source": "file:Tests/RiftRoulette.Tests/MatchStateTests.cs",
+   "target": "file:RiftRoulette/GameLoop/MatchState.cs",
+   "kind": "tests"
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/OverviewRuleTests.cs",
@@ -8614,13 +9190,13 @@
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/RoundLocationsTests.cs",
-   "target": "file:RiftRoulette/Round/RoundLocations.cs",
-   "kind": "tests"
+   "target": "file:RiftRoulette/Rift/RiftSide.cs",
+   "kind": "uses"
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/RoundLocationsTests.cs",
-   "target": "file:RiftRoulette/Rift/RiftSide.cs",
-   "kind": "uses"
+   "target": "file:RiftRoulette/Round/RoundLocations.cs",
+   "kind": "tests"
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/RoundLocationsTests.cs",
@@ -8629,7 +9205,7 @@
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/SelfTestTests.cs",
-   "target": "file:RiftRoulette/SelfTest/GameDependencies.cs",
+   "target": "file:RiftRoulette/SelfTest/SelfTestResult.cs",
    "kind": "uses"
   },
   {
@@ -8639,22 +9215,12 @@
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/SelfTestTests.cs",
-   "target": "file:RiftRoulette/SelfTest/SelfTestResult.cs",
+   "target": "file:RiftRoulette/SelfTest/GameDependencies.cs",
    "kind": "uses"
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/ShopRuleTests.cs",
    "target": "file:RiftRoulette/GameLoop/ShopRule.cs",
-   "kind": "tests"
-  },
-  {
-   "source": "file:Tests/RiftRoulette.Tests/SlotSpotsTests.cs",
-   "target": "file:RiftRoulette/Round/RoundLocations.cs",
-   "kind": "uses"
-  },
-  {
-   "source": "file:Tests/RiftRoulette.Tests/SlotSpotsTests.cs",
-   "target": "file:RiftRoulette/Round/SlotSpots.cs",
    "kind": "tests"
   },
   {
@@ -8668,6 +9234,16 @@
    "kind": "uses"
   },
   {
+   "source": "file:Tests/RiftRoulette.Tests/SlotSpotsTests.cs",
+   "target": "file:RiftRoulette/Round/RoundLocations.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Tests/RiftRoulette.Tests/SlotSpotsTests.cs",
+   "target": "file:RiftRoulette/Round/SlotSpots.cs",
+   "kind": "tests"
+  },
+  {
    "source": "file:Tests/RiftRoulette.Tests/SoulRuleTests.cs",
    "target": "file:RiftRoulette/GameLoop/SoulRule.cs",
    "kind": "tests"
@@ -8679,23 +9255,23 @@
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/StatsBoardTextTests.cs",
-   "target": "file:RiftRoulette/Stats/StatsLedger.cs",
+   "target": "file:RiftRoulette/Duel/StreakBoard.cs",
    "kind": "uses"
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/StatsBoardTextTests.cs",
-   "target": "file:RiftRoulette/Duel/StreakBoard.cs",
+   "target": "file:RiftRoulette/Stats/StatsLedger.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Tests/RiftRoulette.Tests/StatsLedgerTests.cs",
+   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
    "kind": "uses"
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/StatsLedgerTests.cs",
    "target": "file:RiftRoulette/Stats/StatsLedger.cs",
    "kind": "tests"
-  },
-  {
-   "source": "file:Tests/RiftRoulette.Tests/StatsLedgerTests.cs",
-   "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
-   "kind": "uses"
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/StreakBoardTests.cs",
@@ -8709,18 +9285,13 @@
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/TeamBalanceTests.cs",
-   "target": "file:RiftRoulette/Lobby/TeamBalance.cs",
-   "kind": "tests"
-  },
-  {
-   "source": "file:Tests/RiftRoulette.Tests/TeamBalanceTests.cs",
    "target": "file:RiftRoulette/Lobby/RiftRouletteTeams.cs",
    "kind": "uses"
   },
   {
-   "source": "file:Tests/RiftRoulette.Tests/WatchGuardRuleTests.cs",
-   "target": "file:RiftRoulette/Locations/RiftRouletteLocations.cs",
-   "kind": "uses"
+   "source": "file:Tests/RiftRoulette.Tests/TeamBalanceTests.cs",
+   "target": "file:RiftRoulette/Lobby/TeamBalance.cs",
+   "kind": "tests"
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/WatchGuardRuleTests.cs",
@@ -8728,8 +9299,8 @@
    "kind": "tests"
   },
   {
-   "source": "file:Tests/RiftRoulette.Tests/WatchLayoutTests.cs",
-   "target": "file:RiftRoulette/Round/RoundLocations.cs",
+   "source": "file:Tests/RiftRoulette.Tests/WatchGuardRuleTests.cs",
+   "target": "file:RiftRoulette/Locations/RiftRouletteLocations.cs",
    "kind": "uses"
   },
   {
@@ -8743,9 +9314,9 @@
    "kind": "tests"
   },
   {
-   "source": "file:Tests/RiftRoulette.Tests/WatchSpotRuleTests.cs",
-   "target": "file:RiftRoulette/Round/WatchSpotRule.cs",
-   "kind": "tests"
+   "source": "file:Tests/RiftRoulette.Tests/WatchLayoutTests.cs",
+   "target": "file:RiftRoulette/Round/RoundLocations.cs",
+   "kind": "uses"
   },
   {
    "source": "file:Tests/RiftRoulette.Tests/WatchSpotRuleTests.cs",
@@ -8753,9 +9324,9 @@
    "kind": "uses"
   },
   {
-   "source": "file:Tests/Shared.Tests/LogFormatterTests.cs",
-   "target": "file:Shared/Logging/PlayerRef.cs",
-   "kind": "uses"
+   "source": "file:Tests/RiftRoulette.Tests/WatchSpotRuleTests.cs",
+   "target": "file:RiftRoulette/Round/WatchSpotRule.cs",
+   "kind": "tests"
   },
   {
    "source": "file:Tests/Shared.Tests/LogFormatterTests.cs",
@@ -8768,13 +9339,13 @@
    "kind": "tests"
   },
   {
-   "source": "file:Tests/Shared.Tests/LogHubTests.cs",
-   "target": "file:Tests/Shared.Tests/TempDir.cs",
+   "source": "file:Tests/Shared.Tests/LogFormatterTests.cs",
+   "target": "file:Shared/Logging/PlayerRef.cs",
    "kind": "uses"
   },
   {
    "source": "file:Tests/Shared.Tests/LogHubTests.cs",
-   "target": "file:Shared/Logging/PlayerRef.cs",
+   "target": "file:Shared/Execution/ExecutionMode.cs",
    "kind": "uses"
   },
   {
@@ -8784,7 +9355,12 @@
   },
   {
    "source": "file:Tests/Shared.Tests/LogHubTests.cs",
-   "target": "file:Shared/Execution/ExecutionMode.cs",
+   "target": "file:Tests/Shared.Tests/TempDir.cs",
+   "kind": "uses"
+  },
+  {
+   "source": "file:Tests/Shared.Tests/LogHubTests.cs",
+   "target": "file:Shared/Logging/PlayerRef.cs",
    "kind": "uses"
   },
   {
@@ -8804,13 +9380,13 @@
   },
   {
    "source": "file:Tests/Shared.Tests/RollingFileWriterTests.cs",
-   "target": "file:Tests/Shared.Tests/TempDir.cs",
-   "kind": "uses"
+   "target": "file:Shared/Logging/RollingFileWriter.cs",
+   "kind": "tests"
   },
   {
    "source": "file:Tests/Shared.Tests/RollingFileWriterTests.cs",
-   "target": "file:Shared/Logging/RollingFileWriter.cs",
-   "kind": "tests"
+   "target": "file:Tests/Shared.Tests/TempDir.cs",
+   "kind": "uses"
   },
   {
    "source": "script:scripts/deploy.sh",
@@ -9154,6 +9730,11 @@
   },
   {
    "source": "doc:RiftRoulette/reference/admin-commands.md",
+   "target": "feature:RiftRoulette/GunGame",
+   "kind": "links"
+  },
+  {
+   "source": "doc:RiftRoulette/reference/admin-commands.md",
    "target": "doc:RiftRoulette/reference/patch-day.md",
    "kind": "links"
   },
@@ -9378,6 +9959,11 @@
    "kind": "links"
   },
   {
+   "source": "doc:RiftRoulette/reference/resources.md",
+   "target": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "kind": "links"
+  },
+  {
    "source": "module:Shared",
    "target": "doc:Shared/Shared.md",
    "kind": "documents"
@@ -9594,6 +10180,11 @@
   },
   {
    "source": "doc:knowledge/effects-catalog.md",
+   "target": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "kind": "links"
+  },
+  {
+   "source": "doc:knowledge/effects-catalog.md",
    "target": "file:Modules/Loadout/LoadoutService.cs",
    "kind": "links"
   },
@@ -9680,6 +10271,11 @@
   {
    "source": "doc:knowledge/game-mode-recipes.md",
    "target": "doc:knowledge/mental-models/talking-to-the-game.md",
+   "kind": "links"
+  },
+  {
+   "source": "doc:knowledge/game-mode-recipes.md",
+   "target": "doc:RiftRoulette/reference/master-plan.md",
    "kind": "links"
   },
   {
@@ -9804,6 +10400,21 @@
   },
   {
    "source": "doc:knowledge/glossary.md",
+   "target": "feature:RiftRoulette/GunGame",
+   "kind": "links"
+  },
+  {
+   "source": "doc:knowledge/glossary.md",
+   "target": "file:RiftRoulette/GunGame/GunGameLadder.cs",
+   "kind": "links"
+  },
+  {
+   "source": "doc:knowledge/glossary.md",
+   "target": "script:scripts/knowledge-graph.py",
+   "kind": "links"
+  },
+  {
+   "source": "doc:knowledge/glossary.md",
    "target": "file:RiftRoulette/Duel/DuelService.cs",
    "kind": "links"
   },
@@ -9865,6 +10476,11 @@
   {
    "source": "doc:knowledge/generated/indexes.md",
    "target": "file:RiftRoulette/Duel/DuelPlugin.cs",
+   "kind": "links"
+  },
+  {
+   "source": "doc:knowledge/generated/indexes.md",
+   "target": "file:RiftRoulette/GunGame/GunGamePlugin.cs",
    "kind": "links"
   },
   {
@@ -10005,6 +10621,16 @@
   {
    "source": "doc:knowledge/generated/indexes.md",
    "target": "file:Modules/Movement/MovementService.cs",
+   "kind": "links"
+  },
+  {
+   "source": "doc:knowledge/generated/indexes.md",
+   "target": "doc:RiftRoulette/reference/master-plan.md",
+   "kind": "links"
+  },
+  {
+   "source": "doc:knowledge/generated/indexes.md",
+   "target": "doc:knowledge/game-mode-recipes.md",
    "kind": "links"
   },
   {
@@ -10195,6 +10821,16 @@
   {
    "source": "doc:knowledge/generated/indexes.md",
    "target": "file:RiftRoulette/GameLoop/SoulRule.cs",
+   "kind": "links"
+  },
+  {
+   "source": "doc:knowledge/generated/indexes.md",
+   "target": "file:RiftRoulette/GunGame/GunGameLadder.cs",
+   "kind": "links"
+  },
+  {
+   "source": "doc:knowledge/generated/indexes.md",
+   "target": "file:RiftRoulette/GunGame/GunGameService.cs",
    "kind": "links"
   },
   {
@@ -10514,11 +11150,6 @@
   },
   {
    "source": "doc:knowledge/generated/indexes.md",
-   "target": "doc:RiftRoulette/reference/master-plan.md",
-   "kind": "links"
-  },
-  {
-   "source": "doc:knowledge/generated/indexes.md",
    "target": "doc:RiftRoulette/reference/parity-review.md",
    "kind": "links"
   },
@@ -10550,11 +11181,6 @@
   {
    "source": "doc:knowledge/generated/indexes.md",
    "target": "doc:knowledge/effects-catalog.md",
-   "kind": "links"
-  },
-  {
-   "source": "doc:knowledge/generated/indexes.md",
-   "target": "doc:knowledge/game-mode-recipes.md",
    "kind": "links"
   },
   {
@@ -10696,6 +11322,2060 @@
    "source": "doc:knowledge/mental-models/talking-to-the-game.md",
    "target": "doc:knowledge/game-mode-recipes.md",
    "kind": "links"
+  },
+  {
+   "source": "feature:RiftRoulette/Balance",
+   "target": "feature:RiftRoulette/GameLoop",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/Balance",
+   "target": "feature:RiftRoulette/Lobby",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/Balance",
+   "target": "feature:RiftRoulette/RandomMode",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Balance",
+   "target": "feature:RiftRoulette/Stats",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Balance",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 8
+  },
+  {
+   "source": "feature:RiftRoulette/Betting",
+   "target": "feature:RiftRoulette/Draft",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Betting",
+   "target": "feature:RiftRoulette/GameLoop",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/Betting",
+   "target": "feature:RiftRoulette/Lobby",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/Betting",
+   "target": "feature:RiftRoulette/RandomMode",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Betting",
+   "target": "module:Modules/WorldText",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Betting",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 9
+  },
+  {
+   "source": "feature:RiftRoulette/Draft",
+   "target": "feature:RiftRoulette/Betting",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Draft",
+   "target": "feature:RiftRoulette/Duel",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Draft",
+   "target": "feature:RiftRoulette/GameLoop",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/Draft",
+   "target": "feature:RiftRoulette/Lobby",
+   "kind": "feature-uses",
+   "weight": 4
+  },
+  {
+   "source": "feature:RiftRoulette/Draft",
+   "target": "feature:RiftRoulette/RandomMode",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Draft",
+   "target": "feature:RiftRoulette/Round",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/Draft",
+   "target": "feature:RiftRoulette/SelfTest",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Draft",
+   "target": "feature:RiftRoulette/Stats",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Draft",
+   "target": "module:Modules/WorldText",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/Draft",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 8
+  },
+  {
+   "source": "feature:RiftRoulette/Duel",
+   "target": "feature:RiftRoulette/GameLoop",
+   "kind": "feature-uses",
+   "weight": 5
+  },
+  {
+   "source": "feature:RiftRoulette/Duel",
+   "target": "feature:RiftRoulette/Lobby",
+   "kind": "feature-uses",
+   "weight": 5
+  },
+  {
+   "source": "feature:RiftRoulette/Duel",
+   "target": "feature:RiftRoulette/Rift",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/Duel",
+   "target": "feature:RiftRoulette/Stats",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/Duel",
+   "target": "module:Modules/Hud",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Duel",
+   "target": "module:Modules/Loadout",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/Duel",
+   "target": "module:Modules/Queue",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Duel",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 8
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "feature:RiftRoulette/Balance",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "feature:RiftRoulette/Betting",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "feature:RiftRoulette/Draft",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "feature:RiftRoulette/Duel",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "feature:RiftRoulette/GunGame",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "feature:RiftRoulette/Lobby",
+   "kind": "feature-uses",
+   "weight": 4
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "feature:RiftRoulette/RandomMode",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "feature:RiftRoulette/Rift",
+   "kind": "feature-uses",
+   "weight": 8
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "feature:RiftRoulette/Round",
+   "kind": "feature-uses",
+   "weight": 4
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "feature:RiftRoulette/SelfTest",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "feature:RiftRoulette/Stats",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "module:Modules/Hud",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "module:Modules/Movement",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "module:Modules/Restraint",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "module:Modules/WorldText",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/GameLoop",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 18
+  },
+  {
+   "source": "feature:RiftRoulette/GunGame",
+   "target": "feature:RiftRoulette/GameLoop",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/GunGame",
+   "target": "feature:RiftRoulette/RandomMode",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/GunGame",
+   "target": "module:Modules/Hud",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/GunGame",
+   "target": "module:Modules/Loadout",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/GunGame",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 7
+  },
+  {
+   "source": "feature:RiftRoulette/Lobby",
+   "target": "feature:RiftRoulette/Draft",
+   "kind": "feature-uses",
+   "weight": 5
+  },
+  {
+   "source": "feature:RiftRoulette/Lobby",
+   "target": "feature:RiftRoulette/Duel",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/Lobby",
+   "target": "feature:RiftRoulette/GameLoop",
+   "kind": "feature-uses",
+   "weight": 6
+  },
+  {
+   "source": "feature:RiftRoulette/Lobby",
+   "target": "feature:RiftRoulette/RandomMode",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/Lobby",
+   "target": "feature:RiftRoulette/Rift",
+   "kind": "feature-uses",
+   "weight": 4
+  },
+  {
+   "source": "feature:RiftRoulette/Lobby",
+   "target": "feature:RiftRoulette/Round",
+   "kind": "feature-uses",
+   "weight": 6
+  },
+  {
+   "source": "feature:RiftRoulette/Lobby",
+   "target": "feature:RiftRoulette/SelfTest",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Lobby",
+   "target": "feature:RiftRoulette/Stats",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/Lobby",
+   "target": "module:Modules/Restraint",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/Lobby",
+   "target": "module:Modules/Spectate",
+   "kind": "feature-uses",
+   "weight": 4
+  },
+  {
+   "source": "feature:RiftRoulette/Lobby",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 28
+  },
+  {
+   "source": "feature:RiftRoulette/Locations",
+   "target": "module:Modules/Movement",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/RandomMode",
+   "target": "feature:RiftRoulette/Balance",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/RandomMode",
+   "target": "feature:RiftRoulette/Draft",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/RandomMode",
+   "target": "feature:RiftRoulette/GameLoop",
+   "kind": "feature-uses",
+   "weight": 6
+  },
+  {
+   "source": "feature:RiftRoulette/RandomMode",
+   "target": "feature:RiftRoulette/Lobby",
+   "kind": "feature-uses",
+   "weight": 5
+  },
+  {
+   "source": "feature:RiftRoulette/RandomMode",
+   "target": "feature:RiftRoulette/SelfTest",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/RandomMode",
+   "target": "feature:RiftRoulette/Stats",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/RandomMode",
+   "target": "module:Modules/Hud",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/RandomMode",
+   "target": "module:Modules/Loadout",
+   "kind": "feature-uses",
+   "weight": 4
+  },
+  {
+   "source": "feature:RiftRoulette/RandomMode",
+   "target": "module:Modules/Queue",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/RandomMode",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 7
+  },
+  {
+   "source": "feature:RiftRoulette/Rift",
+   "target": "feature:RiftRoulette/Round",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Rift",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 10
+  },
+  {
+   "source": "feature:RiftRoulette/Round",
+   "target": "feature:RiftRoulette/Draft",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/Round",
+   "target": "feature:RiftRoulette/Duel",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Round",
+   "target": "feature:RiftRoulette/GameLoop",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/Round",
+   "target": "feature:RiftRoulette/Lobby",
+   "kind": "feature-uses",
+   "weight": 4
+  },
+  {
+   "source": "feature:RiftRoulette/Round",
+   "target": "feature:RiftRoulette/Locations",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Round",
+   "target": "feature:RiftRoulette/Rift",
+   "kind": "feature-uses",
+   "weight": 16
+  },
+  {
+   "source": "feature:RiftRoulette/Round",
+   "target": "module:Modules/Movement",
+   "kind": "feature-uses",
+   "weight": 8
+  },
+  {
+   "source": "feature:RiftRoulette/Round",
+   "target": "module:Modules/Restraint",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/Round",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 16
+  },
+  {
+   "source": "feature:RiftRoulette/SelfTest",
+   "target": "feature:RiftRoulette/Lobby",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/SelfTest",
+   "target": "feature:RiftRoulette/Locations",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/SelfTest",
+   "target": "feature:RiftRoulette/Rift",
+   "kind": "feature-uses",
+   "weight": 5
+  },
+  {
+   "source": "feature:RiftRoulette/SelfTest",
+   "target": "feature:RiftRoulette/Round",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/SelfTest",
+   "target": "module:Modules/Hud",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/SelfTest",
+   "target": "module:Modules/Loadout",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/SelfTest",
+   "target": "module:Modules/Movement",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/SelfTest",
+   "target": "module:Modules/Restraint",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/SelfTest",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 8
+  },
+  {
+   "source": "feature:RiftRoulette/Session",
+   "target": "feature:RiftRoulette/Locations",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Session",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/Stats",
+   "target": "feature:RiftRoulette/Balance",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Stats",
+   "target": "feature:RiftRoulette/Betting",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Stats",
+   "target": "feature:RiftRoulette/Draft",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Stats",
+   "target": "feature:RiftRoulette/Duel",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "feature:RiftRoulette/Stats",
+   "target": "feature:RiftRoulette/GameLoop",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/Stats",
+   "target": "feature:RiftRoulette/GunGame",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Stats",
+   "target": "feature:RiftRoulette/Lobby",
+   "kind": "feature-uses",
+   "weight": 2
+  },
+  {
+   "source": "feature:RiftRoulette/Stats",
+   "target": "feature:RiftRoulette/RandomMode",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Stats",
+   "target": "module:Modules/WorldText",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "feature:RiftRoulette/Stats",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 8
+  },
+  {
+   "source": "module:Modules/Hud",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 7
+  },
+  {
+   "source": "module:Modules/Loadout",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 9
+  },
+  {
+   "source": "module:Modules/Movement",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 7
+  },
+  {
+   "source": "module:Modules/Restraint",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 7
+  },
+  {
+   "source": "module:Modules/Spectate",
+   "target": "module:Modules/Movement",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "module:Modules/Spectate",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "module:Modules/WorldText",
+   "target": "module:Modules/Movement",
+   "kind": "feature-uses",
+   "weight": 1
+  },
+  {
+   "source": "module:Modules/WorldText",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 7
+  },
+  {
+   "source": "plugin:CleanSlate",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 8
+  },
+  {
+   "source": "plugin:DevTools",
+   "target": "module:Shared",
+   "kind": "feature-uses",
+   "weight": 3
+  },
+  {
+   "source": "stage:3",
+   "target": "file:DevTools/DevToolsPlugin.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:3",
+   "target": "module:Shared",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:4",
+   "target": "module:Shared",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:4",
+   "target": "script:scripts/test.sh",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:4",
+   "target": "script:scripts/pull-logs.sh",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:4",
+   "target": "file:RiftRoulette/Session/SessionPlugin.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:5",
+   "target": "doc:RiftRoulette/reference/behavior-inventory.md",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:6",
+   "target": "module:Modules/WorldText",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:6",
+   "target": "entity:point_worldtext",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:7",
+   "target": "module:Modules/Movement",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:8",
+   "target": "hook:OnStartupServer",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:8",
+   "target": "feature:RiftRoulette/Lobby",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:9",
+   "target": "command:pick",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:9",
+   "target": "command:unpick",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:9",
+   "target": "command:picks",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:9",
+   "target": "command:heroes",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:9",
+   "target": "event:player_hero_changed",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:9",
+   "target": "feature:RiftRoulette/Draft",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:10",
+   "target": "feature:RiftRoulette/Rift",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:12",
+   "target": "doc:RiftRoulette/reference/parity-review.md",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:12",
+   "target": "command:cleanup_run",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:12",
+   "target": "script:scripts/pull-logs.sh",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "command:match_start",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "command:match_end",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "module:Modules/Hud",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "file:Modules/Hud/HudService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "command:hud_announce",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "feature:RiftRoulette/GameLoop",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "file:RiftRoulette/GameLoop/MatchState.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "command:match_status",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "command:match_intermission",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "command:score",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "file:RiftRoulette/Rift/RiftRoundResult.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "file:RiftRoulette/Rift/RiftService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "file:Tests/RiftRoulette.Tests/MatchStateTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13a",
+   "target": "file:Tests/Modules.Tests/HudServiceTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "command:match_start",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:RiftRoulette/RandomMode/HeroDraw.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "script:scripts/fetch-builds.py",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "module:Modules/Loadout",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:Modules/Loadout/HeroBuildData.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:Modules/Loadout/HeroBuildCatalog.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:Modules/Loadout/LoadoutPlanner.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:Modules/Loadout/LoadoutService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:Modules/Loadout/LoadoutPlugin.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "command:loadout_give",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "command:loadout_list",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "command:loadout_info",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "command:match_mode",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "command:match_format",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "command:match_config",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "feature:RiftRoulette/RandomMode",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:RiftRoulette/Lobby/TeamBalance.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:RiftRoulette/RandomMode/RandomPlugin.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "event:player_respawned",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "command:random_status",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "command:random_reroll",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:RiftRoulette/Round/RoundFlow.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:Tests/Modules.Tests/LoadoutPlannerTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:Tests/Modules.Tests/HeroBuildCatalogTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:Tests/RiftRoulette.Tests/MatchConfigTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:Tests/RiftRoulette.Tests/HeroDrawTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "file:Tests/RiftRoulette.Tests/TeamBalanceTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13b",
+   "target": "command:match_end",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "feature:RiftRoulette/Stats",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:RiftRoulette/Stats/StatsLedger.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:RiftRoulette/Stats/StatsBoardText.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:RiftRoulette/Stats/StatsService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:RiftRoulette/Stats/StatsPlugin.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "event:player_death",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "command:stats",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "command:stats_board",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "command:stats_reset",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "feature:RiftRoulette/Balance",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:RiftRoulette/Balance/BalanceTracker.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:RiftRoulette/Balance/BalancePicker.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:RiftRoulette/Balance/BalanceService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:RiftRoulette/Balance/BalancePlugin.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "command:balance_status",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "command:balance_auto",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "command:balance_now",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:RiftRoulette/Lobby/TeamBalance.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "feature:RiftRoulette/RandomMode",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "event:player_spawn",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:RiftRoulette/Draft/BoardLayout.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:Modules/Loadout/LoadoutPlanner.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:Modules/Loadout/HeroBuildCatalog.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:Modules/Loadout/LoadoutService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:Tests/RiftRoulette.Tests/StatsLedgerTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:Tests/RiftRoulette.Tests/StatsBoardTextTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:Tests/RiftRoulette.Tests/BalanceTrackerTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:Tests/RiftRoulette.Tests/BalancePickerTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:Tests/RiftRoulette.Tests/TeamBalanceTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:Tests/Modules.Tests/LoadoutPlannerTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13c",
+   "target": "file:Tests/Modules.Tests/HeroBuildCatalogTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13d",
+   "target": "command:match_auto",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13d",
+   "target": "file:RiftRoulette/GameLoop/AutoStartRule.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13d",
+   "target": "file:RiftRoulette/GameLoop/AutoStartService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13d",
+   "target": "file:RiftRoulette/Lobby/LobbyService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13d",
+   "target": "file:RiftRoulette/GameLoop/GameLoopPlugin.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13d",
+   "target": "command:match_status",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13d",
+   "target": "file:Tests/RiftRoulette.Tests/AutoStartRuleTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13d",
+   "target": "command:match_end",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13e",
+   "target": "script:scripts/fetch-builds.py",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13e",
+   "target": "file:Modules/Loadout/LoadoutPlanner.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13e",
+   "target": "file:Tests/Modules.Tests/HeroBuildCatalogTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13e",
+   "target": "command:loadout_list",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13f",
+   "target": "file:RiftRoulette/Lobby/AdminSeatRule.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13f",
+   "target": "file:RiftRoulette/Lobby/AdminSeat.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13f",
+   "target": "file:RiftRoulette/Lobby/Participants.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13f",
+   "target": "file:RiftRoulette/Lobby/LobbyPlugin.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13f",
+   "target": "event:player_spawn",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13f",
+   "target": "command:seat_spec",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13f",
+   "target": "command:seat_play",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13f",
+   "target": "command:seat_status",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13f",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13f",
+   "target": "file:Tests/RiftRoulette.Tests/AdminSeatRuleTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13f",
+   "target": "hook:OnClientConnect",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "command:match_mode",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "command:duel_copy",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "file:Modules/Loadout/LoadoutSnapshot.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "file:Modules/Loadout/LoadoutService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "command:loadout_copy",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "file:RiftRoulette/Lobby/HeroLock.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "feature:RiftRoulette/Duel",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "file:RiftRoulette/Duel/DuelService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "file:RiftRoulette/Duel/DuelPlugin.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "command:duel_clear",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "command:duel_status",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "file:RiftRoulette/GameLoop/AutoStartService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "file:RiftRoulette/Draft/DraftService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "file:RiftRoulette/Stats/StatsService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "file:RiftRoulette/Round/RoundFlow.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13g",
+   "target": "file:Tests/RiftRoulette.Tests/MatchConfigTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13h",
+   "target": "module:Modules/Restraint",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13h",
+   "target": "file:Modules/Restraint/RestraintService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13h",
+   "target": "file:Modules/Restraint/RestraintPlugin.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13h",
+   "target": "hook:OnGameFrame",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13h",
+   "target": "command:restrain",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13h",
+   "target": "command:restrain_release",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13h",
+   "target": "command:restrain_list",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13h",
+   "target": "command:status_add",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13h",
+   "target": "command:status_remove",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13h",
+   "target": "modifier:modifier_citadel_silenced",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13h",
+   "target": "file:RiftRoulette/Round/RoundFlow.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13i",
+   "target": "file:RiftRoulette/Locations/RiftRouletteLocations.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13i",
+   "target": "file:RiftRoulette/Round/WatchSpotRule.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13i",
+   "target": "file:RiftRoulette/Round/WatchSpot.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13i",
+   "target": "file:RiftRoulette/Draft/BoardLayout.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13i",
+   "target": "command:rift_next",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13i",
+   "target": "file:RiftRoulette/Round/RoundLocations.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13i",
+   "target": "file:Tests/RiftRoulette.Tests/WatchSpotRuleTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13i",
+   "target": "file:Tests/RiftRoulette.Tests/RoundLocationsTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13j",
+   "target": "file:Modules/Queue/PlayerQueue.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13j",
+   "target": "file:RiftRoulette/Duel/KothRule.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13j",
+   "target": "file:RiftRoulette/Duel/DuelService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13j",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13j",
+   "target": "file:RiftRoulette/Round/RoundFlow.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13j",
+   "target": "file:RiftRoulette/GameLoop/AutoStartService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13j",
+   "target": "command:queue",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13j",
+   "target": "command:unqueue",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13j",
+   "target": "command:duel_queue",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13j",
+   "target": "command:duel_queue_add",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13j",
+   "target": "command:duel_queue_remove",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13j",
+   "target": "file:Tests/Modules.Tests/PlayerQueueTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13j",
+   "target": "file:Tests/RiftRoulette.Tests/KothRuleTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:playtest-fixes-for-13h-13j",
+   "target": "hook:OnLoad",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:playtest-fixes-for-13h-13j",
+   "target": "file:RiftRoulette/Round/WatchLayout.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:playtest-fixes-for-13h-13j",
+   "target": "file:RiftRoulette/GameLoop/ShopRule.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:playtest-fixes-for-13h-13j",
+   "target": "file:RiftRoulette/GameLoop/ShopAccess.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:playtest-fixes-for-13h-13j",
+   "target": "file:RiftRoulette/Round/WatchGuard.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:playtest-fixes-for-13h-13j",
+   "target": "file:RiftRoulette/GameLoop/MatchProbe.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:playtest-fixes-for-13h-13j",
+   "target": "file:Tests/RiftRoulette.Tests/WatchLayoutTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:playtest-fixes-for-13h-13j",
+   "target": "file:Tests/RiftRoulette.Tests/WatchGuardRuleTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:playtest-fixes-for-13h-13j",
+   "target": "file:Tests/RiftRoulette.Tests/ShopRuleTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:playtest-fixes-for-13h-13j",
+   "target": "file:Tests/RiftRoulette.Tests/RoundLocationsTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:quiet-banners-reload-leftover-rift",
+   "target": "file:RiftRoulette/Rift/RiftService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:quiet-banners-reload-leftover-rift",
+   "target": "file:RiftRoulette/Rift/RiftSide.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:quiet-banners-reload-leftover-rift",
+   "target": "file:Tests/RiftRoulette.Tests/RiftSidesTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:quiet-banners-reload-leftover-rift",
+   "target": "entity:citadel_koth_cashin",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:quiet-banners-reload-leftover-rift",
+   "target": "command:match_end",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:per-slot-spots",
+   "target": "file:Modules/Movement/MovementLocation.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:per-slot-spots",
+   "target": "file:RiftRoulette/Round/SlotSpots.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:per-slot-spots",
+   "target": "file:RiftRoulette/Round/WatchSpot.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:per-slot-spots",
+   "target": "file:RiftRoulette/Round/RoundFlow.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:per-slot-spots",
+   "target": "file:RiftRoulette/Round/SpotCheck.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:per-slot-spots",
+   "target": "file:RiftRoulette/Round/SpotsPlugin.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:per-slot-spots",
+   "target": "command:spots_list",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:per-slot-spots",
+   "target": "command:spots_walk",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:per-slot-spots",
+   "target": "script:scripts/check-spots.py",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:per-slot-spots",
+   "target": "file:Tests/Modules.Tests/MovementLocationTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:per-slot-spots",
+   "target": "file:Tests/RiftRoulette.Tests/SlotSpotsTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:patch-day-readiness",
+   "target": "doc:RiftRoulette/reference/patch-day.md",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:patch-day-readiness",
+   "target": "script:scripts/patch-baseline.sh",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:patch-day-readiness",
+   "target": "script:scripts/patch-check.py",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:patch-day-readiness",
+   "target": "feature:RiftRoulette/SelfTest",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:patch-day-readiness",
+   "target": "command:selftest_run",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:patch-day-readiness",
+   "target": "command:selftest_live",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:patch-day-readiness",
+   "target": "file:Shared/ConVars/ServerConVars.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:patch-day-readiness",
+   "target": "file:Modules/Loadout/HeroBuildCatalog.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "command:match_format",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "file:RiftRoulette/GameLoop/MatchConfig.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "file:RiftRoulette/GunGame/GunGameLadder.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "file:RiftRoulette/Stats/StatsService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "file:RiftRoulette/GameLoop/AutoStartService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "file:RiftRoulette/GunGame/GunGamePlugin.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "command:ladder",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "command:gungame_status",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "command:gungame_target",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "command:gungame_reroll",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "file:Tests/RiftRoulette.Tests/GunGameLadderTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "stage:13k",
+   "target": "file:Tests/RiftRoulette.Tests/MatchConfigTests.cs",
+   "kind": "touches"
+  },
+  {
+   "source": "mode:rift-roulette-random-mode",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:rift-roulette-random-mode",
+   "target": "module:Modules/Loadout",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:rift-roulette-random-mode",
+   "target": "file:RiftRoulette/RandomMode/BenchRule.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:rift-roulette-random-mode",
+   "target": "feature:RiftRoulette/Balance",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:rift-roulette-random-mode",
+   "target": "file:RiftRoulette/GameLoop/SoulRule.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:rift-roulette-random-mode",
+   "target": "module:Modules/Restraint",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:rift-roulette-random-mode",
+   "target": "hook:OnTakeDamage",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:rift-roulette-random-mode",
+   "target": "file:RiftRoulette/Rift/RiftGameRules.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:1v1-winner-stays-on-duel-mode",
+   "target": "file:Modules/Queue/PlayerQueue.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:1v1-winner-stays-on-duel-mode",
+   "target": "file:Modules/Loadout/LoadoutSnapshot.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:1v1-winner-stays-on-duel-mode",
+   "target": "file:RiftRoulette/Lobby/HeroLock.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:1v1-winner-stays-on-duel-mode",
+   "target": "module:Modules/Queue",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "doc:RiftRoulette/reference/master-plan.md",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "feature:RiftRoulette/GunGame",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "file:RiftRoulette/GameLoop/MatchService.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "file:RiftRoulette/GameLoop/AutoStartService.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "command:match_mode",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "command:match_format",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "command:gungame_target",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "file:RiftRoulette/Stats/StatsService.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "file:RiftRoulette/GunGame/GunGameService.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "file:Modules/Loadout/LoadoutService.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "file:RiftRoulette/GameLoop/SoulRule.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "command:ladder",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "event:player_death",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:gun-game",
+   "target": "stage:13k",
+   "kind": "planned-in"
+  },
+  {
+   "source": "mode:grifball",
+   "target": "module:Modules/Loadout",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:grifball",
+   "target": "file:RiftRoulette/Lobby/HeroLock.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:grifball",
+   "target": "modifier-state:ShootingDisabled",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:grifball",
+   "target": "command:status_add",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:grifball",
+   "target": "hook:OnTakeDamage",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:grifball",
+   "target": "convar:citadel_player_override_spawn_time",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:grifball",
+   "target": "event:player_spawn",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:grifball",
+   "target": "hook:OnGameFrame",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:grifball",
+   "target": "event:player_death",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:fat-boy-zombie-escape",
+   "target": "feature:RiftRoulette/Balance",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:fat-boy-zombie-escape",
+   "target": "module:Modules/Loadout",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:fat-boy-zombie-escape",
+   "target": "hook:OnTakeDamage",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:fat-boy-zombie-escape",
+   "target": "file:RiftRoulette/Lobby/HeroLock.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:fat-boy-zombie-escape",
+   "target": "file:RiftRoulette/RandomMode/RandomModeService.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:fat-boy-zombie-escape",
+   "target": "file:RiftRoulette/Rift/RiftService.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:last-team-standing",
+   "target": "event:player_spawn",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:last-team-standing",
+   "target": "file:RiftRoulette/Round/WatchSpot.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:last-team-standing",
+   "target": "convar:citadel_player_override_spawn_time",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:last-team-standing",
+   "target": "file:RiftRoulette/Round/RoundFlow.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:juggernaut",
+   "target": "file:Modules/Loadout/LoadoutService.cs",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:juggernaut",
+   "target": "hook:OnTakeDamage",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:juggernaut",
+   "target": "event:player_death",
+   "kind": "mode-uses"
+  },
+  {
+   "source": "mode:endless-mid-rift",
+   "target": "doc:RiftRoulette/reference/endless-mode.md",
+   "kind": "mode-uses"
   }
  ]
 }

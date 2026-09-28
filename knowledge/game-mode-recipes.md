@@ -32,6 +32,37 @@ pick up as their own stage in `master-plan.md`.
 - **Setup:** one player's exact build copied to both (`LoadoutSnapshot`), locked (`HeroLock`).
 - **Reuse lesson:** a new "wait your turn" feature reuses `Modules/Queue`.
 
+## In progress
+
+### Gun Game
+
+Stage 13k in `RiftRoulette/reference/master-plan.md`; code in
+`RiftRoulette/GunGame/`. Every kill moves the killer up a kill ladder and
+swaps them, right away, to a new random hero with one of its real top
+builds; the first to the target wins the match.
+
+- **Loop:** Rift Roulette's rounds and rifts, unchanged (`MatchService`);
+  the match also ends on the winning kill, then auto-starts again 10 s
+  later (`AutoStartService`).
+- **Setup:** Random mode's intermission draw (`RandomModeService`), even
+  teams and the bench, as always. Turn it on with `/match_mode random`
+  and `/match_format gungame`; `/gungame_target <n>` sets the ladder
+  length.
+- **Rules:** a kill counts when `StatsService` credits it (human killer,
+  enemy victim, hero-lock kills skipped). `GunGameService` then calls
+  `RandomModeService.Reroll`, which goes through the same assignment and
+  hero lock as the draw, then `LoadoutService.Swap` (`SelectHero` on the
+  living killer, build 1 s later). Souls stay blocked (`SoulRule`), so
+  power comes only from each new build.
+- **Feedback:** `Kill 3/10: <hero>` banner with the build and its soul
+  value; `/ladder`; the stats boards' kill column is the ladder; the
+  `Match over` banner names the winner.
+- **Levers:** `player_death` (verified), `SelectHero` on a living pawn
+  mid-round (untested on our server; the Deadworks Deathmatch example does
+  it every minute), the loadout path (verified).
+- **Next:** a continuous arena (respawn into the fight, no rift), a fixed
+  hero ladder instead of random, weaker builds higher up the ladder.
+
 ## Designs (not built)
 
 ### Grifball
@@ -97,18 +128,6 @@ before the zombies arrive or everyone is converted.
 - **First thing to prove:** can we force the rift far from spawn and
   have a team of 1 capture it against a team of many (capture rules
   may depend on player counts)?
-
-### Hero ladder (gun-game style)
-
-Every kill moves you to the next hero on a fixed ladder; first through the
-ladder wins.
-
-- **Levers, all verified:** `player_death` (attacker slot), `SelectHero` on
-  respawn (never while dead), `LoadoutService` for the new hero's build,
-  HUD banner, stats boards for ladder position.
-- **New:** a ladder service (ordered `Heroes` list per player) and a rule
-  class for "advance, demote on melee death" (unit-testable).
-- **Risk:** low; same pattern as Random mode's pending loadouts.
 
 ### Last team standing
 

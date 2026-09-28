@@ -9,7 +9,7 @@ Every command, game dependency, hook and type in the code, with where it lives.
 Generated from source; the command catalogs (`reference/user-commands.md`,
 `admin-commands.md`) stay the authority for behavior.
 
-## Commands (100)
+## Commands (104)
 
 | Command | Who | Description | File |
 |---|---|---|---|
@@ -43,6 +43,9 @@ Generated from source; the command catalogs (`reference/user-commands.md`,
 | `/ent_info` | admin | Show fields of every entity with a designer name: ent_info <designerName> | `DevTools/DevToolsPlugin.cs` |
 | `/ent_remove` | admin | Remove every entity with a designer name: ent_remove <designerName> | `DevTools/DevToolsPlugin.cs` |
 | `/ent_snapshot` | admin | Remember every entity for a later ent_diff | `DevTools/DevToolsPlugin.cs` |
+| `/gungame_reroll` | admin | Give a player a new random hero and build now, as a Gun Game kill does: gungame_reroll <slot> | `RiftRoulette/GunGame/GunGamePlugin.cs` |
+| `/gungame_status` | admin | Gun Game: on or off, target, winner, every player's kills | `RiftRoulette/GunGame/GunGamePlugin.cs` |
+| `/gungame_target` | admin | Set the Gun Game kill target between matches: gungame_target <1-50> | `RiftRoulette/GunGame/GunGamePlugin.cs` |
 | `/hud_announce` | admin | Show an on-screen banner to everyone: hud_announce <title> [\| description] | `Modules/Hud/HudPlugin.cs` |
 | `/hud_say` | admin | Say something to everyone as a big on-screen banner: hud_say <message> | `Modules/Hud/HudPlugin.cs` |
 | `/loadout_copy` | admin | Copy one player's exact hero, items, ability upgrades and level onto another: loadout_copy <from> <to> | `Modules/Loadout/LoadoutPlugin.cs` |
@@ -105,6 +108,7 @@ Generated from source; the command catalogs (`reference/user-commands.md`,
 | `/chips` | player | Show your betting chips and your bet | `RiftRoulette/Betting/BettingPlugin.cs` |
 | `/commands` | player | List the commands players can use | `RiftRoulette/Lobby/LobbyPlugin.cs` |
 | `/heroes` | player | Show both hero pools and which heroes are taken | `RiftRoulette/Draft/DraftPlugin.cs` |
+| `/ladder` | player | Show the Gun Game kill ladder and your place | `RiftRoulette/GunGame/GunGamePlugin.cs` |
 | `/pick` | player | Draft a hero: pick <hero> | `RiftRoulette/Draft/DraftPlugin.cs` |
 | `/picks` | player | List drafted heroes and who picked them | `RiftRoulette/Draft/DraftPlugin.cs` |
 | `/queue` | player | 1v1: join the queue (winner stays on), or show your place in it | `RiftRoulette/Duel/DuelPlugin.cs` |
@@ -233,7 +237,58 @@ What the code touches in the game. A new entry here needs a self-test and a row 
 | `CCitadelUserMsg_ChatMsg` | `Shared/Chat/PlayerChat.cs` |
 | `CCitadelUserMsg_SetClientCameraAngles` | `Modules/Movement/MovementService.cs` |
 
-## Types (170)
+## Stages (28)
+
+From `RiftRoulette/reference/master-plan.md`; each links to the code its entry names.
+
+| Stage | Status | Touches |
+|---|---|---|
+| Stage 1: RiftRoulette project shell + deploy tooling | done |  |
+| Stage 2: Multi-plugin shell (DevTools + CleanSlate) | done |  |
+| Stage 3: Shared foundation + Legacy move | done | DevToolsPlugin, Shared |
+| Stage 4: Logging foundation (Shared) | done | SessionPlugin, Shared, pull-logs.sh, test.sh |
+| Stage 5: Behavioral inventory + module map | done | Bublock — Behavioral Inventory (Stage 5) |
+| Stage 6: WorldText module | done | point_worldtext, WorldText |
+| Stage 7: Movement module | done | Movement |
+| Stage 8: Lobby plugin class (RiftRoulette) | done | Lobby, OnStartupServer |
+| Stage 9: Draft plugin class (RiftRoulette) | done | /heroes, /pick, /picks, /unpick, player_hero_changed, Draft |
+| Stage 10: Rift plugin class (RiftRoulette) | done | Rift |
+| Stage 11: Parity composition | done |  |
+| Stage 12: Parity harden + docs pass | done | /cleanup_run, Stage 12 — Parity review (archive vs Bublock), pull-logs.sh |
+| Stage 13: New gameplay (only then) | open |  |
+| Stage 13a: Playtest match loop | awaiting playtest | /hud_announce, /match_end, /match_intermission, /match_start, /match_status, /score, GameLoop, HudService, GameLoopPlugin, MatchService, MatchState, RiftRoundResult ... |
+| Stage 13b: Random mode with real builds | awaiting playtest | /loadout_give, /loadout_info, /loadout_list, /match_config, /match_end, /match_format, /match_mode, /match_start, /random_reroll, /random_status, player_respawned, RandomMode ... |
+| Stage 13c: Match stats boards, auto-balance, balanced joins | awaiting playtest | /balance_auto, /balance_now, /balance_status, /stats, /stats_board, /stats_reset, player_death, player_spawn, Balance, RandomMode, Stats, HeroBuildCatalog ... |
+| Stage 13d: Auto-start the match | awaiting playtest | /match_auto, /match_end, /match_status, AutoStartRule, AutoStartService, GameLoopPlugin, LobbyService, AutoStartRuleTests |
+| Stage 13e: Ban Cultist Sacrifice | awaiting playtest | /loadout_list, LoadoutPlanner, HeroBuildCatalogTests, fetch-builds.py |
+| Stage 13f: Admin seat (13th connection) | awaiting playtest | /seat_play, /seat_spec, /seat_status, player_spawn, AdminSeat, AdminSeatRule, LobbyPlugin, Participants, RandomModeService, AdminSeatRuleTests, OnClientConnect |
+| Stage 13g: 1v1 mode (exact copy, locked) | awaiting playtest | /duel_clear, /duel_copy, /duel_status, /loadout_copy, /match_mode, Duel, LoadoutService, LoadoutSnapshot, DraftService, DuelPlugin, DuelService, AutoStartService ... |
+| Stage 13h: Restrain inactive players | awaiting playtest | /restrain, /restrain_list, /restrain_release, /status_add, /status_remove, RestraintPlugin, RestraintService, RoundFlow, OnGameFrame, modifier_citadel_silenced, Restraint |
+| Stage 13i: Watch spot above the rift | awaiting playtest | /rift_next, BoardLayout, RiftRouletteLocations, RoundLocations, WatchSpot, WatchSpotRule, RoundLocationsTests, WatchSpotRuleTests |
+| Stage 13j: 1v1 queue, winner stays on | awaiting playtest | /duel_queue, /duel_queue_add, /duel_queue_remove, /queue, /unqueue, PlayerQueue, DuelService, KothRule, AutoStartService, MatchService, RoundFlow, PlayerQueueTests ... |
+| Playtest fixes for 13h-13j | awaiting playtest | MatchProbe, ShopAccess, ShopRule, WatchGuard, WatchLayout, RoundLocationsTests, ShopRuleTests, WatchGuardRuleTests, WatchLayoutTests, OnLoad |
+| Quiet banners, reload, leftover rift | awaiting playtest | /match_end, citadel_koth_cashin, RiftService, RiftSide, RiftSidesTests |
+| Per-slot spots | awaiting playtest | /spots_list, /spots_walk, MovementLocation, RoundFlow, SlotSpots, SpotCheck, SpotsPlugin, WatchSpot, MovementLocationTests, SlotSpotsTests, check-spots.py |
+| Patch-day readiness | open | /selftest_live, /selftest_run, Patch day runbook, SelfTest, HeroBuildCatalog, ServerConVars, patch-baseline.sh, patch-check.py |
+| Stage 13k: Gun Game format (redock fork) | open | /gungame_reroll, /gungame_status, /gungame_target, /ladder, /match_format, AutoStartService, MatchConfig, MatchService, GunGameLadder, GunGamePlugin, GunGameService, RandomModeService ... |
+
+## Game modes (9)
+
+From `knowledge/game-mode-recipes.md`; each links to the levers and code it uses.
+
+| Mode | Status | Uses |
+|---|---|---|
+| 1v1 winner stays on (duel mode) | shipped | LoadoutSnapshot, PlayerQueue, HeroLock, Queue |
+| Rift Roulette (random mode) | shipped | Balance, MatchService, SoulRule, BenchRule, RiftGameRules, OnTakeDamage, Loadout, Restraint |
+| Gun Game | in progress | /gungame_target, /ladder, /match_format, /match_mode, Bublock — Master Plan, player_death, GunGame, LoadoutService, AutoStartService, MatchService, SoulRule, GunGameService, RandomModeService, StatsService, Stage 13k: Gun Game format (redock fork) |
+| Endless mid-rift | designed | Endless mid-rift mode (shelved proposal) |
+| Fat Boy / Zombie Escape | designed | Balance, HeroLock, RandomModeService, RiftService, OnTakeDamage, Loadout |
+| Grifball | designed | /status_add, citadel_player_override_spawn_time, player_death, player_spawn, HeroLock, OnGameFrame, OnTakeDamage, EModifierState.ShootingDisabled, Loadout |
+| Hold the zone | designed |  |
+| Juggernaut | designed | player_death, LoadoutService, OnTakeDamage |
+| Last team standing | designed | citadel_player_override_spawn_time, player_spawn, RoundFlow, WatchSpot |
+
+## Types (174)
 
 | Type | File | Summary |
 |---|---|---|
@@ -323,6 +378,10 @@ What the code touches in the game. A new entry here needs a self-test and a row 
 | `ShopAccess` | `RiftRoulette/GameLoop/ShopAccess.cs` | Owns `citadel_allow_purchasing_anywhere`. |
 | `ShopRule` | `RiftRoulette/GameLoop/ShopRule.cs` | Pure rule for when players may buy items. |
 | `SoulRule` | `RiftRoulette/GameLoop/SoulRule.cs` | Pure rule for which currency gains are blocked. |
+| `GunGameLadder` | `RiftRoulette/GunGame/GunGameLadder.cs` | Kill ladder for one Gun Game match (Stage 13k). |
+| `LadderStep` | `RiftRoulette/GunGame/GunGameLadder.cs` | Kill ladder for one Gun Game match (Stage 13k). |
+| `GunGamePlugin` | `RiftRoulette/GunGame/GunGamePlugin.cs` | Thin host for Gun Game (`GunGameService`, Stage 13k). |
+| `GunGameService` | `RiftRoulette/GunGame/GunGameService.cs` | Gun Game (Stage 13k): a match format on top of Random mode. |
 | `AccessFile` | `RiftRoulette/Lobby/AccessList.cs` | In-memory form of `bublock/access.json`: open/private mode plus the banned and allowed Steam64 ID sets. |
 | `AccessList` | `RiftRoulette/Lobby/AccessList.cs` | In-memory form of `bublock/access.json`: open/private mode plus the banned and allowed Steam64 ID sets. |
 | `AccessPlugin` | `RiftRoulette/Lobby/AccessPlugin.cs` | Thin plugin class (Name `Rift Roulette Access`) for the admin join-access commands. |

@@ -15,7 +15,7 @@ python3 scripts/knowledge-graph.py
   `networkx.node_link_graph`, and most graph tools).
 - `tree.md`: plugin / module → feature → file tree with each file's doc
   summary, commands and game dependencies.
-- `indexes.md`: commands, game dependencies, types and docs, each with the
+- `indexes.md`: commands, game dependencies, stages, game modes, types and docs, each with the
   files that use them.
 
 ## Nodes
@@ -34,6 +34,8 @@ python3 scripts/knowledge-graph.py
 | `modifier-state`, `net-message` | `EModifierState.X`, `CCitadelUserMsg_*` / `CUserMessage*` |
 | `script`, `workflow` | `scripts/*.sh|py|cs`, `.github/workflows/*.yml` |
 | `doc`, `knowledge` | every other `.md` (colocated docs attach to their file node instead) |
+| `stage` | each `###` / `####` entry under "Staged roadmap" in `reference/master-plan.md`; `status` = `done` (`- [x]`), `awaiting playtest` (`- [ ]` and uploaded), else `open`; summary = its **Goal** |
+| `game-mode` | each `###` recipe in `knowledge/game-mode-recipes.md`; `status` from its `##` section: `shipped`, `in progress`, `designed` |
 
 ## Links
 
@@ -41,7 +43,16 @@ python3 scripts/knowledge-graph.py
 file whose type it names), `tests` (`FooTests` → `Foo`), `registers`,
 `hooks`, `listens`, `depends-on`, `sends`, `refers-to` (script → script it
 names outside comments), `documents` (module → its `.projitems` doc), `links`
-(markdown links, `related:` front matter, and backticked repo paths).
+(markdown links, `related:` front matter, and backticked repo paths),
+`feature-uses` (folder → folder, rolled up from `uses` between their files,
+with a `weight`), `touches` (stage → every backticked name in its entry that
+resolves to a node), `mode-uses` (game mode → the same, for its recipe) and
+`planned-in` (game mode → a stage it names as `Stage 13k`).
+
+Backtick resolution (`resolve_ref`): `/command`, a repo path or folder
+(also under `RiftRoulette/`, with or without `.cs`), `EModifierState.X`, a
+hook, event, convar, entity, modifier, schema field, ability or net message
+name, then a C# type name (its declaring file).
 
 ## Limits
 

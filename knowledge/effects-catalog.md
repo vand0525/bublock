@@ -72,6 +72,7 @@ and add the dependency to `SelfTest/GameDependencies` and `patch-day.md` §5.
 | Effect | How | Status | Where |
 |---|---|---|---|
 | Change a player's hero | `SelectHero(Heroes.X)`, only while alive | verified | `Lobby/LobbyService.cs`; never while dead (`.rules` §8) |
+| Swap a living player's hero mid-fight, then give a build | `SelectHero` then `LoadoutService.Swap` applies 1 s later; route it through `RandomModeService.Reroll` so the hero lock allows it | untested on our server (the Deadworks Deathmatch example does it every minute) | `GunGame/GunGameService.cs` (Stage 13k) |
 | Allow duplicate heroes | convar `citadel_allow_duplicate_heroes 1` | verified | `LobbyService` |
 | Give a full build (items, imbues, ability ranks, level) | `ResetHero`, `AddItem`, `ImbueItem`, ability upgrade bits, currencies | verified | `Modules/Loadout/LoadoutService.cs` |
 | Copy one player's exact hero state to another | `LoadoutSnapshot` | verified | `Modules/Loadout/LoadoutSnapshot.cs` |

@@ -172,6 +172,7 @@ Compiles in: Movement, Queue, Shared
 ├── <b>DraftBoardTextTests.cs</b> — Unit tests for `RiftRoulette/Draft/DraftBoardText`.
 ├── <b>DraftPoolsTests.cs</b> — Unit tests for `RiftRoulette/Draft/DraftPools`.
 ├── <b>DraftStateTests.cs</b> — Unit tests for `RiftRoulette/Draft/DraftState` (static pick data).
+├── <b>GunGameLadderTests.cs</b> — Unit tests for `RiftRoulette/GunGame/GunGameLadder`.
 ├── <b>HeroDrawTests.cs</b> — Unit tests for `RandomMode/HeroDraw` (pure, seeded `Random`).
 ├── <b>KothRuleTests.cs</b> — Unit tests for `RiftRoulette/Duel/KothRule`.
 ├── <b>MatchConfigTests.cs</b> — Unit tests for the pure parts of `GameLoop/MatchConfig`.
