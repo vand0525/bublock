@@ -215,7 +215,6 @@ The target command list. **Status:** `archive` = renames an archive command
 | `/chips` | — | Betting | `BettingService.DescribePlayer` | Your chips, open bet, whether betting is open | new | betting |
 | `/queue` | — | Duel | `DuelService.JoinQueue` | Join the 1v1 queue (winner stays on), or see your place (1v1 mode only) | new | 13j |
 | `/unqueue` | — | Duel | `DuelService.LeaveQueue` | Leave the 1v1 queue (not while fighting) | new | 13j |
-| `/ladder` | — | GunGame | `GunGameService.DescribePlayer` | Your Gun Game kills, place, and the top 3 | new | 13k |
 
 ### 4.2 Admin commands — Rift Roulette (Debug mode, `AdminAuth`)
 
@@ -261,10 +260,7 @@ The target command list. **Status:** `archive` = renames an archive command
 | `/match_status` | — | GameLoop | `MatchService.DescribeMatch` | Match phase, round, score, ties, auto-start, intermission, rift phase (1v1: king and streak leaderboard) | new | 13a |
 | `/match_intermission <seconds>` | — | GameLoop | `MatchService.SetIntermission` | Seconds between rounds (5-120, default 5) | new | 13a |
 | `/match_mode <random\|draft\|duel\|1v1>` | — | GameLoop | `MatchService.SetHeroMode` | Hero mode between matches (default random; `1v1` = duel since 13g); lobby reset | new | 13b |
-| `/match_format <continuous\|gungame>` | — | GameLoop | `MatchService.SetFormat` | Match format between matches (`gungame` since 13k, Random mode only) | new | 13b |
-| `/gungame_status` | — | GunGame | `GunGameService.Describe` | Gun Game on/off, target, winner, every player's kills | new | 13k |
-| `/gungame_target <kills>` | — | GunGame | `GunGameService.SetTarget` | Kill target for the next Gun Game match (1..50, default 10) | new | 13k |
-| `/gungame_reroll <slot>` | — | GunGame | `GunGameService.Reroll` | New random hero and build for one player now, as a Gun Game kill does | new | 13k |
+| `/match_format <continuous>` | — | GameLoop | `MatchService.SetFormat` | Match format between matches (only continuous for now) | new | 13b |
 | `/match_config` | — | GameLoop | `MatchService.DescribeConfig` | Current mode, format, allowed values, intermission | new | 13b |
 | `/random_status` | — | RandomMode | `RandomModeService.Describe` | Teams, heroes, builds, pending swaps per player | new | 13b |
 | `/bet_status` | — | Betting | `BettingService.Describe` | Every player's chips and open bet; redraws the betting board | new | betting |

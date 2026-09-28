@@ -559,14 +559,14 @@ matches by hand.
 - **Side effects:** sets how heroes are chosen for the next match. `random` (default): each intermission everyone gets a new random hero with one of its top 3 builds, draft pool boards hidden, pick commands off. `draft`: the Stage 12 draft with boards. `duel` or `1v1` (Stage 13g): draft off, free hero switching from the menu, 100,000 souls and level 36 for everyone until `/duel_copy`; leaving 1v1 drops the copied build. Buying anywhere (`citadel_allow_purchasing_anywhere`) is on only in 1v1 setup and off in every other mode (the map shops are disabled by CleanSlate). Resets the lobby (everyone alive back to Skyrunner in the draft area, picks cleared, boards redrawn for the mode). Banner to everyone: `Random mode` / `Random hero and build every round`, `1v1 mode` / `Shop open anywhere - build your hero`, or `Draft mode` / `Pick your heroes`. Replies `Mode set to random. N player(s) returned to the lobby.`
 - **Notes:** new in Stage 13b. Refused during a match (`/match_end` first; with auto-start on and 2+ players, `/match_auto off` before `/match_end`) and when the mode is unchanged; error for an unknown mode. Resets to `random` on plugin reload
 
-#### /match_format <continuous|gungame>
+#### /match_format <continuous>
 
-- **Invocation:** chat `/match_format <continuous|gungame>` | console `dw_match_format <format>`
+- **Invocation:** chat `/match_format <continuous>` | console `dw_match_format <format>`
 - **Who:** admin
 - **Calls:** `MatchConfig.TryParseFormat`, `MatchService.SetFormat`
 - **Mode:** Debug
-- **Side effects:** sets the match format. `continuous`: rounds loop until `/match_end`. `gungame` (Stage 13k): the same rounds, plus every credited kill gives the killer a new random hero and build and a ladder step; the first to the target (`/gungame_target`, default 10) wins and the next match auto-starts 10 s later. Replies `Format set to <name>.`; `gungame` outside Random mode adds `Gun Game only runs in Random mode: /match_mode random.`
-- **Notes:** new in Stage 13b; `gungame` added in Stage 13k. Refused during a match
+- **Side effects:** sets the match format; only `continuous` exists today (rounds loop until `/match_end`). Replies `Format set to continuous.`
+- **Notes:** new in Stage 13b; placeholder for best-of formats. Refused during a match
 
 #### /match_config
 
@@ -715,40 +715,6 @@ chat line `Auto-balance: A <-> B`.
 - **Mode:** Debug
 - **Side effects:** forces a swap now for the leading team (rounds, then kills, since the last swap), then rerolls everyone's hero and build like `/random_reroll`. Replies `Balanced and rerolled: N swapped, M pending`
 - **Notes:** error unless the hero mode is `random` and the match is in an intermission. No swap with fewer than 3 players
-
-### Gun Game (`GunGamePlugin`, in RiftRoulette.dll)
-
-Gun Game runs by itself with `/match_format gungame` in Random mode (see
-`user-commands.md` `/ladder` and `GunGame/FEATURE.md`). Admin
-(`AdminCommand.Authorize` with the `GunGame` log; server console trusted).
-Debug mode; `[GunGame]` replies. Added in Stage 13k.
-
-#### /gungame_status
-
-- **Invocation:** chat `/gungame_status` | console `dw_gungame_status`
-- **Who:** admin
-- **Calls:** `GunGameService.Describe`
-- **Mode:** Debug; read-only
-- **Side effects:** one line `Active=`, mode and format, `Target=`, `Winner=`, then one line per player with kills (`1. Name (steamid) 4/10`), or `No kills yet.`
-- **Notes:** new in Stage 13k
-
-#### /gungame_target <1-50>
-
-- **Invocation:** chat `/gungame_target <kills>` | console `dw_gungame_target <kills>`
-- **Who:** admin
-- **Calls:** `GunGameService.SetTarget` → `GunGameLadder.TrySetTarget`
-- **Mode:** Debug; logged in `gungame-*.log`
-- **Side effects:** sets the kill target for the next Gun Game match (default 10, reset on every DLL load). Refused while a match runs or outside 1..50
-- **Notes:** new in Stage 13k. `1` makes a quick two-player test
-
-#### /gungame_reroll <slot>
-
-- **Invocation:** chat `/gungame_reroll <slot>` | console `dw_gungame_reroll <slot>`
-- **Who:** admin
-- **Calls:** `GunGameService.Reroll` → `RandomModeService.Reroll` → `LoadoutService.Swap`
-- **Mode:** Debug; logged in `random-*.log` (`Rerolled`) and `loadout-*.log`
-- **Side effects:** gives the player in that slot a new random hero and one of its top builds now, as a Gun Game kill does, without a ladder step; banner `<hero>` / `<build> - N souls` when it lands. A dead player gets it on their next spawn. Needs a running Random mode match (any format) and a hero assignment for that player (not sitting out, not a brand-new joiner)
-- **Notes:** new in Stage 13k; the way to test the mid-round swap alone
 
 ### Betting (`BettingPlugin`, in RiftRoulette.dll)
 

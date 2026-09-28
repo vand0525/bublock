@@ -73,9 +73,6 @@ load; cleared by `BeginMatch` / `EndMatch`). 1v1 mode owns its own lock.
 - `Draft/DraftService.EnforceHero` calls `DuelService.GuardHero`, then
   `GuardHero`.
 - `Lobby/AdminSeat.Sit` calls `Forget`.
-- Gun Game (Stage 13k): `GunGame/GunGameService` calls `Reroll` for the
-  killer on every credited kill, and `/gungame_reroll <slot>` for one
-  player in Debug mode.
 - `/random_reroll` calls the same `PrepareRound` in Debug mode;
   `/balance_now` calls it with `forceBalance: true`.
 - In Random mode, Draft's pool boards are replaced by the stats boards and

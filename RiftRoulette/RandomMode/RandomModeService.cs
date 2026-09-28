@@ -258,47 +258,6 @@ public static class RandomModeService
     return true;
   }
 
-  // Gun Game (Stage 13k): a new random hero and build for one fighter mid-round, through the
-  // same assignment, hero lock and swap path as the intermission draw. `applied` replaces the
-  // build banner once the loadout lands.
-  public static RandomAssignment? Reroll(
-    CCitadelPlayerController player,
-    ITimer timer,
-    ExecutionMode mode = ExecutionMode.Clean,
-    Action<CCitadelPlayerController, RandomAssignment, int>? applied = null)
-  {
-    var log = Log.WithMode(mode);
-    var steamId = player.PlayerSteamId;
-
-    if (!MatchConfig.IsRandom || !Assignments.TryGetValue(steamId, out var previous))
-      return null;
-
-    var catalog = HeroBuildCatalog.Default;
-    var taken = Assignments.Where(pair => pair.Key != steamId).Select(pair => pair.Value.Hero).ToHashSet();
-    var others = catalog.Heroes.Where(hero => hero != previous.Hero).ToList();
-    var free = others.Where(hero => !taken.Contains(hero)).ToList();
-    var pool = free.Count > 0 ? free : others;
-
-    if (pool.Count == 0)
-      return null;
-
-    var hero = HeroDraw.Draw([steamId], pool, LastHero, Random.Shared)[steamId];
-    DraftState.Release(steamId, out _);
-    var assignment = Assign(steamId, hero, catalog);
-
-    if (Start(player, assignment, timer, mode, applied))
-    {
-      log.Info(player.ToPlayerRef(), "Rerolled Hero={Hero} Previous={Previous} Build={Build}", hero, previous.Hero, assignment.Build.Name);
-    }
-    else
-    {
-      Lock.MarkPending(steamId);
-      log.Info(player.ToPlayerRef(), "Reroll pending spawn Hero={Hero} Previous={Previous}", hero, previous.Hero);
-    }
-
-    return assignment;
-  }
-
   public static bool TryGetAssignment(ulong steamId, out RandomAssignment assignment) =>
     Assignments.TryGetValue(steamId, out assignment!);
 
@@ -438,12 +397,7 @@ public static class RandomModeService
     return assignment;
   }
 
-  private static bool Start(
-    CCitadelPlayerController player,
-    RandomAssignment assignment,
-    ITimer timer,
-    ExecutionMode mode,
-    Action<CCitadelPlayerController, RandomAssignment, int>? applied = null)
+  private static bool Start(CCitadelPlayerController player, RandomAssignment assignment, ITimer timer, ExecutionMode mode)
   {
     var pawn = player.GetHeroPawn();
 
@@ -474,9 +428,7 @@ public static class RandomModeService
         Lock.MarkApplied(steamId);
         Values[steamId] = result.Value;
 
-        if (applied != null)
-          applied(current, assignment, result.Value);
-        else if (_buildsAnnounced)
+        if (_buildsAnnounced)
           AnnounceBuild(current, mode);
       });
   }

@@ -38,7 +38,6 @@ deadworks/                 # Cursor workspace root
       Stats/               # match kills / deaths / assists, stats boards (Stage 13c)
       Balance/             # auto-balance swaps between rounds (Stage 13c)
       Duel/                # 1v1 mode: copied build, queue, winner stays on (Stage 13g, 13j)
-      GunGame/             # Gun Game format on Random mode: kill ladder, reroll on kill (Stage 13k)
       SelfTest/            # patch-day self-test of every game dependency (dw_selftest_*)
     DevTools/              # discovery / diagnostics
     CleanSlate/            # map cleanup helpers
@@ -219,13 +218,6 @@ Assume the git repo is rooted at `Bublock/`.
   fighters (`IsFighter`), only they get the build and lock and move into
   the rift; the loser goes to the back; auto-start counts the queue in 1v1
   mode. New "wait your turn" features reuse `PlayerQueue`.
-- Stage 13k (redock fork): Gun Game is a match *format* on Random mode
-  (`/match_format gungame`, `MatchConfig.IsGunGame`), not a hero mode.
-  Credited kills reach it only through `StatsService.RecordDeath` (never a
-  second `player_death` handler that credits kills on its own). The killer's
-  new hero goes through `RandomModeService.Reroll` (Random mode's assignment,
-  hero lock and `LoadoutService.Swap`), never a bare `SelectHero`. The win
-  ends the match on the next tick, outside the death event.
 - Hot reload: an upload hot-reloads each DLL, which runs
   `OnLoad(isReload: true)` but not `OnStartupServer` and drops timers from
   the previous load. Startup work that matters (CleanSlate cleanup, server

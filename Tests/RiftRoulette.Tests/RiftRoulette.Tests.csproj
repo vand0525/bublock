@@ -65,7 +65,6 @@
     <Compile Include="..\..\RiftRoulette\Duel\KothRule.cs" Link="RiftRoulette\Duel\KothRule.cs" />
     <Compile Include="..\..\RiftRoulette\Duel\StreakBoard.cs" Link="RiftRoulette\Duel\StreakBoard.cs" />
     <Compile Include="..\..\RiftRoulette\Stats\StatsLedger.cs" Link="RiftRoulette\Stats\StatsLedger.cs" />
-    <Compile Include="..\..\RiftRoulette\GunGame\GunGameLadder.cs" Link="RiftRoulette\GunGame\GunGameLadder.cs" />
     <Compile Include="..\..\RiftRoulette\Stats\StatsBoardText.cs" Link="RiftRoulette\Stats\StatsBoardText.cs" />
     <Compile Include="..\..\RiftRoulette\Balance\BalanceTracker.cs" Link="RiftRoulette\Balance\BalanceTracker.cs" />
     <Compile Include="..\..\RiftRoulette\Balance\BalancePicker.cs" Link="RiftRoulette\Balance\BalancePicker.cs" />
