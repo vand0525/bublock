@@ -24,6 +24,7 @@ public static class AdminSeat
   public const string RoamModifier = "modifier_invis";
   public const int RoamModifierSeconds = 3600;
   public const int FloorCheckSeconds = 2;
+  public const double UncloakSeconds = 0.5;
 
   private static readonly Logger Log = BublockLog.For("Lobby");
 
@@ -180,8 +181,15 @@ public static class AdminSeat
     Roaming.Remove(steamId);
     CloakGeneration.Remove(steamId);
 
-    Log.WithMode(mode).Info(player.ToPlayerRef(), "Admin roam ended, spectating next tick Playing={Playing}", Participants.Humans().Count);
-    timer.NextTick(() => BecomeObserver(steamId, mode));
+    // Deleting the pawn with the cloak still on leaves the client's red invisibility tint on screen.
+    var uncloaked = player.GetHeroPawn()?.RemoveModifier(RoamModifier) ?? false;
+
+    Log.WithMode(mode).Info(
+      player.ToPlayerRef(),
+      "Admin roam ended, spectating shortly Playing={Playing} Uncloaked={Uncloaked}",
+      Participants.Humans().Count,
+      uncloaked);
+    timer.Once(UncloakSeconds.Seconds(), () => BecomeObserver(steamId, mode));
   }
 
   public static void PlaceAndCloak(ulong steamId, ITimer timer, ExecutionMode mode = ExecutionMode.Clean, bool retry = false)
