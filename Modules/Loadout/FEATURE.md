@@ -13,13 +13,18 @@ Collector and Healing Rite are never bought (the next item takes the
 slot). Budget planner (2026-09-28, `LoadoutPlanner.Plan`): items are bought
 in order while the held items' value stays within the cap (20,000 souls by
 default; unaffordable items are skipped, later cheaper ones still fit),
-into 12 universal slots (Rift Roulette opens every flex slot). With the
-slots full it sells the build's marked sell-priority items first, else the
-cheapest and earliest, to make room for pricier items. After the build
-list, empty slots are filled from the build's optional items, most
-expensive first, and a final pass upgrades every held component item
-(T1 to T2 to T3) while the cap allows. The median planned
-value of all builds at 20,000 is the informational baseline.
+up to an item limit set by the cap (`ItemSlots`, 2026-09-28): the slots a
+real hero has at that net worth, 9 below 16,000 souls, then 10, 11 and 12
+from 16,000 / 22,000 / 28,000 (the median net worth when a team's 1st, 2nd
+and 3rd enemy Walker falls; `scripts/walker-souls.py`). The HUD still
+shows all 12 slots (Rift Roulette opens every flex slot); only the item
+count is capped. With the limit reached it sells the build's marked
+sell-priority items first, else the cheapest and earliest, to make room
+for pricier items. Only at 12 items (every slot open) are empty slots
+filled from the build's optional items, most expensive first, and held
+component items upgraded (T1 to T2 to T3) while the cap allows; below
+that the build order alone decides. The median planned value of all
+builds at 20,000 is the informational baseline.
 
 The cap is adjustable at runtime (2026-09-28): `/loadout_cap <souls>`
 (1,000 to 200,000, or `default`) sets `LoadoutService.MaxValue` for the
@@ -41,6 +46,7 @@ left at 0. Copies (`ApplySnapshot`) stay exact.
 | `HeroBuildData.Parse`, `HeroBuild.SellPriorityOf` | `HeroBuildData.md` |
 | `LoadoutPlanner.ItemOrder` / `OptionalItems` / `Plan` / `SellCandidate` / `Value` / `TryParseCap` / `AbilityBits` / `AbilityPrefix` / `BitsFor` | `LoadoutPlanner.md` |
 | `Progression.ForSouls` / `Max` / `MaxLevel` | `Progression.md` |
+| `ItemSlots.ForSouls` / `ExtraPasses` / `Describe` | `ItemSlots.md` |
 | `LoadoutService.Apply` / `Swap` / `Capture` / `ApplySnapshot` / `SwapSnapshot` / `MaxValue` / `SetMaxValue` | `LoadoutService.md` |
 | `LoadoutSnapshot`, `SnapshotAbility`, `SnapshotItem`, `SnapshotResult` | `LoadoutSnapshot.md` |
 
@@ -54,6 +60,8 @@ and `LoadoutService.MaxValue` (the current cap, reset on every load).
 - `Data/hero-builds.json`: written offline by `scripts/fetch-builds.py`,
   committed, and embedded in the DLL. It is never fetched at runtime.
 - Refresh: run the script, then build and deploy.
+- `ItemSlots.Breakpoints`: constants from `scripts/walker-souls.py`
+  (read-only, prints suggestions); edit by hand after economy patches.
 
 ## Units
 
@@ -63,6 +71,7 @@ and `LoadoutService.MaxValue` (the current cap, reset on every load).
 | `HeroBuildCatalog.cs` | Embedded data and lookups |
 | `LoadoutPlanner.cs` | Budgeted item shopping (buy, sell, skip, fill, upgrade) and ability bit planning, including the budgeted ability prefix (pure) |
 | `Progression.cs` | Deadlock level table: boons, unlocks and ability points per soul count (pure) |
+| `ItemSlots.cs` | Item limit per soul value, from when Walkers fall in real matches (pure) |
 | `LoadoutSnapshot.cs` | Exact hero-state records for copying (Stage 13g) |
 | `LoadoutService.cs` | Apply a build to a pawn; swap hero, then apply; capture / apply / swap a snapshot |
 | `LoadoutPlugin.cs` | `/loadout_give`, `/loadout_show`, `/loadout_copy`, `/loadout_list`, `/loadout_info`, `/loadout_cap` |
@@ -87,4 +96,5 @@ and `LoadoutService.MaxValue` (the current cap, reset on every load).
 
 - `RiftRoulette.dll` imports both projitems.
 - `Tests/Modules.Tests` imports `Loadout.projitems` (`LoadoutPlannerTests`,
-  `ProgressionTests`, `HeroBuildCatalogTests`, `LoadoutSnapshotTests`).
+  `ProgressionTests`, `ItemSlotsTests`, `HeroBuildCatalogTests`,
+  `LoadoutSnapshotTests`).

@@ -50,6 +50,7 @@ deadworks/                 # Cursor workspace root
     scripts/test.sh        # run local tests
     scripts/pull-logs.sh   # read-only pull: server logs into logs/, access.json into server-data/
     scripts/fetch-builds.py # refresh Modules/Loadout/Data/hero-builds.json (offline)
+    scripts/walker-souls.py # print loadout item-limit breakpoints from real matches (offline)
     scripts/check-spots.py # check the per-slot spots against the map mesh (offline)
     scripts/patch-baseline.sh # save a known-good snapshot before a game patch
     scripts/patch-check.py # diff game data / API vs that snapshot (offline)
@@ -133,14 +134,17 @@ Assume the git repo is rooted at `Bublock/`.
   `scripts/fetch-builds.py` and embedded in the DLL; the server never calls
   the Deadlock API.
 - Loadouts (`Modules/Loadout`, `LoadoutPlanner.Plan`) shop the build in
-  order into 12 universal slots (every flex slot open: `Lobby/FlexSlots`
-  writes `m_nFlexSlotsUnlocked = 15` on both team entities; the demo
-  convar alone does nothing)
-  and never go over the soul cap (`/loadout_cap`); once the slots are full
-  they sell by the build's sell priority, else the cheapest and earliest,
-  for pricier items. Slots still empty after the build are filled from its
-  optional items (most expensive first); a final pass upgrades held
-  component items while the cap allows. The hero's level, boons and ability ranks come from
+  order up to the item limit for the cap (`Modules/Loadout/ItemSlots`: 9,
+  then 10 / 11 / 12 from 16,000 / 22,000 / 28,000 souls, when real teams'
+  Walkers fall; `scripts/walker-souls.py`) and never go over the soul cap
+  (`/loadout_cap`). The HUD always shows 12 slots (every flex slot open:
+  `Lobby/FlexSlots` writes `m_nFlexSlotsUnlocked = 15` on both team
+  entities; the demo convar alone does nothing); never cap items by
+  locking slots. Once the limit is reached they sell by the build's sell
+  priority, else the cheapest and earliest, for pricier items. Only at 12
+  items are empty slots filled from the build's optional items (most
+  expensive first) and held component items upgraded while the cap
+  allows. The hero's level, boons and ability ranks come from
   the cap, never from the items' value.
 - Stage 13c: `Stats/StatsService` counts match kills, deaths and assists
   from `player_death` and draws them on the Sapphire / Amber boards (Random
@@ -250,6 +254,9 @@ Assume the git repo is rooted at `Bublock/`.
   `OnLoad(isReload: true)` but not `OnStartupServer` and drops timers from
   the previous load. Startup work that matters (CleanSlate cleanup, server
   convars, boards) must also run in `OnLoad` when `isReload` is true.
+  A reload also ends a running match (`MatchService.State` starts empty),
+  and with no match `SoulRule` blocks nothing: after an upload mid-match,
+  run `/match_start` again (auto-start only does it with 2+ players).
 - Buying: CleanSlate disables every shop; buying anywhere is on only in 1v1
   setup (1v1 mode, no match). Only `GameLoop/ShopAccess` sets
   `citadel_allow_purchasing_anywhere`. Items reach players with `AddItem`.
@@ -289,8 +296,12 @@ Assume the git repo is rooted at `Bublock/`.
   `IsValidObserverTarget` (it rejects team 3, Sapphire). A hot reload
   re-seats an admin still on the observer pawn (`AdminSeat.Restore`).
   Never move the camera while the admin moves it (the client crashed):
-  flying away from a park, leaving a follow, or a `spec_*` console
-  command starts a 60 s manual hold with no camera calls. Never follow
+  moving in fly cam (before or after its park) or a `spec_*` console
+  command starts a 60 s manual hold with no camera calls. In fly cam
+  (observer `Roaming`, no target; only the admin's C puts it there) the
+  camera parks once after `SpectateRule.FlyCamSettle` of stillness,
+  confirms it by position, then leaves it (repark only on a watch spot
+  side change); no follows or ult top-downs in fly cam. Never follow
   a hero spawned less than 5 s ago (`StreamCam.FollowGrace`).
 
 ---

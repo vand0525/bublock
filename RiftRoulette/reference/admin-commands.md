@@ -281,7 +281,7 @@ client console (`dw_spec_*`).
 - **Who:** admin
 - **Calls:** `StreamCam.Describe`
 - **Mode:** Debug; read-only
-- **Side effects:** three lines: auto, manual hold (`Manual=until HH:mm:ss UTC` or `off`), seated, observer, observer mode; who is on camera, parked and side; top-down showing or off, return-to player, round number, whether a round is running, whether this round's top-down is used
+- **Side effects:** three lines: auto, manual hold (`Manual=until HH:mm:ss UTC` or `off`), fly cam (`FlyCam=parked|settling|off`), seated, observer, observer mode; who is on camera, parked and side; top-down showing or off, return-to player, round number, whether a round is running, whether this round's top-down is used
 - **Notes:** new with the stream camera (2026-09-27)
 
 #### /spec_overview
@@ -774,7 +774,7 @@ Added in Stage 13b.
 - **Who:** admin
 - **Calls:** `HeroBuildCatalog.TryParseHero` / `BuildsFor`, `LoadoutService.Swap` (→ `Apply`)
 - **Mode:** Debug (per-ability and per-item detail in `loadout-*.log`)
-- **Side effects:** swaps the player in that slot to the hero (enum name like `inferno` or game name like `Infernus`), then 1 s later shops the build's items in order within the cap (20,000 souls unless `/loadout_cap` changed it) and 12 slots: every required item plus one random item per optional group; Monster Rounds, Cultist Sacrifice, Golden Goose Egg, Trophy Collector and Healing Rite skipped; upgrades replace their components; unaffordable items skipped (later cheaper ones still bought); with the slots full it sells the build's marked sell-priority items first, else the cheapest and earliest, for pricier ones; empty slots left after the build are filled from its optional items, most expensive first; a final pass upgrades every held component item (T1 to T2 to T3) while the cap allows. It then resets the hero, sets the level a real hero has at the cap, whatever the items cost (Deadlock's soul table: for example 20,000 souls is level 25 with 4 unlocks and 21 ability points), applies the build's ability order only as far as those unlocks and points pay for (tiers cost 1, 2, 5; it stops at the first step that does not fit), grants the items with imbues, sets souls, ability points and unlocks to 0, and heals to full. The `Loadout applied` line in `loadout-*.log` shows `Value`, `Cap`, `Sold` / `Skipped` counts, `Level`, `Boons`, `Unlocks`, `Points`, `PointsLeft`, `Steps` / `StepsTotal` and the ranks set; `Loadout shopping` names the sold, skipped, filled and upgraded items. Items past 9 need every flex slot open (`Lobby/FlexSlots`, check with `/lobby_flex`). `build` is 1-3; 0 or omitted picks one at random
+- **Side effects:** swaps the player in that slot to the hero (enum name like `inferno` or game name like `Infernus`), then 1 s later shops the build's items in order within the cap (20,000 souls unless `/loadout_cap` changed it) and the item limit for that cap (`ItemSlots`: 9 below 16,000, 10 from 16,000, 11 from 22,000, 12 from 28,000; the HUD still shows 12 slots): every required item plus one random item per optional group; Monster Rounds, Cultist Sacrifice, Golden Goose Egg, Trophy Collector and Healing Rite skipped; upgrades replace their components; unaffordable items skipped (later cheaper ones still bought); with the slots full it sells the build's marked sell-priority items first, else the cheapest and earliest, for pricier ones; only when the limit is 12: empty slots left after the build are filled from its optional items, most expensive first, and a final pass upgrades every held component item (T1 to T2 to T3) while the cap allows. It then resets the hero, sets the level a real hero has at the cap, whatever the items cost (Deadlock's soul table: for example 20,000 souls is level 25 with 4 unlocks and 21 ability points), applies the build's ability order only as far as those unlocks and points pay for (tiers cost 1, 2, 5; it stops at the first step that does not fit), grants the items with imbues, sets souls, ability points and unlocks to 0, and heals to full. The `Loadout applied` line in `loadout-*.log` shows `Value`, `Cap`, `Sold` / `Skipped` counts, `Level`, `Boons`, `Unlocks`, `Points`, `PointsLeft`, `Steps` / `StepsTotal` and the ranks set; `Loadout shopping` names the sold, skipped, filled and upgraded items. Items past 9 need every flex slot open (`Lobby/FlexSlots`, check with `/lobby_flex`). `build` is 1-3; 0 or omitted picks one at random
 - **Notes:** test tool. Errors: empty slot, unknown hero, no builds, bad build number, dead player. In Draft mode, Draft's hero enforcement switches a player without a matching pick back to their pick or Skyrunner, so use it in Random mode or on a player whose pick is that hero
 
 #### /loadout_show <slot>
@@ -801,7 +801,7 @@ Added in Stage 13b.
 - **Who:** admin
 - **Calls:** `HeroBuildCatalog.BuildsFor` / `Plan` (→ `LoadoutPlanner.ItemOrder` / `Plan`)
 - **Mode:** Debug; read-only
-- **Side effects:** at the current cap, lists the hero's stored builds (name, build ID, rank, matches, wins, planned value, sold, skipped, filled and upgraded counts, optional groups), each followed by the items (up to 12) it ends with, using the first pick of each optional group
+- **Side effects:** at the current cap, lists the hero's stored builds (name, build ID, rank, matches, wins, planned value, sold, skipped, filled and upgraded counts, optional groups), each followed by the items (up to the cap's item limit, `ItemSlots.ForSouls`) it ends with, using the first pick of each optional group
 
 #### /loadout_info
 
@@ -809,7 +809,7 @@ Added in Stage 13b.
 - **Who:** admin
 - **Calls:** `HeroBuildCatalog.Default`
 - **Mode:** Debug; read-only
-- **Side effects:** two lines: when the data was fetched, source, window (days), hero count; then the baseline value (median planned value of all builds at 20,000 with 12 slots), the current cap (20,000 unless `/loadout_cap` changed it), and the banned items
+- **Side effects:** three lines: when the data was fetched, source, window (days), hero count; then the baseline value (median planned value of all builds at 20,000 with its 10-item limit), the current cap (20,000 unless `/loadout_cap` changed it), and the banned items; then the item limit by cap (`9 items, then 10 from 16,000, 11 from 22,000, 12 from 28,000`, optional fill and upgrades only at 12)
 
 #### /loadout_cap
 
@@ -817,7 +817,7 @@ Added in Stage 13b.
 - **Who:** admin
 - **Calls:** `LoadoutPlanner.TryParseCap`, then `LoadoutService.SetMaxValue`
 - **Mode:** Debug
-- **Side effects:** no argument: shows the current cap and the default (20,000). With a value (1,000 to 200,000, or `default`): the most a Random mode build's items may be worth from the next build handed out, and the net worth the hero's level and ability ranks are set to (every build at the same cap gets the same level). A 1,000 cap gives one 800 item. Builds already on players stay until the next intermission (`/random_reroll` in an intermission applies it now). Logged in `loadout-*.log` and master. In memory only: every upload or restart resets it to 20,000. Bad input: error naming the range
+- **Side effects:** no argument: shows the current cap, its item limit and the default (20,000). With a value (1,000 to 200,000, or `default`): the most a Random mode build's items may be worth from the next build handed out, the item limit at that value (`ItemSlots.ForSouls`, shown in the reply as `N items`), and the net worth the hero's level and ability ranks are set to (every build at the same cap gets the same level). A 1,000 cap gives one 800 item. Builds already on players stay until the next intermission (`/random_reroll` in an intermission applies it now). Logged in `loadout-*.log` and master. In memory only: every upload or restart resets it to 20,000. Bad input: error naming the range
 - **Notes:** new 2026-09-28. 1v1 copies and 1v1 setup gold do not use the cap
 
 ### Restraint (`RestraintPlugin`, in RiftRoulette.dll)

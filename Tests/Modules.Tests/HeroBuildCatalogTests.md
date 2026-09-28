@@ -8,8 +8,12 @@ Unit tests for `Modules/Loadout/HeroBuildData` and `HeroBuildCatalog`.
   `sellPriority` a build parses with none.
 - `PlannedValue` follows the budget (1,000 gives 800, 5,000 gives 4,000,
   the default 20,000 buys all three items).
-- `Plan` fills an empty slot from the optional group (the priciest item not
-  already taken) and then upgrades a component item (`t1` to `t2`).
+- `Plan` at a budget with all 12 slots open (1,000,000) fills an empty slot
+  from the optional group (the priciest item not already taken) and then
+  upgrades a component item (`t1` to `t2`). At 20,000 (10 slots) it buys
+  only the build order (`t1`, `o1`): no fill, no upgrade.
+- `Default` plans at 8,000 / 14,000 / 20,000 / 26,000 / 60,000 never hold
+  more items than `ItemSlots.ForSouls(budget)`.
 - `Heroes` skips IDs missing from the Deadworks `Heroes` enum and heroes
   with no builds.
 - `TryParseHero` accepts enum names (case-insensitive) and game display

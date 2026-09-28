@@ -54,6 +54,9 @@ public static class StreamCam
     public DateTime? SeatedAt;
     public DateTime? ManualUntil;
     public Vector3? ManualPosition;
+    public bool ParkConfirmed;
+    public DateTime? FlyCamSince;
+    public Vector3? FlyCamPosition;
   }
 
   public static void Tick(ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
@@ -129,6 +132,12 @@ public static class StreamCam
       if (!state.Auto || SpectateRule.ManualActive(state.ManualUntil, now))
         continue;
 
+      if (InFlyCam(admin))
+      {
+        log.Info(admin.ToPlayerRef(), "Big ult skipped, fly cam parked Caster={Caster} Ability={Ability}", caster.PlayerName, abilityName);
+        continue;
+      }
+
       if (OverviewRule.Showing(state.OverviewEnd, now))
       {
         state.ReturnTo = caster.PlayerSteamId;
@@ -167,6 +176,7 @@ public static class StreamCam
     state.OverviewEnd = null;
     state.Parked = false;
     state.ManualUntil = null;
+    ClearFlyCam(state);
     Log.WithMode(mode).Info(admin.ToPlayerRef(), "Stream camera auto Auto={Auto}", on);
     return changed;
   }
@@ -187,10 +197,11 @@ public static class StreamCam
     var showing = OverviewRule.Showing(state.OverviewEnd, DateTime.UtcNow);
     var roundUsed = state.LastShownRound != null && state.LastShownRound == RiftService.RoundNumber;
     var manual = SpectateRule.ManualActive(state.ManualUntil, DateTime.UtcNow) ? $"until {state.ManualUntil:HH:mm:ss} UTC" : "off";
+    var flyCam = !InFlyCam(admin) ? "off" : state.ParkConfirmed ? "parked" : "settling";
 
     return
     [
-      $"Auto={state.Auto} | Manual={manual} | Seated={AdminSeat.IsSeated(admin.PlayerSteamId)} | Observer={SpectateService.IsObserving(admin)} | Mode={SpectateService.Mode(admin)}",
+      $"Auto={state.Auto} | Manual={manual} | FlyCam={flyCam} | Seated={AdminSeat.IsSeated(admin.PlayerSteamId)} | Observer={SpectateService.IsObserving(admin)} | Mode={SpectateService.Mode(admin)}",
       $"Watching={watching?.PlayerName ?? (target == null ? "none" : target.DesignerName)} | Parked={state.Parked} Side={(state.ParkedSide is { } side ? RiftSides.Name(side) : "-")}",
       $"TopDown={(showing ? "showing" : "off")} | ReturnTo={NameOf(state.ReturnTo)} | Round={RiftService.RoundNumber} Live={RiftService.IsRunning} RoundTopDownUsed={roundUsed}"
     ];
@@ -210,6 +221,15 @@ public static class StreamCam
       returning = true;
     }
 
+    if (InFlyCam(admin))
+    {
+      state.ReturnTo = null;
+      FlyCam(admin, state, timer, now, mode);
+      return;
+    }
+
+    ClearFlyCam(state);
+
     var candidates = Candidates();
     var ids = candidates.Select(player => player.PlayerSteamId).ToList();
 
@@ -221,12 +241,6 @@ public static class StreamCam
     }
 
     state.ReturnTo = null;
-
-    if (!returning && LeftFollow(admin, state, candidates))
-    {
-      StartManual(admin, state, "left-follow", now, mode);
-      return;
-    }
 
     var currentId = returning ? null : CurrentId(admin, candidates) ?? PendingFollow(state, candidates);
     var choice = SpectateRule.Choose(currentId, state.PendingKiller, ids);
@@ -271,7 +285,7 @@ public static class StreamCam
     Log.WithMode(mode).Info(admin.ToPlayerRef(), "Stream camera Reason={Reason} Target={Target} Accepted={Accepted}", reason, target.PlayerName, accepted);
   }
 
-  // Parked is only a claim: the client can leave fly cam (or never enter it), so a park that did not hold is retried.
+  // Only reached outside fly cam, where a park does not move the client; it is retried in case the viewer presses C.
   private static void Park(CCitadelPlayerController admin, CamState state, ITimer timer, ExecutionMode mode)
   {
     var side = WatchSpot.Side;
@@ -284,15 +298,6 @@ public static class StreamCam
     {
       if (state.LastParkAt is { } last && now - last < ReparkEvery)
         return;
-
-      if (SpectateService.IsParkedAt(admin, OverheadSpot(side)))
-        return;
-
-      if (SpectateService.IsManualMove(admin, OverheadSpot(side)))
-      {
-        StartManual(admin, state, "moved", now, mode);
-        return;
-      }
 
       reason = "repark";
     }
@@ -314,6 +319,7 @@ public static class StreamCam
     state.ReturnTo = returnTo ?? state.LastFollowed;
     state.LastFollowed = null;
     state.Parked = false;
+    ClearFlyCam(state);
 
     timer.Once(OverviewRule.Duration.TotalSeconds.Seconds(), () => Tick(timer, mode));
   }
@@ -323,12 +329,87 @@ public static class StreamCam
     return SpectateService.Park(admin, OverheadSpot(side), SpectateRule.LookDown(WatchSpot.Location(side).Angle.Y), timer, mode);
   }
 
-  // The camera was following a player who is still alive, but the viewer is now in fly cam with no target.
-  private static bool LeftFollow(CCitadelPlayerController admin, CamState state, List<CCitadelPlayerController> candidates) =>
-    state.LastFollowed is { } followed &&
-    candidates.Any(player => player.PlayerSteamId == followed) &&
-    SpectateService.Mode(admin) == ObserverMode_t.Roaming &&
-    SpectateService.Current(admin) == null;
+  // The server cannot switch the client to fly cam; the observer only reads Roaming with no target after the viewer pressed C.
+  private static bool InFlyCam(CCitadelPlayerController admin) =>
+    SpectateService.Mode(admin) == ObserverMode_t.Roaming && SpectateService.Current(admin) == null;
+
+  // In fly cam the camera parks once, after the viewer has held still, then leaves it there (repark only when the watch spot moves).
+  private static void FlyCam(CCitadelPlayerController admin, CamState state, ITimer timer, DateTime now, ExecutionMode mode)
+  {
+    if (SpectateService.Observer(admin)?.Position is not { } position)
+      return;
+
+    if (state.FlyCamSince == null)
+      state.Parked = false;
+
+    state.LastFollowed = null;
+    state.PendingKiller = null;
+
+    var parkSent = state.Parked && !state.ParkConfirmed;
+
+    if (parkSent && state.LastParkAt is { } sent && now - sent < TimeSpan.FromSeconds(SpectateService.AngleRepeatSeconds))
+      return;
+
+    var side = WatchSpot.Side;
+    var parkedSide = state.ParkedSide ?? side;
+    var atSpot = state.Parked && SpectateService.IsParkedAt(admin, OverheadSpot(parkedSide));
+    var moved = state.FlyCamPosition is { } last && Vector3.Distance(position, last) > ManualMoveUnits;
+    var step = SpectateRule.FlyCamStep(state.ParkConfirmed, parkSent, atSpot, moved, state.FlyCamSince, now, SpectateRule.FlyCamSettle);
+
+    switch (step)
+    {
+      case FlyCamAction.Park:
+        ParkFlyCam(admin, state, side, "flycam", timer, now, mode);
+        break;
+
+      case FlyCamAction.Stay:
+        if (!state.ParkConfirmed)
+        {
+          state.ParkConfirmed = true;
+          Log.WithMode(mode).Info(admin.ToPlayerRef(), "Stream camera fly cam parked, staying Side={Side}", RiftSides.Name(parkedSide));
+        }
+
+        state.FlyCamPosition = position;
+
+        if (parkedSide != side)
+          ParkFlyCam(admin, state, side, "flycam-side", timer, now, mode);
+
+        break;
+
+      case FlyCamAction.Manual:
+        StartManual(admin, state, "moved", now, mode);
+        break;
+
+      default:
+        if (parkSent || state.FlyCamSince == null)
+        {
+          state.Parked = false;
+          state.FlyCamSince = now;
+        }
+
+        state.FlyCamPosition = position;
+        break;
+    }
+  }
+
+  private static void ParkFlyCam(CCitadelPlayerController admin, CamState state, RiftSide side, string reason, ITimer timer, DateTime now, ExecutionMode mode)
+  {
+    if (!ParkOverhead(admin, side, timer, mode))
+      return;
+
+    state.Parked = true;
+    state.ParkedSide = side;
+    state.LastParkAt = now;
+    state.ParkConfirmed = false;
+    Log.WithMode(mode).Info(admin.ToPlayerRef(), "Stream camera Reason={Reason} Side={Side} Mode={Mode}", reason, RiftSides.Name(side), SpectateService.Mode(admin));
+  }
+
+  private static void ClearFlyCam(CamState state)
+  {
+    state.ParkConfirmed = false;
+    state.FlyCamSince = null;
+    state.FlyCamPosition = null;
+  }
 
   private static void StartManual(CCitadelPlayerController admin, CamState state, string reason, DateTime now, ExecutionMode mode)
   {
@@ -341,6 +422,7 @@ public static class StreamCam
     state.PendingKiller = null;
     state.LastFollowed = null;
     state.Parked = false;
+    ClearFlyCam(state);
 
     if (!wasHeld)
       Log.WithMode(mode).Info(admin.ToPlayerRef(), "Stream camera paused, manual control Reason={Reason} HoldSeconds={HoldSeconds}", reason, ManualHold.TotalSeconds);

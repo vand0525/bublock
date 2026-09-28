@@ -49,18 +49,23 @@ public sealed class HeroBuildCatalog
   public int CostOf(string item) =>
     Data.ItemCosts != null && Data.ItemCosts.TryGetValue(item, out var cost) ? cost : 0;
 
-  public ShopPlan Plan(HeroBuild build, int budget = LoadoutPlanner.DefaultCap, int slots = LoadoutPlanner.DefaultSlots) =>
-    LoadoutPlanner.Plan(
+  public ShopPlan Plan(HeroBuild build, int budget = LoadoutPlanner.DefaultCap, int? slots = null)
+  {
+    var limit = slots ?? ItemSlots.ForSouls(budget);
+    var extra = ItemSlots.ExtraPasses(limit);
+
+    return LoadoutPlanner.Plan(
       LoadoutPlanner.ItemOrder(build),
       ComponentsOf,
       CostOf,
       budget,
-      slots,
+      limit,
       build.SellPriorityOf,
-      fillers: LoadoutPlanner.OptionalItems(build),
-      upgradesOf: UpgradesOf);
+      fillers: extra ? LoadoutPlanner.OptionalItems(build) : null,
+      upgradesOf: extra ? UpgradesOf : null);
+  }
 
-  public int PlannedValue(HeroBuild build, int budget = LoadoutPlanner.DefaultCap, int slots = LoadoutPlanner.DefaultSlots) =>
+  public int PlannedValue(HeroBuild build, int budget = LoadoutPlanner.DefaultCap, int? slots = null) =>
     Plan(build, budget, slots).Value;
 
   public static HeroBuildCatalog Default => Embedded.Value;

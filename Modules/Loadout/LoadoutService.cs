@@ -6,7 +6,7 @@ namespace Bublock.Modules.Loadout;
 
 public sealed record LoadoutOptions(
   int Gold = 0,
-  int Slots = LoadoutPlanner.DefaultSlots,
+  int? Slots = null,
   int? MaxValue = null);
 
 public sealed record LoadoutResult(
@@ -69,12 +69,14 @@ public static class LoadoutService
 
     var unknown = new List<string>();
     var cap = options.MaxValue ?? MaxValue;
+    var slots = options.Slots ?? ItemSlots.ForSouls(cap);
+    var extra = ItemSlots.ExtraPasses(slots);
     var shop = LoadoutPlanner.Plan(
       LoadoutPlanner.ItemOrder(build, rng),
       catalog.ComponentsOf,
       catalog.CostOf,
       cap,
-      options.Slots,
+      slots,
       build.SellPriorityOf,
       item =>
       {
@@ -84,8 +86,8 @@ public static class LoadoutService
         unknown.Add(item);
         return false;
       },
-      LoadoutPlanner.OptionalItems(build),
-      catalog.UpgradesOf);
+      extra ? LoadoutPlanner.OptionalItems(build) : null,
+      extra ? catalog.UpgradesOf : null);
 
     var items = shop.Items;
     var value = shop.Value;
@@ -162,11 +164,11 @@ public static class LoadoutService
       log,
       who,
       "Loadout applied Hero={Hero} Build={Build} BuildId={BuildId} Items={Items} Failed={Failed} Imbued={Imbued} " +
-      "Abilities={Abilities} AbilitiesMissing={AbilitiesMissing} Unknown={Unknown} Value={Value} Cap={Cap} Baseline={Baseline} " +
+      "Abilities={Abilities} AbilitiesMissing={AbilitiesMissing} Unknown={Unknown} Value={Value} Cap={Cap} Slots={Slots} Baseline={Baseline} " +
       "Sold={Sold} Skipped={Skipped} Level={Level} Boons={Boons} Unlocks={Unlocks} Points={Points} PointsLeft={PointsLeft} " +
       "Steps={Steps} StepsTotal={StepsTotal} Ranks={Ranks} Gold={Gold} ItemNames={ItemNames}",
       pawn.HeroID, build.Name, build.BuildId, added, failed, imbued,
-      abilitiesSet, abilitiesMissing, string.Join(",", unknown), value, cap, catalog.BaselineValue,
+      abilitiesSet, abilitiesMissing, string.Join(",", unknown), value, cap, slots, catalog.BaselineValue,
       shop.Sold.Count, shop.Skipped.Count, progression.Level, progression.Boons, progression.Unlocks, progression.AbilityPoints,
       progression.AbilityPoints - plan.PointsUsed, plan.StepsTaken, plan.StepsTotal,
       string.Join(",", plan.Bits.Select(entry => $"{entry.Ability}:{Convert.ToString(entry.Bits, 2)}")), options.Gold,

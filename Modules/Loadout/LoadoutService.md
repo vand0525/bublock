@@ -6,10 +6,11 @@ hero state (`LoadoutSnapshot`) and applies it to another pawn. Game-agnostic.
 
 ## Types
 
-- `LoadoutOptions(Gold = 0, Slots = 12, MaxValue = null)`. There is no
+- `LoadoutOptions(Gold = 0, Slots = null, MaxValue = null)`. There is no
   level option: the level follows the cap. `MaxValue` null means
-  the current `LoadoutService.MaxValue`; a caller's own value wins (none
-  pass one today).
+  the current `LoadoutService.MaxValue`; `Slots` null means
+  `ItemSlots.ForSouls(cap)`. A caller's own value wins (none pass one
+  today).
 - `LoadoutResult(ItemsAdded, ItemsFailed, Imbued, AbilitiesSet, AbilitiesMissing, Unknown, Value, Cap, ItemsSold, ItemsSkipped, Progression, AbilityPlan)`.
   `Value` is the items' soul cost (at most `Cap`); `Progression` comes from `Cap`.
 - `DefaultMaxValue` = `LoadoutPlanner.DefaultCap` (20,000 souls).
@@ -32,15 +33,20 @@ Gives a hero the power a real player of that build has at the same net
 worth. Plans first, then follows the Deadworks Deathmatch example's
 known-good order:
 
-1. Plan the items: `cap = options.MaxValue ?? MaxValue`, then
+1. Plan the items: `cap = options.MaxValue ?? MaxValue`, `slots =
+   options.Slots ?? ItemSlots.ForSouls(cap)` (9 below 16,000, 10, 11, then
+   12 from 28,000: the slots a real hero has at that net worth), then
    `LoadoutPlanner.Plan(ItemOrder(build, rng), catalog.ComponentsOf,
-   catalog.CostOf, cap, options.Slots, build.SellPriorityOf,
-   ItemInfo.Exists, OptionalItems(build), catalog.UpgradesOf)`: buys in
-   build order within the cap and the 12 slots, and once the slots are full
-   sells (by the build's sell priority, else cheapest and earliest) to make
-   room for pricier items; then fills empty slots with the build's optional
-   items (most expensive first), then upgrades held component items while
-   the cap allows. Unknown items are collected. `value` is the held items' soul cost, never above `cap`.
+   catalog.CostOf, cap, slots, build.SellPriorityOf, ItemInfo.Exists,
+   fillers, upgradesOf)`: buys in build order within the cap and the slots,
+   and once the slots are full sells (by the build's sell priority, else
+   cheapest and earliest) to make room for pricier items. Only when
+   `ItemSlots.ExtraPasses(slots)` (all 12 open) are `OptionalItems(build)`
+   and `catalog.UpgradesOf` passed, so empty slots are filled with the
+   build's optional items (most expensive first) and held component items
+   upgraded while the cap allows; below 12 nothing is backfilled or
+   upgraded after the build order. Unknown items are collected. `value` is
+   the held items' soul cost, never above `cap`.
 2. Plan the power: `Progression.ForSouls(cap)` gives the level, boons,
    unlocks and ability points at the cap, so two builds at the same cap get
    the same level whatever their items cost; `AbilityPrefix(build.Abilities,
@@ -64,7 +70,7 @@ Returns a `LoadoutResult`. Logs Information `Loadout shopping Sold= Skipped=
 Filled= Upgraded= Value= Cap=` (item names) when anything was sold, skipped,
 filled or upgraded, one Information
 line per loadout (`Loadout applied`, with `PlayerRef`, `Value`, `Cap`,
-baseline, `Sold` / `Skipped` counts, `Level`, `Boons`, `Unlocks`, `Points`,
+`Slots` (the item limit used), baseline, `Sold` / `Skipped` counts, `Level`, `Boons`, `Unlocks`, `Points`,
 `PointsLeft`, `Steps` / `StepsTotal`, `Ranks` as `ability:bits` and
 `ItemNames`, the planned items in order), and a
 Warning when any item failed or was unknown.

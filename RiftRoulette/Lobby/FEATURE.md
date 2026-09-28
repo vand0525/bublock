@@ -38,11 +38,14 @@ player's view (in-eye), cuts to the killer when the watched player dies,
 goes top-down over the rift for 10 s on the first big teamfight ult of each
 round (`BigUlts`, from the `player_used_ability` event) and then to the ult
 user's view, and parks top-down over the current rift when nobody plays.
+Once the admin presses C (fly cam) and holds still for a moment, it parks
+the camera top-down over the rift once and leaves it there (reparking only
+when the watch spot changes side); no follows or ult views in fly cam.
 It never follows a hero spawned less than 5 s ago, and it steps aside for
 60 s (extended while the camera keeps moving) when the admin takes the
-camera: flying away from the park spot, leaving a follow, or a `spec_*`
-console command. Moving the camera while the server also moved it crashed
-the client.
+camera: moving in fly cam before or after the park, or a `spec_*` console
+command. Moving the camera while the server also moved it crashed the
+client.
 Camera calls go through `Modules/Spectate`. A hot reload re-seats an admin
 still on the observer pawn (`AdminSeat.Restore`).
 

@@ -93,4 +93,52 @@ public class SpectateRuleTests
     Assert.Equal(135f, angle.Y);
     Assert.Equal(0f, angle.Z);
   }
+
+  private static readonly DateTime Now = new(2026, 9, 28, 5, 40, 0, DateTimeKind.Utc);
+
+  private static FlyCamAction Step(
+    bool confirmed = false, bool parkSent = false, bool atSpot = false, bool moved = false, double? seenSecondsAgo = null) =>
+    SpectateRule.FlyCamStep(
+      confirmed, parkSent, atSpot, moved, seenSecondsAgo is { } ago ? Now.AddSeconds(-ago) : null, Now, SpectateRule.FlyCamSettle);
+
+  [Fact]
+  public void FlyCamStep_waits_on_first_sight()
+  {
+    Assert.Equal(FlyCamAction.Wait, Step());
+  }
+
+  [Fact]
+  public void FlyCamStep_parks_after_staying_still_for_the_settle()
+  {
+    Assert.Equal(FlyCamAction.Wait, Step(seenSecondsAgo: 1));
+    Assert.Equal(FlyCamAction.Park, Step(seenSecondsAgo: 1.5));
+    Assert.Equal(FlyCamAction.Park, Step(seenSecondsAgo: 2));
+  }
+
+  [Fact]
+  public void FlyCamStep_moving_while_settling_is_manual()
+  {
+    Assert.Equal(FlyCamAction.Manual, Step(moved: true, seenSecondsAgo: 2));
+  }
+
+  [Fact]
+  public void FlyCamStep_after_a_park_confirms_at_the_spot_or_settles_again()
+  {
+    Assert.Equal(FlyCamAction.Stay, Step(parkSent: true, atSpot: true, moved: true, seenSecondsAgo: 2));
+    Assert.Equal(FlyCamAction.Wait, Step(parkSent: true, moved: true, seenSecondsAgo: 2));
+  }
+
+  [Fact]
+  public void FlyCamStep_confirmed_stays_at_the_spot_and_is_manual_once_flown_away()
+  {
+    Assert.Equal(FlyCamAction.Stay, Step(confirmed: true, atSpot: true));
+    Assert.Equal(FlyCamAction.Manual, Step(confirmed: true, atSpot: true, moved: true));
+    Assert.Equal(FlyCamAction.Manual, Step(confirmed: true));
+  }
+
+  [Fact]
+  public void FlyCamSettle_is_under_one_camera_tick()
+  {
+    Assert.True(SpectateRule.FlyCamSettle < TimeSpan.FromSeconds(2));
+  }
 }

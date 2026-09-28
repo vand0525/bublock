@@ -19,6 +19,7 @@ angle. Built for the admin's stream camera.
 | `SpectateRule.LookDown(yaw)` | `SpectateRule.md` |
 | `SpectateRule.ParkCheck(roaming, hasTarget, distance, tolerance)` | `SpectateRule.md` |
 | `SpectateRule.IsManualMove` / `ManualActive` / `FollowReady` | `SpectateRule.md` |
+| `SpectateRule.FlyCamStep(...)` / `FlyCamSettle` | `SpectateRule.md` |
 
 ## State
 
@@ -36,7 +37,7 @@ of the observer pawn (`Park`) moves it.
 
 | File | Role |
 |---|---|
-| `SpectateRule.cs` | Pure choice (keep, killer, any, park), the straight-down angle, the parked check |
+| `SpectateRule.cs` | Pure choice (keep, killer, any, park), the straight-down angle, the parked check, the fly cam step (wait, park, stay, manual) |
 | `SpectateService.cs` | Observer-services calls and the timed park |
 | `Spectate.projitems` | Service and rule (no commands) |
 

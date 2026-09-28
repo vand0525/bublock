@@ -21,7 +21,7 @@ Tools:
 4. **`scripts/update.sh`**: compile errors here are API renames or removals. Fix them with the decompiled API (`~/.dotnet/tools/ilspycmd lib/DeadworksManaged.Api.dll > /tmp/dwapi.cs`).
 5. **`scripts/test.sh`**.
 6. **`python3 scripts/patch-check.py`** (needs network). Every `HIT` line names the code to fix; section 4 says how.
-7. **Refresh data if the check says so**: `python3 scripts/fetch-builds.py` (items, heroes), map dump + `scripts/check-spots.py` (geometry), `reference/cvarlist.md` (convars).
+7. **Refresh data if the check says so**: `python3 scripts/fetch-builds.py` (items, heroes), map dump + `scripts/check-spots.py` (geometry), `reference/cvarlist.md` (convars). After economy or objective changes (soul income, Walker health or bounty, slot unlocks), `python3 scripts/walker-souls.py` and update `Modules/Loadout/ItemSlots` when a breakpoint moved about 1,000 souls or more.
 8. **Upload** with `scripts/deploy.sh --confirm` (with approval).
 9. **`dw_selftest_run`**, then compare with the baseline log. Every new FAIL / WARN maps to a row in section 4.
 10. **`dw_selftest_live <slot>`** on yourself, then the smoke list (section 3).
@@ -199,7 +199,7 @@ a red wireframe; if the hero enum or the ability moves, update
 
 - `Heroes.Skyrunner` is the lobby hero (`LobbyService`, `DraftService`); draft pools in `Draft/DraftPools.cs`.
 - `hero-builds.json` (38 heroes, 161 items, 154 abilities, per-build sell priorities), banned items in `Modules/Loadout/LoadoutPlanner.cs`.
-- Item slots: universal (any item in any slot), 9 open by default (one flex slot already open), 12 with every flex slot (`LoadoutPlanner.DefaultSlots`).
+- Item slots: universal (any item in any slot), 9 open by default (one flex slot already open), 12 with every flex slot (`LoadoutPlanner.DefaultSlots`); each enemy Walker opens one in a real match, which `Modules/Loadout/ItemSlots` mirrors by soul value (`scripts/walker-souls.py`).
 - `EAbilitySlot.Signature1..4`, `ECurrencyType.EGold` / `EAbilityPoints` / `EAbilityUnlocks`, `ECurrencySource.ECheats` / `EStartingAmount` / `EItemSale` (the sources `GameLoop/SoulRule` lets through for gold; for ability points and unlocks only `ECheats` passes in Random and 1v1 matches), `ImbueResult.Success`.
 - Level table: 36 soul thresholds, unlock rows and 32 points in `Modules/Loadout/Progression.cs`, from the wiki's [Data:SoulUnlockData.json](https://deadlock.wiki/index.php?title=Data:SoulUnlockData.json&action=raw) (+600 each). Upgrade tier costs 1 / 2 / 5 in `LoadoutPlanner.UpgradeCosts`. An economy patch that moves boons or points needs both updated (`ProgressionTests` pins the current values).
 - Teams: Amber 2, Sapphire 3, spectator 1.

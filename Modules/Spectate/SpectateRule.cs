@@ -12,10 +12,45 @@ public enum SpectateReason
 
 public readonly record struct SpectateChoice(SpectateReason Reason, ulong? Target);
 
+public enum FlyCamAction
+{
+  Wait,
+  Park,
+  Stay,
+  Manual
+}
+
 public static class SpectateRule
 {
   // Source caps view pitch at 89; 90 would be clamped or flip the view.
   public const float StraightDownPitch = 89f;
+
+  // One 2 s camera tick after first sight; kept under 2 s so timer jitter never adds a tick.
+  public static readonly TimeSpan FlyCamSettle = TimeSpan.FromSeconds(1.5);
+
+  public static FlyCamAction FlyCamStep(
+    bool confirmed,
+    bool parkSent,
+    bool atSpot,
+    bool moved,
+    DateTime? firstSeen,
+    DateTime now,
+    TimeSpan settle)
+  {
+    if (confirmed)
+      return atSpot && !moved ? FlyCamAction.Stay : FlyCamAction.Manual;
+
+    if (parkSent)
+      return atSpot ? FlyCamAction.Stay : FlyCamAction.Wait;
+
+    if (moved)
+      return FlyCamAction.Manual;
+
+    if (firstSeen is not { } seen)
+      return FlyCamAction.Wait;
+
+    return now - seen >= settle ? FlyCamAction.Park : FlyCamAction.Wait;
+  }
 
   public static SpectateChoice Choose(ulong? currentId, ulong? killerId, IReadOnlyList<ulong> candidates)
   {

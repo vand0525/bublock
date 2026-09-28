@@ -97,6 +97,46 @@ public class HeroBuildCatalogTests
   }
 
   [Fact]
+  public void Plan_below_every_slot_open_skips_fill_and_upgrade()
+  {
+    const string json = """
+      {
+        "fetchedAt": "x", "source": "test", "windowDays": 14,
+        "heroes": [{ "id": 13, "className": "hero_haze", "name": "Haze", "builds": [
+          { "buildId": 1, "name": "a", "rank": "matches", "categories": [
+            { "name": "Early", "optional": false, "items": ["t1"] },
+            { "name": "Options", "optional": true, "items": ["o1", "o2"] }
+          ] }
+        ] }],
+        "components": { "t2": ["t1"] },
+        "itemCosts": { "t1": 800, "t2": 1600, "o1": 800, "o2": 3200 }
+      }
+      """;
+
+    var catalog = new HeroBuildCatalog(HeroBuildData.Parse(json));
+    var plan = catalog.Plan(Assert.Single(catalog.BuildsFor(Heroes.Haze)), budget: 20000);
+
+    Assert.Equal(["t1", "o1"], plan.Items);
+    Assert.Empty(plan.Filled);
+    Assert.Empty(plan.Upgraded);
+  }
+
+  [Theory]
+  [InlineData(8000)]
+  [InlineData(14000)]
+  [InlineData(20000)]
+  [InlineData(26000)]
+  [InlineData(60000)]
+  public void Default_plans_never_exceed_the_slots_at_the_cap(int budget)
+  {
+    var catalog = HeroBuildCatalog.Default;
+
+    Assert.All(
+      catalog.Heroes.SelectMany(catalog.BuildsFor),
+      build => Assert.InRange(catalog.Plan(build, budget).Items.Count, 0, ItemSlots.ForSouls(budget)));
+  }
+
+  [Fact]
   public void Heroes_skips_unknown_ids_and_heroes_without_builds()
   {
     var catalog = new HeroBuildCatalog(HeroBuildData.Parse(Sample));

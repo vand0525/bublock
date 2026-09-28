@@ -20,7 +20,10 @@ set on each ability. No Deadworks calls.
 
 ## Constants
 
-`DefaultSlots` = 12 (universal item slots with every flex slot open),
+`DefaultSlots` = 12 (universal item slots with every flex slot open; the
+default for direct `Plan` calls only: `LoadoutService` and
+`HeroBuildCatalog` pass `ItemSlots.ForSouls(cap)` and pass fillers and
+upgrades only at 12),
 `MaxUpgrades` = 3, `UpgradeCosts` = 1, 2, 5 (the game's
 tier costs; builds record them as `delta` -1/-2/-5), `FullyUpgradedBits` = `0b11111`,
 `DefaultCap` = 20,000 (souls a loadout's items may

@@ -8,6 +8,11 @@ unit tested (`Tests/Modules.Tests/SpectateRuleTests`).
 - `SpectateReason`: `Keep`, `Killer`, `Any`, `Park`.
 - `SpectateChoice(Reason, Target)`: the reason and the Steam ID to follow
   (null for `Park`).
+- `FlyCamAction`: `Wait`, `Park`, `Stay`, `Manual` (what to do with a
+  viewer in fly cam with no target).
+- `FlyCamSettle`: 1.5 s, how long a fly cam must stay still before the
+  camera parks it. Under the 2 s camera tick, so the tick after first
+  sight parks.
 
 ## Operations
 
@@ -19,6 +24,7 @@ unit tested (`Tests/Modules.Tests/SpectateRuleTests`).
 | `IsManualMove(roaming, hasTarget, distance, tolerance)` | True when the observer is roaming with no target but farther than `tolerance`: the viewer flew away, the park did not fail. |
 | `ManualActive(until, now)` | True while `now` is before the manual hold's end; false with no hold. |
 | `FollowReady(spawnedAt, now, grace)` | True when no spawn was seen or at least `grace` has passed since it. |
+| `FlyCamStep(confirmed, parkSent, atSpot, moved, firstSeen, now, settle)` | For a viewer in fly cam with no target. `confirmed` (a park was seen holding): `Stay` at the spot and still, else `Manual` (the viewer is moving or flew away). `parkSent` (park sent, not yet seen holding): `Stay` at the spot (the caller confirms it), else `Wait` (the caller restarts the settle). Otherwise `moved` since the last check: `Manual`; no `firstSeen`: `Wait`; still for at least `settle`: `Park`; else `Wait`. |
 
 ## Invariants
 

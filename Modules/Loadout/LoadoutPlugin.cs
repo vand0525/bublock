@@ -118,8 +118,11 @@ public class LoadoutPlugin : DeadworksPluginBase
       $"[Loadout] Fetched={data.FetchedAt} | Source={data.Source} | Window={data.WindowDays}d | Heroes={catalog.Heroes.Count}");
     AdminCommand.Reply(
       caller,
-      $"[Loadout] Baseline={catalog.BaselineValue} (median planned value at {Format(LoadoutPlanner.DefaultCap)}, {LoadoutPlanner.DefaultSlots} slots) | Cap={LoadoutService.MaxValue} | " +
+      $"[Loadout] Baseline={catalog.BaselineValue} (median planned value at {Format(LoadoutPlanner.DefaultCap)}, {ItemSlots.ForSouls(LoadoutPlanner.DefaultCap)} items) | Cap={LoadoutService.MaxValue} | " +
       $"Banned={string.Join(",", LoadoutPlanner.Banned)}");
+    AdminCommand.Reply(
+      caller,
+      $"[Loadout] Item limit by cap: {ItemSlots.Describe()} (optional fill and upgrades only at {ItemSlots.MaxSlots})");
   }
 
   [Command("loadout_cap", Description = "Show or set the loadout soul cap: loadout_cap [souls|default]")]
@@ -129,7 +132,9 @@ public class LoadoutPlugin : DeadworksPluginBase
 
     if (string.IsNullOrWhiteSpace(souls))
     {
-      AdminCommand.Reply(caller, $"[Loadout] Cap={Format(LoadoutService.MaxValue)} souls (default {Format(LoadoutService.DefaultMaxValue)})");
+      AdminCommand.Reply(
+        caller,
+        $"[Loadout] Cap={Format(LoadoutService.MaxValue)} souls, {ItemSlots.ForSouls(LoadoutService.MaxValue)} items (default {Format(LoadoutService.DefaultMaxValue)})");
       return;
     }
 
@@ -139,7 +144,9 @@ public class LoadoutPlugin : DeadworksPluginBase
 
     var previous = LoadoutService.MaxValue;
     LoadoutService.SetMaxValue(cap, ExecutionMode.Debug);
-    AdminCommand.Reply(caller, $"[Loadout] Cap {Format(previous)} -> {Format(cap)} (applies to the next builds handed out)");
+    AdminCommand.Reply(
+      caller,
+      $"[Loadout] Cap {Format(previous)} -> {Format(cap)}, {ItemSlots.ForSouls(cap)} items (applies to the next builds handed out)");
   }
 
   private static string Format(int souls) => souls.ToString("N0", System.Globalization.CultureInfo.InvariantCulture);

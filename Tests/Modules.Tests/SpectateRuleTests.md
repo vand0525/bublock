@@ -17,3 +17,8 @@ Unit tests for `Modules/Spectate/SpectateRule`.
 - `ManualActive` is true before the hold's end, false at it and with no hold.
 - `FollowReady` is true with no spawn seen and from the grace on; false
   inside it.
+- `FlyCamStep`: first sight waits; still for `FlyCamSettle` (1.5 s) or more
+  parks, 1 s waits; moving while settling is manual; after a park it
+  stays at the spot (the park's own jump does not count as moving) or
+  waits to settle again; once confirmed it stays at the spot while still and
+  is manual when moving or flown away. `FlyCamSettle` is under the 2 s camera tick.
