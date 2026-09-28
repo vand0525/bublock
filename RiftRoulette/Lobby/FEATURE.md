@@ -118,6 +118,8 @@ startup, hot reload, every join and every intermission;
 | `PauseRule.cs` | Pure pause rules: pause commands, pause convars, unpause and chat throttles (tested) |
 | `PauseGuard.cs` | Pause service: convars, blocking pause requests, automatic unpause, `/pause_allow` state |
 | `FlexSlots.cs` | Opens every flex slot on both team entities (`m_nFlexSlotsUnlocked = 15`), `Describe` |
+| `AutoRestartRule.cs` | Pure map reload rule: stuck join or 3 h up, only with nobody playing, not within 10 min of a map start (tested) |
+| `AutoRestartService.cs` | Join watch (connect to full connect), stuck joins, the 60 s check and `Server.ChangeLevel` map reload |
 
 ## Public operations
 
@@ -125,7 +127,8 @@ See `LobbyService.md`. Player commands: `/status`, `/commands` (built by
 `CommandList`). Admin commands: `/player_list`, `/player_info`,
 `/player_kick`, `/player_team`, `/lobby_setup`, `/lobby_flex`, `/pause_allow`, `dw_seat_spec` (console
 only, any time), `/seat_play`, `/seat_roam`, `/seat_status`, `/spec_auto`,
-`/spec_status`, `/spec_reset` (stream camera).
+`/spec_status`, `/spec_reset` (stream camera), `/restart_status`,
+`/restart_now`, `/restart_auto` (automatic map reload).
 Access (admin): `/player_ban <slot>`, `/ban_add`, `/ban_remove`,
 `/ban_list`, `/ban_modifier`, `/allow_add`, `/allow_remove`, `/allow_list`,
 `/access_mode [open|private]` (see `AccessPlugin.md`). Catalogued in
@@ -141,7 +144,10 @@ its mode. `AccessService` caches the last good `access.json` (the file is
 the source of truth and survives reloads and deploys). `BanStatueService`
 holds statues and rejoin strikes in memory (cleared by restart or reload). `PauseGuard` holds
 the pause on / off flag (off after every load), blocked and unpause counts,
-and when each player was last told pausing is off. Otherwise reads and releases picks in `Draft/DraftState` and
+and when each player was last told pausing is off. `AutoRestartService`
+holds the joins in progress, the stuck-join count (both cleared at every
+map start), the on / off flag (on after every load) and the map start /
+last reload times. Otherwise reads and releases picks in `Draft/DraftState` and
 redraws boards with `Draft/DraftService.RedrawBoards`.
 
 ## Dependencies
@@ -170,6 +176,9 @@ redraws boards with `Draft/DraftService.RedrawBoards`.
 - `pause-YYYYMMDD.log`: pause convars applied, each blocked pause request
   (player, `Source=command|message`, `Detail=`), automatic unpause attempts
   (Warning, so also in master).
+- `restart-YYYYMMDD.log`: every allowed connection (`Client connecting`),
+  `Join completed Seconds=`, stuck joins and map reloads (Warning, so
+  also in master), map starts.
 
 ## Lifecycle vs commands
 

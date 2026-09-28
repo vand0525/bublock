@@ -32,6 +32,7 @@ public class LobbyPlugin : DeadworksPluginBase
     Timer.Every(StreamCam.TickSeconds.Seconds(), () => StreamCam.Tick(Timer));
     Timer.Every(AutoStartService.WaitingReminderSeconds.Seconds(), () => AutoStartService.RemindWaiting());
     Timer.Every(BanStatueService.SustainSeconds.Seconds(), BanStatueService.Sustain);
+    Timer.Every(AutoRestartService.CheckSeconds.Seconds(), () => AutoRestartService.Check());
   }
 
   public override void OnUnload()
@@ -50,6 +51,8 @@ public class LobbyPlugin : DeadworksPluginBase
 
   public override void OnStartupServer()
   {
+    AutoRestartService.OnMapStart();
+    AdminSeat.ResetForMap();
     LobbyService.ApplyServerConvars();
   }
 
@@ -82,13 +85,16 @@ public class LobbyPlugin : DeadworksPluginBase
   public override bool OnClientConnect(ClientConnectEvent args)
   {
     EventCounters.Hit("client_connect");
-    return AccessService.AllowConnect(args.SteamId, args.Name) && AdminSeat.AllowConnect(args.SteamId, args.Name);
+    var allowed = AccessService.AllowConnect(args.SteamId, args.Name) && AdminSeat.AllowConnect(args.SteamId, args.Name);
+    AutoRestartService.OnConnect(args, allowed);
+    return allowed;
   }
 
   public override void OnClientFullConnect(ClientFullConnectEvent args)
   {
     EventCounters.Hit("client_full_connect");
     var player = args.Controller;
+    AutoRestartService.OnFullConnect(args.Slot, player);
 
     if (player == null)
       return;
@@ -97,6 +103,9 @@ public class LobbyPlugin : DeadworksPluginBase
       BanStatueService.Petrify(player, BanStatueService.RejoinKickSeconds, liveBan: false, Timer);
     else if (AdminSeat.SeatOnJoin(player))
     {
+      if (args.IsMapChangeReconnect)
+        AdminSeat.Forget(player.PlayerSteamId);
+
       AdminSeat.Sit(player, Timer);
       AdminSeat.SyncSoon(Timer);
     }
@@ -107,6 +116,7 @@ public class LobbyPlugin : DeadworksPluginBase
   public override void OnClientDisconnect(ClientDisconnectedEvent args)
   {
     EventCounters.Hit("client_disconnect");
+    AutoRestartService.OnDisconnect(args.Slot, args.IsMapChange);
 
     // Deadworks keeps the player through a map change: they reconnect to the next map.
     if (args.IsMapChange)
@@ -299,6 +309,37 @@ public class LobbyPlugin : DeadworksPluginBase
 
     var player = SeatTarget(caller);
     AdminCommand.Reply(caller, $"[Lobby] {AdminSeat.RoamNow(player, Timer, ExecutionMode.Debug)}");
+  }
+
+  [Command("restart_status", Description = "Auto restart: on/off, map uptime, stuck and in-progress joins")]
+  public void CmdRestartStatus(CCitadelPlayerController? caller)
+  {
+    AdminCommand.Authorize(caller, LobbyLog, "restart_status");
+
+    foreach (var line in AutoRestartService.Describe())
+      AdminCommand.Reply(caller, $"[Lobby] {line}");
+  }
+
+  [Command("restart_now", Description = "Reload the map now; every connected client reconnects by itself")]
+  public void CmdRestartNow(CCitadelPlayerController? caller)
+  {
+    AdminCommand.Authorize(caller, LobbyLog, "restart_now");
+    AdminCommand.Reply(caller, $"[Lobby] {AutoRestartService.Restart("admin", ExecutionMode.Debug)}");
+  }
+
+  [Command("restart_auto", Description = "Auto restart on or off until the next upload: restart_auto <on|off>")]
+  public void CmdRestartAuto(CCitadelPlayerController? caller, string state)
+  {
+    AdminCommand.Authorize(caller, LobbyLog, "restart_auto");
+
+    var on = state.Trim().ToLowerInvariant() switch
+    {
+      "on" or "1" => true,
+      "off" or "0" => false,
+      _ => throw new CommandException("Usage: restart_auto <on|off>")
+    };
+
+    AdminCommand.Reply(caller, $"[Lobby] {AutoRestartService.SetEnabled(on, ExecutionMode.Debug)}");
   }
 
   [Command("seat_status", Description = "Show player slots, the admin seat, and maxplayers")]

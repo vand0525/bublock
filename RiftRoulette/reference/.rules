@@ -234,6 +234,15 @@ Assume the git repo is rooted at `Bublock/`.
   admins stay seated (never participants). `/seat_roam` starts roaming (or
   re-places at the sign) only while nobody plays. `AdminSeat.SyncSoon` switches
   2 s after a join / leave / statue (never inside `OnClientFullConnect`).
+- Auto restart (`Lobby/AutoRestartService`, rule `AutoRestartRule`):
+  after hours up the server can stop letting new players finish joining
+  (players in keep playing). Every 60 s, with no participants, it reloads
+  the map (`Server.ChangeLevel(Server.MapName)`, never `quit`) after a
+  stuck join (connected, never full-connected: left, or 3 min) or 3 h up;
+  never within 10 min of a map start. Clients reconnect by themselves
+  (`IsMapChangeReconnect`). Map starts (`OnStartupServer`) must reset
+  per-map state: plugin statics survive a map change, pawns do not
+  (`AdminSeat.ResetForMap`).
 - Hero mode `duel` (`/match_mode 1v1`) copies one player's exact
   hero state (`Modules/Loadout` `LoadoutSnapshot`) onto both players with
   `/duel_copy <slot>` and locks them to it (`Lobby/HeroLock`, one instance
@@ -552,7 +561,7 @@ When debugging with Cursor: run `pull-logs.sh` first, then inspect
                            # round start/end, plus every feature Warning+
   <feature>-YYYYMMDD.log   # one per feature: draft, rift, lobby, worldtext,
                            # movement, hud, match, cleanup, commands,
-                           # watch, probe, spectate, betting, pause, ...
+                           # watch, probe, spectate, betting, pause, restart, ...
 ```
 
 - Every feature gets its own file (`BublockLog.For("Draft")` →

@@ -260,6 +260,40 @@ position, entity index.
 - **Side effects:** playing count and cap (12), seated and roaming counts, the `maxplayers` and `sv_visiblemaxplayers` values, then per seated admin: slot, name, team number, whether a pawn exists, whether roaming
 - **Notes:** use it to check that `maxplayers 13` took effect
 
+### Automatic map reload (`LobbyPlugin`, `Lobby/AutoRestartService`)
+
+Every 60 s, with nobody playing (seated admins and statues don't count),
+the server reloads its map (`changelevel`) when a join got stuck since
+the map started (a player connected but left without getting in, or was
+still connecting after 3 min) or the map has been up 3 hours; never
+within 10 minutes of a map start. Everyone connected, seated admins
+included, reconnects by themselves. Each connection, completed join and
+stuck join is logged in `restart-*.log`.
+
+#### /restart_status
+
+- **Invocation:** chat `/restart_status` | console `dw_restart_status`
+- **Who:** admin
+- **Calls:** `AutoRestartService.Describe`
+- **Mode:** Debug; read-only
+- **Side effects:** auto on / off, map name and uptime, stuck joins since the map started, joins in progress (one line each: slot, name, seconds connecting, stuck)
+
+#### /restart_now
+
+- **Invocation:** chat `/restart_now` | console `dw_restart_now`
+- **Who:** admin
+- **Calls:** `AutoRestartService.Restart("admin")` (→ `Server.ChangeLevel(Server.MapName)`)
+- **Mode:** Debug
+- **Side effects:** reloads the current map right away, even with players connected (a running match is lost; every client reconnects to the new map). Warning `Reloading the map Reason=admin ...` in `restart-*.log` and master. Refused while a map change is already under way or the map name is unknown
+
+#### /restart_auto
+
+- **Invocation:** chat `/restart_auto <on|off>` | console `dw_restart_auto <on|off>`
+- **Who:** admin
+- **Calls:** `AutoRestartService.SetEnabled`
+- **Mode:** Debug
+- **Side effects:** turns the automatic reload on or off until the next load or upload (on by default); master line `Auto restart on|off`. Error for any other argument
+
 ### Stream camera (`LobbyPlugin`, `Lobby/StreamCam`)
 
 While an admin is seated as an observer the stream camera runs by itself

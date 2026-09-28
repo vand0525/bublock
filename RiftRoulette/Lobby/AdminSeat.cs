@@ -313,6 +313,18 @@ public static class AdminSeat
     StreamCam.Forget(steamId);
   }
 
+  // A map change keeps clients but not their pawns; they rejoin through OnClientFullConnect and are seated fresh.
+  public static void ResetForMap()
+  {
+    foreach (var steamId in Seated)
+      StreamCam.Forget(steamId);
+
+    Log.Info("Admin seat reset for the new map Seated={Seated} Roaming={Roaming}", Seated.Count, Roaming.Count);
+    Seated.Clear();
+    Roaming.Clear();
+    CloakGeneration.Clear();
+  }
+
   // Hot reload wipes Seated and Roaming. Every connected admin goes back into the seat; one on a
   // hero pawn is roaming again (cloak re-applied in place), then Sync settles roam vs spectate.
   public static int Restore(ITimer timer, ExecutionMode mode = ExecutionMode.Clean)

@@ -92,6 +92,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Loadout level or ranks look wrong for the cap | boon / point thresholds or tier costs changed | `loadout-*.log` `Loadout applied` `Level=` `Points=` `Ranks=` vs the hero panel; wiki soul table | update `Modules/Loadout/Progression.cs` and `LoadoutPlanner.UpgradeCosts`, then `ProgressionTests` |
 | Random mode never gives some hero / new hero missing | new hero id not in enum or builds | patch-check Heroes HIT; self-test Heroes WARN | update `lib/`, `fetch-builds.py` |
 | Joining fails / players stuck in hero select | `Heroes.Skyrunner` removed or not selectable | patch-check `Skyrunner`; `lobby-*.log` | pick another lobby hero in `LobbyService` / `DraftService` |
+| New players never finish joining (players in keep playing) | unknown; seen after hours up | `restart-*.log` `Join never completed` / `Join stuck`; `/restart_status` | automatic map reload with nobody playing, or `/restart_now`; if joins still fail after a reload, restart the server process |
 | Players fall from the watch spot | skybox floor moved or removed | self-test Map floor WARN (compare to baseline); `watch-*.log` rescues | new map dump; move the watch anchors; `check-spots.py` |
 | Players spawn in walls at rift starts | map geometry changed | `/spots_walk sapphire|amber`; `check-spots.py` | new map dump, move anchors / `spots.json` |
 | Players can shoot / cast up top | modifier or state renamed / renumbered | self-test live Restraint FAIL; `restraint` Trace `refused` | new names from the schema DB / enum |
@@ -202,7 +203,9 @@ invisibility item and reading `modifiers-*.log`.
 
 ### Events and hooks
 
-`player_spawn` (Lobby, Duel, Random), `player_death` (Lobby, Stats, stream camera), `player_respawned` (Duel, Random), `player_hero_changed` (Draft); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnAddModifier` (DevTools `ModifierProbe`, `AddModifierEvent.ModifierVData.Name`; diagnostics only), `OnLoad`, `OnStartupServer`.
+`player_spawn` (Lobby, Duel, Random), `player_death` (Lobby, Stats, stream camera), `player_respawned` (Duel, Random), `player_hero_changed` (Draft); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnAddModifier` (DevTools `ModifierProbe`, `AddModifierEvent.ModifierVData.Name`; diagnostics only), `OnLoad`, `OnStartupServer` (also each map reload: `AutoRestartService.OnMapStart`, `AdminSeat.ResetForMap`).
+
+Map reload: `Server.ChangeLevel(Server.MapName)`, `Server.IsChangingLevel`, `IsMapChangeReconnect` on the connect events, `GlobalVars.CurTime` (uptime after a hot reload) in `Lobby/AutoRestartService`. Check with `/restart_status` after an update; `/restart_now` on an empty server should bring every connected client back.
 
 ### Enums and hero data
 
