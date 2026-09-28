@@ -31,6 +31,6 @@ from cdnjs).
 ## Guard
 
 Refuses to build (exit 1, value not printed) if any bundled doc contains a
-non-empty `DW_*` value from `scripts/server.env` or any IPv4 address other
+non-empty connection value from `scripts/server.env` (`DW_HOST`, `DW_PORT`, `DW_USER`, `DW_PASSWORD`, `DW_GAME_ADDR`) or any IPv4 address other
 than the README's public join address. The page can be shared further than
 the repo.

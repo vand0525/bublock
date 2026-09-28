@@ -29,6 +29,7 @@ deadworks/                 # Cursor workspace root
       Restraint/           # silence / disarm / no melee until released (dw_restrain*)
       Queue/               # reusable player join queue (no commands)
       Spectate/            # spectator camera: follow a player, park a free camera (no commands)
+      Teams/ Arena/ Session/ Economy/ RandomLoadout/  # engine modules for game types (redock fork, no commands)
     RiftRoulette/            # game mode DLL
       Session/             # session lifecycle lines in the master log
       Lobby/ Draft/ Rift/  # game-specific plugin classes
@@ -39,6 +40,8 @@ deadworks/                 # Cursor workspace root
       Balance/             # auto-balance swaps between rounds (Stage 13c)
       Duel/                # 1v1 mode: copied build, queue, winner stays on (Stage 13g, 13j)
       SelfTest/            # patch-day self-test of every game dependency (dw_selftest_*)
+    GunGame/               # game type (redock fork): continuous timed Gun Game, own DLL on Shared + Modules
+    templates/             # game-type scaffold used by scripts/new-game-type.sh
     DevTools/              # discovery / diagnostics
     CleanSlate/            # map cleanup helpers
     Tests/                 # local xUnit tests (never deployed)
@@ -55,6 +58,8 @@ deadworks/                 # Cursor workspace root
     scripts/fetch-deadworks.sh # pinned Deadworks API into lib/ when there is no workspace ../lib (CI)
     scripts/sftp-password.sh # SFTP password: DW_PASSWORD, macOS keychain or Linux keyring
     scripts/server-check.sh # read-only SFTP look: layout, Deadworks version vs lib/, plugins, logs
+    scripts/check-arena.py # check a game type's arena.json against the map mesh; --probe floor heights
+    scripts/new-game-type.sh # scaffold a new game type (own DLL) from templates/
     scripts/knowledge.sh   # regenerate knowledge/generated/ and site/ (api-index.cs, knowledge-graph.py, docs-site.py)
     knowledge/             # glossary, mental models, effects catalog, recipes, changelog; generated/ indexes + graph
     .github/workflows/     # ci.yml (build + test), deploy.yml (manual; runs deploy.sh --confirm)
@@ -218,6 +223,17 @@ Assume the git repo is rooted at `Bublock/`.
   fighters (`IsFighter`), only they get the build and lock and move into
   the rift; the loser goes to the back; auto-start counts the queue in 1v1
   mode. New "wait your turn" features reuse `PlayerQueue`.
+- Game types (redock fork): Rift Roulette is one game type; `Shared/` and
+  `Modules/` are the engine. Every other game type is its own DLL (its own
+  folder beside `RiftRoulette/`, scaffolded with `scripts/new-game-type.sh`)
+  that imports only `Shared` and module projitems, never another game
+  type's code; module *Commands.projitems stay in Rift Roulette. A server
+  runs one game type at a time: `scripts/server.env` `DW_PLUGINS` (the set)
+  and `DW_PARKED` (other game types, backed up and removed). A removed DLL
+  stays loaded until the server restarts, so restart after parking. Game
+  types never load together, so a player command may repeat across game
+  types (`/points`); admin commands keep a per-game prefix (`gg_*`), and
+  names still never collide with the tool plugins.
 - Hot reload: an upload hot-reloads each DLL, which runs
   `OnLoad(isReload: true)` but not `OnStartupServer` and drops timers from
   the previous load. Startup work that matters (CleanSlate cleanup, server

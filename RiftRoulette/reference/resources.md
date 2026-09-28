@@ -437,3 +437,16 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Used as:** `Modules/Loadout/Progression` (table), `LoadoutPlanner.AbilityPrefix` (build order walked against the unlock and point budgets), `LoadoutService.Apply` (level from the item value, prefix bits, both wallets 0), `GameLoop/SoulRule` (ability gains blocked in Random and 1v1 matches).
 - **To confirm in game:** partial masks (`0b11`, `0b111`) show the right tiers; the boon stats follow `Level` after the `ECheats` recalc; the `ability_blocked_*` self-test counters show which sources the game sends.
 - **Link / path:** `Bublock/Modules/Loadout/Progression.cs`, `Bublock/Modules/Loadout/LoadoutPlanner.cs`, `Bublock/Modules/Loadout/LoadoutService.cs`
+
+### 2026-09-28 — Deleting a plugin DLL does not unload it; restart the server
+
+- **Why hard / useful:** Switching game types by removing one DLL and uploading another leaves both running.
+- **Verified fact:** `PluginLoader` logged `Detected change` / `Loaded plugin` for the new `GunGame.dll` and reloads for changed DLLs, but nothing for the deleted `RiftRoulette.dll`: no `Unloaded plugin: Rift Roulette ...` until the server restarted (redock server, 02:39 → restart 02:41 UTC). `deploy.sh` parks a game type (`DW_PARKED`); restart afterwards.
+- **Link / path:** `scripts/deploy.sh.md` (Plugin sets), `citadel/console.log` `[PluginLoader]` lines
+
+### 2026-09-28 — dl_midtown lanes, citadel_active_lane, and native center spawns
+
+- **Why hard / useful:** Contained arenas need lane numbers and safe ground; the entity dump has them but not labelled.
+- **Verified fact (map dump, build 6698):** 12 `lane_marker_path` entities (`lanenum` / `laneslot` keys) at the south base: lane **1** west (x ≈ -1000), **4** middle (x ≈ ±800), **6** east (x ≈ +1000). `citadel_active_lane` (sv, rep, release): "Which lane should be active? 0 means all"; the Deadworks Deathmatch example sets 4; Gun Game's arena sets 4 (effect in game unverified). `citadel_gamemode_streetbrawl_enabled` exists (Valve's Street Brawl flow; not used). The middle lane street is z 376 from y ±1200 to ±2400 (probed with `scripts/check-arena.py --probe`); the center is layered (a platform at 576 with native `info_team_spawn` points for team 2 at y -128 and team 3 at y +128, bridges, the mid-boss pit at -768).
+- **Link / path:** `RiftRoulette/reference/maps/dl_midtown/entities.json`, `GunGame/Data/arena.json`, `scripts/check-arena.py`
+

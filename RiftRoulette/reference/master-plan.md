@@ -453,6 +453,24 @@ commands (including obvious supporting commands), colocated docs, a
 
 ---
 
+## Game types (redock fork)
+
+Rift Roulette is one game type; `Shared/` and `Modules/` are the engine.
+Other game types are their own DLLs on the engine
+(`scripts/new-game-type.sh`), one per server at a time (`DW_PLUGINS` /
+`DW_PARKED`). Engine modules added for them: `Teams`, `Arena`, `Session`,
+`Economy`, `RandomLoadout`.
+
+#### Stage G1 — Gun Game, continuous timed arena
+
+- [ ] Code, tests, and docs done; uploaded 2026-09-28 (stamp `20260928T023931Z`, Rift Roulette parked, server restarted); awaiting a playtest
+
+- **Goal:** `GunGame.dll`: no rounds, no rift. A mid-lane brawl arena (`GunGame/Data/arena.json`, all 26 spots pass `check-arena.py`), continuous 2-minute matches (`TimedSession`), a new random hero and top build on every kill (`RandomLoadouts`), most kills wins.
+- **Outputs:** `GunGame/` (`GunGameRules`, `GunGameService`, `LobbyPlugin`, `ArenaPlugin`, `MatchPlugin`), engine modules above, `Tests/GunGame.Tests`, module tests in `Modules.Tests`, `scripts/check-arena.py`, `scripts/new-game-type.sh` + `templates/`, deploy plugin sets
+- **Verify:** 2 players: spawns on the lane streets, a kill swaps the killer with a `N kills: <hero>` banner, leaving the bounds sends you back, the match ends at 2:00 with the winner, the next starts 5 s later
+- **Known issues:** souls reset on death (points should show as cumulative souls); one spawn spot per slot per team invites spawn camping (needs several random spots in the arena)
+- **Done when:** playtest confirms the loop
+
 ## Backlog (deferred ideas)
 
 - Cleanup bot that captures a rift left by a cancelled round. Blocked: no
@@ -534,3 +552,5 @@ Rows before the 2026-09-27 rebrand row use the old name (Rift Rumble,
 | 2026-09-27 | faster breaks + waiting message (code) | Intermission default 10 to 5 s; betting now closes `BettingService.LingerSeconds` (10 s) into the round instead of at round start (`MatchService.CloseBetting`, skipped if that round already ended, cancelled with the countdown), and the open line says so. Lone joiners left within 10-20 s (lucas 23:20, Irna 23:23): the `Waiting for players` banner only showed after a match ended. `AutoStartService.Check` now shows it (`Match starts when 1 more player joins`) plus a chat line when a join / load check finds too few players, and `RemindWaiting` repeats the banner every 20 s (`LobbyPlugin` timer). Tests: Shared 23, Modules 82, RiftRoulette 252. Next: upload approval (includes the full HP / turret row). |
 | 2026-09-27 | Trophy Collector ban + waiting message in chat (code) | `upgrade_trophy_collector` added to `LoadoutPlanner.Banned` and `fetch-builds.py` `BANNED_ITEMS`; stripped offline from the embedded `hero-builds.json` (40 builds, none left empty; `components` / `itemCosts` pruned) instead of a full re-fetch. The waiting message is now a chat line only (banners went by too fast and did not fit), repeated every 30 s. Tests unchanged. Next: upload approval. |
 | 2026-09-27 | budgeted build power (code) | Stored loadouts now match a real hero at the same net worth instead of level 36 with every ability maxed. `Modules/Loadout/Progression` embeds Deadlock's level table (wiki `Data:SoulUnlockData.json` + 600: 36 rows, 35 boons, 4 unlocks, 32 points); `LoadoutPlanner.AbilityPrefix` walks the build's ability order against those unlocks and points (tiers 1 / 2 / 5, stops at the first step that does not fit); `LoadoutService.Apply` plans the items first, sets `Level` from the item value, stamps the prefix bits, and zeroes both ability wallets (`LoadoutOptions.Level` removed). 18,000 souls is level 24 with 20 of 32 points. `GameLoop/SoulRule` also blocks ability-point and unlock gains (all sources but `ECheats`) during Random and 1v1 matches; Draft mode unchanged. `ApplySnapshot` / 1v1 setup unchanged. Tests: Shared 23, Modules 99, RiftRoulette 259. Uploaded together with the three rows above (backup `20260927T235556Z`). Next: check in game that partial tiers (`0b11`, `0b111`) show correctly (`Ranks=` in `loadout-*.log`). |
+| 2026-09-28 | 13k withdrawn | Gun Game moved out of Rift Roulette (owner: "Rift Roulette is the game type, not the engine"); Rift Roulette code back to `105f1b2`. Replaced by Stage G1. |
+| 2026-09-28 | G1 (code + push) | `GunGame.dll` on new engine modules `Teams`, `Arena`, `Session`, `Economy`, `RandomLoadout`; mid-lane brawl arena (26/26 spots pass `check-arena.py`); `new-game-type.sh` scaffold (a probe game type built and passed 5 tests). Tests: Shared 23, Modules 138, RiftRoulette 259, GunGame 9. Deployed with `DW_PLUGINS="GunGame DevTools CleanSlate"`, `DW_PARKED="RiftRoulette"` (stamp `20260928T023931Z`); the removed Rift Roulette DLL stayed loaded until a restart (02:41), after which only Gun Game loaded. |

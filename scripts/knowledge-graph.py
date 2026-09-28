@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 OUT = os.path.join(ROOT, "knowledge", "generated")
-SKIP_DIRS = {"bin", "obj", ".git", "lib", "logs", "site", ".github", "baseline", "maps", ".cursor"}
+SKIP_DIRS = {"bin", "obj", ".git", "lib", "logs", "site", ".github", "baseline", "maps", ".cursor", "templates"}
 CVARLIST = os.path.join(ROOT, "RiftRoulette", "reference", "cvarlist.md")
 ENTITY_DUMP = os.path.join(ROOT, "RiftRoulette", "reference", "maps", "dl_midtown", "entities.json")
 ENTITY_PREFIXES = ("npc_", "citadel_item_", "citadel_koth_", "citadel_gamerules", "citadel_shop_",
@@ -151,7 +151,8 @@ def build_containers():
         add_node("feature:" + rel(folder), "feature", os.path.basename(folder), path=rel(folder),
                  doc=rel(feature_md), summary=doc_summary(feature_md))
     for node_id in list(nodes):
-        parent = owner_of(os.path.join(ROOT, nodes[node_id]["path"], "x"))
+        # Search from the folder's parent, so a feature finds its plugin rather than itself.
+        parent = owner_of(os.path.join(ROOT, nodes[node_id]["path"]))
         if parent and parent != node_id:
             add_link(parent, node_id, "contains")
     for proj in walk((".csproj",)):
@@ -305,18 +306,42 @@ def refs_in(text):
     return found
 
 
+def mark_roles():
+    """A plugin that admits joining players (OnClientFullConnect) is a game type; the rest are tools."""
+    kids = defaultdict(list)
+    for l in links:
+        if l["kind"] == "contains":
+            kids[l["source"]].append(l["target"])
+    for node in nodes.values():
+        if node["kind"] != "plugin":
+            continue
+        stack, files = [node["id"]], []
+        while stack:
+            for kid in kids[stack.pop()]:
+                if nodes[kid]["kind"] == "source":
+                    files.append(kid)
+                else:
+                    stack.append(kid)
+        admits = any(l["source"] in files and l["target"] == "hook:OnClientFullConnect" for l in links)
+        node["role"] = "game type" if admits else "tool"
+
+
 def build_stages():
     """Master-plan stages (Theo's roadmap) with status, linked to the code each one names."""
     if not os.path.exists(MASTER_PLAN):
         return
     text = read(MASTER_PLAN)
-    roadmap = text.split("## Staged roadmap", 1)[-1].split("\n## ", 1)[0]
-    sections = re.split(r"^(#{3,4} .+)$", roadmap, flags=re.M)
+    # Theo's roadmap, then the fork's game-type stages (Stage G1, ...).
+    parts = [text.split(marker, 1)[-1].split("\n## ", 1)[0] for marker in ("## Staged roadmap", "## Game types") if marker in text]
+    sections = []
+    for part in parts:
+        split = re.split(r"^(#{3,4} .+)$", part, flags=re.M)
+        sections += list(zip(split[1::2], split[2::2]))
     order = 0
-    for heading, body in zip(sections[1::2], sections[2::2]):
+    for heading, body in sections:
         title = heading.lstrip("#").strip()
-        match = re.match(r"Stage (\d+[a-z]?)\b", title)
-        node_id = "stage:" + (match.group(1) if match else slug(title))
+        match = re.match(r"Stage ([A-Z]?\d+[a-z]?)\b", title)
+        node_id = "stage:" + (match.group(1).lower() if match else slug(title))
         box = re.search(r"^- \[(x| )\] (.+)$", body, flags=re.M)
         note = box.group(2) if box else ""
         status = ("done" if box and box.group(1) == "x"
@@ -353,8 +378,8 @@ def build_game_modes():
                  doc="knowledge/game-mode-recipes.md", status=status, summary=para[:220])
         for target in refs_in(body):
             add_link(node_id, target, "mode-uses")
-        for stage in set(re.findall(r"Stage (\d+[a-z]?)\b", body)):
-            add_link(node_id, "stage:" + stage, "planned-in")
+        for stage in set(re.findall(r"Stage ([A-Z]?\d+[a-z]?)\b", body)):
+            add_link(node_id, "stage:" + stage.lower(), "planned-in")
 
 
 # ---------------------------------------------------------- scripts and CI
@@ -541,6 +566,14 @@ def write_indexes(path):
         lines.append(f"| {cell(n['label'])} | {n['status']} | {cell(', '.join(used))} |")
     lines.append("")
 
+    plugins = sorted((n for n in nodes.values() if n["kind"] == "plugin"), key=lambda n: (n.get("role") != "game type", n["label"]))
+    lines += [f"## Plugins ({len(plugins)})", "", "Game types run one per server; tools run beside any of them.", "",
+              "| Plugin | Role | Engine modules |", "|---|---|---|"]
+    for n in plugins:
+        modules = [nodes[m]["label"] for m in outgoing(n["id"], {"imports"})]
+        lines.append(f"| {n['label']} | {n.get('role', '-')} | {', '.join(modules)} |")
+    lines.append("")
+
     files = sorted((n for n in nodes.values() if n["kind"] == "source"), key=lambda n: n["path"])
     lines += [f"## Types ({sum(len(n.get('types', [])) for n in files)})", "", "| Type | File | Summary |", "|---|---|---|"]
     for n in files:
@@ -565,6 +598,7 @@ def main():
     build_feature_deps()
     build_stages()
     build_game_modes()
+    mark_roles()
     seen = set()
     unique = []
     for l in links:

@@ -17,6 +17,13 @@ Join from the Deadlock console:
 
 ## Plugins (one DLL each)
 
+Game types run one at a time per server (`DW_PLUGINS` / `DW_PARKED` in
+`scripts/server.env`); the tool plugins run beside any of them.
+
+- [GunGame](GunGame/FEATURE.md): game type (redock fork). Continuous 2-minute
+  matches in a mid-lane brawl arena; every kill gives you a new random
+  hero and build; most kills wins. New game types: `scripts/new-game-type.sh`.
+
 - [RiftRoulette](RiftRoulette/FEATURE.md): the game mode
 - [CleanSlate](CleanSlate/FEATURE.md): strips lanes, NPCs and shops from the map
 - [DevTools](DevTools/FEATURE.md): discovery and diagnostics
@@ -31,6 +38,11 @@ Join from the Deadlock console:
 - [Restraint](Modules/Restraint/FEATURE.md): "can't fight" state
 - [Queue](Modules/Queue/FEATURE.md): player join queue
 - [Spectate](Modules/Spectate/FEATURE.md): spectator camera control (follow a player, park a free camera)
+- [Teams](Modules/Teams/FEATURE.md): team numbers, smaller-team placement, hero / team change guard
+- [Arena](Modules/Arena/FEATURE.md): contained fight areas from an `arena.json` asset
+- [Session](Modules/Session/FEATURE.md): continuous timed matches and a scoreboard
+- [Economy](Modules/Economy/FEATURE.md): soul rules (power only from builds)
+- [RandomLoadout](Modules/RandomLoadout/FEATURE.md): random hero + stored build per player
 
 ## Build
 

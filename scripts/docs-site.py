@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 OUT = os.path.join(ROOT, "site", "index.html")
 GRAPH = os.path.join(ROOT, "knowledge", "generated", "graph.json")
-SKIP_DIRS = {"bin", "obj", ".git", "lib", "logs", "site", "baseline", "maps", ".cursor"}
+SKIP_DIRS = {"bin", "obj", ".git", "lib", "logs", "site", "baseline", "maps", ".cursor", "templates"}
 SKIP_FILES = {"cvarlist.md"}
 EXTRA = ["RiftRoulette/reference/.rules"]
 # The page can travel further than the repo: refuse to build if a doc holds a server detail.
@@ -86,7 +86,8 @@ def server_secrets():
     if not os.path.exists(SERVER_ENV):
         return []
     with open(SERVER_ENV, encoding="utf-8") as f:
-        values = re.findall(r'^\s*DW_[A-Z_]+="?([^"#\n]+?)"?\s*(?:#.*)?$', f.read(), flags=re.M)
+        # Connection details only (host, port, user, password, game address), not settings like DW_PLUGINS.
+        values = re.findall(r'^\s*DW_(?:HOST|PORT|USER|PASSWORD|GAME_ADDR)="?([^"#\n]+?)"?\s*(?:#.*)?$', f.read(), flags=re.M)
     return [v.strip() for v in values if len(v.strip()) >= 4]
 
 
@@ -464,7 +465,7 @@ main { min-width: 0; padding-inline: 40px; padding-block: 32px 64px; }
       const n = nodesById.get(selected);
       if (!n) {
         el.innerHTML = `<p class="kind" style="color:var(--muted)">Legend</p><ul>${CATS.map(([k, l]) => `<li><button type="button" disabled><span class="legend-dot" style="background:${color(k)}"></span>${l}</button></li>`).join('')}</ul>
-          <h3>Start here</h3><ul>${['mode:gun-game', 'stage:13k', 'plugin:RiftRoulette', 'feature:RiftRoulette/GunGame', 'module:Modules/Restraint', 'event:player_death', 'workflow:.github/workflows/deploy.yml']
+          <h3>Start here</h3><ul>${['plugin:GunGame', 'plugin:RiftRoulette', 'mode:gun-game', 'stage:g1', 'module:Modules/Session', 'module:Modules/Arena', 'module:Modules/RandomLoadout', 'workflow:.github/workflows/deploy.yml']
             .filter(id => nodesById.has(id)).map(id => `<li><button type="button" data-id="${esc(id)}"><span class="legend-dot" style="background:${color(catOf(nodesById.get(id).kind))}"></span>${esc(nodesById.get(id).label)}</button></li>`).join('')}</ul>`;
       } else {
         const groups = new Map();
@@ -474,7 +475,7 @@ main { min-width: 0; padding-inline: 40px; padding-block: 32px 64px; }
           groups.get(label).push(other);
         });
         const doc = docForNode(n);
-        el.innerHTML = `<span class="kind" style="color:${color(catOf(n.kind))}">${esc(n.kind)}${n.audience ? ' · ' + esc(n.audience) : ''}${n.status ? ' · ' + esc(n.status) : ''}</span>
+        el.innerHTML = `<span class="kind" style="color:${color(catOf(n.kind))}">${esc(n.role || n.kind)}${n.audience ? ' · ' + esc(n.audience) : ''}${n.status ? ' · ' + esc(n.status) : ''}</span>
           <h2>${esc(n.label)}</h2>${n.path ? `<div class="path">${esc(n.path)}</div>` : ''}
           ${n.description ? `<p>${esc(n.description)}</p>` : ''}${n.summary ? `<p>${esc(n.summary)}</p>` : ''}
           ${doc ? `<button class="btn" type="button" id="open-doc">Open doc</button>` : ''}

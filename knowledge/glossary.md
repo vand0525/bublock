@@ -69,10 +69,13 @@ term is defined or used.
 | **Bench** | With an odd player count, one player sits out a round so teams stay even. | `RandomMode/BenchRule.cs` |
 | **Admin seat** | The 13th connection, admin only, on the spectator side. Admins land here on connect. | `Lobby/AdminSeat.cs` |
 | **Stream camera** | Automatic camera for a seated admin: follows fights, cuts to kills, top-down on big ults. | `Lobby/StreamCam.cs` |
-| **Gun Game** | Match format on Random mode (`/match_format gungame`, Stage 13k): each kill gives the killer a new random hero and build and one ladder step; first to the target wins. | `GunGame/FEATURE.md` |
-| **Kill ladder / target** | Gun Game's per-player kill count and the count that wins (default 10, `/gungame_target`). | `GunGame/GunGameLadder.cs` |
-| **Reroll** | A new random hero and build for one player mid-round, through Random mode's assignment and hero lock. | `RandomModeService.Reroll` |
-| **Match format** | How a match ends: `continuous` (until `/match_end`) or `gungame` (first to the kill target). Separate from the hero mode. | `GameLoop/MatchConfig.cs` |
+| **Engine** | `Shared/` + `Modules/*`: game-agnostic code every game type compiles in. | `knowledge/mental-models/building-a-game-type.md` |
+| **Game type** | A game as its own DLL on the engine (Rift Roulette, Gun Game). One runs per server. | `scripts/new-game-type.sh` |
+| **Parked** | A game type's DLL backed up and removed from the server (`DW_PARKED`); needs a restart to unload. | `scripts/deploy.sh.md` |
+| **Arena** | A contained fight area: team anchors, per-slot spots, bounds, from an `arena.json` asset. | `Modules/Arena/` |
+| **Session** | Continuous timed matches with a break and a scoreboard (no rounds). | `Modules/Session/` |
+| **Gun Game** | Game type: continuous 2-minute matches in the mid-lane arena; each kill gives the killer a new random hero and build; most kills wins. | `GunGame/FEATURE.md` |
+| **Roll** | A new random hero plus one of its stored builds for one player (`RandomLoadouts.Roll`). | `Modules/RandomLoadout/` |
 | **Stage** node | A master-plan entry in the knowledge graph, with its status and the code it names. | `scripts/knowledge-graph.py` |
 | **Winner stays on** | 1v1 mode: the first two in the queue fight, the loser goes to the back. | `Duel/DuelService.cs` |
 | **Chips** | Betting currency. Never affects gameplay. | `Betting/BetBook.cs` |

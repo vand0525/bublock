@@ -35,6 +35,13 @@ several ports: a **game port** (players `connect <ip>:<port>`) and an
 **SFTP port** (rclone SFTP, password or public key). Real values live only
 in git-ignored `scripts/server.env`.
 
+An unlisted server (`-nomaster`) does not answer server-browser queries on
+the game port, and the panel shows "Game offline". Neither means players
+can't join: test with a real `connect` and look for the player in
+`lobby-*.log`. Match settings (`/match_mode`, `/match_format`) can be set
+from the panel's server console as `dw_match_mode` / `dw_match_format`
+without anyone connected; they reset on every plugin load.
+
 | SFTP path | Holds |
 |---|---|
 | `/server/game/bin/win64/managed/plugins/` | our three DLLs |

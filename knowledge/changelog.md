@@ -16,6 +16,39 @@ we work.
 
 ## 2026-09-28
 
+**Gun Game becomes its own game type**
+
+- Rift Roulette is a game type, not the engine: Gun Game moved out of it
+  (Rift Roulette back to Theo's `105f1b2`) into `GunGame.dll` on the
+  engine. New engine modules: `Teams`, `Arena`, `Session`, `Economy`,
+  `RandomLoadout`.
+- Gun Game: continuous 2-minute matches, most kills wins, a new random hero
+  and build on every kill, in a contained mid-lane brawl arena (no rift).
+  Arena spots checked against the map mesh (`scripts/check-arena.py`, 26/26).
+- `scripts/new-game-type.sh` + `templates/`: scaffold a working game type
+  (a probe built and passed its tests).
+- Deploy plugin sets (`DW_PLUGINS` / `DW_PARKED`); deployed Gun Game, parked
+  Rift Roulette, restarted (a removed DLL stays loaded until then).
+- Tests: Shared 23, Modules 138, RiftRoulette 259, GunGame 9.
+- Open: souls reset on death (track points as cumulative souls); multiple
+  random spawn points against spawn camping (GitHub issues).
+
+**Earlier the same day**
+
+**Gun Game live on the redock server**
+
+- Deployed with backup (stamp `20260928T021126Z`), hot reload clean; set
+  `dw_match_format gungame` from the panel's server console (Random mode,
+  target 10, auto-start on). `MatchConfig` resets on every load, so set it
+  again after a restart or upload.
+- Correction: the server was joinable all along. The owner connected at
+  01:32 UTC (admin seat). An unlisted `-nomaster` server just doesn't answer
+  server-browser (A2S) queries; see `resources.md`. The "UDP blocked"
+  diagnosis earlier the same day was wrong, and no host ticket is needed.
+- Seen in the log: the seated admin's stream camera re-parks every 6-8 s
+  (`Reason=repark`, `Mode=InEye`), the `patch-day.md` symptom for fly cam
+  not taking; to look at on the next visit.
+
 **Gun Game, slice 1 (Stage 13k)**
 
 - `/match_format gungame` on Random mode: every credited kill gives the

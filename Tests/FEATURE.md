@@ -21,6 +21,11 @@ server. Never deployed to the server.
   baseline value), the `PlayerQueue` join queue, and the spectate choice
   (keep, killer, any, park) and straight-down angle. Service ops that touch entities or players are
   not tested here.
+- `Modules.Tests/` also covers the redock engine modules (`Teams`, `Arena`,
+  `Session`, `Economy`, `RandomLoadout`): `TeamsTests`, `ArenaSpotsTests`,
+  `SessionTests`, `EconomyTests`, `HeroRollTests`.
+- `GunGame.Tests/` — the Gun Game game type: `GunGameRules` (linked) and its
+  embedded arena asset loaded through `Modules/Arena`.
 - `RiftRoulette.Tests/` — xUnit tests for pure Rift Roulette pieces, compiled in
   directly as linked files (`RiftRoulette/Draft/DraftState.cs`,
   `DraftPools.cs`, `DraftBoardText.cs`, `RiftRoulette/Lobby/RiftRouletteTeams.cs`,

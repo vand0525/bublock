@@ -8,6 +8,7 @@ related:
   - mental-models/talking-to-the-game.md
   - mental-models/rift-roulette-architecture.md
   - mental-models/ship-and-operate.md
+  - mental-models/building-a-game-type.md
   - effects-catalog.md
   - game-mode-recipes.md
   - changelog.md
@@ -39,8 +40,9 @@ Read top to bottom until you have enough for the task.
 | 4 | [rift-roulette-architecture.md](mental-models/rift-roulette-architecture.md) | How is the game mode put together, and where does new code go? |
 | 5 | [effects-catalog.md](effects-catalog.md) | Which effects are proven, which are untested, and which to avoid? |
 | 6 | [game-mode-recipes.md](game-mode-recipes.md) | How do those effects combine into new modes? |
-| 7 | [ship-and-operate.md](mental-models/ship-and-operate.md) | Build, CI, deploy, logs, patch day, server layout |
-| 8 | [changelog.md](changelog.md) | What changed in this fork, and when |
+| 7 | [building-a-game-type.md](mental-models/building-a-game-type.md) | How do I make a new game type on the engine? |
+| 8 | [ship-and-operate.md](mental-models/ship-and-operate.md) | Build, CI, deploy, logs, patch day, server layout |
+| 9 | [changelog.md](changelog.md) | What changed in this fork, and when |
 
 ## Generated references (rebuild, never hand-edit)
 

@@ -28,6 +28,8 @@ and add the dependency to `SelfTest/GameDependencies` and `patch-day.md` §5.
 |---|---|---|---|
 | Teleport a player (position + facing) | `pawn.Teleport(...)` | verified | `Modules/Movement/MovementService.cs` |
 | Teleport a group without stacking | anchor + per-slot offset from `spots.json` | verified | `Round/SlotSpots.cs` |
+| Contain players to an arena | bounds box in `arena.json`, strays sent back each second | built, awaiting playtest | `Modules/Arena/ArenaService.cs` (`ReturnStrays`) |
+| Make only one lane active | `citadel_active_lane <n>` (1 west, 4 middle, 6 east) | untested | `GunGame/Data/arena.json` |
 | Point the client camera | `CCitadelUserMsg_SetClientCameraAngles` | verified | `MovementService.SetViewAngle` |
 | Move a player to a team | `ChangeTeam(team, false)` (2 Amber, 3 Sapphire) | verified | `Lobby/LobbyService.cs` |
 | Make a player a spectator | `ChangeTeam(1, false)` then `MakeObserver()` next tick | verified | `Lobby/AdminSeat.cs` |
@@ -72,7 +74,7 @@ and add the dependency to `SelfTest/GameDependencies` and `patch-day.md` §5.
 | Effect | How | Status | Where |
 |---|---|---|---|
 | Change a player's hero | `SelectHero(Heroes.X)`, only while alive | verified | `Lobby/LobbyService.cs`; never while dead (`.rules` §8) |
-| Swap a living player's hero mid-fight, then give a build | `SelectHero` then `LoadoutService.Swap` applies 1 s later; route it through `RandomModeService.Reroll` so the hero lock allows it | untested on our server (the Deadworks Deathmatch example does it every minute) | `GunGame/GunGameService.cs` (Stage 13k) |
+| Swap a living player's hero mid-fight, then give a build | `SelectHero` then `LoadoutService.Swap` applies 1 s later; route it through `RandomModeService.Reroll` so the hero lock allows it | verified (owner playtest, 2026-09-28) | `Modules/RandomLoadout/RandomLoadouts.cs`, used by `GunGame/` |
 | Allow duplicate heroes | convar `citadel_allow_duplicate_heroes 1` | verified | `LobbyService` |
 | Give a full build (items, imbues, ability ranks, level) | `ResetHero`, `AddItem`, `ImbueItem`, ability upgrade bits, currencies | verified | `Modules/Loadout/LoadoutService.cs` |
 | Copy one player's exact hero state to another | `LoadoutSnapshot` | verified | `Modules/Loadout/LoadoutSnapshot.cs` |
@@ -120,3 +122,4 @@ and add the dependency to `SelfTest/GameDependencies` and `patch-day.md` §5.
 | Survive hot reload | redo startup work in `OnLoad(isReload: true)` | verified | `CleanSlate/CleanSlatePlugin.cs` |
 | Start a match inside `OnClientFullConnect` | hero swaps are lost | **avoid** | `.rules` §0.2 |
 | Start a match on disconnect | crashed the server | **avoid** | `.rules` §0.2 |
+| Remove a game type by deleting its DLL only | the loaded plugin keeps running until a restart | **avoid** (restart after parking) | `resources.md` 2026-09-28 |

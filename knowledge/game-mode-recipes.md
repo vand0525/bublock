@@ -36,32 +36,30 @@ pick up as their own stage in `master-plan.md`.
 
 ### Gun Game
 
-Stage 13k in `RiftRoulette/reference/master-plan.md`; code in
-`RiftRoulette/GunGame/`. Every kill moves the killer up a kill ladder and
-swaps them, right away, to a new random hero with one of its real top
-builds; the first to the target wins the match.
+Its own game type, `GunGame.dll` (Stage G1 in
+`RiftRoulette/reference/master-plan.md`; `GunGame/FEATURE.md`). No rounds,
+no rift: a contained mid-lane brawl, continuous 2-minute matches, and every
+kill swaps the killer to a new random hero with a real top build.
 
-- **Loop:** Rift Roulette's rounds and rifts, unchanged (`MatchService`);
-  the match also ends on the winning kill, then auto-starts again 10 s
-  later (`AutoStartService`).
-- **Setup:** Random mode's intermission draw (`RandomModeService`), even
-  teams and the bench, as always. Turn it on with `/match_mode random`
-  and `/match_format gungame`; `/gungame_target <n>` sets the ladder
-  length.
-- **Rules:** a kill counts when `StatsService` credits it (human killer,
-  enemy victim, hero-lock kills skipped). `GunGameService` then calls
-  `RandomModeService.Reroll`, which goes through the same assignment and
-  hero lock as the draw, then `LoadoutService.Swap` (`SelectHero` on the
-  living killer, build 1 s later). Souls stay blocked (`SoulRule`), so
-  power comes only from each new build.
-- **Feedback:** `Kill 3/10: <hero>` banner with the build and its soul
-  value; `/ladder`; the stats boards' kill column is the ladder; the
-  `Match over` banner names the winner.
+- **Loop:** `TimedSession` (Session module): from 2 players, 2-minute
+  matches, most kills wins, 5 s result break, next match.
+- **Setup:** smaller team on join (`DeadlockTeams`), a random hero and
+  build (`RandomLoadouts`), spawns on the team's street in the middle lane
+  (`ArenaSpots`, `Data/arena.json`), strays sent back every second.
+- **Rules:** an enemy kill by a player scores (`GunGameRules.Credits`) and
+  rerolls the killer (`RandomLoadouts.Roll` → `LoadoutService.Swap`); menu
+  hero picks and team changes refused (`ChoiceGuard`); earned souls blocked
+  (`SoulRule`).
+- **Feedback:** `N kills: <hero>` / build and souls banner, `10 seconds
+  left`, the winner banner, `/points`.
 - **Levers:** `player_death` (verified), `SelectHero` on a living pawn
-  mid-round (untested on our server; the Deadworks Deathmatch example does
-  it every minute), the loadout path (verified).
-- **Next:** a continuous arena (respawn into the fight, no rift), a fixed
-  hero ladder instead of random, weaker builds higher up the ladder.
+  mid-fight (verified in the owner's playtest, 2026-09-28), the loadout
+  path (verified), `citadel_active_lane 4` (untested effect).
+- **Open issues:** souls reset on death (the score should show as
+  cumulative souls); one spot per slot per team invites spawn camping
+  (several random spots in the arena).
+- **Next:** a fixed hero ladder option, weaker builds higher up, a world
+  scoreboard (`WorldText`).
 
 ## Designs (not built)
 
@@ -179,8 +177,8 @@ rounds).
 
 | Idea | Kind | First lever to prove |
 |---|---|---|
-| Grifball | mode | designed above; melee-only one-hit kills (`ShootingDisabled` + `OnTakeDamage` → `Hurt`) |
-| Fat Boy / Zombie Escape | mode | designed above; the forced rift as the escape point, infection by kill-then-respawn |
+| Grifball | mode | designed above; its own game type from the scaffold (Arena + Session already fit), then melee-only one-hit kills |
+| Fat Boy / Zombie Escape | mode | designed above; build it as its own game type (`scripts/new-game-type.sh`), with an escape zone instead of Rift Roulette's rift |
 | Bumper cars | mode | knockback-only fighting (`OnTakeDamage` changes, untested beyond `Stop`) |
 | Lane practice | practice | turning one lane and its troopers back on (`citadel_active_lane`, `citadel_trooper_spawn_enabled`, verified as convars we set) |
 | Build orders | practice | stepping a player through a stored build (`Modules/Loadout`, verified) |

@@ -15,6 +15,10 @@ start with `Bublock/`, which is this repo's root.
 
 ## This fork
 
+- Game types: Rift Roulette is one game type, `Shared/` + `Modules/` are the
+  engine. New game types are their own DLLs (`scripts/new-game-type.sh`),
+  never modes inside another game type. The server runs one at a time
+  (`DW_PLUGINS` / `DW_PARKED`); restart after parking one.
 - The owner's server is an experimental debug and game-mode planning server:
   try things, use Debug-mode admin commands, and write findings back into
   `knowledge/`. `scripts/server-check.sh` is the read-only first look.

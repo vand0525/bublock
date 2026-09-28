@@ -9,7 +9,7 @@ Every command, game dependency, hook and type in the code, with where it lives.
 Generated from source; the command catalogs (`reference/user-commands.md`,
 `admin-commands.md`) stay the authority for behavior.
 
-## Commands (104)
+## Commands (107)
 
 | Command | Who | Description | File |
 |---|---|---|---|
@@ -43,9 +43,12 @@ Generated from source; the command catalogs (`reference/user-commands.md`,
 | `/ent_info` | admin | Show fields of every entity with a designer name: ent_info <designerName> | `DevTools/DevToolsPlugin.cs` |
 | `/ent_remove` | admin | Remove every entity with a designer name: ent_remove <designerName> | `DevTools/DevToolsPlugin.cs` |
 | `/ent_snapshot` | admin | Remember every entity for a later ent_diff | `DevTools/DevToolsPlugin.cs` |
-| `/gungame_reroll` | admin | Give a player a new random hero and build now, as a Gun Game kill does: gungame_reroll <slot> | `RiftRoulette/GunGame/GunGamePlugin.cs` |
-| `/gungame_status` | admin | Gun Game: on or off, target, winner, every player's kills | `RiftRoulette/GunGame/GunGamePlugin.cs` |
-| `/gungame_target` | admin | Set the Gun Game kill target between matches: gungame_target <1-50> | `RiftRoulette/GunGame/GunGamePlugin.cs` |
+| `/gg_arena` | admin | Send a player to their arena spot now: gg_arena <slot> | `GunGame/ArenaPlugin.cs` |
+| `/gg_end` | admin | End the current Gun Game match now and show the result | `GunGame/MatchPlugin.cs` |
+| `/gg_reroll` | admin | Give a player a new random hero and build now, as a kill does: gg_reroll <slot> | `GunGame/MatchPlugin.cs` |
+| `/gg_start` | admin | Start a Gun Game match now, even with one player | `GunGame/MatchPlugin.cs` |
+| `/gg_status` | admin | Gun Game: phase, match, time left, kills, arena, heroes | `GunGame/MatchPlugin.cs` |
+| `/gg_time` | admin | Set the Gun Game match length from the next match: gg_time <30-1800 seconds> | `GunGame/MatchPlugin.cs` |
 | `/hud_announce` | admin | Show an on-screen banner to everyone: hud_announce <title> [\| description] | `Modules/Hud/HudPlugin.cs` |
 | `/hud_say` | admin | Say something to everyone as a big on-screen banner: hud_say <message> | `Modules/Hud/HudPlugin.cs` |
 | `/loadout_copy` | admin | Copy one player's exact hero, items, ability upgrades and level onto another: loadout_copy <from> <to> | `Modules/Loadout/LoadoutPlugin.cs` |
@@ -108,9 +111,9 @@ Generated from source; the command catalogs (`reference/user-commands.md`,
 | `/chips` | player | Show your betting chips and your bet | `RiftRoulette/Betting/BettingPlugin.cs` |
 | `/commands` | player | List the commands players can use | `RiftRoulette/Lobby/LobbyPlugin.cs` |
 | `/heroes` | player | Show both hero pools and which heroes are taken | `RiftRoulette/Draft/DraftPlugin.cs` |
-| `/ladder` | player | Show the Gun Game kill ladder and your place | `RiftRoulette/GunGame/GunGamePlugin.cs` |
 | `/pick` | player | Draft a hero: pick <hero> | `RiftRoulette/Draft/DraftPlugin.cs` |
 | `/picks` | player | List drafted heroes and who picked them | `RiftRoulette/Draft/DraftPlugin.cs` |
+| `/points` | player | Show the Gun Game kills this match, your place, and the time left | `GunGame/MatchPlugin.cs` |
 | `/queue` | player | 1v1: join the queue (winner stays on), or show your place in it | `RiftRoulette/Duel/DuelPlugin.cs` |
 | `/score` | player | Show the match score | `RiftRoulette/GameLoop/GameLoopPlugin.cs` |
 | `/stats` | player | Show your kills, deaths, and assists this match | `RiftRoulette/Stats/StatsPlugin.cs` |
@@ -127,10 +130,10 @@ What the code touches in the game. A new entry here needs a self-test and a row 
 
 | Name | Used in |
 |---|---|
-| `player_death` | `RiftRoulette/Lobby/LobbyPlugin.cs`, `RiftRoulette/Stats/StatsPlugin.cs` |
+| `player_death` | `GunGame/MatchPlugin.cs`, `RiftRoulette/Lobby/LobbyPlugin.cs`, `RiftRoulette/Stats/StatsPlugin.cs` |
 | `player_hero_changed` | `RiftRoulette/Draft/DraftPlugin.cs` |
-| `player_respawned` | `RiftRoulette/Duel/DuelPlugin.cs`, `RiftRoulette/RandomMode/RandomPlugin.cs` |
-| `player_spawn` | `RiftRoulette/Duel/DuelPlugin.cs`, `RiftRoulette/Lobby/LobbyPlugin.cs`, `RiftRoulette/RandomMode/RandomPlugin.cs` |
+| `player_respawned` | `GunGame/ArenaPlugin.cs`, `RiftRoulette/Duel/DuelPlugin.cs`, `RiftRoulette/RandomMode/RandomPlugin.cs` |
+| `player_spawn` | `GunGame/ArenaPlugin.cs`, `RiftRoulette/Duel/DuelPlugin.cs`, `RiftRoulette/Lobby/LobbyPlugin.cs`, `RiftRoulette/RandomMode/RandomPlugin.cs` |
 | `player_used_ability` | `RiftRoulette/Lobby/LobbyPlugin.cs` |
 
 ### Hooks (11)
@@ -138,14 +141,14 @@ What the code touches in the game. A new entry here needs a self-test and a row 
 | Name | Used in |
 |---|---|
 | `OnChatMessage` | `RiftRoulette/Betting/BettingPlugin.cs` |
-| `OnClientConCommand` | `RiftRoulette/GameLoop/GameLoopPlugin.cs` |
+| `OnClientConCommand` | `GunGame/LobbyPlugin.cs`, `RiftRoulette/GameLoop/GameLoopPlugin.cs` |
 | `OnClientConnect` | `RiftRoulette/Lobby/LobbyPlugin.cs` |
-| `OnClientDisconnect` | `RiftRoulette/Lobby/LobbyPlugin.cs` |
-| `OnClientFullConnect` | `RiftRoulette/Lobby/LobbyPlugin.cs` |
+| `OnClientDisconnect` | `GunGame/LobbyPlugin.cs`, `RiftRoulette/Lobby/LobbyPlugin.cs` |
+| `OnClientFullConnect` | `GunGame/LobbyPlugin.cs`, `RiftRoulette/Lobby/LobbyPlugin.cs` |
 | `OnGameFrame` | `Modules/Restraint/RestraintPlugin.cs`, `RiftRoulette/GameLoop/GameLoopPlugin.cs` |
-| `OnLoad` | `CleanSlate/CleanSlatePlugin.cs`, `DevTools/DevToolsPlugin.cs`, `RiftRoulette/Draft/DraftPlugin.cs`, `RiftRoulette/GameLoop/GameLoopPlugin.cs`, `RiftRoulette/Lobby/AccessPlugin.cs`, `RiftRoulette/Lobby/LobbyPlugin.cs`, `RiftRoulette/Session/SessionPlugin.cs` |
-| `OnModifyCurrency` | `RiftRoulette/GameLoop/GameLoopPlugin.cs` |
-| `OnStartupServer` | `CleanSlate/CleanSlatePlugin.cs`, `DevTools/DevToolsPlugin.cs`, `RiftRoulette/Draft/DraftPlugin.cs`, `RiftRoulette/Lobby/LobbyPlugin.cs`, `RiftRoulette/Session/SessionPlugin.cs` |
+| `OnLoad` | `CleanSlate/CleanSlatePlugin.cs`, `DevTools/DevToolsPlugin.cs`, `GunGame/ArenaPlugin.cs`, `GunGame/LobbyPlugin.cs`, `RiftRoulette/Draft/DraftPlugin.cs`, `RiftRoulette/GameLoop/GameLoopPlugin.cs`, `RiftRoulette/Lobby/AccessPlugin.cs`, `RiftRoulette/Lobby/LobbyPlugin.cs`, `RiftRoulette/Session/SessionPlugin.cs` |
+| `OnModifyCurrency` | `GunGame/LobbyPlugin.cs`, `RiftRoulette/GameLoop/GameLoopPlugin.cs` |
+| `OnStartupServer` | `CleanSlate/CleanSlatePlugin.cs`, `DevTools/DevToolsPlugin.cs`, `GunGame/LobbyPlugin.cs`, `RiftRoulette/Draft/DraftPlugin.cs`, `RiftRoulette/Lobby/LobbyPlugin.cs`, `RiftRoulette/Session/SessionPlugin.cs` |
 | `OnTakeDamage` | `RiftRoulette/GameLoop/GameLoopPlugin.cs` |
 | `OnUnload` | `DevTools/DevToolsPlugin.cs`, `RiftRoulette/Session/SessionPlugin.cs` |
 
@@ -153,20 +156,20 @@ What the code touches in the game. A new entry here needs a self-test and a row 
 
 | Name | Used in |
 |---|---|
-| `citadel_active_lane` | `CleanSlate/CleanSlateService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
-| `citadel_allow_duplicate_heroes` | `RiftRoulette/Lobby/LobbyService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
-| `citadel_allow_purchasing_anywhere` | `RiftRoulette/GameLoop/ShopAccess.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
+| `citadel_active_lane` | `CleanSlate/CleanSlateService.cs`, `GunGame/GunGameService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
+| `citadel_allow_duplicate_heroes` | `GunGame/GunGameService.cs`, `RiftRoulette/Lobby/LobbyService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
+| `citadel_allow_purchasing_anywhere` | `GunGame/GunGameService.cs`, `RiftRoulette/GameLoop/ShopAccess.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_crate_disable_early_spawn` | `CleanSlate/CleanSlateService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_crate_respawn_interval` | `CleanSlate/CleanSlateService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_crate_spawn_enabled` | `CleanSlate/CleanSlateService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_crate_spawn_initial_delay` | `CleanSlate/CleanSlateService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_koth_early_warning_time` | `RiftRoulette/SelfTest/GameDependencies.cs` |
-| `citadel_koth_enabled` | `RiftRoulette/Lobby/LobbyService.cs`, `RiftRoulette/Rift/RiftGameRules.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
+| `citadel_koth_enabled` | `GunGame/GunGameService.cs`, `RiftRoulette/Lobby/LobbyService.cs`, `RiftRoulette/Rift/RiftGameRules.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_koth_warning_time` | `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_midboss_initial_spawn_time_override` | `CleanSlate/CleanSlateService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_npc_spawn_enabled` | `CleanSlate/CleanSlateService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_player_override_spawn_time` | `RiftRoulette/SelfTest/GameDependencies.cs` |
-| `citadel_team_size` | `RiftRoulette/Lobby/LobbyService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
+| `citadel_team_size` | `GunGame/GunGameService.cs`, `RiftRoulette/Lobby/LobbyService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `citadel_trooper_spawn_enabled` | `CleanSlate/CleanSlateService.cs`, `RiftRoulette/SelfTest/GameDependencies.cs` |
 | `sv_cheats` | `Shared/Cheats/Cheats.cs` |
 
@@ -261,7 +264,7 @@ From `RiftRoulette/reference/master-plan.md`; each links to the code its entry n
 | Stage 13c: Match stats boards, auto-balance, balanced joins | awaiting playtest | /balance_auto, /balance_now, /balance_status, /stats, /stats_board, /stats_reset, player_death, player_spawn, Balance, RandomMode, Stats, HeroBuildCatalog ... |
 | Stage 13d: Auto-start the match | awaiting playtest | /match_auto, /match_end, /match_status, AutoStartRule, AutoStartService, GameLoopPlugin, LobbyService, AutoStartRuleTests |
 | Stage 13e: Ban Cultist Sacrifice | awaiting playtest | /loadout_list, LoadoutPlanner, HeroBuildCatalogTests, fetch-builds.py |
-| Stage 13f: Admin seat (13th connection) | awaiting playtest | /seat_play, /seat_spec, /seat_status, player_spawn, AdminSeat, AdminSeatRule, LobbyPlugin, Participants, RandomModeService, AdminSeatRuleTests, OnClientConnect |
+| Stage 13f: Admin seat (13th connection) | awaiting playtest | /seat_play, /seat_spec, /seat_status, player_spawn, LobbyPlugin, AdminSeat, AdminSeatRule, Participants, RandomModeService, AdminSeatRuleTests, OnClientConnect |
 | Stage 13g: 1v1 mode (exact copy, locked) | awaiting playtest | /duel_clear, /duel_copy, /duel_status, /loadout_copy, /match_mode, Duel, LoadoutService, LoadoutSnapshot, DraftService, DuelPlugin, DuelService, AutoStartService ... |
 | Stage 13h: Restrain inactive players | awaiting playtest | /restrain, /restrain_list, /restrain_release, /status_add, /status_remove, RestraintPlugin, RestraintService, RoundFlow, OnGameFrame, modifier_citadel_silenced, Restraint |
 | Stage 13i: Watch spot above the rift | awaiting playtest | /rift_next, BoardLayout, RiftRouletteLocations, RoundLocations, WatchSpot, WatchSpotRule, RoundLocationsTests, WatchSpotRuleTests |
@@ -270,7 +273,7 @@ From `RiftRoulette/reference/master-plan.md`; each links to the code its entry n
 | Quiet banners, reload, leftover rift | awaiting playtest | /match_end, citadel_koth_cashin, RiftService, RiftSide, RiftSidesTests |
 | Per-slot spots | awaiting playtest | /spots_list, /spots_walk, MovementLocation, RoundFlow, SlotSpots, SpotCheck, SpotsPlugin, WatchSpot, MovementLocationTests, SlotSpotsTests, check-spots.py |
 | Patch-day readiness | open | /selftest_live, /selftest_run, Patch day runbook, SelfTest, HeroBuildCatalog, ServerConVars, patch-baseline.sh, patch-check.py |
-| Stage 13k: Gun Game format (redock fork) | open | /gungame_reroll, /gungame_status, /gungame_target, /ladder, /match_format, AutoStartService, MatchConfig, MatchService, GunGameLadder, GunGamePlugin, GunGameService, RandomModeService ... |
+| Stage G1: Gun Game, continuous timed arena | awaiting playtest | ArenaPlugin, GunGameRules, GunGameService, LobbyPlugin, MatchPlugin, RandomLoadouts, TimedSession, GunGame.dll, check-arena.py, new-game-type.sh |
 
 ## Game modes (9)
 
@@ -279,8 +282,8 @@ From `knowledge/game-mode-recipes.md`; each links to the levers and code it uses
 | Mode | Status | Uses |
 |---|---|---|
 | 1v1 winner stays on (duel mode) | shipped | LoadoutSnapshot, PlayerQueue, HeroLock, Queue |
-| Rift Roulette (random mode) | shipped | Balance, MatchService, SoulRule, BenchRule, RiftGameRules, OnTakeDamage, Loadout, Restraint |
-| Gun Game | in progress | /gungame_target, /ladder, /match_format, /match_mode, Bublock — Master Plan, player_death, GunGame, LoadoutService, AutoStartService, MatchService, SoulRule, GunGameService, RandomModeService, StatsService, Stage 13k: Gun Game format (redock fork) |
+| Rift Roulette (random mode) | shipped | Balance, SoulRule, MatchService, BenchRule, RiftGameRules, OnTakeDamage, Loadout, Restraint |
+| Gun Game | in progress | Bublock — Master Plan, player_death, GunGameRules, ArenaSpots, SoulRule, LoadoutService, RandomLoadouts, TimedSession, ChoiceGuard, DeadlockTeams, Stage G1: Gun Game, continuous timed arena |
 | Endless mid-rift | designed | Endless mid-rift mode (shelved proposal) |
 | Fat Boy / Zombie Escape | designed | Balance, HeroLock, RandomModeService, RiftService, OnTakeDamage, Loadout |
 | Grifball | designed | /status_add, citadel_player_override_spawn_time, player_death, player_spawn, HeroLock, OnGameFrame, OnTakeDamage, EModifierState.ShootingDisabled, Loadout |
@@ -288,7 +291,18 @@ From `knowledge/game-mode-recipes.md`; each links to the levers and code it uses
 | Juggernaut | designed | player_death, LoadoutService, OnTakeDamage |
 | Last team standing | designed | citadel_player_override_spawn_time, player_spawn, RoundFlow, WatchSpot |
 
-## Types (174)
+## Plugins (4)
+
+Game types run one per server; tools run beside any of them.
+
+| Plugin | Role | Engine modules |
+|---|---|---|
+| GunGame.dll | game type | Arena, Economy, Hud, Loadout, Movement, RandomLoadout, Session, Teams, Shared |
+| RiftRoulette.dll | game type | Hud, Loadout, Movement, Queue, Restraint, Spectate, WorldText, Shared |
+| CleanSlate.dll | tool | Shared |
+| DevTools.dll | tool | Shared |
+
+## Types (191)
 
 | Type | File | Summary |
 |---|---|---|
@@ -296,6 +310,15 @@ From `knowledge/game-mode-recipes.md`; each links to the levers and code it uses
 | `CleanSlateService` | `CleanSlate/CleanSlateService.cs` | Static service holding the CleanSlate map-cleanup operations. |
 | `CleanupResult` | `CleanSlate/CleanupResult.cs` | Immutable result of one `CleanSlateService.RemoveMapEntities` run. |
 | `DevToolsPlugin` | `DevTools/DevToolsPlugin.cs` | Deadworks admin/diagnostics plugin: entity find/inspect/remove, snapshot and diff, hero watch, log path. |
+| `ArenaPlugin` | `GunGame/ArenaPlugin.cs` | Thin host for the arena. |
+| `GunGameRules` | `GunGame/GunGameRules.cs` | Gun Game's own rules and player-facing text. |
+| `GunGameService` | `GunGame/GunGameService.cs` | The whole Gun Game game type as a composition of engine modules; the plugin classes only forward hooks here. |
+| `LobbyPlugin` | `GunGame/LobbyPlugin.cs` | Thin host for joins, leaves and the server rules. |
+| `MatchPlugin` | `GunGame/MatchPlugin.cs` | Thin host for kills and match commands. |
+| `ArenaService` | `Modules/Arena/ArenaService.cs` | Sends a player to their own arena spot through `Modules/Movement`. |
+| `ArenaBounds` | `Modules/Arena/ArenaSpots.cs` | Where a game type's players spawn: one anchor per team plus a per-slot offset, read from a JSON asset the game type embeds. |
+| `ArenaSpots` | `Modules/Arena/ArenaSpots.cs` | Where a game type's players spawn: one anchor per team plus a per-slot offset, read from a JSON asset the game type embeds. |
+| `SoulRule` | `Modules/Economy/SoulRule.cs` | Which currency gains to block in a game type where power comes only from the build a player is given. |
 | `HudPlugin` | `Modules/Hud/HudPlugin.cs` | Thin Deadworks plugin class (`Name` = `Hud`) exposing the admin `/hud_announce` and `/hud_say` commands. |
 | `HudService` | `Modules/Hud/HudService.cs` | Static service that shows the game's on-screen announcement banner (title plus smaller description) to one player or to everyone. |
 | `HeroBuildCatalog` | `Modules/Loadout/HeroBuildCatalog.cs` | Lookup over `HeroBuildData`: builds per hero, the playable hero pool, display names, and item components. |
@@ -323,12 +346,24 @@ From `knowledge/game-mode-recipes.md`; each links to the levers and code it uses
 | `MovementPlugin` | `Modules/Movement/MovementPlugin.cs` | Thin Deadworks plugin class (`Name` = `Movement`) exposing the admin `/mv_*` commands. |
 | `MovementService` | `Modules/Movement/MovementService.cs` | Core teleport and camera operations. |
 | `PlayerQueue` | `Modules/Queue/PlayerQueue.cs` | An ordered line of unique Steam IDs. |
+| `HeroRoll` | `Modules/RandomLoadout/HeroRoll.cs` | Picks a random hero for one player. |
+| `RandomLoadouts` | `Modules/RandomLoadout/RandomLoadouts.cs` | A random hero plus one of that hero's stored top builds per player, given through `Modules/Loadout` (`LoadoutService.Swap`: `SelectHero`, then the budgeted build 1 s later). |
+| `RandomPick` | `Modules/RandomLoadout/RandomLoadouts.cs` | A random hero plus one of that hero's stored top builds per player, given through `Modules/Loadout` (`LoadoutService.Swap`: `SelectHero`, then the budgeted build 1 s later). |
 | `RestraintPlugin` | `Modules/Restraint/RestraintPlugin.cs` | Thin host for `RestraintService`: the per-frame hook and admin commands. |
 | `RestraintService` | `Modules/Restraint/RestraintService.cs` | Keeps chosen players silenced and unable to use items, shoot or melee until they are released (Stage 13h), and ignored by NPC targeting. |
+| `Scoreboard` | `Modules/Session/Scoreboard.cs` | Points per player for one match. |
+| `MatchResult` | `Modules/Session/SessionRule.cs` | Pure decisions and types for `TimedSession`. |
+| `SessionAction` | `Modules/Session/SessionRule.cs` | Pure decisions and types for `TimedSession`. |
+| `SessionOptions` | `Modules/Session/SessionRule.cs` | Pure decisions and types for `TimedSession`. |
+| `SessionPhase` | `Modules/Session/SessionRule.cs` | Pure decisions and types for `TimedSession`. |
+| `SessionRule` | `Modules/Session/SessionRule.cs` | Pure decisions and types for `TimedSession`. |
+| `TimedSession` | `Modules/Session/TimedSession.cs` | One continuous session of fixed-length matches: no rounds, just `Waiting` → `Playing` (the match clock) → `Break` (results) → `Playing` again while enough players stay. |
 | `SpectateChoice` | `Modules/Spectate/SpectateRule.cs` | Pure decisions for an automatic spectator camera. |
 | `SpectateReason` | `Modules/Spectate/SpectateRule.cs` | Pure decisions for an automatic spectator camera. |
 | `SpectateRule` | `Modules/Spectate/SpectateRule.cs` | Pure decisions for an automatic spectator camera. |
 | `SpectateService` | `Modules/Spectate/SpectateService.cs` | Drives a spectating player's camera: follow a player's view or park a free camera at a position. |
+| `ChoiceGuard` | `Modules/Teams/ChoiceGuard.cs` | Which client console commands a game type refuses when it decides heroes or teams itself. |
+| `DeadlockTeams` | `Modules/Teams/DeadlockTeams.cs` | Deadlock's team numbers and names, and new-player placement. |
 | `WorldTextColor` | `Modules/WorldText/WorldTextColor.cs` | RGBA color for a text board (`byte` channels, alpha defaults to 255). |
 | `WorldTextFormat` | `Modules/WorldText/WorldTextFormat.cs` | Pure text helpers for board commands. |
 | `WorldTextPlacement` | `Modules/WorldText/WorldTextPlacement.cs` | Pure math for placing a board in front of a viewer. |
@@ -378,10 +413,6 @@ From `knowledge/game-mode-recipes.md`; each links to the levers and code it uses
 | `ShopAccess` | `RiftRoulette/GameLoop/ShopAccess.cs` | Owns `citadel_allow_purchasing_anywhere`. |
 | `ShopRule` | `RiftRoulette/GameLoop/ShopRule.cs` | Pure rule for when players may buy items. |
 | `SoulRule` | `RiftRoulette/GameLoop/SoulRule.cs` | Pure rule for which currency gains are blocked. |
-| `GunGameLadder` | `RiftRoulette/GunGame/GunGameLadder.cs` | Kill ladder for one Gun Game match (Stage 13k). |
-| `LadderStep` | `RiftRoulette/GunGame/GunGameLadder.cs` | Kill ladder for one Gun Game match (Stage 13k). |
-| `GunGamePlugin` | `RiftRoulette/GunGame/GunGamePlugin.cs` | Thin host for Gun Game (`GunGameService`, Stage 13k). |
-| `GunGameService` | `RiftRoulette/GunGame/GunGameService.cs` | Gun Game (Stage 13k): a match format on top of Random mode. |
 | `AccessFile` | `RiftRoulette/Lobby/AccessList.cs` | In-memory form of `bublock/access.json`: open/private mode plus the banned and allowed Steam64 ID sets. |
 | `AccessList` | `RiftRoulette/Lobby/AccessList.cs` | In-memory form of `bublock/access.json`: open/private mode plus the banned and allowed Steam64 ID sets. |
 | `AccessPlugin` | `RiftRoulette/Lobby/AccessPlugin.cs` | Thin plugin class (Name `Rift Roulette Access`) for the admin join-access commands. |
@@ -467,11 +498,13 @@ From `knowledge/game-mode-recipes.md`; each links to the levers and code it uses
 | `PlayerRefExtensions` | `Shared/Logging/PlayerRefExtensions.cs` | `controller.ToPlayerRef()` builds a `PlayerRef` from any `CBasePlayerController` (including `CCitadelPlayerController`). |
 | `RollingFileWriter` | `Shared/Logging/RollingFileWriter.cs` | Appends lines to one rolling log file family (`<base>-YYYYMMDD[.N].log`). |
 
-## Docs (36)
+## Docs (43)
 
 | Doc | Title | Summary |
 |---|---|---|
 | `CLAUDE.md` | Bublock (redock fork) | Theo (GitHub `vand0525`) built this repo. |
+| `Modules/Arena/Arena.md` | Arena.projitems | MSBuild shared-items file that compiles `ArenaSpots` and `ArenaService` into a consuming project. |
+| `Modules/Economy/Economy.md` | Economy.projitems | MSBuild shared-items file that compiles `SoulRule` into a consuming project. |
 | `Modules/Hud/Hud.md` | Hud.projitems | MSBuild shared-items file that compiles `HudService` (no commands) into a consuming project. |
 | `Modules/Hud/HudCommands.md` | HudCommands.projitems | MSBuild shared-items file that adds `HudPlugin` (the `/hud_announce` and `/hud_say` admin commands) to a consuming project. |
 | `Modules/Loadout/Loadout.md` | Loadout.projitems | MSBuild shared-items file that compiles the Loadout service (no commands) into a consuming project, and embeds `Data/hero-builds.json` as the resource `Bublock.Modules.Loadout.hero-builds.json`. |
@@ -479,9 +512,12 @@ From `knowledge/game-mode-recipes.md`; each links to the levers and code it uses
 | `Modules/Movement/Movement.md` | Movement.projitems | MSBuild shared-items file that compiles the Movement **registry and service** (no commands) into a consuming project. |
 | `Modules/Movement/MovementCommands.md` | MovementCommands.projitems | MSBuild shared-items file that adds `MovementPlugin` (the `/mv_*` admin commands) to a consuming project. |
 | `Modules/Queue/Queue.md` | Queue.projitems | MSBuild shared-items file that compiles `PlayerQueue` into a consuming project. |
+| `Modules/RandomLoadout/RandomLoadout.md` | RandomLoadout.projitems | MSBuild shared-items file that compiles `HeroRoll` and `RandomLoadouts` into a consuming project. |
 | `Modules/Restraint/Restraint.md` | Restraint.projitems | MSBuild shared-items file that compiles `RestraintService` (no commands) into a consuming project. |
 | `Modules/Restraint/RestraintCommands.md` | RestraintCommands.projitems | MSBuild shared-items file that adds `RestraintPlugin` (the per-frame `Sustain` hook and the `/restrain*`, `/status_*` admin commands) to a consuming project. |
+| `Modules/Session/Session.md` | Session.projitems | MSBuild shared-items file that compiles `Scoreboard`, `SessionRule` and `TimedSession` into a consuming project. |
 | `Modules/Spectate/Spectate.md` | Spectate.projitems | MSBuild shared-items file that compiles `SpectateRule` and `SpectateService` (no commands) into a consuming project. |
+| `Modules/Teams/Teams.md` | Teams.projitems | MSBuild shared-items file that compiles `DeadlockTeams` and `ChoiceGuard` into a consuming project. |
 | `Modules/WorldText/WorldText.md` | WorldText.projitems | MSBuild shared-items file that compiles the WorldText **service and types** (no commands) into a consuming project. |
 | `Modules/WorldText/WorldTextCommands.md` | WorldTextCommands.projitems | MSBuild shared-items file that adds `WorldTextPlugin` (the `/wt_*` admin commands) to a consuming project. |
 | `README.md` | Bublock | Deadworks server plugins for Deadlock. |
@@ -495,6 +531,7 @@ From `knowledge/game-mode-recipes.md`; each links to the levers and code it uses
 | `RiftRoulette/reference/resources.md` | Rift Roulette — Resources | Canonical links and a living discoveries log for hard-to-find or highly useful research findings. |
 | `RiftRoulette/reference/user-commands.md` | Rift Roulette — User Commands | Player-facing commands. |
 | `Shared/Shared.md` | Shared.projitems | MSBuild shared-items file that compiles `Bublock/Shared/` sources into a consuming project. |
+| `Tests/GunGame.Tests/GunGame.Tests.md` | GunGame.Tests | xUnit project for the Gun Game game type (never deployed). |
 | `knowledge/README.md` | Bublock knowledge base | What we know about modding Deadlock through Deadworks, written so a person or an agent can load the right context in one pass. |
 | `knowledge/changelog.md` | Changelog (redock fork) | Changes in this fork (`scho0124/bublock_redock`), newest first. |
 | `knowledge/effects-catalog.md` | Effects catalog | Every lever a game mode can pull, grouped by what you want to do to the game. |
@@ -503,6 +540,7 @@ From `knowledge/game-mode-recipes.md`; each links to the levers and code it uses
 | `knowledge/generated/indexes.md` | Indexes | Every command, game dependency, hook and type in the code, with where it lives. |
 | `knowledge/generated/tree.md` | Repo tree | Plugins and test projects, the modules they compile in, their feature folders and files. |
 | `knowledge/glossary.md` | Glossary | Terms used in the code, logs, docs and in game. |
+| `knowledge/mental-models/building-a-game-type.md` | Building a game type | each DLL through `.projitems`. |
 | `knowledge/mental-models/how-deadworks-mods-work.md` | How Deadworks mods work | the game process. |
 | `knowledge/mental-models/rift-roulette-architecture.md` | Rift Roulette architecture | The authority is Theo's `RiftRoulette/FEATURE.md` (composition diagram) and `.rules` §6. |
 | `knowledge/mental-models/ship-and-operate.md` | Ship and operate | Local deploys use the same script: `scripts/deploy.sh --confirm`. |

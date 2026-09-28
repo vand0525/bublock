@@ -15,14 +15,14 @@ python3 scripts/knowledge-graph.py
   `networkx.node_link_graph`, and most graph tools).
 - `tree.md`: plugin / module → feature → file tree with each file's doc
   summary, commands and game dependencies.
-- `indexes.md`: commands, game dependencies, stages, game modes, types and docs, each with the
+- `indexes.md`: commands, game dependencies, stages, game modes, plugins (role, modules), types and docs, each with the
   files that use them.
 
 ## Nodes
 
 | Kind | From |
 |---|---|
-| `plugin`, `test-project` | `*.csproj` (under `Tests/` = test project) |
+| `plugin`, `test-project` | `*.csproj` (under `Tests/` = test project); plugins get `role` = `game type` when their code overrides `OnClientFullConnect` (they admit players), else `tool` |
 | `module` | folders holding a `.projitems` (`Shared`, `Modules/*`) |
 | `feature` | other folders with a `FEATURE.md` |
 | `source`, `test` | `*.cs`; summary = first sentence of the sibling `.md` |
@@ -34,7 +34,7 @@ python3 scripts/knowledge-graph.py
 | `modifier-state`, `net-message` | `EModifierState.X`, `CCitadelUserMsg_*` / `CUserMessage*` |
 | `script`, `workflow` | `scripts/*.sh|py|cs`, `.github/workflows/*.yml` |
 | `doc`, `knowledge` | every other `.md` (colocated docs attach to their file node instead) |
-| `stage` | each `###` / `####` entry under "Staged roadmap" in `reference/master-plan.md`; `status` = `done` (`- [x]`), `awaiting playtest` (`- [ ]` and uploaded), else `open`; summary = its **Goal** |
+| `stage` | each `###` / `####` entry under "Staged roadmap" and "Game types" in `reference/master-plan.md` (ids `stage:13j`, `stage:g1`); `status` = `done` (`- [x]`), `awaiting playtest` (`- [ ]` and uploaded), else `open`; summary = its **Goal** |
 | `game-mode` | each `###` recipe in `knowledge/game-mode-recipes.md`; `status` from its `##` section: `shipped`, `in progress`, `designed` |
 
 ## Links
@@ -53,6 +53,8 @@ Backtick resolution (`resolve_ref`): `/command`, a repo path or folder
 (also under `RiftRoulette/`, with or without `.cs`), `EModifierState.X`, a
 hook, event, convar, entity, modifier, schema field, ability or net message
 name, then a C# type name (its declaring file).
+
+`templates/` is skipped (placeholders, not code).
 
 ## Limits
 
