@@ -11,8 +11,8 @@ Mirrors server log files into `Bublock/logs/` so Cursor can read them.
 ## Behavior
 
 - Source: `/server/game/bin/win64/bublock/logs/` on the Deadworks host
-  from `scripts/server.env` (same file and keychain entry `deadworks-sftp`
-  as `deploy.sh`).
+  from `scripts/server.env` (same file and password source as
+  `deploy.sh`).
 - Destination: `Bublock/logs/` (one subfolder per DLL, e.g.
   `logs/RiftRoulette/master-20260926.log`).
 - `lftp mirror --only-newer`: downloads new or changed files only.
@@ -29,7 +29,8 @@ Mirrors server log files into `Bublock/logs/` so Cursor can read them.
 
 - `scripts/server.env` (git-ignored; copy `server.env.example`) with
   `DW_HOST`, `DW_PORT`, `DW_USER`. Missing file: exits 1 with a hint.
-- `lftp` installed; keychain item `deadworks-sftp` for account `DW_USER`.
+- `lftp` installed; SFTP password from `sftp-password.sh` (`DW_PASSWORD`,
+  macOS keychain or Linux keyring `deadworks-sftp` for account `DW_USER`).
 - The password is passed via `LFTP_PASSWORD` / `--env-password`, not on the
   command line.
 
@@ -37,3 +38,7 @@ Mirrors server log files into `Bublock/logs/` so Cursor can read them.
 
 - Allowed before Stage 12 because it only reads. Remote logs exist only once
   Bublock plugins run on the server (Stage 12 push).
+
+`DW_REMOTE_GAME` in `server.env` overrides the remote game folder
+(default `/server/game`; `""` means the SFTP root, as on the deadworks.net
+panel). `server-check.sh` prints the right value.

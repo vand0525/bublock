@@ -23,3 +23,12 @@ logs/**
 !logs/**/.gitkeep
 RiftRoulette/logs/*
 !RiftRoulette/logs/.gitkeep
+
+# Deadworks API from scripts/fetch-deadworks.sh (outside the deadworks/ workspace)
+/lib/
+
+# Docs webpage from scripts/docs-site.py
+/site/
+
+# Python bytecode
+__pycache__/

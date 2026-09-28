@@ -10,7 +10,8 @@ if [[ ! -f "$ROOT/scripts/server.env" ]]; then
   exit 1
 fi
 source "$ROOT/scripts/server.env"
-REMOTE_DIR="/server/game/bin/win64/managed/plugins"
+REMOTE_GAME="${DW_REMOTE_GAME-/server/game}"
+REMOTE_DIR="$REMOTE_GAME/bin/win64/managed/plugins"
 
 STAMP="${1:-}"
 if [[ -z "$STAMP" ]]; then
@@ -32,8 +33,7 @@ if ! command -v lftp >/dev/null 2>&1; then
   exit 1
 fi
 
-LFTP_PASSWORD="$(security find-generic-password -a "$DW_USER" -s 'deadworks-sftp' -w)"
-export LFTP_PASSWORD
+source "$ROOT/scripts/sftp-password.sh"
 
 # Restoring a DLL under its pre-rename name must remove the renamed copy so both never load.
 renamed_to() {
