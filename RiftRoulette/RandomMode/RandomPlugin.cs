@@ -42,7 +42,7 @@ public class RandomPlugin : DeadworksPluginBase
     });
   }
 
-  [Command("reserve", Description = "Spend 1,000 chips to play a hero in your next 3 rounds: reserve <hero>")]
+  [Command("reserve", Description = "Spend 1,000 souls to play a hero in your next 3 rounds: reserve <hero>")]
   public void CmdReserve(CCitadelPlayerController player, params string[] hero)
   {
     PlayerChat.Send(player, RandomModeService.Reserve(player, string.Join(' ', hero)));

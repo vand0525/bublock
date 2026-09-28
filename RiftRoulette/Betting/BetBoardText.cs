@@ -8,7 +8,7 @@ public sealed record BetRow(string Name, int Chips);
 public static class BetBoardText
 {
   public const string Title = "BETTING";
-  public const string Empty = "No chips yet";
+  public const string Empty = "No souls yet";
   public const int MaxRows = 8;
 
   public static IReadOnlyList<BetRow> Rank(IEnumerable<BetRow> rows) =>

@@ -92,9 +92,9 @@ public static class BettingService
 
     return result switch
     {
-      BetResult.Placed => $"Bet {BetBoardText.Format(bet.Stake)} chips on {RiftRouletteTeams.Name(team)}.",
-      BetResult.Changed => $"Bet moved: {BetBoardText.Format(bet.Stake)} chips on {RiftRouletteTeams.Name(team)}.",
-      BetResult.NoChips => "No chips - get a kill.",
+      BetResult.Placed => $"Bet {BetBoardText.Format(bet.Stake)} souls on {RiftRouletteTeams.Name(team)}.",
+      BetResult.Changed => $"Bet moved: {BetBoardText.Format(bet.Stake)} souls on {RiftRouletteTeams.Name(team)}.",
+      BetResult.NoChips => "No souls - get a kill.",
       _ => $"You're fighting for {RiftRouletteTeams.Name(allowed[0])} - you can only bet on your team."
     };
   }
@@ -141,10 +141,10 @@ public static class BettingService
   public static IReadOnlyList<string> DescribePlayer(CCitadelPlayerController player)
   {
     var steamId = player.PlayerSteamId;
-    var lines = new List<string> { $"You have {BetBoardText.Format(Book.Chips(steamId))} chips." };
+    var lines = new List<string> { $"You have {BetBoardText.Format(Book.Chips(steamId))} souls." };
 
     if (Book.TryGetBet(steamId, out var bet))
-      lines.Add($"Your bet: {BetBoardText.Format(bet.Stake)} chips on {RiftRouletteTeams.Name(bet.Team)}.");
+      lines.Add($"Your bet: {BetBoardText.Format(bet.Stake)} souls on {RiftRouletteTeams.Name(bet.Team)}.");
 
     lines.Add(IsOpen ? "Betting is open: type sapphire or amber." : "Betting opens between rounds.");
     lines.Add(RandomModeService.DescribeReservation(player));
@@ -159,7 +159,7 @@ public static class BettingService
     {
       var steamId = player.PlayerSteamId;
       var bet = Book.TryGetBet(steamId, out var open) ? $"{open.Stake} on {RiftRouletteTeams.Name(open.Team)}" : "-";
-      lines.Add($"Slot={player.Slot} | {player.PlayerName} | Chips={Book.Chips(steamId)} | Bet={bet}");
+      lines.Add($"Slot={player.Slot} | {player.PlayerName} | Souls={Book.Chips(steamId)} | Bet={bet}");
     }
 
     return lines;
@@ -181,7 +181,7 @@ public static class BettingService
       ? $" Or /reserve <hero> for {BetBoardText.Format(HeroReservations.Cost)}."
       : "";
 
-    return $"Bet on the next round: {how} (open until {LingerSeconds}s into the round). You have {chips} chips; a win doubles them.{reserve}";
+    return $"Bet on the next round: {how} (open until {LingerSeconds}s into the round). You have {chips} souls; a win doubles them.{reserve}";
   }
 
   private static int Pay(IReadOnlyList<BetSettlement> settled, string reason, ExecutionMode mode)
@@ -194,9 +194,9 @@ public static class BettingService
       var player = Players.GetAll().FirstOrDefault(candidate => candidate.PlayerSteamId == settlement.SteamId);
       var line = settlement.Outcome switch
       {
-        BetOutcome.Won => $"You won {BetBoardText.Format(stake * BetBook.PayoutMultiplier)} chips (now {BetBoardText.Format(settlement.Balance)}).",
-        BetOutcome.Lost => $"You lost {BetBoardText.Format(stake)} chips (now {BetBoardText.Format(settlement.Balance)}).",
-        _ => $"No result - your {BetBoardText.Format(stake)} chips are back."
+        BetOutcome.Won => $"You won {BetBoardText.Format(stake * BetBook.PayoutMultiplier)} souls (now {BetBoardText.Format(settlement.Balance)}).",
+        BetOutcome.Lost => $"You lost {BetBoardText.Format(stake)} souls (now {BetBoardText.Format(settlement.Balance)}).",
+        _ => $"No result - your {BetBoardText.Format(stake)} souls are back."
       };
 
       if (player != null)

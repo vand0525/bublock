@@ -7,9 +7,9 @@ Pure text for the betting leaderboard board. Unit tested
 
 | Operation | Result |
 |---|---|
-| `Rank(rows)` | `BetRow(Name, Chips)` sorted by chips (highest first), then name (case-insensitive); at most `MaxRows` (8) |
-| `Board(rows)` | `BETTING`, a blank line, then `1  Name   1,200` per ranked row (names cut to `StatsBoardText.NameLength`), or `No chips yet` |
-| `Format(chips)` | Thousands separator, invariant culture (`1,200`) |
+| `Rank(rows)` | `BetRow(Name, Chips)` sorted by souls (highest first), then name (case-insensitive); at most `MaxRows` (8) |
+| `Board(rows)` | `BETTING`, a blank line, then `1  Name   1,200` per ranked row (names cut to `StatsBoardText.NameLength`), or `No souls yet` |
+| `Format(souls)` | Thousands separator, invariant culture (`1,200`) |
 
 ## Invariants
 

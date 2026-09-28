@@ -36,21 +36,21 @@ public class BettingPlugin : DeadworksPluginBase
     return HookResult.Continue;
   }
 
-  [Command("bet", Description = "Bet all your chips on a team for the next round: bet <sapphire|amber>")]
+  [Command("bet", Description = "Bet all your souls on a team for the next round: bet <sapphire|amber>")]
   public void CmdBet(CCitadelPlayerController player, string team)
   {
     var reply = BettingService.TryBet(player, team) ?? throw new CommandException("Bet on sapphire or amber.");
     PlayerChat.Send(player, reply);
   }
 
-  [Command("chips", Description = "Show your betting chips and your bet")]
-  public void CmdChips(CCitadelPlayerController player)
+  [Command("souls", Description = "Show your betting souls and your bet")]
+  public void CmdSouls(CCitadelPlayerController player)
   {
     foreach (var line in BettingService.DescribePlayer(player))
       PlayerChat.Send(player, line);
   }
 
-  [Command("bet_status", Description = "Show every player's betting chips and open bets")]
+  [Command("bet_status", Description = "Show every player's betting souls and open bets")]
   public void CmdBetStatus(CCitadelPlayerController? caller)
   {
     AdminCommand.Authorize(caller, BettingLog, "bet_status");

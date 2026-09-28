@@ -99,9 +99,31 @@ public class LoadoutPlugin : DeadworksPluginBase
       $"[Loadout] Fetched={data.FetchedAt} | Source={data.Source} | Window={data.WindowDays}d | Heroes={catalog.Heroes.Count}");
     AdminCommand.Reply(
       caller,
-      $"[Loadout] Baseline={catalog.BaselineValue} (median first-{LoadoutPlanner.DefaultSlots} value) | Cap={LoadoutService.DefaultMaxValue} | " +
+      $"[Loadout] Baseline={catalog.BaselineValue} (median first-{LoadoutPlanner.DefaultSlots} value) | Cap={LoadoutService.MaxValue} | " +
       $"Banned={string.Join(",", LoadoutPlanner.Banned)}");
   }
+
+  [Command("loadout_cap", Description = "Show or set the loadout soul cap: loadout_cap [souls|default]")]
+  public void CmdCap(CCitadelPlayerController? caller, string souls = "")
+  {
+    AdminCommand.Authorize(caller, CommandsLog, "loadout_cap");
+
+    if (string.IsNullOrWhiteSpace(souls))
+    {
+      AdminCommand.Reply(caller, $"[Loadout] Cap={Format(LoadoutService.MaxValue)} souls (default {Format(LoadoutService.DefaultMaxValue)})");
+      return;
+    }
+
+    if (!LoadoutPlanner.TryParseCap(souls, out var cap))
+      throw new CommandException(
+        $"Cap must be a whole number from {Format(LoadoutPlanner.MinCap)} to {Format(LoadoutPlanner.MaxCap)}, or {LoadoutPlanner.DefaultCapWord}.");
+
+    var previous = LoadoutService.MaxValue;
+    LoadoutService.SetMaxValue(cap, ExecutionMode.Debug);
+    AdminCommand.Reply(caller, $"[Loadout] Cap {Format(previous)} -> {Format(cap)} (applies to the next builds handed out)");
+  }
+
+  private static string Format(int souls) => souls.ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
 
   private static CCitadelPlayerController BySlot(int slot) =>
     Players.GetAll().FirstOrDefault(candidate => candidate.Slot == slot)

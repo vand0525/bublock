@@ -18,14 +18,11 @@ public static class StreamCam
 
   public static readonly TimeSpan ReparkEvery = TimeSpan.FromSeconds(6);
 
-  // The client needs a moment after MakeObserver before it takes spectator commands.
+  // The client needs a moment after MakeObserver before the camera moves it.
   public static readonly TimeSpan SeatGrace = TimeSpan.FromSeconds(3);
 
   // Moving the camera by hand while the server also drives it has crashed the client.
   public static readonly TimeSpan ManualHold = TimeSpan.FromSeconds(60);
-
-  // Client commands the camera sends itself can echo back as console commands.
-  public static readonly TimeSpan OwnCommandEcho = TimeSpan.FromSeconds(2);
 
   // A hero pawn only seconds old may still be set up; following it preceded a client crash.
   public static readonly TimeSpan FollowGrace = TimeSpan.FromSeconds(5);
@@ -47,7 +44,6 @@ public static class StreamCam
   {
     public bool Auto = true;
     public ulong? LastFollowed;
-    public bool FallbackSent;
     public ulong? PendingKiller;
     public bool Parked;
     public RiftSide? ParkedSide;
@@ -58,7 +54,6 @@ public static class StreamCam
     public DateTime? SeatedAt;
     public DateTime? ManualUntil;
     public Vector3? ManualPosition;
-    public DateTime? LastClientCommandAt;
   }
 
   public static void Tick(ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
@@ -93,9 +88,6 @@ public static class StreamCam
 
     var state = State(admin.PlayerSteamId);
     var now = DateTime.UtcNow;
-
-    if (state.LastClientCommandAt is { } sent && now - sent < OwnCommandEcho)
-      return;
 
     if (state.SeatedAt is { } seated && now - seated < SeatGrace)
       return;
@@ -236,7 +228,7 @@ public static class StreamCam
       return;
     }
 
-    var currentId = returning ? null : CurrentId(admin, candidates) ?? PendingFollow(admin, state, candidates, mode);
+    var currentId = returning ? null : CurrentId(admin, candidates) ?? PendingFollow(state, candidates);
     var choice = SpectateRule.Choose(currentId, state.PendingKiller, ids);
 
     switch (choice.Reason)
@@ -245,7 +237,6 @@ public static class StreamCam
         if (state.LastFollowed != choice.Target)
         {
           Log.WithMode(mode).Info(admin.ToPlayerRef(), "Stream camera Reason={Reason} Target={Target}", "keep", NameOf(choice.Target));
-          state.FallbackSent = false;
         }
 
         state.LastFollowed = choice.Target;
@@ -265,34 +256,15 @@ public static class StreamCam
     }
   }
 
-  // The server target may not stick; the client command is sent once per target before giving up on it.
-  private static ulong? PendingFollow(CCitadelPlayerController admin, CamState state, List<CCitadelPlayerController> candidates, ExecutionMode mode)
-  {
-    if (state.LastFollowed is not { } followed)
-      return null;
-
-    var target = candidates.FirstOrDefault(player => player.PlayerSteamId == followed);
-
-    if (target == null)
-      return null;
-
-    if (!state.FallbackSent)
-    {
-      state.LastClientCommandAt = DateTime.UtcNow;
-      SpectateService.ClientFollow(admin, target, mode);
-      state.FallbackSent = true;
-    }
-
-    return followed;
-  }
+  // The server target may not stick; the last followed player is kept while alive rather than switching every tick.
+  private static ulong? PendingFollow(CamState state, List<CCitadelPlayerController> candidates) =>
+    state.LastFollowed is { } followed && candidates.Any(player => player.PlayerSteamId == followed) ? followed : null;
 
   private static void Follow(CCitadelPlayerController admin, CamState state, CCitadelPlayerController target, string reason, ExecutionMode mode)
   {
-    state.LastClientCommandAt = DateTime.UtcNow;
     var accepted = SpectateService.Follow(admin, target, mode);
 
     state.LastFollowed = target.PlayerSteamId;
-    state.FallbackSent = !accepted;
     state.PendingKiller = null;
     state.Parked = false;
 
@@ -348,7 +320,6 @@ public static class StreamCam
 
   private static bool ParkOverhead(CCitadelPlayerController admin, RiftSide side, ITimer timer, ExecutionMode mode)
   {
-    State(admin.PlayerSteamId).LastClientCommandAt = DateTime.UtcNow;
     return SpectateService.Park(admin, OverheadSpot(side), SpectateRule.LookDown(WatchSpot.Location(side).Angle.Y), timer, mode);
   }
 

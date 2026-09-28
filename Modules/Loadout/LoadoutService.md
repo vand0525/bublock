@@ -6,10 +6,22 @@ hero state (`LoadoutSnapshot`) and applies it to another pawn. Game-agnostic.
 
 ## Types
 
-- `LoadoutOptions(Gold = 0, Slots = 9, MaxValue = 20000)`. There is no
-  level option: the level follows the item value.
+- `LoadoutOptions(Gold = 0, Slots = 9, MaxValue = null)`. There is no
+  level option: the level follows the item value. `MaxValue` null means
+  the current `LoadoutService.MaxValue`; a caller's own value wins (none
+  pass one today).
 - `LoadoutResult(ItemsAdded, ItemsFailed, Imbued, AbilitiesSet, AbilitiesMissing, Unknown, Value, ItemsCapped, Progression, AbilityPlan)`
-- `DefaultMaxValue` = 20,000 souls: the most a loadout's items may be worth.
+- `DefaultMaxValue` = `LoadoutPlanner.DefaultCap` (20,000 souls).
+- `MaxValue`: the most a loadout's items may be worth now. Static, starts
+  at `DefaultMaxValue`, so every upload or restart (a hot reload re-creates
+  it) resets it to 20,000.
+
+## `SetMaxValue(souls, mode)`
+
+Sets `MaxValue` (callers validate with `LoadoutPlanner.TryParseCap`), logs
+Information `Loadout cap set Previous= Cap=` in `loadout-*.log` and a master
+line `Loadout cap <old> -> <new>`. Applies to the next `Apply`; loadouts
+already on players are not touched.
 
 ## Operations
 
@@ -22,7 +34,7 @@ known-good order:
 1. Plan the items: `LoadoutPlanner.ItemOrder(build, rng)` (one random pick
    per optional group), then `FirstSlots(order, catalog.ComponentsOf,
    options.Slots, ItemInfo.Exists)`, then `CapValue(slots, catalog.CostOf,
-   options.MaxValue)` (drops the most expensive items while over the cap,
+   cap)` with `cap = options.MaxValue ?? MaxValue` (drops the most expensive items while over the cap,
    keeping at least 6). Unknown items are collected. `value` is the kept
    items' soul cost.
 2. Plan the power: `Progression.ForSouls(value)` gives the level, boons,

@@ -13,6 +13,12 @@ takes the slot); a loadout's items may be worth at most 20,000 souls (the
 most expensive items are dropped, keeping at least 6). The median planned
 value of all builds is the informational baseline.
 
+The cap is adjustable at runtime (2026-09-28): `/loadout_cap <souls>`
+(1,000 to 200,000, or `default`) sets `LoadoutService.MaxValue` for the
+next builds handed out. It is in memory only and resets to 20,000 on every
+upload or restart. A lower cap also means a lower level and fewer ability
+ranks (both follow the kept items' value).
+
 Budgeted power (2026-09-27): a stored build's level, boons and ability ranks
 match a real hero at the same net worth. The items' soul value goes through
 `Progression.ForSouls` (Deadlock's level table), and the build's ability
@@ -26,14 +32,15 @@ Copies (`ApplySnapshot`) stay exact.
 |---|---|
 | `HeroBuildCatalog.Default` / `Heroes` / `BuildsFor` / `DisplayName` / `ComponentsOf` / `CostOf` / `PlannedValue` / `BaselineValue` / `TryParseHero` | `HeroBuildCatalog.md` |
 | `HeroBuildData.Parse` | `HeroBuildData.md` |
-| `LoadoutPlanner.ItemOrder` / `FirstSlots` / `Value` / `CapValue` / `AbilityBits` / `AbilityPrefix` / `BitsFor` | `LoadoutPlanner.md` |
+| `LoadoutPlanner.ItemOrder` / `FirstSlots` / `Value` / `CapValue` / `TryParseCap` / `AbilityBits` / `AbilityPrefix` / `BitsFor` | `LoadoutPlanner.md` |
 | `Progression.ForSouls` / `Max` / `MaxLevel` | `Progression.md` |
-| `LoadoutService.Apply` / `Swap` / `Capture` / `ApplySnapshot` / `SwapSnapshot` | `LoadoutService.md` |
+| `LoadoutService.Apply` / `Swap` / `Capture` / `ApplySnapshot` / `SwapSnapshot` / `MaxValue` / `SetMaxValue` | `LoadoutService.md` |
 | `LoadoutSnapshot`, `SnapshotAbility`, `SnapshotItem`, `SnapshotResult` | `LoadoutSnapshot.md` |
 
 ## State
 
-The lazily loaded `HeroBuildCatalog.Default` (read-only, one per DLL load).
+The lazily loaded `HeroBuildCatalog.Default` (read-only, one per DLL load)
+and `LoadoutService.MaxValue` (the current cap, reset on every load).
 
 ## Data
 
@@ -51,7 +58,7 @@ The lazily loaded `HeroBuildCatalog.Default` (read-only, one per DLL load).
 | `Progression.cs` | Deadlock level table: boons, unlocks and ability points per soul count (pure) |
 | `LoadoutSnapshot.cs` | Exact hero-state records for copying (Stage 13g) |
 | `LoadoutService.cs` | Apply a build to a pawn; swap hero, then apply; capture / apply / swap a snapshot |
-| `LoadoutPlugin.cs` | `/loadout_give`, `/loadout_copy`, `/loadout_list`, `/loadout_info` |
+| `LoadoutPlugin.cs` | `/loadout_give`, `/loadout_copy`, `/loadout_list`, `/loadout_info`, `/loadout_cap` |
 | `Loadout.projitems` | Service and data (no commands) |
 | `LoadoutCommands.projitems` | Plugin class |
 

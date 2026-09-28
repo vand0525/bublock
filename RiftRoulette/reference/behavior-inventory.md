@@ -211,9 +211,9 @@ The target command list. **Status:** `archive` = renames an archive command
 | `/commands` | — | Lobby | `CommandList.PlayerCommands` | Chat list of the player commands (`dw_help` is console-only) | new | 12 |
 | `/score` | — | GameLoop | `MatchService.DescribeScore` | Match round and score in chat (1v1: best-streak leaderboard) | new | 13a |
 | `/stats` | — | Stats | `StatsService.Describe` | Your match K / D / A and both team totals | new | 13c |
-| `/bet <sapphire\|amber>` (or type the team name in chat) | — | Betting | `BettingService.TryBet` | Bet all your chips on the next round (own team only while fighting) | new | betting |
-| `/chips` | — | Betting | `BettingService.DescribePlayer` | Your chips, open bet, whether betting is open, your hero reservation | new | betting |
-| `/reserve [hero]` | — | Random | `RandomModeService.Reserve` | Spend 1,000 chips to play a hero in your next 3 fighting rounds; a waiting line per hero (Random mode match only) | new | reservations |
+| `/bet <sapphire\|amber>` (or type the team name in chat) | — | Betting | `BettingService.TryBet` | Bet all your souls on the next round (own team only while fighting) | new | betting |
+| `/souls` | — | Betting | `BettingService.DescribePlayer` | Your souls, open bet, whether betting is open, your hero reservation | new | betting |
+| `/reserve [hero]` | — | Random | `RandomModeService.Reserve` | Spend 1,000 souls to play a hero in your next 3 fighting rounds; a waiting line per hero (Random mode match only) | new | reservations |
 | `/queue` | — | Duel | `DuelService.JoinQueue` | Join the 1v1 queue (winner stays on), or see your place (1v1 mode only) | new | 13j |
 | `/unqueue` | — | Duel | `DuelService.LeaveQueue` | Leave the 1v1 queue (not while fighting) | new | 13j |
 
@@ -266,7 +266,7 @@ The target command list. **Status:** `archive` = renames an archive command
 | `/match_format <continuous>` | — | GameLoop | `MatchService.SetFormat` | Match format between matches (only continuous for now) | new | 13b |
 | `/match_config` | — | GameLoop | `MatchService.DescribeConfig` | Current mode, format, allowed values, intermission | new | 13b |
 | `/random_status` | — | RandomMode | `RandomModeService.Describe` | Teams, heroes, builds, pending swaps per player | new | 13b |
-| `/bet_status` | — | Betting | `BettingService.Describe` | Every player's chips and open bet; redraws the betting board | new | betting |
+| `/bet_status` | — | Betting | `BettingService.Describe` | Every player's souls and open bet; redraws the betting board | new | betting |
 | `/random_reroll` | — | RandomMode | `RandomModeService.PrepareRound` | New random heroes and builds now (Random mode intermission only) | new | 13b |
 | `/duel_copy <slot>` | — | Duel | `DuelService.Copy` | Copy a player's exact hero and build for the 1v1 fighters and start (needs 2 queued since 13j) | new | 13g |
 | `/duel_clear` | — | Duel | `DuelService.ClearSnapshot` | Drop the 1v1 build, back to free setup | new | 13g |
@@ -305,6 +305,7 @@ Game-agnostic: no Rift Roulette names in arguments (teams are team numbers).
 | `/loadout_copy <from> <to>` | — | Loadout | `LoadoutService.Capture` / `SwapSnapshot` | Copy one player's exact hero, items, abilities and level onto another | new | 13g |
 | `/loadout_list <hero>` | — | Loadout | `HeroBuildCatalog.BuildsFor` | A hero's stored builds, the 9 items each grants, planned value, optional groups | new | 13b |
 | `/loadout_info` | — | Loadout | `HeroBuildCatalog.Default` | Build data date, source, hero count, baseline value, cap, banned items | new | 13b |
+| `/loadout_cap [souls\|default]` | — | Loadout | `LoadoutService.SetMaxValue` | Show or set the loadout soul cap (1,000-200,000; resets to 20,000 on every load) | new | cap |
 | `/restrain <slot>` | — | Restraint | `RestraintService.Restrain` | Silence, disarm and block melee until released | new | 13h |
 | `/restrain_release <slot>` | — | Restraint | `RestraintService.Release` | Lift the restraint | new | 13h |
 | `/restrain_list` | — | Restraint | `RestraintService.Describe` | Restrained players and their active modifiers | new | 13h |

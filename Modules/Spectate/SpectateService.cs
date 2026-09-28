@@ -10,9 +10,6 @@ public static class SpectateService
 {
   public const string ObserverDesignerName = "observer";
 
-  // Source 2 OBS_MODE_ROAMING; CS2 uses spec_mode 4 for free cam. Deadlock's key for it is C.
-  public const int FlyCamMode = 4;
-
   public const double TeleportDelaySeconds = 0.25;
   public const double AngleDelaySeconds = 0.5;
   public const double AngleRepeatSeconds = 1.0;
@@ -56,24 +53,13 @@ public static class SpectateService
       return true;
     }
 
-    ClientFollow(player, target, mode);
+    log.Info(player.ToPlayerRef(), "Server target refused Target={Target} TargetSlot={TargetSlot}", target.PlayerName, target.Slot);
     return false;
   }
 
-  public static void ClientFollow(CCitadelPlayerController player, CCitadelPlayerController target, ExecutionMode mode = ExecutionMode.Clean)
-  {
-    Server.ClientCommand(player.Slot, $"spec_player {target.Slot}");
-    Log.WithMode(mode).Info(player.ToPlayerRef(), "Server target refused, sent client command Command={Command}", $"spec_player {target.Slot}");
-  }
-
-  // The server's Roaming mode does not switch the client; the client must be in fly cam before a teleport moves its camera.
-  public static void SetFlyCam(CCitadelPlayerController player, ExecutionMode mode = ExecutionMode.Clean)
-  {
-    Server.ClientCommand(player.Slot, $"spec_mode {FlyCamMode}");
-    Log.WithMode(mode).Debug(player.ToPlayerRef(), "Sent client command Command={Command}", $"spec_mode {FlyCamMode}");
-  }
-
-  // Order matters: fly cam, then teleport, then the angle a moment later (an angle sent with the teleport is ignored).
+  // The teleport only moves the camera if the viewer is already in fly cam (C). The server cannot switch the
+  // client there: spec_mode / spec_player lack server_can_execute and the client refuses them.
+  // Order matters: teleport, then the angle a moment later (an angle sent with the teleport is ignored).
   public static bool Park(CCitadelPlayerController player, Vector3 position, Vector3 angle, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
     var log = Log.WithMode(mode);
@@ -88,7 +74,6 @@ public static class SpectateService
     var steamId = player.PlayerSteamId;
 
     observer.SetObserverMode(ObserverMode_t.Roaming);
-    SetFlyCam(player, mode);
 
     timer.Once(TeleportDelaySeconds.Seconds(), () =>
     {

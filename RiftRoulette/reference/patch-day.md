@@ -38,7 +38,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Session (`Session/`) | Session id, map name, registers locations | `Server.MapName`, `OnLoad` / `OnStartupServer` | `dw_session_info` |
 | Lobby (`Lobby/`) | Admits players, balances teams, convars, kick, respawn to watch spot | `OnClientConnect` / `FullConnect` / `Disconnect`, `player_spawn`, `player_death`, `SelectHero(Heroes.Skyrunner)`, `ChangeTeam`, `kickid`, lobby convars | join; `/status`; `dw_player_list` |
 | AdminSeat (`Lobby/AdminSeat`) | 13th seat on the spectator side | `maxplayers`, `sv_visiblemaxplayers`, team 1 | `dw_seat_status` |
-| Stream camera (`Lobby/StreamCam`, `Modules/Spectate`) | Seated admin's automatic camera: follow, killer cut, top-down on big ults | `observer` pawn designer name, `ObserverServices` (`InEye`, `Roaming`, `SetObserverTarget`), observer `Teleport`, `player_used_ability`, ult class names in `Lobby/BigUlts`, client `spec_player` and `spec_mode 4` (fly cam) | `dw_spec_status`, `dw_spec_overview` |
+| Stream camera (`Lobby/StreamCam`, `Modules/Spectate`) | Seated admin's automatic camera: follow, killer cut, top-down on big ults | `observer` pawn designer name, `ObserverServices` (`InEye`, `Roaming`, `SetObserverTarget`), observer `Teleport`, `player_used_ability`, ult class names in `Lobby/BigUlts` (no client commands: the client refuses `spec_*` from the server) | `dw_spec_status`, `dw_spec_overview` |
 | Access (`Lobby/Access*`, `BanStatueService`) | Bans / private mode from `bublock/access.json`; banned players turned to stone then kicked | `OnClientConnect` returning false, `kickid`, `AddModifier` (statue modifier) | `/access_mode`, `/ban_list`, `/ban_modifier` |
 | Draft (`Draft/`) | Draft picks, boards (off in Random mode) | `player_hero_changed`, `SelectHero`, `Heroes` pools, `point_worldtext` | `/draft_status`, `/draft_boards` |
 | Rift (`Rift/`) | Forces a rift at a side, detects capture / tie, cleans troopers | KOTH schema fields, `citadel_gamerules`, `citadel_item_koth_spawner`, `citadel_koth_cashin`, `npc_trooper`, `citadel_koth_enabled`, rift positions | `/rift_start green`, `rift-*.log` |
@@ -101,7 +101,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Boards missing | `point_worldtext` / `CPointWorldText` changed | `dw_wt_create test` | check `CPointWorldText` in `/tmp/dwapi.cs` |
 | Stream camera never goes top-down on ults | ult renamed / reworked, or `player_used_ability` no longer fires | self-test Events `player_used_ability`; `lobby-*.log` `Ability name seen for the first time` | new `signature4` names from `assets.deadlock-api.com/v2/heroes` into `Lobby/BigUlts` |
 | Stream camera stuck / not following | observer pawn renamed or observer services changed | `dw_spec_status` (`Observer=False`, `Mode=`); `spectate-*.log` | check `CPlayer_ObserverServices` and the pawn designer name in `/tmp/dwapi.cs` |
-| Top-down never moves (camera stays in the directed view) | `spec_mode` renamed, lost `clientcmd_can_execute`, or fly cam is no longer 4 | `lobby-*.log` `Reason=repark` every 6 s; `spec_mode` in `patch-check.py` convar diff | new fly cam value / command from `cvarlist.md` into `SpectateService.FlyCamMode` |
+| Top-down never moves (camera stays in the directed view) | The admin is not in fly cam (C); the server cannot switch it. If a patch gives a `spec_*` command `server_can_execute`, the server could send it | `lobby-*.log` `Reason=repark` every 6 s; `server_can_execute` in the `patch-check.py` convar diff | press C; or send the newly allowed command from `SpectateService.Park` |
 
 ---
 
@@ -199,7 +199,7 @@ a red wireframe; if the hero enum or the ability moves, update
 - Level table: 36 soul thresholds, unlock rows and 32 points in `Modules/Loadout/Progression.cs`, from the wiki's [Data:SoulUnlockData.json](https://deadlock.wiki/index.php?title=Data:SoulUnlockData.json&action=raw) (+600 each). Upgrade tier costs 1 / 2 / 5 in `LoadoutPlanner.UpgradeCosts`. An economy patch that moves boons or points needs both updated (`ProgressionTests` pins the current values).
 - Teams: Amber 2, Sapphire 3, spectator 1.
 - Big teamfight ults: 17 ability class names in `Lobby/BigUlts.cs` (each hero's `signature4` from `assets.deadlock-api.com/v2/heroes`, 2026-09-27). Heroes get reworked; re-check after a hero patch.
-- Observer: `ObserverMode_t.InEye` (player view) and `Roaming` (free cam); client command `spec_player <slot>` (`clientcmd_can_execute`) as the follow fallback; client command `spec_mode 4` (`clientcmd_can_execute`) puts the client in fly cam before every park (the server mode alone does not). Never `IsValidObserverTarget` (rejects team 3).
+- Observer: `ObserverMode_t.InEye` (player view) and `Roaming` (free cam); no client commands: `spec_player` / `spec_mode` are `clientcmd_can_execute`, not `server_can_execute`, and the client refuses them from the server, so parks only move a viewer already in fly cam (C). Never `IsValidObserverTarget` (rejects team 3).
 
 ### Coordinates (dl_midtown)
 

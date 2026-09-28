@@ -269,4 +269,30 @@ public class LoadoutPlannerTests
     Assert.Equal(6, plan.StepsTotal);
     Assert.Equal(8, plan.PointsUsed);
   }
+
+  [Theory]
+  [InlineData("15000", 15000)]
+  [InlineData(" 1000 ", 1000)]
+  [InlineData("200000", 200000)]
+  [InlineData("default", LoadoutPlanner.DefaultCap)]
+  [InlineData("DEFAULT", LoadoutPlanner.DefaultCap)]
+  public void TryParseCap_accepts_whole_numbers_in_range_and_default(string text, int expected)
+  {
+    Assert.True(LoadoutPlanner.TryParseCap(text, out var souls));
+    Assert.Equal(expected, souls);
+  }
+
+  [Theory]
+  [InlineData("999")]
+  [InlineData("200001")]
+  [InlineData("-5000")]
+  [InlineData("15,000")]
+  [InlineData("15000.5")]
+  [InlineData("lots")]
+  [InlineData("")]
+  [InlineData(null)]
+  public void TryParseCap_rejects_out_of_range_and_non_numbers(string? text)
+  {
+    Assert.False(LoadoutPlanner.TryParseCap(text, out _));
+  }
 }

@@ -145,16 +145,18 @@ Assume the git repo is rooted at `Bublock/`.
   no pick, so `RoundFlow` leaves them up top, restrained. Joins and leaves
   in an intermission sub the bench player in; never give a bench player a
   pick without evening the teams.
-- Betting (Random mode, `Betting/BettingService`): 100 starting chips, 100
-  per credited kill, all-in bets on the next round from the start of the
-  intermission (default 5 s, `MatchService.DefaultIntermissionSeconds`)
+- Betting (Random mode, `Betting/BettingService`): 100 starting betting
+  souls (a separate balance, not in-game souls; player text always says
+  souls, never chips; they never add fighting power), 100 per credited
+  kill, all-in bets on the next round from the start of the intermission
+  (default 5 s, `MatchService.DefaultIntermissionSeconds`)
   until 10 s into the round (`BettingService.LingerSeconds`), a win doubles
   the stake, no result refunds. Fighters bet only on their own team. Bets
   come from chat lines that are exactly `sapphire` / `amber`
   (`BettingPlugin.OnChatMessage`) or `/bet`. Betting messages are chat
   only, never a banner. The leaderboard is `BoardLayout.Back`, the empty
-  side of the watch spot. The only thing chips buy is a hero reservation
-  (`/reserve <hero>`, `RandomMode/HeroReservations`): 1,000 chips for the
+  side of the watch spot. The only thing souls buy is a hero reservation
+  (`/reserve <hero>`, `RandomMode/HeroReservations`): 1,000 souls for the
   player's next 3 fighting rounds, a waiting line per hero, and each round
   the first fighter in a hero's line gets it (never two on one hero).
   Reserved heroes go into `HeroDraw.Draw` as fixed heroes; everyone else
@@ -267,8 +269,10 @@ Assume the git repo is rooted at `Bublock/`.
   command needed. Top-down uses the main `WatchSpot.Location` anchor
   (raised by `StreamCam.OverheadHeight`) with `SpectateRule.LookDown`
   (pitch 89). The server's observer mode does not switch the client:
-  every park goes through `SpectateService.Park` (client `spec_mode 4`
-  fly cam, then teleport, then the angle later), and a park that did not
+  every park goes through `SpectateService.Park` (teleport, then the
+  angle later; it only moves an admin already in fly cam, C, because the
+  client refuses `spec_*` commands from the server, which is why no
+  client commands are sent), and a park that did not
   hold is retried. Big ults are the class names
   in `Lobby/BigUlts` (hero `signature4`), at most one top-down per live
   round (`OverviewRule`, `RiftService.RoundNumber`). Never use

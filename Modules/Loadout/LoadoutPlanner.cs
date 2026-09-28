@@ -19,6 +19,12 @@ public static class LoadoutPlanner
 
   public const int DefaultMinItems = 6;
 
+  public const int DefaultCap = 20000;
+  public const int MinCap = 1000;
+  public const int MaxCap = 200000;
+
+  public const string DefaultCapWord = "default";
+
   public static readonly IReadOnlySet<string> Banned = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
   {
     "upgrade_non_player_bonus",
@@ -116,6 +122,20 @@ public static class LoadoutPlanner
     }
 
     return (kept, removed);
+  }
+
+  public static bool TryParseCap(string? text, out int souls)
+  {
+    var trimmed = text?.Trim() ?? "";
+
+    if (string.Equals(trimmed, DefaultCapWord, StringComparison.OrdinalIgnoreCase))
+    {
+      souls = DefaultCap;
+      return true;
+    }
+
+    return int.TryParse(trimmed, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out souls)
+      && souls is >= MinCap and <= MaxCap;
   }
 
   public static IReadOnlyList<(string Ability, int Bits)> AbilityBits(IEnumerable<AbilityStep> steps)

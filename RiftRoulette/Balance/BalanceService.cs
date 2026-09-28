@@ -37,6 +37,14 @@ public static class BalanceService
   {
     var log = Log.WithMode(mode);
 
+    // A 1v1's rounds and kills must not carry into a bigger match and swap people there.
+    if (teams.Count < BalancePicker.MinPlayers)
+    {
+      Tracker.Reset();
+      log.Debug("Balance off, fewer than 3 fighting Fighters={Fighters}", teams.Count);
+      return null;
+    }
+
     if (!Enabled && !force)
       return null;
 
@@ -94,7 +102,8 @@ public static class BalanceService
       $"Enabled={Enabled} | Verdict={(verdict == null ? "none" : $"{verdict.Reason} {RiftRouletteTeams.Name(verdict.Team)}")}",
       Tracker.Describe(),
       $"Rules: stomp = lead {BalanceTracker.LeadRounds}+ rounds and {BalanceTracker.StompKillDiff}+ more kills at {BalanceTracker.StompKillRatio}x; " +
-      $"streak = {BalanceTracker.StreakRounds} rounds in a row"
+      $"streak = {BalanceTracker.StreakRounds} rounds in a row",
+      $"Needs {BalancePicker.MinPlayers}+ fighting (the bench does not count); counters reset while fewer fight"
     ];
   }
 

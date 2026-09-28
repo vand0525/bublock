@@ -1,11 +1,11 @@
 # HeroReservations
 
-Hero reservations bought with betting chips, as a waiting line per hero.
+Hero reservations bought with betting souls, as a waiting line per hero.
 Pure (no game calls); one instance owned by `RandomModeService`. Unit
 tested (`Tests/RiftRoulette.Tests/HeroReservationsTests`).
 
-A reservation costs `Cost` (1,000) chips and lasts `Rounds` (3) rounds in
-which the player fights with that hero. The chips are spent by the caller
+A reservation costs `Cost` (1,000) souls and lasts `Rounds` (3) rounds in
+which the player fights with that hero. The souls are spent by the caller
 (`BetBook.TrySpend`) before `TryReserve`.
 
 ## Operations

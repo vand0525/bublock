@@ -7,7 +7,7 @@ namespace Bublock.Modules.Loadout;
 public sealed record LoadoutOptions(
   int Gold = 0,
   int Slots = LoadoutPlanner.DefaultSlots,
-  int MaxValue = LoadoutService.DefaultMaxValue);
+  int? MaxValue = null);
 
 public sealed record LoadoutResult(
   int ItemsAdded,
@@ -27,9 +27,20 @@ public static class LoadoutService
 
   public const int SwapAttempts = 3;
 
-  public const int DefaultMaxValue = 20000;
+  public const int DefaultMaxValue = LoadoutPlanner.DefaultCap;
 
   private static readonly Logger Log = BublockLog.For("Loadout");
+
+  public static int MaxValue { get; private set; } = DefaultMaxValue;
+
+  public static void SetMaxValue(int souls, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    var previous = MaxValue;
+    MaxValue = souls;
+
+    Log.WithMode(mode).Info("Loadout cap set Previous={Previous} Cap={Cap}", previous, souls);
+    BublockLog.Master.Info("Loadout cap {Previous} -> {Cap}", previous, souls);
+  }
 
   private static readonly EAbilitySlot[] SignatureSlots =
   [
@@ -68,7 +79,8 @@ public static class LoadoutService
         return false;
       });
 
-    var (items, capped) = LoadoutPlanner.CapValue(slots, catalog.CostOf, options.MaxValue);
+    var cap = options.MaxValue ?? MaxValue;
+    var (items, capped) = LoadoutPlanner.CapValue(slots, catalog.CostOf, cap);
     var value = LoadoutPlanner.Value(items, catalog.CostOf);
 
     if (capped.Count > 0)
@@ -79,7 +91,7 @@ public static class LoadoutService
         "Loadout over cap, removed Removed={Removed} Value={Value} Cap={Cap} Baseline={Baseline}",
         string.Join(",", capped),
         value,
-        options.MaxValue,
+        cap,
         catalog.BaselineValue);
     }
 

@@ -5,7 +5,7 @@ namespace Bublock.Tests.RiftRoulette;
 public class BetBoardTextTests
 {
   [Fact]
-  public void Board_ranks_by_chips_then_name()
+  public void Board_ranks_by_souls_then_name()
   {
     var text = BetBoardText.Board([new BetRow("bo", 100), new BetRow("Al", 1200), new BetRow("ann", 100)]);
 

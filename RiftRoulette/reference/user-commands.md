@@ -77,7 +77,7 @@ below work.
 - **Who:** players, in game (`LobbyPlugin`)
 - **Calls:** `CommandList.PlayerCommands` (reads the `[Command]` attributes in RiftRoulette.dll)
 - **Mode:** Clean; read-only; not logged
-- **Side effects:** one chat line per player command (`/name - Description`, sorted: `/bet`, `/chips`, `/commands`, `/heroes`, `/pick`, `/picks`, `/queue`, `/reserve`, `/score`, `/stats`, `/status`, `/unpick`, `/unqueue`), then `Full list: dw_help in console`
+- **Side effects:** one chat line per player command (`/name - Description`, sorted: `/bet`, `/commands`, `/heroes`, `/pick`, `/picks`, `/queue`, `/reserve`, `/score`, `/souls`, `/stats`, `/status`, `/unpick`, `/unqueue`), then `Full list: dw_help in console`
 - **Notes:** new in Stage 12. Deadworks' built-in `dw_help` only runs from the game console (there is no chat `/help`) and lists every visible command, admin ones included; `/commands` gives players a chat list of just their commands
 
 ### /score
@@ -122,16 +122,16 @@ below work.
 - **Who:** players, in game (`BettingPlugin`); Random mode match only
 - **Calls:** `BettingService.TryBet` → `BetBook.Place`
 - **Mode:** Clean; logged in `betting-*.log`
-- **Side effects:** bets all your chips on that team for the next round; typing the other team before the round starts moves the bet. Players in the coming round's fight may only bet on their own team; the player sitting out may bet on either. Chat reply: `Bet 300 chips on Amber.` At round end: `You won 600 chips (now 600).`, `You lost 300 chips (now 0).`, or `No result - your 300 chips are back.` (tie, cancel, match end). The betting board updates
-- **Notes:** new 2026-09-27. Everyone starts a match with 100 chips and earns 100 per kill. Betting opens at the start of the intermission (5 s) and closes 10 s into the round (`Betting is closed - it opens again after this round.`); with 0 chips: `No chips - get a kill.` A plain team-name chat message outside a Random match is ignored; `/bet` then replies that betting is only open during a Random mode match
+- **Side effects:** bets all your souls on that team for the next round; typing the other team before the round starts moves the bet. Players in the coming round's fight may only bet on their own team; the player sitting out may bet on either. Chat reply: `Bet 300 souls on Amber.` At round end: `You won 600 souls (now 600).`, `You lost 300 souls (now 0).`, or `No result - your 300 souls are back.` (tie, cancel, match end). The betting board updates
+- **Notes:** new 2026-09-27. Everyone starts a match with 100 souls and earns 100 per kill. Betting opens at the start of the intermission (5 s) and closes 10 s into the round (`Betting is closed - it opens again after this round.`); with 0 souls: `No souls - get a kill.` A plain team-name chat message outside a Random match is ignored; `/bet` then replies that betting is only open during a Random mode match
 
-### /chips
+### /souls
 
-- **Invocation:** chat `/chips` or `!chips` | console `dw_chips`
+- **Invocation:** chat `/souls` or `!souls` | console `dw_souls`
 - **Who:** players, in game (`BettingPlugin`)
 - **Calls:** `BettingService.DescribePlayer`
 - **Mode:** Clean; read-only; not logged
-- **Side effects:** chat lines: `You have N chips.`, your open bet if any, whether betting is open, and your hero reservation (or how to buy one with `/reserve`)
+- **Side effects:** chat lines: `You have N souls.`, your open bet if any, whether betting is open, and your hero reservation (or how to buy one with `/reserve`)
 - **Notes:** new 2026-09-27
 
 ### /reserve [hero]
@@ -140,5 +140,5 @@ below work.
 - **Who:** players, in game (`RandomPlugin`); Random mode match only
 - **Calls:** `RandomModeService.Reserve` → `BetBook.TrySpend`, `HeroReservations.TryReserve`
 - **Mode:** Clean; logged in `random-*.log`
-- **Side effects:** spends 1,000 chips (not chips riding on a bet) and puts you in line for that hero. Nobody ahead: `Reserved Haze for your next 3 rounds, starting the round after this one (250 chips left).` Someone ahead: `Kamilk has reserved Haze. When their 3 rounds are done, it will be your turn.` (with more ahead: `2 players are ahead of you for Haze (5 rounds). Then it will be your turn.`). From the next hero draw, the first player in the hero's line who is fighting that round gets it with a random stored build, and a chat line: `Your reserved hero is up: Haze (round 1 of 3).`, then `Reserved hero: Haze (round 2 of 3).` Everyone else is drawn randomly from the other heroes. The betting board total drops by 1,000
-- **Notes:** new 2026-09-27. One reservation per player (holding or waiting). Rounds you sit out don't count; if the holder sits out or is away, the next fighter in line plays the hero that round. Refused outside a Random match, for spectators, for an unknown hero, and with fewer than 1,000 free chips. No refunds: an unused reservation ends with the match (chips reset at every match start)
+- **Side effects:** spends 1,000 souls (not souls riding on a bet) and puts you in line for that hero. Nobody ahead: `Reserved Haze for your next 3 rounds, starting the round after this one (250 souls left).` Someone ahead: `Kamilk has reserved Haze. When their 3 rounds are done, it will be your turn.` (with more ahead: `2 players are ahead of you for Haze (5 rounds). Then it will be your turn.`). From the next hero draw, the first player in the hero's line who is fighting that round gets it with a random stored build, and a chat line: `Your reserved hero is up: Haze (round 1 of 3).`, then `Reserved hero: Haze (round 2 of 3).` Everyone else is drawn randomly from the other heroes. The betting board total drops by 1,000
+- **Notes:** new 2026-09-27. One reservation per player (holding or waiting). Rounds you sit out don't count; if the holder sits out or is away, the next fighter in line plays the hero that round. Refused outside a Random match, for spectators, for an unknown hero, and with fewer than 1,000 free souls. No refunds: an unused reservation ends with the match (souls reset at every match start)

@@ -281,7 +281,7 @@ client console (`dw_spec_*`).
 - **Who:** admin
 - **Calls:** `StreamCam.ShowOverview` (→ `SpectateService.Park` 264 units above `WatchSpot.Location(WatchSpot.Side)`, pitch 89)
 - **Mode:** Debug
-- **Side effects:** puts the admin's client in fly cam (`spec_mode 4`), then top-down over the rift now for 10 s, then back to the player the camera was on (or the next choice). Does not use up the round's automatic top-down. Errors when the admin is not spectating
+- **Side effects:** top-down over the rift now for 10 s (the view only moves when the admin is in fly cam, C; the server cannot switch it), then back to the player the camera was on (or the next choice). Does not use up the round's automatic top-down. Errors when the admin is not spectating
 - **Notes:** new with the stream camera (2026-09-27); also the quickest in-game check that teleporting the observer camera works
 
 ### Access (`AccessPlugin`, in RiftRoulette.dll)
@@ -717,7 +717,7 @@ chat line `Auto-balance: A <-> B`.
 - **Who:** admin
 - **Calls:** `BalanceService.Describe`
 - **Mode:** Debug; read-only
-- **Side effects:** enabled flag and current verdict, rounds / kills / streak since the last swap, the rules
+- **Side effects:** enabled flag and current verdict, rounds / kills / streak since the last swap, the rules (including: needs 3+ fighting, the bench does not count, counters reset while fewer fight)
 
 #### /balance_auto <on|off>
 
@@ -734,12 +734,12 @@ chat line `Auto-balance: A <-> B`.
 - **Calls:** `RandomModeService.PrepareRound(forceBalance: true)` (→ `BalanceService.TryBalance`)
 - **Mode:** Debug
 - **Side effects:** forces a swap now for the leading team (rounds, then kills, since the last swap), then rerolls everyone's hero and build like `/random_reroll`. Replies `Balanced and rerolled: N swapped, M pending`
-- **Notes:** error unless the hero mode is `random` and the match is in an intermission. No swap with fewer than 3 players
+- **Notes:** error unless the hero mode is `random` and the match is in an intermission. No swap with fewer than 3 fighting (a benched player does not count); then it only rerolls (`0 swapped`) and the counters reset
 
 ### Betting (`BettingPlugin`, in RiftRoulette.dll)
 
 Round betting runs by itself in Random mode (see `user-commands.md` `/bet`):
-100 starting chips, 100 per kill, all-in bets on the next round during the
+100 starting souls, 100 per kill, all-in bets on the next round during the
 intermission, a win doubles the stake, a `BETTING` board on the empty side
 of the watch spot. Admin (`AdminCommand.Authorize` with the `Betting` log;
 server console trusted). `[Betting]` replies.
@@ -750,7 +750,7 @@ server console trusted). `[Betting]` replies.
 - **Who:** admin
 - **Calls:** `BettingService.RefreshBoard`, `BettingService.Describe`
 - **Mode:** Debug; read-only apart from redrawing the board
-- **Side effects:** redraws the betting board (Random mode), then one line with active, open, bet count, total staked, and one line per participant: slot, name, chips, open bet
+- **Side effects:** redraws the betting board (Random mode), then one line with active, open, bet count, total staked, and one line per participant: slot, name, souls, open bet
 - **Notes:** new 2026-09-27
 
 ### Loadout (`LoadoutPlugin`, in RiftRoulette.dll)
@@ -791,7 +791,16 @@ Added in Stage 13b.
 - **Who:** admin
 - **Calls:** `HeroBuildCatalog.Default`
 - **Mode:** Debug; read-only
-- **Side effects:** two lines: when the data was fetched, source, window (days), hero count; then the baseline value (median planned value of all builds), the cap (20,000), and the banned items
+- **Side effects:** two lines: when the data was fetched, source, window (days), hero count; then the baseline value (median planned value of all builds), the current cap (20,000 unless `/loadout_cap` changed it), and the banned items
+
+#### /loadout_cap
+
+- **Invocation:** chat `/loadout_cap [souls|default]` | console `dw_loadout_cap [souls|default]`
+- **Who:** admin
+- **Calls:** `LoadoutPlanner.TryParseCap`, then `LoadoutService.SetMaxValue`
+- **Mode:** Debug
+- **Side effects:** no argument: shows the current cap and the default (20,000). With a value (1,000 to 200,000, or `default`): the most a Random mode build's items may be worth from the next build handed out; a lower cap also lowers the level and ability ranks. Builds already on players stay until the next intermission (`/random_reroll` in an intermission applies it now). Logged in `loadout-*.log` and master. In memory only: every upload or restart resets it to 20,000. Bad input: error naming the range
+- **Notes:** new 2026-09-28. 1v1 copies and 1v1 setup gold do not use the cap
 
 ### Restraint (`RestraintPlugin`, in RiftRoulette.dll)
 

@@ -8,12 +8,11 @@ aside while the admin moves the camera by hand (manual hold).
 ## State (per admin Steam ID, static)
 
 - `Auto` (default on), `LastFollowed` (Steam ID the camera was put on),
-  `FallbackSent` (client command already sent for that target),
   `PendingKiller`, `Parked` / `ParkedSide`, `OverviewEnd`, `ReturnTo`
   (player to show after the top-down), `LastShownRound`, `LastParkAt`
   (last park sent), `SeatedAt` (set by `Seated`), `ManualUntil` /
   `ManualPosition` (manual hold end and the observer position last seen
-  during it), `LastClientCommandAt` (last follow / park the camera sent).
+  during it).
 - `SpawnedAt` (per player Steam ID): last `player_spawn`, from `NoteSpawn`.
 - `Forget(steamId)` resets everything but `Auto` and drops the spawn time
   (stand up, disconnect).
@@ -27,7 +26,7 @@ aside while the admin moves the camera by hand (manual hold).
 | `Tick(timer, mode)` | Every `TickSeconds` (2 s) from `LobbyPlugin.OnLoad` (with the plugin's `Timer`): for every seated admin who is observing with `Auto` on, past `SeatGrace` (3 s after `Seated`) and not in a manual hold, runs the update below. |
 | `Seated(steamId)` | Called by `AdminSeat.BecomeObserver` right after `MakeObserver`; starts the seat grace, so the first park waits for the client. |
 | `NoteSpawn(steamId)` | From the `player_spawn` handler (joins and respawns of participants and statues): records the spawn time for the follow delay. |
-| `OnAdminCommand(admin, command, args, mode)` | From `LobbyPlugin.OnClientConCommand` for every client console command. Seated admins only: logs Information `Admin client command Command= Args=` in `spectate-*.log`. A `spec_*` command starts a manual hold (`Reason=command`), unless the camera sent a client command in the last `OwnCommandEcho` (2 s) or the seat grace is running. |
+| `OnAdminCommand(admin, command, args, mode)` | From `LobbyPlugin.OnClientConCommand` for every client console command. Seated admins only: logs Information `Admin client command Command= Args=` in `spectate-*.log`. A `spec_*` command starts a manual hold (`Reason=command`), unless the seat grace is running. |
 | `OnDeath(victim, attacker, timer, mode)` | If an admin's camera is on the victim (or the victim is the top-down return-to player), stores the attacker as `PendingKiller` (none for a suicide or a non-player) and runs `Tick` on the next tick. |
 | `OnBigUlt(caster, ability, timer, mode)` | Skipped during a manual hold. While a top-down view shows: the caster becomes `ReturnTo` (logged, not extended). Otherwise, if `OverviewRule.CanStart(RiftService.IsRunning, RiftService.RoundNumber, LastShownRound)`: records the round and starts the top-down view with the caster as `ReturnTo` (logged `Reason=ult Caster= Ability= Round=`). Else logs Information `Big ult skipped ...`. |
 | `ShowOverview(admin, timer, mode)` | `spec_overview`: starts the top-down view now, returning to the current player; does not touch `LastShownRound`. Throws `CommandException` when not observing. |
@@ -64,9 +63,8 @@ client (2026-09-28), so the camera never fights the admin:
 4. The admin left a follow (see Manual hold): start the hold, stop.
 5. Otherwise `SpectateRule.Choose(current, PendingKiller, candidates)`,
    where current is the candidate the observer is on, else `LastFollowed`
-   if still a candidate (the server target did not stick: the
-   `spec_player` client command is sent once for it), and null right
-   after a top-down.
+   if still a candidate (the server target did not stick; it is kept
+   rather than switching every tick), and null right after a top-down.
    - `Keep`: stay; a manual click to another live player is adopted and
      logged once (`Reason=keep`).
    - `Killer` / `Any`: `SpectateService.Follow` (`Reason=killer|any`,
@@ -83,8 +81,8 @@ client (2026-09-28), so the camera never fights the admin:
 - Position: the main watch spot anchor (`WatchSpot.Location(side)`, not a
   per-slot spot), above the rift being fought or the next one, raised by
   `OverheadHeight` (264, so z 1800 over the 1536 floor).
-- Sent through `SpectateService.Park`: fly cam (`spec_mode 4`), teleport,
-  then the angle.
+- Sent through `SpectateService.Park`: teleport, then the angle. Only
+  moves the view when the admin is in fly cam (C).
 - Angle: `SpectateRule.LookDown(anchor yaw)`: pitch 89, the watch spot's
   yaw.
 - Length: `OverviewRule.Duration` (10 s); a `timer.Once` runs `Tick` when
@@ -101,7 +99,9 @@ client (2026-09-28), so the camera never fights the admin:
 ## Dangerous Deadworks constraints
 
 - The client starts in the directed view; the camera only moves once the
-  client is in fly cam, so every park sends `spec_mode 4` first.
+  admin presses C for fly cam. The server cannot switch it: the client
+  refuses `spec_mode` / `spec_player` from the server (not
+  `server_can_execute`), so the camera sends no client commands.
 - `Parked` is only a claim: the client can leave fly cam (C key, or the
   directed view taking over), so the park is re-checked, not trusted.
 - Never move the camera while the admin is moving it (manual hold): the

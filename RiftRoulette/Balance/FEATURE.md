@@ -15,7 +15,10 @@ Counted since the last swap (or match start):
   least 1.5x the other team's kills.
 - **Streak:** otherwise, 5 scoring rounds in a row for one team (ties,
   cancels, and timeouts don't count or break it).
-- **Who:** score = kills + assists - deaths this match. Needs 3+ players.
+- **Who:** score = kills + assists - deaths this match.
+- **Needs 3+ fighting players;** the bench does not count, so a 1v1 (with
+  or without a benched third player) never swaps. Counters reset while
+  fewer fight, so 1v1 rounds never cause a swap once more players join.
 - After a swap all counters reset.
 
 ## Files

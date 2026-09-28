@@ -440,13 +440,13 @@ public static class RandomModeService
 
     if (!book.TrySpend(steamId, HeroReservations.Cost))
     {
-      var riding = book.TryGetBet(steamId, out _) ? " Your chips are on a bet until the round ends." : "";
-      return $"A reservation costs {BetBoardText.Format(HeroReservations.Cost)} chips; you have {BetBoardText.Format(book.Chips(steamId))}.{riding}";
+      var riding = book.TryGetBet(steamId, out _) ? " Your souls are on a bet until the round ends." : "";
+      return $"A reservation costs {BetBoardText.Format(HeroReservations.Cost)} souls; you have {BetBoardText.Format(book.Chips(steamId))}.{riding}";
     }
 
     var outcome = Reservations.TryReserve(steamId, hero);
     var name = catalog.DisplayName(hero);
-    var left = $"{BetBoardText.Format(book.Chips(steamId))} chips left";
+    var left = $"{BetBoardText.Format(book.Chips(steamId))} souls left";
 
     Log.WithMode(mode).Info(
       player.ToPlayerRef(),
@@ -471,7 +471,7 @@ public static class RandomModeService
 
     if (Reservations.Position(steamId) is not { } position)
       return $"Reserve a hero for your next {HeroReservations.Rounds} rounds: /reserve <hero> " +
-             $"({BetBoardText.Format(HeroReservations.Cost)} chips; you have {BetBoardText.Format(BettingService.Book.Chips(steamId))}).";
+             $"({BetBoardText.Format(HeroReservations.Cost)} souls; you have {BetBoardText.Format(BettingService.Book.Chips(steamId))}).";
 
     var name = HeroBuildCatalog.Default.DisplayName(position.Hero);
 

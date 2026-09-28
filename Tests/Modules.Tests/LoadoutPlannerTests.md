@@ -33,3 +33,6 @@ Unit tests for `Modules/Loadout/LoadoutPlanner` (pure).
   - stops when unlocks run out
   - an upgrade on a locked ability pays 1 unlock and the tier cost
   - repeat unlocks, upgrades past 3 and unknown kinds cost nothing
+- `TryParseCap`: accepts whole numbers from 1,000 to 200,000 (edges
+  included, spaces trimmed) and `default` in any case (20,000); rejects
+  999, 200,001, negatives, `15,000`, decimals, words, blank and null.

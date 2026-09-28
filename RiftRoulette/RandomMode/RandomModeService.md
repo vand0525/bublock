@@ -33,8 +33,8 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
   `_benchRound`: the `MatchState.Round` the bench was chosen for, so a
   reroll in the same intermission keeps the bench.
 - `Reservations` (public): the `HeroReservations` waiting lines bought with
-  betting chips (whole match; reset with the rest in `BeginMatch` /
-  `EndMatch`, like the chips at match start). Kept by Steam ID across a
+  betting souls (whole match; reset with the rest in `BeginMatch` /
+  `EndMatch`, like the souls at match start). Kept by Steam ID across a
   disconnect.
 
 ## Operations
@@ -54,8 +54,8 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
 | `BuildDescription(buildName, souls)` | `<build> - 12,345 souls` (invariant culture) | string |
 | `EndMatch(mode)` | `ResetHero()` for alive assigned players (clears the build before the lobby reset), then clears state | heroes reset |
 | `Describe()` | Config line with `Bench=`, then one line per player: slot, name, team, hero, build, `PENDING`, `SITTING OUT`, and `Reserved=<hero> (N left)` (front of a line) or `Waiting=<hero> #N` | lines |
-| `Reserve(player, heroText, mode)` | `/reserve`. Refuses outside a running Random match (`BettingService.Active`) and for spectators. Empty text: `DescribeReservation`. Parses the hero (`TryParseHero`, also with spaces removed; must have stored builds); refuses a player who already holds or waits for one; spends `HeroReservations.Cost` (1,000) unstaked chips (`BetBook.TrySpend`; short: the price, their chips, and a note when chips are on a bet); joins the hero's line; logs `Hero reserved Hero= Result= Ahead= RoundsAhead= Chips=`; refreshes the betting board. Reply: `Reserved <hero> for your next 3 rounds, starting the round after this one / the next round you play (N chips left).`, or `HeroReservations.WaitingLine` with the holder's name (`Another player` if they are offline) | reply |
-| `DescribeReservation(player)` | No reservation: price, usage, and their chips. Front of the line: hero and rounds left. Waiting: place, rounds ahead, own rounds | reply |
+| `Reserve(player, heroText, mode)` | `/reserve`. Refuses outside a running Random match (`BettingService.Active`) and for spectators. Empty text: `DescribeReservation`. Parses the hero (`TryParseHero`, also with spaces removed; must have stored builds); refuses a player who already holds or waits for one; spends `HeroReservations.Cost` (1,000) unstaked souls (`BetBook.TrySpend`; short: the price, their souls, and a note when souls are on a bet); joins the hero's line; logs `Hero reserved Hero= Result= Ahead= RoundsAhead= Chips=`; refreshes the betting board. Reply: `Reserved <hero> for your next 3 rounds, starting the round after this one / the next round you play (N souls left).`, or `HeroReservations.WaitingLine` with the holder's name (`Another player` if they are offline) | reply |
+| `DescribeReservation(player)` | No reservation: price, usage, and their souls. Front of the line: hero and rounds left. Waiting: place, rounds ahead, own rounds | reply |
 
 ### PrepareRound
 

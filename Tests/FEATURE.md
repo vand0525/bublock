@@ -43,7 +43,7 @@ server. Never deployed to the server.
   seat rules, the stream camera's once-per-round top-down timing and big-ult list,
   the random hero draw, who sits out (bench rotation) and the fighting teams,
   team placement, kill / death / assist counting and
-  board text, the auto-balance trigger and pick, and betting chips, payouts
+  board text, the auto-balance trigger and pick, and betting souls, payouts
   and board text. Imports `Shared.projitems`,
   `Movement.projitems` because the locations are Movement types, and
   `Queue.projitems` for the bench rotation's `PlayerQueue`.

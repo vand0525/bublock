@@ -15,7 +15,7 @@ caller of `Start` (`GameLoopPlugin`) and is kept for the whole match.
    `RandomModeService.PrepareRound` (new hero and build for everyone); in
    1v1 mode `DuelService.PrepareRound` (both players reset to the copied
    build with 0 souls). Then `BettingService.Open` (Random mode: betting
-   opens and everyone gets a chat line with their chips). The default
+   opens and everyone gets a chat line with their souls). The default
    intermission is `DefaultIntermissionSeconds` (5 s).
    - Random mode, `BuildBannerDelaySeconds` (3 s) in: each player gets
      `<Hero>` / `<build> - 12,345 souls` (`RandomModeService.AnnounceBuilds`;

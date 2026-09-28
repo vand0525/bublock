@@ -27,7 +27,7 @@ round's bench player fills the gap the new one leaves. A join or leave
 during an intermission subs the bench player in; mid-round the round plays
 on uneven until the next intermission.
 
-Hero reservations: a player can spend 1,000 betting chips (`/reserve
+Hero reservations: a player can spend 1,000 betting souls (`/reserve
 <hero>`) to play that hero in their next 3 fighting rounds
 (`HeroReservations`). Several players can reserve the same hero; they wait
 in line in the order they bought, and are told who is ahead and for how
@@ -35,7 +35,7 @@ many rounds. At each draw the first player in a hero's line who is
 fighting that round gets it (so a benched or absent holder never stalls the
 line, and keeps their rounds); everyone else is drawn randomly from the
 other heroes. Rounds spent sitting out don't count. Reservations last one
-match, like the chips.
+match, like the souls.
 
 ## Files
 
@@ -88,7 +88,7 @@ load; cleared by `BeginMatch` / `EndMatch`). 1v1 mode owns its own lock.
 - `Draft/DraftService.EnforceHero` calls `DuelService.GuardHero`, then
   `GuardHero`.
 - `Lobby/AdminSeat.Sit` calls `Forget`.
-- `/reserve` (player, Clean) calls `Reserve`; `/chips` shows
+- `/reserve` (player, Clean) calls `Reserve`; `/souls` shows
   `DescribeReservation`.
 - `/random_reroll` calls the same `PrepareRound` in Debug mode (a reroll
   does not use up another reserved round);
