@@ -1,7 +1,7 @@
 # RestraintService
 
 Keeps chosen players silenced and unable to use items, shoot or melee until
-they are released (Stage 13h), and ignored by NPC targeting. They can still reload. Game agnostic: the caller decides who is restrained
+they are released, and ignored by NPC targeting. They can still reload. Game agnostic: the caller decides who is restrained
 (Rift Roulette restrains everyone sent up top, see `Round/WatchSpot`).
 
 ## State

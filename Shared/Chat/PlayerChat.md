@@ -6,8 +6,7 @@ Sends a chat line to one player.
 
 - `Send(player, message)`: sends `CCitadelUserMsg_ChatMsg` with
   `PlayerSlot = player.Slot`, `Text = message`, `AllChat = true`, filtered to
-  that player only (`RecipientFilter.Single(player.Slot)`). Body identical
-  to the archive Rift Roulette `SendChat`.
+  that player only (`RecipientFilter.Single(player.Slot)`).
 
 ## Inputs / outputs
 

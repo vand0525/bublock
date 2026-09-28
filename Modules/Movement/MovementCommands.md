@@ -1,7 +1,6 @@
 # MovementCommands.projitems
 
-MSBuild shared-items file that adds `MovementPlugin` (the `/mv_*` admin
-commands) to a consuming project.
+Adds `MovementPlugin` (the `/mv_*` admin commands).
 
 ```xml
 <Import Project="..\Modules\Movement\Movement.projitems" />
@@ -9,5 +8,5 @@ commands) to a consuming project.
 ```
 
 - Requires `Movement.projitems` and `Shared.projitems`.
-- Import it in exactly one DLL per server; two DLLs registering `/mv_*` would
-  clash. Today that DLL is `RiftRoulette.dll`.
+- Import it in exactly one DLL per server (command names would clash across
+  DLLs). Today that DLL is `RiftRoulette.dll`.

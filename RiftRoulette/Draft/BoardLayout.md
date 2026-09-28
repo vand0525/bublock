@@ -1,11 +1,11 @@
 # BoardLayout
 
-Where the draft-area boards sit (Stage 13c, extracted from `DraftService`).
+Where the draft-area boards sit.
 Positions are offsets from the watch spot the boards are drawn at
-(`Round/WatchSpot.Location(WatchSpot.BoardSide)`, Stage 13i), so the boards
+(`Round/WatchSpot.Location(WatchSpot.BoardSide)`), so the boards
 move with the watch spot between rounds.
 
-Offsets and angles below are the green ones (the archive's, unchanged). On
+Offsets and angles below are the green ones. On
 yellow every board goes through `Round/WatchLayout`: offsets rotate half a
 turn around the watch spot (x and y negated) and yaw gets +180, so the
 layout looks the same from the watch spot on both lanes and the welcome

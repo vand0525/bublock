@@ -2,9 +2,8 @@
 
 Core rift operations: start a rift through the game's KOTH scheduler, watch
 for the outcome, end the round, cancel, and clean up. Static; state lives
-here, timers come from the calling plugin class (`ITimer`). Extracted from
-Legacy `Koth` in Stage 10; the sequence is tick-for-tick the archive one.
-Since Stage 11 the two player-moving steps are handed in by the caller
+here, timers come from the calling plugin class (`ITimer`). Known-good
+sequence; do not reorder. The two player-moving steps are handed in by the caller
 (`RiftRoundSteps`, built by `Round/RoundFlow`), so this file has no Draft
 or Movement dependency.
 
@@ -29,7 +28,7 @@ logger.
   caller's steps. `MoveTeamsToRift(side)` runs right after the scheduler is
   parked; `ReturnPlayersToDraft()` runs at round end or cancel, before
   trooper cleanup, and returns how many players moved. `RoundEnded(result)`
-  (Stage 13a) runs last on every ending path (finished, tied, cancelled,
+  runs last on every ending path (finished, tied, cancelled,
   spawn timed out), after the phase is back to `Idle`, with a
   `RiftRoundResult` (outcome, side, winner team). An exception in it is
   logged as Error and does not affect the rift state.
@@ -38,7 +37,7 @@ logger.
 
 | Member | Meaning |
 |---|---|
-| `NextSide` | Side of the next rift; starts Green (archive `_nextRiftIsGreen = true`) |
+| `NextSide` | Side of the next rift; starts Green |
 | `Phase` | see `RiftPhase` |
 | `CurrentSide` | Side of the running rift, or null |
 | `LastOutcome` | `none`, `finished`, `tied`, `spawn timed out`, or `cancelled` |
@@ -50,7 +49,7 @@ logger.
 
 | Op | Behavior | Returns |
 |---|---|---|
-| `RunRift(timer, steps, mode)` | Refuses if a rift is running. Else, in archive order: log `Forcing Rift`; resolve gamerules (Error and stop if missing or null); take `NextSide`; snapshot spawners, cash-ins and troopers; start the round; log `Spawning rift` (with `Existing=`, the spawners already on the map, and `Cashins=`, the cash-ins already on the map); `ConfigureNextRift`; then each tick `WaitForSpawner` | reply line |
+| `RunRift(timer, steps, mode)` | Refuses if a rift is running. Else, in this order (known-good; do not reorder): log `Forcing Rift`; resolve gamerules (Error and stop if missing or null); take `NextSide`; snapshot spawners, cash-ins and troopers; start the round; log `Spawning rift` (with `Existing=`, the spawners already on the map, and `Cashins=`, the cash-ins already on the map); `ConfigureNextRift`; then each tick `WaitForSpawner` | reply line |
 | `WaitForSpawner` (private, per tick) | A `citadel_item_koth_spawner` not in the snapshot appears: its side is `RiftSides.TryMatch(position)` (the requested side if it matches neither); log spawned (expected vs actual position, index), then `GoLive`. Else, when the snapshot had a cash-in (a leftover rift, adopted on the first tick) or at `step.Run >= 320`, a rift already on the map (`FindRiftOnMap`): Warning `No new rift spawned, using the one on the map` (side, requested, entity designer name, index, position, runs waited), then `GoLive` with that rift's side. Otherwise at `step.Run >= 320`: `ParkScheduler`, Warning `Rift spawn timed out` (side not flipped), round finishes as `spawn timed out` | — |
 | `FindRiftOnMap(requested)` (private) | First a `citadel_item_koth_spawner` within `MatchDistance` of a rift position; if none, a `citadel_koth_cashin` (side by `TryMatch`, else `RiftSides.Nearest`). The requested side is preferred within each kind | entity, side, designer name, or null |
 | `GoLive` (private) | `ParkScheduler`; `CurrentSide` = the side; `steps.MoveTeamsToRift(side)`, log moved, log give-up (Debug), `AlternateSide(side)`, log next side / window / spawn, phase `Live`, start `WatchOutcome`. The watch spot (`WatchSpotRule`) follows `CurrentSide` | — |
@@ -77,7 +76,7 @@ logger.
   skips dead players; Lobby's `player_spawn` returns them).
 - Entity indexes are compared only within one designer name
   (`citadel_item_koth_spawner`, `citadel_koth_cashin`, `npc_trooper`)
-  captured moments earlier, as in the archive; do not use them as global
+  captured moments earlier; do not use them as global
   keys.
 - Never remove `info_super_trooper_spawn`.
 - The spawner is short-lived: it spawns the cash-in about 1 s later and is

@@ -1,6 +1,6 @@
 # AdminSeatRule
 
-Pure rules for the reserved admin seat (Stage 13f). Unit tested. `playing`
+Pure rules for the reserved admin seat. Unit tested. `playing`
 is the number of connected participants (humans not in the seat), not
 counting the player being decided about.
 

@@ -17,7 +17,7 @@ Resolves the server log root.
   `Assembly.Location` is empty. Always resolve through the API assembly.
 - Logs live beside `managed/` (like the host's `configs/`) because
   `managed/` may be deleted on Deadworks updates.
-- Verified on the live server at the Stage 12 push: resolves to
+- Verified on the live server: resolves to
   `Z:\gameserver\server\game\bin\win64\bublock\logs` (SFTP
   `/server/game/bin/win64/bublock/logs/`). `dw_dev_logpath` (DevTools)
   prints the resolved path.

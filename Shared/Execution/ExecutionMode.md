@@ -11,4 +11,4 @@ Execution mode passed explicitly to operations (`.rules` §5).
 
 - Mode changes logging and diagnostics only, never gameplay outcomes.
 - Passed as a parameter; there is no ambient/static current mode.
-- Not yet consumed by any operation (logging arrives in Stage 4).
+- Loggers take it through `Logger.WithMode(mode)`.

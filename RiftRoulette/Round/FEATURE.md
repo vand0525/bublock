@@ -2,15 +2,14 @@
 
 ## Purpose
 
-The parity round, composed from Draft, Movement, and Rift ops: start a rift,
+The round, composed from Draft, Movement, and Rift ops: start a rift,
 move each drafted team to its side's start, and return players to draft
-when the rift ends or is cancelled. This is the `koth`-equivalent path from
-the master plan (Stage 11). One code path; the mode (Clean for lifecycle,
-Debug for admin) changes only logging. Since Stage 13a the round also
-reports its result to the match loop. Since Stage 13i players wait at a
-watch spot above the rift (`WatchSpot`) instead of the fixed `draft` spot,
-restrained (`Modules/Restraint`) until they are moved into the rift, where
-each fighter is healed to full health.
+when the rift ends or is cancelled. One code path; the mode (Clean for
+lifecycle, Debug for admin) changes only logging. The round reports its
+result to the match loop. Players wait at a watch spot above the rift
+(`WatchSpot`), not the fixed `draft` spot, restrained (`Modules/Restraint`)
+until they are moved into the rift, where each fighter is healed to full
+health.
 
 ## Files
 
@@ -55,7 +54,7 @@ rescue count. Round state
 ## Composition
 
 ```text
-GameLoop/MatchService (Stage 13a) ─┐
+GameLoop/MatchService ─────────────┐
                                    ├─> RoundFlow.RunRound / CancelRound
 /rift_start, /rift_cancel (Debug) ─┘
       └─> RiftService.RunRift / CancelRift (order, gamerules, watch, cleanup)

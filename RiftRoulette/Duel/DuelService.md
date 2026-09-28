@@ -1,10 +1,10 @@
 # DuelService
 
-1v1 mode orchestration (Stage 13g, `HeroMode.Duel`, `/match_mode 1v1`). One
+1v1 mode orchestration (`HeroMode.Duel`, `/match_mode 1v1`). One
 player builds a hero freely; the admin copies that exact hero (items,
 imbues, ability upgrades, level, ability points) onto both players, and the
-match runs with both locked to it, re-applied every intermission. Since
-Stage 13j a queue decides who fights: the first two in the queue, winner
+match runs with both locked to it, re-applied every intermission. A queue
+decides who fights: the first two in the queue, winner
 stays on, loser to the back. Static state, one per DLL load.
 
 ## State

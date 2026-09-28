@@ -7,11 +7,10 @@ Server-side discovery and diagnostics for Deadlock/Deadworks experimentation
 
 ## Current state
 
-- Single plugin class `DevToolsPlugin` under `Bublock/DevTools/`, derived
-  from the archive snapshot, plus the `ModifierProbe` service.
-- Compiles in `Bublock/Shared/` via `Shared.projitems`.
-- Builds with `Bublock.sln` / `scripts/update.sh`; ships as `DevTools.dll`
-  (replaces the archive DLL of the same name on the server).
+- Single plugin class `DevToolsPlugin` under `Bublock/DevTools/`, plus the
+  `ModifierProbe` service.
+- Uses `Bublock/Shared/`.
+- Builds with `Bublock.sln` / `scripts/update.sh`; ships as `DevTools.dll`.
 
 ## Public operations
 

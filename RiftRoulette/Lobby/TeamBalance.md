@@ -1,6 +1,6 @@
 # TeamBalance
 
-Pure team placement (Stage 13b, moved to Lobby in Stage 13c). Used for new
+Pure team placement. Used for new
 connections (`LobbyService.AdmitPlayer`), Random mode match start, and late
 joiners.
 

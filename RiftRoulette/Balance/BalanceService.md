@@ -1,6 +1,6 @@
 # BalanceService
 
-Auto-balance for Random mode (Stage 13c). Static; holds one
+Auto-balance for Random mode. Static; holds one
 `BalanceTracker` and the `Enabled` flag (on by default, reset to on at every
 DLL load).
 

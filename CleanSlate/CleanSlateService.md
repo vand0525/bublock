@@ -13,7 +13,7 @@ Static service holding the CleanSlate map-cleanup operations. Used by
 
 `RemovedDesignerNames`: `npc_trooper_boss`, `npc_boss_tier2`,
 `npc_barrack_boss`, `citadel_item_powerup_spawner`,
-`citadel_herotest_orbspawner` (archive list), plus `citadel_shop_prop_dynamic`
+`citadel_herotest_orbspawner`, `citadel_shop_prop_dynamic`
 (the 8 shop kiosk models on `dl_midtown`).
 
 `DisabledDesignerNames`: `trigger_item_shop` (9 buy zones, including a base

@@ -3,12 +3,12 @@
 Admin / debug / force commands. Keep this catalog accurate whenever
 commands are added, renamed, restricted, or removed.
 
-Populate entries from verified source as commands are extracted. Do not
-invent undocumented commands. Do not invent Steam IDs; authorize from
-existing DevTools / source only.
+Populate entries from verified source. Do not invent undocumented
+commands. Do not invent Steam IDs; authorize from existing DevTools /
+source only.
 
 Admin gate: `AdminAuth.IsAuthorized` in `Bublock/Shared/Auth/AdminAuth.cs`
-(the single shared Steam ID set, compiled into every Bublock DLL). New admin
+(the single shared Steam ID set). New admin
 commands call it through `AdminCommand.Authorize`
 (`Bublock/Shared/Auth/AdminCommand.cs`).
 
@@ -89,8 +89,8 @@ locations (registered by Rift Roulette on load): `draft`, `green_sapphire`,
 `green_amber`, `yellow_sapphire`, `yellow_amber`.
 
 A teleport keeps the model angle, zeroes velocity, and sets the camera to
-the location's angle (same as the archive). Players with no hero pawn are
-skipped; there is no alive check (the archive had none either).
+the location's angle. Players with no hero pawn are skipped; there is no
+alive check.
 
 #### /mv_list
 
@@ -115,7 +115,6 @@ skipped; there is no alive check (the archive had none either).
 - **Calls:** `MovementService.TeleportTo`
 - **Mode:** Debug
 - **Side effects:** teleports one player to the location and sets their camera; error if the location is unknown, the slot is empty, or the player has no hero
-- **Notes:** `/mv_tp draft` replaces the archive `/test`, which anyone could run (old name removed in Stage 12)
 
 #### /mv_tp_team <team number> <location>
 
@@ -173,7 +172,6 @@ position, entity index.
 - **Calls:** `LobbyService.ListPlayers`
 - **Mode:** Debug; read-only
 - **Side effects:** prints the count, then one line per fully connected player
-- **Notes:** replaces the archive's unused `LogPlayerLifeStates`
 
 #### /player_info <slot>
 
@@ -190,7 +188,6 @@ position, entity index.
 - **Calls:** `LobbyService.KickPlayer`
 - **Mode:** Debug
 - **Side effects:** logs the kick with the player's name and Steam ID; releases their pick and redraws the draft boards if they had one; runs `kickid <slot>`. Empty slot: Warning in `lobby` (copied to master) and an error reply
-- **Notes:** replaces the archive `/kick`, which anyone could run (old name removed in Stage 12; now admin-only, intentional difference)
 
 #### /player_team <slot> <sapphire|amber>
 
@@ -225,7 +222,7 @@ position, entity index.
 - **Calls:** `PauseGuard.Describe` (no argument) or `PauseGuard.SetAllowed` (`on` / `off`, also `1` / `0`)
 - **Mode:** Debug
 - **Side effects:** no argument: one line with pausing on / off, `GamePaused`, `ServerPaused`, blocked requests and automatic unpauses since load. `on` / `off`: sets `citadel_allow_pausing` and `citadel_allow_pause_in_match` to 1 / 0 (`citadel_pause_allow_in_pregame` stays 0) and writes a master line `Pausing turned on/off`. While off, pause console commands (`pause`, `setpause`, `citadel_pause`, `citadel_toggle_server_pause`) and the pause net messages (`CCLCMsg_RequestPause`, `CCitadelClientMsg_Pause`) are blocked for everyone, admins included; the player gets the chat line `Pausing is off on this server.` (at most once per 5 s), and a game that is paused anyway gets the server `pause` toggle every 2 s until it runs again (`pause-*.log`)
-- **Notes:** new 2026-09-27 (a player kept pausing the lobby). Off after every load and hot reload; `on` lasts until the next one. Error for any other argument
+- **Notes:** a player kept pausing the lobby (2026-09-27). Off after every load and hot reload; `on` lasts until the next one. Error for any other argument
 
 #### dw_seat_spec
 
@@ -234,7 +231,7 @@ position, entity index.
 - **Calls:** `AdminSeat.Sit` (→ `DraftState.Release`, `RandomModeService.Forget`, `DuelService.Forget`, `RestraintService.Release`, `WatchGuard.Forget`, `StatsService.RefreshBoards`, `AutoStartService.Check`; next tick `ChangeTeam(1, false)` + `MakeObserver()`)
 - **Mode:** Debug
 - **Side effects:** works at any time, also during a rift round. Moves the admin to the spectator side, outside Sapphire and Amber, and removes their hero pawn (observer camera). They stop counting for teams, auto-start, stats, Random mode and 1v1; a running match may auto-end if fewer than 2 players remain, and the teams are evened at the next Random mode intermission. Logs `Admin seat taken, spectating next tick Phase=...`, then `Admin spectating TeamNum=... HeroPawn=... Observer=...`, and a master line
-- **Notes:** new in Stage 13f; console only since 2026-09-27. `ChangeTeam(1)` alone left the hero pawn alive and dropped the admin's client 12-23 s later (two crashes on 2026-09-27); `MakeObserver` fixes that, so the round refusal is gone. Spectators cannot type in game chat, so getting back out needs the console. Every admin is seated automatically on connect (use `dw_seat_play` to play)
+- **Notes:** `ChangeTeam(1)` alone leaves the hero pawn alive and dropped the admin's client 12-23 s later (two crashes on 2026-09-27); `MakeObserver` prevents that. Spectators cannot type in game chat, so getting back out needs the console. Every admin is seated automatically on connect (use `dw_seat_play` to play)
 
 #### /seat_play
 
@@ -243,7 +240,7 @@ position, entity index.
 - **Calls:** `AdminSeat.Stand` (→ `LobbyService.AdmitPlayer`)
 - **Mode:** Debug
 - **Side effects:** takes the admin out of the seat and admits them like a new connection: smaller team, Skyrunner, watch spot (restrained), Random mode joiner or 1v1 setup souls, auto-start check. 2 s later logs whether a hero spawned (`Admin hero after leaving the seat`, or the Warning `Admin has no hero after leaving the seat`)
-- **Notes:** new in Stage 13f. Refused when not seated, or when 12 players are already playing. At 09:39 on 2026-09-27 a `dw_seat_play` from the seated admin arrived without a caller and stopped at "pass the slot" (the reply went to the server console). Both seat commands dropped the slot argument after that and fall back to the admin Steam ID
+- **Notes:** refused when not seated, or when 12 players are already playing. Takes no slot argument: a seated admin's console command can arrive without a caller (seen 2026-09-27), so both seat commands fall back to the admin Steam ID
 
 #### /seat_status
 
@@ -252,7 +249,7 @@ position, entity index.
 - **Calls:** `AdminSeat.Describe`
 - **Mode:** Debug; read-only
 - **Side effects:** playing count and cap (12), seated count, the `maxplayers` and `sv_visiblemaxplayers` values, then per seated admin: slot, name, team number, whether a pawn exists
-- **Notes:** new in Stage 13f. Use it to check that `maxplayers 13` took effect
+- **Notes:** use it to check that `maxplayers 13` took effect
 
 ### Stream camera (`LobbyPlugin`, `Lobby/StreamCam`)
 
@@ -275,7 +272,6 @@ as `dw_seat_spec`). Spectators have no chat, so use the client console
 - **Calls:** `StreamCam.SetAuto`
 - **Mode:** Debug
 - **Side effects:** turns the automatic camera on or off for that admin (default on) and resets its camera state (the saved framing stays). Off leaves the camera where it is for manual control. `on`/`1`, `off`/`0`; anything else errors. Resets to on when the admin stands up or disconnects
-- **Notes:** new with the stream camera (2026-09-27)
 
 #### /spec_status
 
@@ -284,7 +280,7 @@ as `dw_seat_spec`). Spectators have no chat, so use the client console
 - **Calls:** `StreamCam.Describe`
 - **Mode:** Debug; read-only
 - **Side effects:** three lines: auto, seated, observer, observer mode, fly cam, the view angle read (`ViewAngle=pitch yaw` or `unreadable`); who is on camera, parked side, placed, adjusting, watch side; the saved framing per side (offset, pitch, yaw) or `default`
-- **Notes:** new with the stream camera (2026-09-27); `ViewAngle` changing while you turn in fly cam confirms the framing angle can be saved
+- **Notes:** `ViewAngle` changing while you turn in fly cam confirms the framing angle can be saved
 
 #### /spec_reset
 
@@ -293,7 +289,6 @@ as `dw_seat_spec`). Spectators have no chat, so use the client console
 - **Calls:** `StreamCam.ResetFraming` (→ `StreamFramingStore.Reset`)
 - **Mode:** Debug
 - **Side effects:** forgets the saved framing for both sides (rewrites `bublock/streamcam.json`); the next park (nobody to watch, fly cam) goes to the top-down default
-- **Notes:** new 2026-09-28; replaces `/spec_overview` (removed with the big-ult top-down)
 
 ### Access (`AccessPlugin`, in RiftRoulette.dll)
 
@@ -389,11 +384,11 @@ All: admin (`AdminCommand.Authorize`; server console trusted; rejected
 callers get "You are not allowed to use this command." and a Warning in the
 `Draft` log with name and Steam ID). Ops run in Debug mode, so detail lines
 appear in `draft-*.log`. Results go to the caller's console with a
-`[Draft]` prefix. In Random mode (`/match_mode random`, the default since
-Stage 13b) `/draft_assign` and `/draft_release` reply "Heroes are random
-this match..." and change nothing, and `/draft_boards` draws the welcome
-board plus the Sapphire / Amber stats boards (Stage 13c) instead of the
-pool boards. 1v1 mode (Stage 13g) behaves the same way (draft off, stats
+`[Draft]` prefix. In Random mode (`/match_mode random`, the default)
+`/draft_assign` and `/draft_release` reply "Heroes are random this
+match..." and change nothing, and `/draft_boards` draws the welcome board
+plus the Sapphire / Amber stats boards instead of the pool boards. 1v1
+mode behaves the same way (draft off, stats
 boards), and Draft's hero enforcement never runs there. In Random mode Draft's hero enforcement defers to
 `RandomModeService.GuardHero`: a player who changes hero from the menu
 after their build was applied is killed and respawns with their assigned
@@ -430,7 +425,6 @@ hero and build (the death is not counted in stats).
 - **Calls:** `DraftService.Reset`
 - **Mode:** Debug
 - **Side effects:** clears all picks; for every alive player zeroes gold, ability points, and level, moves them to team 2 as Skyrunner (Random mode keeps their team so teams stay even), and teleports them to the draft area next tick; dead players are skipped (Debug line in `draft-*.log`); redraws boards; replies with the number of players reset
-- **Notes:** replaces the archive `/reset`, which anyone could run (old name removed in Stage 12; now admin-only, intentional difference)
 
 #### /draft_boards
 
@@ -439,7 +433,7 @@ hero and build (the death is not counted in stats).
 - **Calls:** `DraftService.RedrawBoards`
 - **Mode:** Debug
 - **Side effects:** removes **every** `point_worldtext` on the map, then redraws the three draft boards from the current picks (Random mode: welcome board plus the two stats boards)
-- **Notes:** new in Stage 9; use after `/wt_clear` or manual `/wt_update` edits
+- **Notes:** use after `/wt_clear` or manual `/wt_update` edits
 
 ### Rift (`RiftPlugin`, in RiftRoulette.dll)
 
@@ -458,7 +452,7 @@ one rift runs at a time.
 - **Calls:** `RoundFlow.RunRound` (the same composed path the lifecycle runs in Clean mode) → `RiftService.RunRift` (`RiftGameRules.ConfigureNextRift`, wait for spawner, `ParkScheduler`, `RoundFlow.MoveTeamsToRift`, `AlternateSide`, watch, `EndRound` with `RoundFlow.ReturnPlayersToDraft`)
 - **Mode:** Debug
 - **Side effects:** forces the next rift (green / yellow alternating, starts green) through the game's KOTH scheduler. When the spawner appears: parks the natural scheduler (KOTH off), moves Sapphire picks and Amber picks to their own slot spots around that side's team starts (`SlotSpots.Fight`), flips the next side. Watches each tick: new troopers mean finished; a cash-in that appears then disappears means tied. 3 s later returns alive players, restrained, to the watch spot above the next rift, and moves the boards there (dead ones return through Lobby's `player_spawn`) and removes troopers spawned since the start. If no spawner appears within 320 ticks: parks the scheduler, Warning in the log, side not flipped. Sets the log round id `r<n>` for the rift
-- **Notes:** replaces the archive `/koth`, which anyone could run (old name removed in Stage 12; now admin-only, intentional difference). Refuses with "A rift is already running (Phase=...). Use /rift_cancel." while a rift is in progress. In the archive a second `/koth` could not spawn a second rift and only timed out after 320 ticks; the refusal reports that immediately (intentional difference). Replies "Could not reach CCitadelGameRules" (Error in log) if gamerules cannot be found. Known-good sequence; do not alter
+- **Notes:** refuses with "A rift is already running (Phase=...). Use /rift_cancel." while a rift is in progress. Replies "Could not reach CCitadelGameRules" (Error in log) if gamerules cannot be found. Known-good sequence; do not alter
 
 #### /rift_status
 
@@ -475,7 +469,7 @@ one rift runs at a time.
 - **Calls:** `RiftSides.TryParse`, `RiftService.SetNextSide`, `WatchSpot.MoveAllUp`
 - **Mode:** Debug
 - **Side effects:** sets the side of the next `/rift_start`, then moves every live player (restrained) and the boards to the watch spot above that side. Replies `Next rift: <side>. N player(s) moved to the watch spot.` Errors for an unknown side or while a rift is running (the flip on spawn would overwrite it)
-- **Notes:** new in Stage 10; the middle rift is not selectable
+- **Notes:** the middle rift is not selectable
 
 #### /rift_cancel
 
@@ -484,7 +478,7 @@ one rift runs at a time.
 - **Calls:** `RoundFlow.CancelRound` → `RiftService.CancelRift` (with `RoundFlow.ReturnPlayersToDraft`)
 - **Mode:** Debug
 - **Side effects:** stops the spawn wait, the watch, and the end timer; parks the KOTH scheduler and turns KOTH off; returns alive players to the watch spot above the next rift (restrained); removes every rift trooper (`npc_trooper`) now and again 5 s and 10 s later; outcome becomes `cancelled`. If the rift had not spawned yet, the next side is unchanged. Replies "No rift is running." when idle
-- **Notes:** new in Stage 10. Ends **our** round only: a rift objective that already spawned stays on the map (verified in game; there is no known safe way to remove it). If it is captured later, nothing watches it; `/rift_cleanup` removes its troopers. During a match (`/match_start`) the cancelled round scores no point and the loop continues
+- **Notes:** ends **our** round only: a rift objective that already spawned stays on the map (verified in game; there is no known safe way to remove it). If it is captured later, nothing watches it; `/rift_cleanup` removes its troopers. During a match (`/match_start`) the cancelled round scores no point and the loop continues
 
 #### /rift_cleanup
 
@@ -493,7 +487,7 @@ one rift runs at a time.
 - **Calls:** `RiftService.CleanupRiftTroopers`
 - **Mode:** Debug
 - **Side effects:** removes every `npc_trooper` on the map (lane troopers are off, so all are rift troopers) and replies with the count
-- **Notes:** new in Stage 10; works during or after a rift. Since the 2026-09-27 playtest fixes it removes all troopers, not only those spawned since the last rift started (late-spawned troopers used to pile up)
+- **Notes:** works during or after a rift. Removes all troopers, not only those spawned since the last rift started, because late-spawned troopers otherwise pile up
 
 ### Spots (`SpotsPlugin`, in RiftRoulette.dll)
 
@@ -510,7 +504,6 @@ spot and its own spot around each team's rift start, offset from the
 - **Calls:** `SpotCheck.Describe`
 - **Mode:** Debug; read-only
 - **Side effects:** one console line per slot, for the given side or both: `<SIDE> Slot=N | watch=(x,y,z) | sapphire=(x,y,z) | amber=(x,y,z)`. Error for an unknown side
-- **Notes:** new 2026-09-27
 
 #### /spots_walk <watch|sapphire|amber> [green|yellow]
 
@@ -519,7 +512,7 @@ spot and its own spot around each team's rift start, offset from the
 - **Calls:** `SpotCheck.Walk` (`MovementService.TeleportTo`, `WatchGuard.Grace`, `WatchSpot.SendUp`)
 - **Mode:** Debug
 - **Side effects:** teleports the caller to each of the 13 slot spots of the group, one every 1.5 s, and logs where the pawn landed in `spots-*.log`. A spot that moved the pawn more than 32 units (pushed out of a wall, or fell) is a Warning, copied to master. Afterwards sends the caller back up to the watch spot and prints `Walk done: <group> on <SIDE>, N spot(s) moved the pawn.` Side defaults to the current watch-spot side. Refused while a rift round runs or another walk is running; errors for an unknown group or side
-- **Notes:** new 2026-09-27; the in-game half of the wall check (the offline half is `scripts/check-spots.py`)
+- **Notes:** the in-game half of the wall check (the offline half is `scripts/check-spots.py`)
 
 ### Match (`GameLoopPlugin`, in RiftRoulette.dll)
 
@@ -527,9 +520,9 @@ All: admin (`AdminCommand.Authorize`; server console trusted; rejected
 callers get "You are not allowed to use this command." and a Warning in the
 `Match` log with name and Steam ID). Ops run in Debug mode. Results go to
 the caller's console with a `[Match]` prefix. Banners go to every player's
-screen through the Hud module. Added in Stage 13a.
+screen through the Hud module.
 
-Since Stage 13d the match also starts and ends by itself
+The match also starts and ends by itself
 (`AutoStartService`, on by default): the 2nd human player to connect
 starts it (Clean mode) and a disconnect that leaves fewer than 2 ends it,
 followed 3 s later by a `Waiting for players: ...` chat line. A lone
@@ -563,7 +556,7 @@ matches by hand.
 - **Calls:** `AutoStartService.SetEnabled`; when turned on, `AutoStartService.Check` (→ `MatchService.Start` / `End`)
 - **Mode:** Debug
 - **Side effects:** turns match auto-start / auto-end on or off (on after every DLL load). Turning it on checks right away, so with 2+ players connected and no match it starts one. Replies `Auto-start on` (plus ` - match started`) or `Auto-start off`
-- **Notes:** new in Stage 13d. Turning it off does not end a running match
+- **Notes:** turning it off does not end a running match
 
 #### /match_status
 
@@ -587,8 +580,8 @@ matches by hand.
 - **Who:** admin
 - **Calls:** `MatchConfig.TryParseHeroMode`, `MatchService.SetHeroMode` (→ `ShopAccess.Sync`, `DraftService.Reset`; 1v1: `DuelService.EnterSetup` / `Leave`; `ModeBanner`)
 - **Mode:** Debug
-- **Side effects:** sets how heroes are chosen for the next match. `random` (default): each intermission everyone gets a new random hero with one of its top 3 builds, draft pool boards hidden, pick commands off. `draft`: the Stage 12 draft with boards. `duel` or `1v1` (Stage 13g): draft off, free hero switching from the menu, 100,000 souls and level 36 for everyone until `/duel_copy`; leaving 1v1 drops the copied build. Buying anywhere (`citadel_allow_purchasing_anywhere`) is on only in 1v1 setup and off in every other mode (the map shops are disabled by CleanSlate). Resets the lobby (everyone alive back to Skyrunner in the draft area, picks cleared, boards redrawn for the mode). Banner to everyone: `Random mode` / `Random hero and build every round`, `1v1 mode` / `Shop open anywhere - build your hero`, or `Draft mode` / `Pick your heroes`. Replies `Mode set to random. N player(s) returned to the lobby.`
-- **Notes:** new in Stage 13b. Refused during a match (`/match_end` first; with auto-start on and 2+ players, `/match_auto off` before `/match_end`) and when the mode is unchanged; error for an unknown mode. Resets to `random` on plugin reload
+- **Side effects:** sets how heroes are chosen for the next match. `random` (default): each intermission everyone gets a new random hero with one of its top 3 builds, draft pool boards hidden, pick commands off. `draft`: the hero draft with pool boards. `duel` or `1v1`: draft off, free hero switching from the menu, 100,000 souls and level 36 for everyone until `/duel_copy`; leaving 1v1 drops the copied build. Buying anywhere (`citadel_allow_purchasing_anywhere`) is on only in 1v1 setup and off in every other mode (the map shops are disabled by CleanSlate). Resets the lobby (everyone alive back to Skyrunner in the draft area, picks cleared, boards redrawn for the mode). Banner to everyone: `Random mode` / `Random hero and build every round`, `1v1 mode` / `Shop open anywhere - build your hero`, or `Draft mode` / `Pick your heroes`. Replies `Mode set to random. N player(s) returned to the lobby.`
+- **Notes:** refused during a match (`/match_end` first; with auto-start on and 2+ players, `/match_auto off` before `/match_end`) and when the mode is unchanged; error for an unknown mode. Resets to `random` on plugin reload
 
 #### /match_format <continuous>
 
@@ -597,7 +590,7 @@ matches by hand.
 - **Calls:** `MatchConfig.TryParseFormat`, `MatchService.SetFormat`
 - **Mode:** Debug
 - **Side effects:** sets the match format; only `continuous` exists today (rounds loop until `/match_end`). Replies `Format set to continuous.`
-- **Notes:** new in Stage 13b; placeholder for best-of formats. Refused during a match
+- **Notes:** placeholder for best-of formats. Refused during a match
 
 #### /match_config
 
@@ -606,12 +599,11 @@ matches by hand.
 - **Calls:** `MatchService.DescribeConfig`
 - **Mode:** Debug; read-only
 - **Side effects:** two lines: `Mode=random | Format=continuous`, then the allowed modes and formats and the intermission length
-- **Notes:** new in Stage 13b
 
 ### Random (`RandomPlugin`, in RiftRoulette.dll)
 
 Admin (`AdminCommand.Authorize` with the `Random` log; server console
-trusted). Debug mode; `[Random]` replies. Added in Stage 13b.
+trusted). Debug mode; `[Random]` replies.
 
 #### /random_status
 
@@ -633,8 +625,8 @@ trusted). Debug mode; `[Random]` replies. Added in Stage 13b.
 ### Duel (`DuelPlugin`, in RiftRoulette.dll)
 
 Admin (`AdminCommand.Authorize` with the `Duel` log; server console
-trusted). Debug mode; `[Duel]` replies. Added in Stage 13g. Used after
-`/match_mode 1v1`. Since Stage 13j players join a queue (`/queue`) and the
+trusted). Debug mode; `[Duel]` replies. Used after `/match_mode 1v1`.
+Players join a queue (`/queue`) and the
 first two fight, winner stays on; see `user-commands.md`.
 
 #### /duel_copy <slot>
@@ -670,7 +662,6 @@ first two fight, winner stays on; see `user-commands.md`.
 - **Calls:** `DuelService.DescribeQueue`
 - **Mode:** Debug; read-only
 - **Side effects:** the next pairing, then the queue in order (`1. Theo (fighting, king, streak 3)`)
-- **Notes:** new in Stage 13j
 
 #### /duel_queue_add <slot>
 
@@ -679,7 +670,7 @@ first two fight, winner stays on; see `user-commands.md`.
 - **Calls:** `DuelService.JoinQueue`, then `AutoStartService.Check`
 - **Mode:** Debug
 - **Side effects:** same as the player typing `/queue` (may auto-start the match)
-- **Notes:** new in Stage 13j. Error for an empty slot; refused outside 1v1 mode or for a seated admin
+- **Notes:** error for an empty slot; refused outside 1v1 mode or for a seated admin
 
 #### /duel_queue_remove <slot>
 
@@ -688,12 +679,12 @@ first two fight, winner stays on; see `user-commands.md`.
 - **Calls:** `DuelService.LeaveQueue(force: true)`, then `AutoStartService.Check`
 - **Mode:** Debug
 - **Side effects:** takes the player out of the queue, even a fighter between rounds (the next pair then fights after one more intermission). With fewer than 2 queued, auto-start ends the match
-- **Notes:** new in Stage 13j. Refused while that player is fighting in a running rift (`/rift_cancel` first)
+- **Notes:** refused while that player is fighting in a running rift (`/rift_cancel` first)
 
 ### Stats (`StatsPlugin`, in RiftRoulette.dll)
 
 Admin (`AdminCommand.Authorize` with the `Stats` log; server console
-trusted). Debug mode; `[Stats]` replies. Added in Stage 13c.
+trusted). Debug mode; `[Stats]` replies.
 
 #### /stats_board
 
@@ -714,7 +705,7 @@ trusted). Debug mode; `[Stats]` replies. Added in Stage 13c.
 ### Balance (`BalancePlugin`, in RiftRoulette.dll)
 
 Admin (`AdminCommand.Authorize` with the `Balance` log; server console
-trusted). Debug mode; `[Balance]` replies. Added in Stage 13c. Auto-balance
+trusted). Debug mode; `[Balance]` replies. Auto-balance
 itself runs at the start of every Random mode intermission: a stomp (2+
 round lead with 8+ more kills and 1.5x the kills) or a 5-round streak, both
 counted since the last swap, swaps the winning team's best player (kills +
@@ -762,13 +753,11 @@ server console trusted). `[Betting]` replies.
 - **Calls:** `BettingService.RefreshBoard`, `BettingService.Describe`
 - **Mode:** Debug; read-only apart from redrawing the board
 - **Side effects:** redraws the betting board (Random mode), then one line with active, open, bet count, total staked, and one line per participant: slot, name, souls, open bet
-- **Notes:** new 2026-09-27
 
 ### Loadout (`LoadoutPlugin`, in RiftRoulette.dll)
 
 Admin (`AdminCommand.Authorize` with the `Loadout` log; server console
 trusted). Debug mode; `[Loadout]` replies. Module commands (game-agnostic).
-Added in Stage 13b.
 
 #### /loadout_give <slot> <hero> [build]
 
@@ -795,7 +784,7 @@ Added in Stage 13b.
 - **Calls:** `LoadoutService.Capture`, `LoadoutService.SwapSnapshot` (→ `ApplySnapshot`)
 - **Mode:** Debug
 - **Side effects:** copies the exact hero, items (with imbues), ability upgrades, level, ability points and unlocks of the player in slot `from` onto the player in slot `to` (hero swap, then 1 s later the copy; souls set to 0). No cap and no banned-item filter. Replies with a one-line summary of the copy
-- **Notes:** new in Stage 13g; test tool for 1v1 mode. Errors: empty slot, source dead, target dead. Draft's hero enforcement may undo it in Draft mode (use it in 1v1 or Random mode)
+- **Notes:** test tool for 1v1 mode. Errors: empty slot, source dead, target dead. Draft's hero enforcement may undo it in Draft mode (use it in 1v1 or Random mode)
 
 #### /loadout_list <hero>
 
@@ -820,13 +809,13 @@ Added in Stage 13b.
 - **Calls:** `LoadoutPlanner.TryParseCap`, then `LoadoutService.SetMaxValue`
 - **Mode:** Debug
 - **Side effects:** no argument: shows the current cap, its item limit and the default (20,000). With a value (1,000 to 200,000, or `default`): the most a Random mode build's items may be worth from the next build handed out, the item limit at that value (`ItemSlots.ForSouls`, shown in the reply as `N items`), and the net worth the hero's level and ability ranks are set to (every build at the same cap gets the same level). A 1,000 cap gives one 800 item. Builds already on players stay until the next intermission (`/random_reroll` in an intermission applies it now). Logged in `loadout-*.log` and master. In memory only: every upload or restart resets it to 20,000. Bad input: error naming the range
-- **Notes:** new 2026-09-28. 1v1 copies and 1v1 setup gold do not use the cap
+- **Notes:** 1v1 copies and 1v1 setup gold do not use the cap
 
 ### Restraint (`RestraintPlugin`, in RiftRoulette.dll)
 
 Admin (`AdminCommand.Authorize` with the `Restraint` log; server console
 trusted). Debug mode; `[Restraint]` replies; `restraint-*.log`. Module
-commands (game-agnostic). Added in Stage 13h. The game also restrains
+commands (game-agnostic). The game also restrains
 everyone it sends up top and releases the fighters it moves into the rift.
 
 #### /restrain <slot>
@@ -881,7 +870,7 @@ everyone it sends up top and releases the fighters it moves into the rift.
 - **Calls:** `HudService.ParseAnnouncement`, `HudService.AnnounceAll`
 - **Mode:** Debug
 - **Side effects:** shows the game's on-screen announcement banner to every player; text after the first `|` is the smaller description line, e.g. `/hud_announce Round 3 | GREEN rift`. Replies `[Hud] Announced to N player(s)`
-- **Notes:** new in Stage 13a, for trying banner text by hand. Module command: game-agnostic
+- **Notes:** for trying banner text by hand. Module command: game-agnostic
 
 #### /hud_say <message>
 
@@ -890,7 +879,7 @@ everyone it sends up top and releases the fighters it moves into the rift.
 - **Calls:** `HudService.AnnounceAll(message, HudService.AdminSayLabel)`
 - **Mode:** Debug
 - **Side effects:** shows the whole message as the big banner title on every player's screen, with `Server admin` as the smaller line below. Logs `Announced to all Title=<message> ...` in `hud-*.log`. Replies `[Hud] Said to N player(s): <message>`; errors on an empty message
-- **Notes:** new 2026-09-27, for talking to players. `|` stays part of the text. The console splits commands on `;`, so wrap a message containing `;` in quotes. Banners show for about 3 s and queue when sent close together. Module command: game-agnostic
+- **Notes:** for talking to players. `|` stays part of the text. The console splits commands on `;`, so wrap a message containing `;` in quotes. Banners show for about 3 s and queue when sent close together. Module command: game-agnostic
 
 ### Session (`SessionPlugin`, in RiftRoulette.dll)
 
@@ -929,9 +918,7 @@ All seven: admin (`AdminCommand.Authorize`; server console trusted except
 allowed to use this command." and a Warning in `DevTools/commands` with name
 and Steam ID). Results go to the caller's console (server console for a null
 caller) with a `[DevTools]` prefix. Diagnostic tools with no lifecycle
-caller, so there is no Clean/Debug split. Renamed from the archive in
-Stage 12 (old names removed); the archive left four of them ungated.
-DevTools also logs each game modifier name the first time it is added
+caller, so there is no Clean/Debug split. DevTools also logs each game modifier name the first time it is added
 (`ModifierProbe`, `DevTools/modifiers-*.log`); no command.
 
 #### /dev_logpath
@@ -941,7 +928,7 @@ DevTools also logs each game modifier name the first time it is added
 - **Calls:** `LogPaths.ResolveRoot()`, `BublockLog.Directory`, `BublockLog.SessionId`, `BublockLog.Hub.FileLoggingEnabled`
 - **Mode:** read-only
 - **Side effects:** prints `Log root`, DevTools log folder, session id, and file-logging on/OFF
-- **Notes:** was `logpath` (added in Stage 4; not in the archive). After the Stage 12 push, confirms the server log path that `scripts/pull-logs.sh` mirrors (`/server/game/bin/win64/bublock/logs/`)
+- **Notes:** confirms the server log path that `scripts/pull-logs.sh` mirrors (`/server/game/bin/win64/bublock/logs/`)
 
 #### /ent_find <filter>
 
@@ -950,7 +937,6 @@ DevTools also logs each game modifier name the first time it is added
 - **Calls:** `Entities.All` scan
 - **Mode:** read-only
 - **Side effects:** prints index, designer name, class name, and name for every entity whose combined text contains the filter (case-insensitive)
-- **Notes:** archive `entities` (printed to the server console)
 
 #### /ent_info <designerName>
 
@@ -959,7 +945,6 @@ DevTools also logs each game modifier name the first time it is added
 - **Calls:** `Entities.ByDesignerName`
 - **Mode:** read-only
 - **Side effects:** prints name, class, index, handle, validity, position, velocity, team, health, max health, life state, alive, ground state, and VData/modifier/body presence for each match
-- **Notes:** archive `entity_info` (ungated, server console, `[Rift Wars]` headers)
 
 #### /ent_remove <designerName>
 
@@ -968,7 +953,7 @@ DevTools also logs each game modifier name the first time it is added
 - **Calls:** `Entities.ByDesignerName`, `entity.Remove()`
 - **Mode:** destructive
 - **Side effects:** removes every entity with that designer name; prints and logs (`DevTools/commands`) each one, then a count
-- **Notes:** archive `entity_remove` (ungated). Never use on `info_super_trooper_spawn` (crash risk); the command does not block it
+- **Notes:** never use on `info_super_trooper_spawn` (crash risk); the command does not block it
 
 #### /dev_herowatch
 
@@ -977,7 +962,6 @@ DevTools also logs each game modifier name the first time it is added
 - **Calls:** `Timer.Every(0.5 s)` reading the caller's `HeroID`
 - **Mode:** diagnostic
 - **Side effects:** toggles a watcher that prints `HERO CHANGE` to the caller's console and logs it in `DevTools/herowatch` each time their hero id changes; cancelled on plugin unload
-- **Notes:** archive `herowatch`
 
 #### /ent_snapshot
 
@@ -986,7 +970,6 @@ DevTools also logs each game modifier name the first time it is added
 - **Calls:** `Entities.All`
 - **Mode:** read-only
 - **Side effects:** stores index, designer, class, and name of every entity in memory (lost on reload); prints the count
-- **Notes:** archive `snapshot` (ungated)
 
 #### /ent_diff
 
@@ -995,7 +978,6 @@ DevTools also logs each game modifier name the first time it is added
 - **Calls:** `Entities.All` vs the stored snapshot
 - **Mode:** read-only
 - **Side effects:** prints entities added and removed since `/ent_snapshot` (or a hint if no snapshot exists)
-- **Notes:** archive `compare` (ungated)
 
 ### CleanSlate (`CleanSlatePlugin`, CleanSlate.dll)
 
@@ -1006,4 +988,4 @@ DevTools also logs each game modifier name the first time it is added
 - **Calls:** `CleanSlateService.ApplyConvars`, `CleanSlateService.RemoveMapEntities`
 - **Mode:** Debug (startup and hot reload run the same ops Clean)
 - **Side effects:** sets `citadel_trooper_spawn_enabled 0`, `citadel_npc_spawn_enabled 0`, `citadel_active_lane 0`, `citadel_midboss_initial_spawn_time_override 999999`, and the urn off: `citadel_crate_spawn_enabled 0`, `citadel_crate_disable_early_spawn 1`, `citadel_crate_spawn_initial_delay 999999`, `citadel_crate_respawn_interval 999999`; immediately removes every `npc_trooper_boss`, `npc_boss_tier2`, `npc_barrack_boss`, `citadel_item_powerup_spawner`, `citadel_herotest_orbspawner`, `citadel_shop_prop_dynamic` (shop kiosks) and sends `Disable` to every `trigger_item_shop` / `trigger_item_shop_safe_zone` (shop buy zones); `cleanup` summary with counts per classname; master line `Map cleanup re-run Removed=[...] Disabled=[...]`; no banner; replies `[CleanSlate] Convars applied, N entities removed, M disabled`
-- **Notes:** new in Stage 12, for example after a map change without a restart. Never removes `info_super_trooper_spawn` or the urn spawn points (`item_crate_spawn`); buy zones are disabled, not removed. Does not touch buying (`citadel_allow_purchasing_anywhere` belongs to RiftRoulette)
+- **Notes:** use it, for example, after a map change without a restart. Never removes `info_super_trooper_spawn` or the urn spawn points (`item_crate_spawn`); buy zones are disabled, not removed. Does not touch buying (`citadel_allow_purchasing_anywhere` belongs to RiftRoulette)

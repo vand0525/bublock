@@ -1,6 +1,6 @@
 # KothRule
 
-Winner-stays-on decisions for 1v1 mode (Stage 13j). Pure; unit tested in
+Winner-stays-on decisions for 1v1 mode. Pure; unit tested in
 `Tests/RiftRoulette.Tests`.
 
 ## Operations

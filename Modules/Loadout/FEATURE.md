@@ -5,7 +5,7 @@
 Reusable Deadlock hero loadouts built from real build data: the top 3 builds
 per hero (by matches played, from the Deadlock API), applied to a pawn by
 shopping the build's item order within a soul cap, plus the build's ability
-order. Game-agnostic (no Rift Roulette dependency). Added in Stage 13b.
+order. Game-agnostic (no Rift Roulette dependency).
 
 Item rules: every required item plus one random item per optional
 group; Monster Rounds, Cultist Sacrifice, Golden Goose Egg, Trophy
@@ -72,7 +72,7 @@ and `LoadoutService.MaxValue` (the current cap, reset on every load).
 | `LoadoutPlanner.cs` | Budgeted item shopping (buy, sell, skip, fill, upgrade) and ability bit planning, including the budgeted ability prefix (pure) |
 | `Progression.cs` | Deadlock level table: boons, unlocks and ability points per soul count (pure) |
 | `ItemSlots.cs` | Item limit per soul value, from when Walkers fall in real matches (pure) |
-| `LoadoutSnapshot.cs` | Exact hero-state records for copying (Stage 13g) |
+| `LoadoutSnapshot.cs` | Exact hero-state records for copying |
 | `LoadoutService.cs` | Apply a build to a pawn; swap hero, then apply; capture / apply / swap a snapshot |
 | `LoadoutPlugin.cs` | `/loadout_give`, `/loadout_show`, `/loadout_copy`, `/loadout_list`, `/loadout_info`, `/loadout_cap` |
 | `Loadout.projitems` | Service and data (no commands) |

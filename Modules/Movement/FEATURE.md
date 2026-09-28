@@ -4,8 +4,7 @@
 
 Reusable, game-agnostic player movement: a registry of named locations
 (position + camera angle), teleport one player / a list of players, set a
-player's camera angle. Compiled into consuming DLLs as source; no Rift Roulette
-dependency.
+player's camera angle. No Rift Roulette dependency.
 
 ## Public operations
 

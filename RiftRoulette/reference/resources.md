@@ -24,13 +24,13 @@ research findings. Prefer linking official docs/schema over restating them.
 | `Bublock/RiftRoulette/reference/maps/dl_midtown/` | `dl_midtown` entity dump and world-mesh index (build 6698) |
 | `Bublock/RiftRoulette/reference/chat-handoff.md` | Prior verified session context |
 | `Bublock/RiftRoulette/reference/.rules` | Development rules (source of truth) |
-| `Bublock/Shared/` | Shared source compiled into every Bublock DLL (Stage 3+) |
-| `Bublock/Modules/` | Reusable game-agnostic modules, compiled in via `.projitems` (Stage 6+) |
+| `Bublock/Shared/` | Auth, chat, cheats, convars, execution mode, logging |
+| `Bublock/Modules/` | Reusable game-agnostic modules |
 | `Bublock/RiftRoulette/` | Game mode plugin (active) |
 | `Bublock/DevTools/` | Discovery / diagnostics plugin (active) |
 | `Bublock/CleanSlate/` | Map cleanup plugin (active) |
 | `Bublock/logs/` | Cursor log pull root (`<Dll>/` subfolders), filled by `scripts/pull-logs.sh` |
-| `/server/game/bin/win64/bublock/logs/` | Server log folder (written by Bublock DLLs from Stage 12 on) |
+| `/server/game/bin/win64/bublock/logs/` | Server log folder (written by Bublock DLLs) |
 | `Bublock/Tests/` | Local xUnit tests (`scripts/test.sh`) |
 | `Bublock/RiftRoulette/logs/` | Old pull path (unused; kept only for the git-ignored `.gitkeep`) |
 | `archive/` | Frozen oracles (`RiftRumble/`, the pre-rename game plugin; DevTools; CleanSlate) |
@@ -88,7 +88,7 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 ### 2026-09-26 — Plugin Assembly.Location is empty; find managed/ via the API assembly
 
 - **Why hard / useful:** Needed to pick a server path for plugin-written files (logs).
-- **Verified fact:** `LoadPlugin` loads plugin DLLs with `LoadFromStream` (bytes, so the file isn't locked). Assemblies loaded from a stream have `Assembly.Location == ""`, so a plugin cannot locate itself. The shared `DeadworksManaged.Api` assembly is loaded from disk, so `Path.GetDirectoryName(typeof(IDeadworksPlugin).Assembly.Location)` gives `game/bin/win64/managed/`. Bublock logs go to `<managed>/../bublock/logs/<Dll>/` (`LogPaths.ResolveRoot`). Verified at the Stage 12 push (2026-09-27): the server writes to `Z:\gameserver\server\game\bin\win64\bublock\logs\<Dll>\` (Windows host), which SFTP shows as `/server/game/bin/win64/bublock/logs/`; `dw_dev_logpath` prints it.
+- **Verified fact:** `LoadPlugin` loads plugin DLLs with `LoadFromStream` (bytes, so the file isn't locked). Assemblies loaded from a stream have `Assembly.Location == ""`, so a plugin cannot locate itself. The shared `DeadworksManaged.Api` assembly is loaded from disk, so `Path.GetDirectoryName(typeof(IDeadworksPlugin).Assembly.Location)` gives `game/bin/win64/managed/`. Bublock logs go to `<managed>/../bublock/logs/<Dll>/` (`LogPaths.ResolveRoot`). Verified on 2026-09-27: the server writes to `Z:\gameserver\server\game\bin\win64\bublock\logs\<Dll>\` (Windows host), which SFTP shows as `/server/game/bin/win64/bublock/logs/`; `dw_dev_logpath` prints it.
 - **Link / path:** [managed/PluginLoader.cs](https://github.com/Deadworks-net/deadworks/blob/main/managed/PluginLoader.cs) (`LoadPlugin`), `Bublock/Shared/Logging/LogPaths.cs`
 
 ### 2026-09-26 — Host keeps data beside managed/, not inside it
@@ -136,7 +136,7 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 ### 2026-09-26 — Code that sends net messages needs a Google.Protobuf reference
 
 - **Why hard / useful:** Compiling a module into a new project (e.g. a test project) fails with CS0311 / CS0012 on `NetMessages.Send`.
-- **Verified fact:** `NetMessages.Send<T>` constrains `T` to `Google.Protobuf.IMessage<T>`, so any project that compiles code calling it (`MovementService.SetViewAngle`) must reference `$(DeadworksLibDir)/Google.Protobuf.dll` alongside `DeadworksManaged.Api.dll`. The plugin csprojs already do; `Tests/Modules.Tests` added it in Stage 7. Do not copy the DLL into the plugins folder (the host already provides it).
+- **Verified fact:** `NetMessages.Send<T>` constrains `T` to `Google.Protobuf.IMessage<T>`, so any project that compiles code calling it (`MovementService.SetViewAngle`) must reference `$(DeadworksLibDir)/Google.Protobuf.dll` alongside `DeadworksManaged.Api.dll`. The plugin csprojs and `Tests/Modules.Tests` already do. Do not copy the DLL into the plugins folder (the host already provides it).
 - **Link / path:** `Bublock/RiftRoulette/RiftRoulette.csproj`, `Bublock/Tests/Modules.Tests/Modules.Tests.csproj`
 
 ### 2026-09-26 — Finding players by slot, and team change caveat
@@ -165,13 +165,13 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 
 ### 2026-09-26 — dw_help is console-only; plugins cannot read the command index
 
-- **Why hard / useful:** Decided whether players need a chat command list (Stage 12). The docs only say `Hidden` omits a command from `dw_help`.
+- **Why hard / useful:** Decided whether players need a chat command list. The docs only say `Hidden` omits a command from `dw_help`.
 - **Verified fact:** `ConCommandManager.Initialize` registers `dw_help` as a built-in **console** command (`serverOnly: false`, so players can run it from the game console); there is no chat `/help`. It prints every non-hidden `command` and `chat` entry from `PluginRegistrationTracker`, admin commands included, to the caller's console. `PluginRegistrationTracker` is `internal`, so plugins cannot read it; Bublock's `/commands` reflects `[Command]` attributes instead. `CommandAttribute` has `Names` (string[]), `Description` (defaults to `""`, not null), `ServerOnly`, `ChatOnly`, `ConsoleOnly`, `SuppressChat`, `Hidden`; constructor `(string name, params string[] aliases)`.
 - **Link / path:** [ConCommandManager.cs](https://github.com/Deadworks-net/deadworks/blob/main/managed/ConCommandManager.cs), [CommandRegistration.cs](https://github.com/Deadworks-net/deadworks/blob/main/managed/Commands/CommandRegistration.cs); `Bublock/RiftRoulette/Lobby/CommandList.cs`
 
 ### 2026-09-26 — Log templates: don't write Name= before {Name} (fixed in formatter)
 
-- **Why hard / useful:** Every log line built as `"Selected hero Hero={Hero}"` rendered `Hero=Hero=Shiv` until Stage 12, because `RenderTemplate` always writes `Name=value` for `{Name}`.
+- **Why hard / useful:** Every log line built as `"Selected hero Hero={Hero}"` rendered `Hero=Hero=Shiv` before the formatter fix, because `RenderTemplate` always writes `Name=value` for `{Name}`.
 - **Verified fact:** `LogFormatter.RenderTemplate` now skips the name when the template already ends with `Name=` right before the placeholder (exact name, at a word start), so both `{Hero}` and `Hero={Hero}` render `Hero=Shiv`. Covered by `LogFormatterTests.RenderTemplate_DoesNotRepeatNameWrittenInTemplate`.
 - **Link / path:** `Bublock/Shared/Logging/LogFormatter.cs`
 
@@ -190,7 +190,7 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 ### 2026-09-27 — Rift winner team from the first new trooper (to confirm in game)
 
 - **Why hard / useful:** Scoring a captured rift needs the capturing team; KOTH exposes no winner field we know of.
-- **Verified fact:** Unconfirmed assumption: the troopers a captured rift spawns belong to the capturing team, so `newTrooper.TeamNum` (Sapphire 3, Amber 2) is the winner. Stage 13a logs it as `Rift finished ... TrooperTeam=` in `rift-*.log` and scores with it; an unexpected value logs a Warning in `match-*.log` and scores nothing. Update this entry after the first playtest.
+- **Verified fact:** Unconfirmed assumption: the troopers a captured rift spawns belong to the capturing team, so `newTrooper.TeamNum` (Sapphire 3, Amber 2) is the winner. `RiftService` logs it as `Rift finished ... TrooperTeam=` in `rift-*.log` and scores with it; an unexpected value logs a Warning in `match-*.log` and scores nothing. Update this entry after the first playtest.
 - **Link / path:** `Bublock/RiftRoulette/Rift/RiftService.cs` (`WatchOutcome`), `Bublock/RiftRoulette/GameLoop/MatchService.cs`
 
 ### 2026-09-27 — Renaming a plugin DLL leaves the old one loaded
@@ -269,7 +269,7 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 
 - **Why hard / useful:** Upstream examples call `Kill()`, which our `lib/` build does not have.
 - **Verified fact:** `CBaseEntity.Hurt(float damage, CBaseEntity? attacker = null, CBaseEntity? inflictor = null, CBaseEntity? ability = null, int damageType = 0)` exists in `lib/`; the Random mode hero guard uses `pawn.Hurt(1_000_000f)`. If the pawn is still alive afterwards the guard falls back to rebuilding in place. Reliability to confirm in game.
-- **Link / path:** `Bublock/RiftRoulette/Lobby/HeroLock.cs` (`Enforce`; moved from `RandomModeService.GuardHero` in Stage 13g)
+- **Link / path:** `Bublock/RiftRoulette/Lobby/HeroLock.cs` (`Enforce`)
 
 ### 2026-09-27 — Deadlock API: optional item groups, item costs, banned items
 
@@ -279,7 +279,7 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 
 ### 2026-09-27 — Refusing a connection: OnClientConnect returns bool
 
-- **Why hard / useful:** Lets a plugin reserve slots (the Stage 13f admin seat) without kicking after the player loads.
+- **Why hard / useful:** Lets a plugin reserve slots (the admin seat) without kicking after the player loads.
 - **Verified fact:** `DeadworksPluginBase.OnClientConnect(ClientConnectEvent args)` returns `bool`; the event carries `Slot`, `Name`, `SteamId`, `IpAddress` before the player is in game. Returning `false` refuses the connection (what the client sees is to confirm in game). `maxplayers` and `sv_visiblemaxplayers` are set through `ConVar.Find(...)?.SetInt`; whether `maxplayers` changes at runtime (vs. a launch parameter) is to confirm with `/seat_status`. Spectator team is assumed to be 1 (Source convention); `citadel_server_max_spectator_slots` defaults to 3.
 - **Link / path:** `/tmp/dwapi.cs` decompile (see "Decompiling the Deadworks API"); `Bublock/RiftRoulette/Lobby/AdminSeat.cs`
 
@@ -307,7 +307,7 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 
 ### 2026-09-27 — Hot reload runs OnLoad(isReload: true), not OnStartupServer
 
-- **Why hard / useful:** Startup work silently stops happening after an upload. The 13e-13j push left guardians and walkers on the map, the boards at the old spot, and `maxplayers` at 12.
+- **Why hard / useful:** Startup work silently stops happening after an upload. One upload left guardians and walkers on the map, the boards at the old spot, and `maxplayers` at 12.
 - **Verified fact (server logs):** an upload hot-reloads each DLL: `OnLoad(true)` runs, `OnStartupServer` does not, and timers set by the previous load (CleanSlate's 2 s removal) are dropped with it. Every plugin whose startup work matters must redo it in `OnLoad` when `isReload` is true (CleanSlate cleanup, Lobby convars, Draft boards).
 - **Link / path:** `Bublock/CleanSlate/CleanSlatePlugin.cs`, `Bublock/RiftRoulette/Lobby/LobbyPlugin.cs`, `Bublock/RiftRoulette/Draft/DraftPlugin.cs`
 
@@ -340,7 +340,7 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 
 ### 2026-09-27 — RiftService.NextSide flips at spawn, not at round end
 
-- **Why hard / useful:** Anything that follows "the rift being fought" (the Stage 13i watch spot) goes to the wrong side if it reads `NextSide` mid-round.
+- **Why hard / useful:** Anything that follows "the rift being fought" (the watch spot) goes to the wrong side if it reads `NextSide` mid-round.
 - **Verified fact:** `RiftService.AlternateSide` runs when the rift spawns, so during a live round `NextSide` already points at the other rift; `CurrentSide` holds the side being fought. `CurrentSide` is cleared in `FinishRound`, which runs after the `ReturnPlayersToDraft` step, so at that step the rift still counts as running: pass `NextSide` explicitly there. Rule in `Round/WatchSpotRule.SideFor(running, current, next)`.
 - **Link / path:** `Bublock/RiftRoulette/Rift/RiftService.cs`, `Bublock/RiftRoulette/Round/WatchSpot.cs`
 

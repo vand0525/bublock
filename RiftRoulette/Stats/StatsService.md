@@ -1,7 +1,7 @@
 # StatsService
 
 Match kill / death / assist tracking and the stats boards shown when the
-draft is off (Stage 13c; 1v1 mode added in 13g). Static; owns one `StatsLedger` and the last known round counts.
+draft is off (Random and 1v1 modes). Static; owns one `StatsLedger` and the last known round counts.
 
 ## Operations
 

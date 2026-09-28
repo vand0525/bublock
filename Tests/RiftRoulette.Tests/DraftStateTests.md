@@ -8,6 +8,6 @@ Unit tests for `RiftRoulette/Draft/DraftState` (static pick data).
 - `Add` records the pick and marks the hero selected.
 - `Release` removes the pick, frees the hero, and leaves other picks alone.
 - `Release` for a player without a pick returns false.
-- A second `Add` for the same player throws `ArgumentException` (same as the
-  archive's `Dictionary.Add`).
+- A second `Add` for the same player throws `ArgumentException`
+  (`Dictionary.Add`).
 - `Clear` empties both collections.

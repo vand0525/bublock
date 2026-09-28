@@ -1,8 +1,7 @@
 # DraftPools
 
 The two Rift Roulette hero pools. Pure data; unit tested in
-`Tests/RiftRoulette.Tests`. Extracted from Legacy `SapphireDraft` /
-`AmberDraft` in Stage 9 (values and order unchanged).
+`Tests/RiftRoulette.Tests`.
 
 ## Values
 
@@ -14,8 +13,8 @@ The two Rift Roulette hero pools. Pure data; unit tested in
 ## Operations
 
 - `TeamOf(hero)`: `RiftRouletteTeams.Sapphire` (3) for a Sapphire hero,
-  `RiftRouletteTeams.Amber` (2) for an Amber hero, 0 otherwise. Same order of
-  checks as the archive `/select` ternary.
+  `RiftRouletteTeams.Amber` (2) for an Amber hero, 0 otherwise. Sapphire is
+  checked first.
 
 ## Consumers
 

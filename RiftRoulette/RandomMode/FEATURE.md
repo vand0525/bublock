@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Random hero mode for the continuous match (Stage 13b, the default
+Random hero mode for the continuous match (the default
 `MatchConfig.HeroMode`). No draft and no shepherding: at match start the
 teams are evened out (current teams kept where possible), and every
 intermission each player is swapped to a new random hero with one of that
@@ -15,7 +15,7 @@ ability-point and unlock gains are blocked (`GameLoop/SoulRule`), so the
 ranks stay the build's. Later, heroes will come from a real match ID; only `HeroDraw`
 changes then.
 
-Stage 13c adds: players joining mid-match (a hero right away during an
+The mode also handles players joining mid-match (a hero right away during an
 intermission), team evening (`TeamBalance.Even`, when someone left or
 spectated) then auto-balance before each draw (`Balance/`), and the hero swap
 guard (changing hero from the menu kills you; you respawn with your
@@ -48,7 +48,7 @@ match, like the souls.
 | `RandomModeService.cs` | Match / round orchestration, joiners, pending swaps, hero guard, banners, status |
 | `RandomPlugin.cs` | `player_respawned` + `player_spawn` hooks, `/reserve` (player), `/random_status`, `/random_reroll` |
 
-Team placement (`TeamBalance`) lives in `Lobby/` since Stage 13c.
+Team placement (`TeamBalance`) lives in `Lobby/`.
 
 ## Public operations
 

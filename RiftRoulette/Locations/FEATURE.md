@@ -15,8 +15,7 @@ stays game-agnostic.
 
 ## Invariants
 
-- Sapphire (team 3, base at +y) starts at +y on both lanes, Amber at -y
-  (the archive's yellow starts were swapped; fixed 2026-09-27).
+- Sapphire (team 3, base at +y) starts at +y on both lanes, Amber at -y.
 - The watch spots' camera angles face the welcome board
   (`Round/WatchLayout`), checked by `WatchLayoutTests`.
 

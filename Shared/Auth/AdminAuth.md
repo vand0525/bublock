@@ -17,11 +17,10 @@ Single Steam-ID admin gate for every Bublock DLL.
 
 ## State
 
-- Static, read-only authorized set: `76561198192980843`, copied from the
-  archive DevTools oracle (`archive/DevTools/DevToolsPlugin.cs`).
+- Static, read-only authorized set: `76561198192980843`.
 
 ## Invariants
 
 - Never add an ID that is not taken from verified source.
-- Each consuming DLL compiles its own copy (separate load contexts); editing
-  the set requires rebuilding every consumer.
+- Each consuming DLL has its own copy (separate load contexts); editing the
+  set requires rebuilding every consumer.

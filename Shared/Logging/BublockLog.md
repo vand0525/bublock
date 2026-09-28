@@ -1,6 +1,6 @@
 # BublockLog
 
-Per-DLL entry point to logging. Each Bublock DLL compiles its own copy, so
+Per-DLL entry point to logging. Each Bublock DLL has its own copy, so
 each DLL gets its own hub and folder.
 
 ## Operations

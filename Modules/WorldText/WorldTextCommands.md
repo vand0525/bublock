@@ -1,7 +1,6 @@
 # WorldTextCommands.projitems
 
-MSBuild shared-items file that adds `WorldTextPlugin` (the `/wt_*` admin
-commands) to a consuming project.
+Adds `WorldTextPlugin` (the `/wt_*` admin commands).
 
 ```xml
 <Import Project="..\Modules\WorldText\WorldText.projitems" />
@@ -9,5 +8,5 @@ commands) to a consuming project.
 ```
 
 - Requires `WorldText.projitems` and `Shared.projitems`.
-- Import it in exactly one DLL per server; two DLLs registering `/wt_*` would
-  clash. Today that DLL is `RiftRoulette.dll`.
+- Import it in exactly one DLL per server (command names would clash across
+  DLLs). Today that DLL is `RiftRoulette.dll`.

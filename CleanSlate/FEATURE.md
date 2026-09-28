@@ -8,11 +8,10 @@ Roulette) can run on a cleaner map.
 ## Current state
 
 - `CleanSlatePlugin` (hooks + command), `CleanSlateService` (operations) and
-  `CleanupResult` (counts) under `Bublock/CleanSlate/`, derived from the
-  archive snapshot.
-- Compiles in `Bublock/Shared/` only; logs to `bublock/logs/CleanSlate/`
+  `CleanupResult` (counts) under `Bublock/CleanSlate/`.
+- Uses `Bublock/Shared/` only; logs to `bublock/logs/CleanSlate/`
   (`master` + `cleanup`).
-- Ships as `CleanSlate.dll` (replaces the archive DLL of the same name).
+- Ships as `CleanSlate.dll`.
 
 ## Public operations
 

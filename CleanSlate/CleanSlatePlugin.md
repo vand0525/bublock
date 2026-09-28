@@ -3,14 +3,7 @@
 Thin plugin host for map cleanup: disables trooper/NPC/midboss/urn spawning,
 removes lane bosses, powerup spawners and shop kiosks, and disables the shop
 buy zones shortly after startup. The work lives in `CleanSlateService`.
-
-## Status
-
-Derived from `archive/CleanSlate/CleanSlatePlugin.cs`. Stage 4 replaced its
-`Console.WriteLine` output with shared file logging; Stage 12 moved the
-convars and removals into `CleanSlateService` and added `/cleanup_run`. The
-playtest fixes (2026-09-27) added the hot-reload run and the shops / urn
-cleanup. The "Map cleaned" banner was removed again (players don't need it).
+Shows no banner (players don't need one).
 
 ## Hooks
 

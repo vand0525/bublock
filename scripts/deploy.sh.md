@@ -58,7 +58,7 @@ delete the loop instead of emptying it.
 ## Side effects
 
 - Replaces the live plugins; Deadworks reloads changed DLLs from the plugins
-  folder (the archive deploy used the same direct `put`).
+  folder.
 - Writes backups under `deadworks/server-backups/` (workspace root, outside
   the Bublock git repo, so never committed), including `access.json`.
 - Updates the local log and `server-data/` copies (`pull-logs.sh`).
@@ -77,5 +77,5 @@ delete the loop instead of emptying it.
 
 ## Policy
 
-Run only after the user approves the upload (Stage 12 gate; afterwards per
-change). Roll back with `rollback.sh <stamp>`.
+Run only after the user approves the upload (per change). Roll back with
+`rollback.sh <stamp>`.

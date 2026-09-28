@@ -1,7 +1,7 @@
 # StatsBoardText
 
-Pure text for the side boards: one team's K / D / A (Random mode, Stage
-13c) or the 1v1 best-streak leaderboard. Unit tested.
+Pure text for the side boards: one team's K / D / A (Random mode) or
+the 1v1 best-streak leaderboard. Unit tested.
 
 ## Operations
 

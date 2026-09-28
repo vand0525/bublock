@@ -2,17 +2,16 @@
 
 ## Purpose
 
-A reusable join queue of players (Stage 13j). Game agnostic: it only knows
-Steam IDs and their order. First used by Rift Roulette's 1v1 mode (winner
-stays on, the next in line comes in); meant for any later "wait your turn"
-feature.
+A reusable join queue of players. Game agnostic: it only knows Steam IDs and
+their order. Used by Rift Roulette's 1v1 mode (winner stays on, the next in
+line comes in); meant for any "wait your turn" feature.
 
 ## Files
 
 | File | Role |
 |---|---|
 | `PlayerQueue.cs` | The queue: ordered unique Steam IDs (pure, tested). |
-| `Queue.projitems` | Compiles `PlayerQueue` into a consumer. |
+| `Queue.projitems` | Adds `PlayerQueue` to a consumer. |
 
 ## Public operations
 

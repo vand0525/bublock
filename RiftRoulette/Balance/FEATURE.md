@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Keeps Random mode matches from becoming one-sided (Stage 13c). At the start
+Keeps Random mode matches from becoming one-sided. At the start
 of each intermission, if one team is stomping or on a long streak, its best
 player swaps with the other team's weakest player (or just moves, when the
 winning team has more players).

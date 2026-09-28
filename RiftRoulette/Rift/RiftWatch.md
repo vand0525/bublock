@@ -1,8 +1,8 @@
 # RiftWatch
 
-The per-tick outcome decision of the archive rift watcher, taken out of the
+The per-tick outcome decision of the rift watcher, kept out of the
 `Timer.Sequence` lambda so it can be unit tested. Pure; one instance per
-rift. Extracted from Legacy `Koth` in Stage 10.
+rift.
 
 ## Operations
 
@@ -19,10 +19,9 @@ returns:
 
 ## State
 
-`SawCashin`: whether a `citadel_koth_cashin` has been seen during this rift
-(the archive `sawKothCashin` local).
+`SawCashin`: whether a `citadel_koth_cashin` has been seen during this rift.
 
 ## Invariants
 
 - The caller stops watching after `Finished` or `Tied`.
-- Same order of checks as the archive; do not reorder.
+- Known-good order of checks; do not reorder.

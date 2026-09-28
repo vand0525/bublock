@@ -1,7 +1,6 @@
 # HudCommands.projitems
 
-MSBuild shared-items file that adds `HudPlugin` (the `/hud_announce` and `/hud_say` admin
-commands) to a consuming project.
+Adds `HudPlugin` (the `/hud_announce` and `/hud_say` admin commands).
 
 ```xml
 <Import Project="..\Modules\Hud\Hud.projitems" />
@@ -9,5 +8,5 @@ commands) to a consuming project.
 ```
 
 - Requires `Hud.projitems` and `Shared.projitems`.
-- Import it in exactly one DLL per server. Today that DLL is
-  `RiftRoulette.dll`.
+- Import it in exactly one DLL per server (command names would clash across
+  DLLs). Today that DLL is `RiftRoulette.dll`.

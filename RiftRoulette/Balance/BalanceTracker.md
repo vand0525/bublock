@@ -1,6 +1,6 @@
 # BalanceTracker
 
-Pure counters and the auto-balance trigger (Stage 13c). Everything counts
+Pure counters and the auto-balance trigger. Everything counts
 since the last swap (or match start). Unit tested.
 
 ## Constants

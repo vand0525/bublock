@@ -21,7 +21,7 @@ server. Never deployed to the server.
   committed data, sell priorities, baseline value), the `PlayerQueue` join queue, and the spectate choice
   (keep, killer, any, park) and straight-down angle. Service ops that touch entities or players are
   not tested here.
-- `RiftRoulette.Tests/` — xUnit tests for pure Rift Roulette pieces, compiled in
+- `RiftRoulette.Tests/` — xUnit tests for pure Rift Roulette pieces, included
   directly as linked files (`RiftRoulette/Draft/DraftState.cs`,
   `DraftPools.cs`, `DraftBoardText.cs`, `RiftRoulette/Lobby/RiftRouletteTeams.cs`,
   `CommandList.cs`, `RiftRoulette/Locations/RiftRouletteLocations.cs`,
@@ -59,5 +59,4 @@ All three test projects reference `Google.Protobuf` because Shared
 
 - Tests must not call into Deadworks game types (`ConVar`, controllers,
   entities); those only work inside the server process.
-- Behavior that needs the server is verified manually (parity checks,
-  Stage 12).
+- Behavior that needs the server is verified manually in game.

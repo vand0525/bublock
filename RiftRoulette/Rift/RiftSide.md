@@ -1,9 +1,7 @@
 # RiftSide
 
 The two rift sides in rotation and their spawn positions. Pure; unit tested
-in `Tests/RiftRoulette.Tests`. Extracted from Legacy `GreenRiftPosition`,
-`YellowRiftPosition`, `MiddleRiftPosition`, and the `_nextRiftIsGreen`
-ternaries in Stage 10 (values unchanged).
+in `Tests/RiftRoulette.Tests`.
 
 ## Values
 
@@ -16,8 +14,8 @@ ternaries in Stage 10 (values unchanged).
 ## Operations
 
 - `Position(side)`: the green or yellow position.
-- `Other(side)`: the opposite side (the archive flip).
-- `Name(side)`: `GREEN` / `YELLOW`, the spelling the archive logs used.
+- `Other(side)`: the opposite side.
+- `Name(side)`: `GREEN` / `YELLOW` (the spelling used in logs).
 - `TryMatch(position, out side)`: the side whose position is within
   `MatchDistance` (1000 units) of `position`; false (side Green) when
   neither is. The rifts are about 15,000 units apart. Used to find the side

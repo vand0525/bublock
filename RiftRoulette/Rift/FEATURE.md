@@ -5,10 +5,9 @@
 The rift itself: force the game's KOTH (rift) to spawn on the next side
 (green / yellow alternating), park the natural scheduler, watch for a finish
 (troopers spawn) or a tie (the cash-in disappears), then after 3 seconds end
-the round and remove the rift's troopers. Extracted from Legacy `/koth` in
-Stage 10; the sequence is the known-good archive one. Moving players is not
-done here: the caller hands in those steps (`RiftRoundSteps`), supplied by
-`Round/RoundFlow` since Stage 11.
+the round and remove the rift's troopers. Known-good sequence; do not
+reorder. Moving players is not done here: the caller hands in those steps
+(`RiftRoundSteps`), supplied by `Round/RoundFlow`.
 
 ## Files
 
@@ -23,8 +22,8 @@ done here: the caller hands in those steps (`RiftRoundSteps`), supplied by
 
 ## Public operations
 
-See `RiftService.md`. Admin commands: `/rift_start` (archive `/koth`,
-removed in Stage 12), `/rift_status`, `/rift_next`, `/rift_cancel`,
+See `RiftService.md`. Admin commands: `/rift_start`, `/rift_status`,
+`/rift_next`, `/rift_cancel`,
 `/rift_cleanup`. Catalogued in `reference/admin-commands.md`. No player
 commands. `/rift_start` and `/rift_cancel` go through `Round/RoundFlow`.
 
@@ -50,8 +49,7 @@ gamerules errors). Lines during a rift carry `round=r<n>`.
 ## Lifecycle vs commands
 
 - Admin commands run the composed round (`RoundFlow`) in Debug mode.
-- The lifecycle entry is `RoundFlow.RunRound(timer)`; since Stage 13a the
-  match loop (`GameLoop/MatchService`) calls it between intermissions.
+- The lifecycle entry is `RoundFlow.RunRound(timer)`; the match loop (`GameLoop/MatchService`) calls it between intermissions.
 - Round end and cancel remove every `npc_trooper`, then sweep again 5 s
   and 10 s later while no rift runs: the cash-in wave keeps spawning after
   the 3 s end timer, and those troopers used to pile up round after round.

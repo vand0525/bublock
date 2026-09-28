@@ -1,7 +1,7 @@
 # LoadoutService
 
 Applies a stored hero build to a live pawn, and swaps a player to a hero
-and then applies a build. Since Stage 13g it also captures a player's exact
+and then applies a build. It also captures a player's exact
 hero state (`LoadoutSnapshot`) and applies it to another pawn. Game-agnostic.
 
 ## Types

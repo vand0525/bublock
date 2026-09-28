@@ -1,6 +1,6 @@
 # WatchSpotRule
 
-Which rift the watch spot sits above (Stage 13i). Pure; unit tested in
+Which rift the watch spot sits above. Pure; unit tested in
 `Tests/RiftRoulette.Tests`.
 
 `SideFor(riftRunning, currentSide, nextSide)`:

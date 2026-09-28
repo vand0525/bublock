@@ -1,6 +1,6 @@
 # RandomModeService
 
-Random mode orchestration (Stage 13b, joiners and hero guard in 13c). Each
+Random mode orchestration, joiners and hero guard. Each
 intermission, every human player gets a new random hero, plus one of that
 hero's top 3 builds (`Modules/Loadout`). Teams are evened out at match start
 and kept (auto-balance may swap players between rounds). The fighting teams
@@ -19,7 +19,7 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
 - `_buildsAnnounced`: whether this intermission's build banner has gone
   out; reset in `PrepareRound`. Loadouts landing after it show their banner
   at once.
-- `Lock`: a `Lobby/HeroLock` (Stage 13g extraction) holding the pending set
+- `Lock`: a `Lobby/HeroLock` holding the pending set
   (swap waits for a spawn: dead at prepare time, joiners, players killed by
   the hero guard), the applied set (only these can be punished, so our own
   hero changes in flight never trigger the guard), and enforcement kills

@@ -1,6 +1,6 @@
 # Participants
 
-Who takes part in the game (Stage 13f): connected players that are not
+Who takes part in the game: connected players that are not
 bots, not in the admin seat (`AdminSeat`), and not a banned-player statue
 (`BanStatueService`).
 

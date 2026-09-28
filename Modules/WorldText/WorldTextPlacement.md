@@ -14,10 +14,9 @@ tested in `Tests/Modules.Tests`.
 
 ## Where the angle rule comes from
 
-Derived from the archive draft boards, which players read from the draft
-position:
+It matches the draft boards, which players read from the draft position:
 
-| Board | Offset from draft | Viewer yaw toward it | Archive board yaw |
+| Board | Offset from draft | Viewer yaw toward it | Board yaw |
 |---|---|---|---|
 | Sapphire | +Y | 90 | 360 (= 0) |
 | Amber | -Y | -90 | 180 |
@@ -29,4 +28,4 @@ team boards; the title sits off-axis and matches approximately).
 ## Constraints
 
 - Uses Source angle order (pitch, yaw, roll) in degrees.
-- In-game orientation is confirmed at the Stage 12 push.
+- In-game orientation is confirmed.

@@ -1,8 +1,8 @@
 # MatchProbe
 
 Writes a snapshot of the match to its own log (`probe-YYYYMMDD.log`,
-`[RiftRoulette.Probe]`) so playtests can be checked from the logs. Added
-with the 13h-j playtest fixes. Information level, so it is written without
+`[RiftRoulette.Probe]`) so playtests can be checked from the logs.
+Information level, so it is written without
 Debug mode; a few lines per event, no per-frame work.
 
 ## Operations

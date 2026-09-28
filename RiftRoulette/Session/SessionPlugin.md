@@ -1,7 +1,7 @@
 # SessionPlugin
 
 Small Rift Roulette plugin class that records the session lifecycle in the
-master log. Lives in `RiftRoulette.dll` next to the Legacy plugin.
+master log. Lives in `RiftRoulette.dll`.
 
 ## Behavior
 
@@ -36,5 +36,5 @@ Gated with `AdminCommand.Authorize` (accepted / rejected calls logged in the
 
 ## Invariants
 
-- Does not touch Legacy state. Round ids are set by `Rift/RiftService`
+- Round ids are set by `Rift/RiftService`
   (`r<n>` while a rift runs); `/session_info` shows the current one.

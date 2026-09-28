@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Counts every player's kills, deaths and assists from match start (Stage 13c)
+Counts every player's kills, deaths and assists from match start
 and, in Random mode, shows them on two boards in the draft area: Sapphire's
 on the Sapphire side and Amber's on the Amber side, each with the team's
 rounds won, the team total, and one row per player.

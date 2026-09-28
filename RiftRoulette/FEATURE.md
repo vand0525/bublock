@@ -8,112 +8,105 @@ rounds, return to draft. See `reference/chat-handoff.md` and
 
 ## Current state
 
-- All archive behavior lives in feature plugin classes; the Legacy monolith
-  was deleted in Stage 11.
-- Compiles in `Bublock/Shared/` via `Shared.projitems`.
-- Compiles in `Modules/WorldText` (`WorldText.projitems` +
-  `WorldTextCommands.projitems`): `WorldTextPlugin` hosts the `/wt_*` admin
-  commands, and Draft draws its boards through `WorldTextService` (Stage 6).
-- Compiles in `Modules/Movement` (`Movement.projitems` +
-  `MovementCommands.projitems`): `MovementPlugin` hosts the `/mv_*` admin
+- All behavior lives in feature plugin classes.
+- Includes `Bublock/Shared/`.
+- Includes `Modules/WorldText`: `WorldTextPlugin` hosts the `/wt_*` admin
+  commands, and Draft draws its boards through `WorldTextService`.
+- Includes `Modules/Movement`: `MovementPlugin` hosts the `/mv_*` admin
   commands; Lobby, Draft, and Round teleport through `MovementService` using
-  the typed positions in `Locations/RiftRouletteLocations.cs` (Stage 7).
+  the typed positions in `Locations/RiftRouletteLocations.cs`.
 - `Lobby/LobbyPlugin` owns startup convars, connect / disconnect / spawn /
-  death hooks, kick, team moves, `/status` (Stage 8), and the player
-  command list `/commands` (Stage 12).
+  death hooks, kick, team moves, `/status`, and the player command list
+  `/commands`.
 - `Draft/DraftPlugin` owns hero pools, picks, hero enforcement, starting
-  progression, draft reset, and the draft boards (Stage 9). Picks live in
+  progression, draft reset, and the draft boards. Picks live in
   `Draft/DraftState`, read by Lobby and Round.
 - `Rift/RiftPlugin` and `RiftService` own the rift itself: spawn, park,
-  watch, end round, cleanup, green / yellow alternation (Stage 10).
+  watch, end round, cleanup, green / yellow alternation.
 - `Round/RoundFlow` composes a round from Rift, Draft, and Movement ops
   (team moves, return to draft). It is the Clean lifecycle entry; the admin
-  commands call it in Debug (Stage 11).
+  commands call it in Debug.
 - `GameLoop/GameLoopPlugin` and `MatchService` run the continuous playtest
   match: `/match_start` once, then intermission → round → score banner,
-  repeated until `/match_end` (Stage 13a).
-- Compiles in `Modules/Hud` (`Hud.projitems` + `HudCommands.projitems`):
-  on-screen banners through `HudService`; `HudPlugin` hosts
-  `/hud_announce` (Stage 13a).
+  repeated until `/match_end`.
+- Includes `Modules/Hud`: on-screen banners through `HudService`;
+  `HudPlugin` hosts `/hud_announce`.
 - `GameLoop/MatchConfig` picks the hero mode: `random` (default) or
-  `draft` (Stage 13b). In Random mode `RandomMode/RandomPlugin` and
+  `draft`. In Random mode `RandomMode/RandomPlugin` and
   `RandomModeService` balance teams once and give everyone a new random
   hero and top build every intermission.
-- Stage 13c: `Stats/` counts kills, deaths and assists per match and shows
-  them on the Sapphire and Amber boards (Random mode); `Balance/` swaps
-  players when one team stomps or streaks; new connections join the smaller
-  team (`Lobby/TeamBalance`) and get a hero right away during a Random
+- `Stats/` counts kills, deaths and assists per match and shows them on the
+  Sapphire and Amber boards (Random mode); `Balance/` swaps players when
+  one team stomps or streaks; new connections join the smaller team
+  (`Lobby/TeamBalance`) and get a hero right away during a Random
   intermission; changing hero from the menu in Random mode kills the player,
   who respawns with their assigned hero and build.
-- Stage 13d: `GameLoop/AutoStartService` starts the match when 2 human
-  players are connected and ends it when fewer than 2 remain
-  (`/match_auto <on|off>`), so no admin needs to be online.
-- Stage 13e: Cultist Sacrifice joins Monster Rounds and Golden Goose Egg on
-  the banned-items list (never in a Random mode build).
-- Stage 13f: the server takes 13 connections (browser shows 12); the 13th
-  is an admin-only seat on the spectator side (`Lobby/AdminSeat`,
+- `GameLoop/AutoStartService` starts the match when 2 human players are
+  connected and ends it when fewer than 2 remain (`/match_auto <on|off>`),
+  so no admin needs to be online.
+- Cultist Sacrifice, Monster Rounds and Golden Goose Egg are on the
+  banned-items list (never in a Random mode build).
+- The server takes 13 connections (browser shows 12); the 13th is an
+  admin-only seat on the spectator side (`Lobby/AdminSeat`,
   `dw_seat_spec` console only and any time, `/seat_play`,
   `/seat_status`). Admins are seated on every connect. A seated admin is
   left out of teams, heroes, rounds, stats and auto-start
   (`Lobby/Participants`).
-- Stage 13g: 1v1 mode (`/match_mode 1v1`, `Duel/`): free hero switching and
+- 1v1 mode (`/match_mode 1v1`, `Duel/`): free hero switching and
   100,000 souls while a build is prepared, then `/duel_copy <slot>` copies
   that player's exact hero, items, abilities and level onto both players
   (`Modules/Loadout` snapshot) and starts the match; both stay locked to it
   (`Lobby/HeroLock`) and are reset to it every intermission.
-- Stage 13h: players up top (lobby, between rounds, after dying) are
-  silenced and blocked from items, shooting and melee until they are moved
-  into the rift (`Modules/Restraint`, game modifier
-  `modifier_citadel_silenced` plus modifier states set every frame; no
-  disarm, so they can reload).
-- Stage 13i: the waiting spot moves above the rift being fought, or the
-  next one between rounds (`Round/WatchSpot`); it only changes when
-  players are sent back up after a round, and the boards move with it.
-- Stage 13j: 1v1 mode is winner-stays-on with a join queue (`/queue`,
-  `/unqueue`; reusable `Modules/Queue`): the first two queued fight, the
-  loser goes to the back, the winner builds a streak.
-- Compiles in `Modules/Loadout` (`Loadout.projitems` +
-  `LoadoutCommands.projitems`): the embedded top-3 builds per hero
+- Players up top (lobby, between rounds, after dying) are silenced and
+  blocked from items, shooting and melee until they are moved into the
+  rift (`Modules/Restraint`, game modifier `modifier_citadel_silenced`
+  plus modifier states set every frame; no disarm, so they can reload).
+- The waiting spot sits above the rift being fought, or the next one
+  between rounds (`Round/WatchSpot`); it only changes when players are
+  sent back up after a round, and the boards move with it.
+- 1v1 mode is winner-stays-on with a join queue (`/queue`, `/unqueue`;
+  reusable `Modules/Queue`): the first two queued fight, the loser goes to
+  the back, the winner builds a streak.
+- Includes `Modules/Loadout`: the embedded top-3 builds per hero
   (`Data/hero-builds.json`, from `scripts/fetch-builds.py`) and
   `LoadoutService` (reset, level from the cap, abilities, items shopped
-  within the cap into 12 slots); `LoadoutPlugin`
-  hosts `/loadout_*` (Stage 13b).
+  within the cap into 12 slots); `LoadoutPlugin` hosts `/loadout_*`.
 - `Session/SessionPlugin.cs` writes session lifecycle lines to
   `bublock/logs/RiftRoulette/master-*.log`; every feature writes its own
   feature log, and no Rift Roulette code prints diagnostics to the console.
 - Builds under `Bublock/` against workspace `lib/`; ships as
-  `RiftRoulette.dll` (renamed from `RiftRumble.dll` on 2026-09-27; deploy deletes the old DLL).
-- First server push was Stage 12 (2026-09-27); every push goes through
-  `scripts/deploy.sh --confirm` with the user's approval.
+  `RiftRoulette.dll` (deploy deletes the retired `RiftRumble.dll`, which would otherwise load alongside it).
+- Every server push goes through `scripts/deploy.sh --confirm` with the
+  user's approval.
 
 ## Breakdown
 
 `RiftRoulette.dll` hosts many small plugin classes in one load context, so
 they call each other with typed C# (no command/convar messaging):
 
-| Folder | Plugin class | Owns | Stage |
-|--------|--------------|------|-------|
-| `Modules/WorldText/` (compiled in) | `WorldTextPlugin` | boards / in-game text | 6 (done) |
-| `Modules/Movement/` (compiled in) | `MovementPlugin` | named locations, teleports | 7 (done) |
-| `Locations/` | — (data) | Rift Roulette positions registered with Movement | 7 (done) |
-| `Lobby/` | `LobbyPlugin` | connect/disconnect/spawn/death, teams, kick, status, startup convars, admin seat, participants, hero lock | 8 (done), 13f, 13g |
-| `Draft/` | `DraftPlugin` | hero pools, selections, enforcement, starting progression, draft boards | 9 (done; `DraftState` since 8) |
-| `Rift/` | `RiftPlugin` | spawn / park / watch / cleanup / alternation | 10 (done) |
-| `Round/` | — (composer) | the parity round: Rift ops + team moves + return to the watch spot | 11 (done), 13i |
-| `Modules/Hud/` (compiled in) | `HudPlugin` | on-screen banners | 13a (done) |
-| `GameLoop/` | `GameLoopPlugin` | continuous match loop, score, match end, match config, auto-start | 13a (done), 13b, 13d |
-| `Modules/Loadout/` (compiled in) | `LoadoutPlugin` | stored top builds, apply build to a pawn | 13b |
-| `RandomMode/` | `RandomPlugin` | Random mode: teams, per-round hero + build, pending swaps, joiners, hero guard | 13b, 13c |
-| `Duel/` | `DuelPlugin` | 1v1 mode: copied build, hero lock, setup souls, queue, winner stays on | 13g, 13j |
-| `Modules/Restraint/` (compiled in) | `RestraintPlugin` | silence / no items, shooting or melee until released | 13h |
-| `Modules/Queue/` (compiled in) | — (data) | reusable player queue | 13j |
-| `Stats/` | `StatsPlugin` | match kills / deaths / assists, stats boards | 13c |
-| `Balance/` | `BalancePlugin` | auto-balance trigger and swaps | 13c |
-| `Betting/` | `BettingPlugin` | round betting with kill souls, betting board (Random mode) | 13 |
-| `Session/` | `SessionPlugin` | session lifecycle lines in the master log | 4 (done) |
-| `SelfTest/` | `SelfTestPlugin` | patch-day self-test of every game dependency, hook counters | patch-day readiness |
+| Folder | Plugin class | Owns |
+|--------|--------------|------|
+| `Modules/WorldText/` (module) | `WorldTextPlugin` | boards / in-game text |
+| `Modules/Movement/` (module) | `MovementPlugin` | named locations, teleports |
+| `Locations/` | — (data) | Rift Roulette positions registered with Movement |
+| `Lobby/` | `LobbyPlugin` | connect/disconnect/spawn/death, teams, kick, status, startup convars, admin seat, participants, hero lock |
+| `Draft/` | `DraftPlugin` | hero pools, selections, enforcement, starting progression, draft boards |
+| `Rift/` | `RiftPlugin` | spawn / park / watch / cleanup / alternation |
+| `Round/` | — (composer) | the parity round: Rift ops + team moves + return to the watch spot |
+| `Modules/Hud/` (module) | `HudPlugin` | on-screen banners |
+| `GameLoop/` | `GameLoopPlugin` | continuous match loop, score, match end, match config, auto-start |
+| `Modules/Loadout/` (module) | `LoadoutPlugin` | stored top builds, apply build to a pawn |
+| `RandomMode/` | `RandomPlugin` | Random mode: teams, per-round hero + build, pending swaps, joiners, hero guard |
+| `Duel/` | `DuelPlugin` | 1v1 mode: copied build, hero lock, setup souls, queue, winner stays on |
+| `Modules/Restraint/` (module) | `RestraintPlugin` | silence / no items, shooting or melee until released |
+| `Modules/Queue/` (module) | — (data) | reusable player queue |
+| `Stats/` | `StatsPlugin` | match kills / deaths / assists, stats boards |
+| `Balance/` | `BalancePlugin` | auto-balance trigger and swaps |
+| `Betting/` | `BettingPlugin` | round betting with kill souls, betting board (Random mode) |
+| `Session/` | `SessionPlugin` | session lifecycle lines in the master log |
+| `SelfTest/` | `SelfTestPlugin` | patch-day self-test of every game dependency, hook counters |
 
-`Shared/` (auth, cheats, convars, execution mode, logging) is compiled in as well.
+`Shared/` (auth, cheats, convars, execution mode, logging) is included as well.
 
 ## Public surface (today)
 
@@ -142,7 +135,6 @@ they call each other with typed C# (no command/convar messaging):
 - Loadout admin commands (`LoadoutPlugin`): `loadout_give`,
   `loadout_copy`, `loadout_list`, `loadout_info`
 - Hud admin commands (`HudPlugin`): `hud_announce`, `hud_say`
-- No archive command names remain (hidden aliases removed in Stage 12).
 - Session (`SessionPlugin`): admin `session_info`
 - SelfTest (`SelfTestPlugin`): admin `selftest_run`, `selftest_live`
 - WorldText admin commands (`WorldTextPlugin`): `wt_list`, `wt_create`,
@@ -175,7 +167,7 @@ Round owns nothing else.
 ## Composition
 
 ```text
-GameLoop/MatchService (Stage 13a) ─┐
+GameLoop/MatchService ─────────────┐
                                    ├─> RoundFlow.RunRound / CancelRound
 /rift_start, /rift_cancel (Debug) ─┘
       └─> RiftService (order, gamerules, watch, cleanup)

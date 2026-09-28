@@ -1,8 +1,8 @@
 # Endless mid-rift mode (shelved proposal)
 
-Status: shelved 2026-09-27. Nothing is built. This file records the idea,
-what we already know, what must be tested before building, concerns, and
-suggestions, so the work can be picked up as its own stage later.
+Status: shelved. Nothing is built. This file records the idea, what is
+already known, what must be tested before building, concerns, and
+suggestions.
 
 ## The idea (as requested)
 
@@ -26,8 +26,7 @@ suggestions, so the work can be picked up as its own stage later.
 - The map has only two `info_koth_spawn_location` entities: green
   (7612, -0.000661, 444) and yellow (-7560, 0, 424)
   (`maps/dl_midtown/entities.json`). There is no middle spawn location.
-- `RiftSides.MiddlePosition` (0, 0, 0) comes from the archive and was never
-  used. The center of the map is the mid-boss area, which sits lower
+- `RiftSides.MiddlePosition` (0, 0, 0) is defined but unused. The center of the map is the mid-boss area, which sits lower
   (`trigger_midboss_shield` origin z = -704, a `trigger_team_base` at
   z = -512), so (0, 0, 0) may be inside or under the geometry.
 - We force a rift by writing `m_vNextKothLocation` and zeroing the spawn
@@ -55,7 +54,7 @@ Console settings (`cvarlist.md`), all flagged `cheat`:
   granted; unverified)
 
 Other cheat-flagged convars (`citadel_allow_purchasing_anywhere`) are already
-set by the plugin with `ConVar.Find(...).SetInt`, so setting these from the
+set by the plugin with `ServerConVars.TrySet`, so setting these from the
 plugin should work. Who receives the reward, how it is split, and when is
 unknown.
 
@@ -169,7 +168,7 @@ two discovery commands (see Suggestions).
   the round-only hooks run (watch spot on spawn, restraint, WatchGuard,
   intermission work). A separate DLL would need its own copies of all of
   that and must never be deployed alongside Rift Roulette.
-- **Discovery commands first**, as their own small stage:
+- **Discovery commands first**, built on their own:
   - `/rift_at`: force a rift at the admin's current position (no typed
     coordinates), reusing `ConfigureNextRift` and the existing spawn wait
     and watch.
@@ -212,7 +211,7 @@ two discovery commands (see Suggestions).
 - Catch-up gold for the losing team: yes or no?
 - Keep rift troopers after a capture, or remove them?
 
-## Proposed stages (when picked up)
+## Proposed build order
 
 1. Discovery: `/rift_at`, `/koth_reward`, gold snapshot; run tests 1-4.
 2. Endless loop: `MatchConfig` endless format, rift respawn loop, scoring to

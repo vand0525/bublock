@@ -2,30 +2,30 @@
 
 ## Purpose
 
-Runs a continuous playtest match (Stage 13a). An admin starts it once with
+Runs a continuous playtest match. An admin starts it once with
 `/match_start`; rounds then start themselves after a short intermission,
 each round's result updates a running score, and every player sees the
 score in the game's on-screen banner (Hud module). `/match_end` stops the
 loop and returns everyone to the lobby. In 1v1 mode there is no team
 score: the only score is the best-streak leaderboard (`Duel/FEATURE.md`).
 
-## Auto-start (Stage 13d)
+## Auto-start
 
 `AutoStartService` starts the match as soon as 2 human players are
 connected and ends it when fewer than 2 remain, so no admin has to be on.
 It checks 2 s after every join and on every disconnect (from
 `Lobby/LobbyService`) and once 3 s after the DLL loads. A disconnect can
 only end a match, never start one (starting one during a disconnect
-crashed the server in the 2026-09-27 playtest); the join check is delayed
+crashed the server); the join check is delayed
 so the joiner's own `SelectHero` does not swallow the match's hero swaps. `/match_auto <on|off>` switches it (on after
-every load); with it off, `/match_start` / `/match_end` work as before.
+every load); with it off, admins use `/match_start` / `/match_end`.
 In 1v1 mode it counts the players in the 1v1 queue instead of everyone
-connected (Stage 13j), and also checks after every queue join / leave.
+connected, and also checks after every queue join / leave.
 
-## Configuration (Stage 13b)
+## Configuration
 
-`MatchConfig`: hero mode `random` (default), `draft`, or `duel` (`1v1`,
-Stage 13g), and format
+`MatchConfig`: hero mode `random` (default), `draft`, or `duel` (`1v1`),
+and format
 `continuous` (the only one for now). Set with `/match_mode` and
 `/match_format` between matches; `/match_config` shows it. In Random mode,
 `RandomMode/RandomModeService` balances teams at match start and gives
@@ -33,7 +33,7 @@ everyone a new hero and build at the start of each intermission; 3 s in, a
 banner shows each player their hero, build and its soul value. In 1v1 mode,
 `Duel/DuelService` locks the two fighters to one copied build and
 re-applies it every intermission; the match only starts once a build is
-copied. Since Stage 13j the fighters are the first two in the 1v1 queue:
+copied. The fighters are the first two in the 1v1 queue:
 `OnRoundEnded` sends the loser to the back (`DuelService.RecordResult`)
 and the banners name the winner, streak and next pairing.
 
@@ -49,7 +49,7 @@ and the banners name the winner, streak and next pairing.
 - Draft mode: picks carry over between rounds; players may `/pick` or
   `/unpick` during the intermission.
 - Random mode: heroes and builds change every intermission; teams stay
-  unless auto-balance (Stage 13c, `Balance/`) swaps players between rounds.
+  unless auto-balance (`Balance/`) swaps players between rounds.
 - 1v1 mode: both players have the same copied hero and build, reset every
   intermission; a menu hero swap kills and restores.
 - Buying: CleanSlate disables every shop, and `ShopAccess` turns buying
@@ -112,7 +112,7 @@ to random / continuous on every DLL load), and `AutoStartService.Enabled`
 - `/rift_start` and `/rift_cancel` still work during a match; a round they
   end is scored like any other (cancel = no point) and the loop continues.
 - Outside a match the round-ended step does nothing, so `/rift_start` alone
-  behaves as before.
+  runs one unscored round.
 
 ## Logs
 

@@ -17,17 +17,16 @@ carry a `PlayerRef`.
 
 | Op | Behavior | Returns |
 |---|---|---|
-| `TeleportTo(player, location, mode)` | `pawn.Teleport(location.Position, angles: null, velocity: Vector3.Zero)`, then `SetViewAngle(player, location.Angle)`. Identical to the archive `MoveToDraftPosition`. Skips (and logs) when the player has no hero pawn | `bool` moved |
-| `TeleportPlayers(players, location, mode)` | `TeleportTo` for each player; players without a pawn are skipped. No alive check (same as the archive `MoveActivePlayers`) | count moved |
-| `SetViewAngle(player, angle)` | Sends `CCitadelUserMsg_SetClientCameraAngles` (pitch, yaw, roll) to that player only. Body identical to the archive `SetPlayerAngle` | — |
+| `TeleportTo(player, location, mode)` | `pawn.Teleport(location.Position, angles: null, velocity: Vector3.Zero)`, then `SetViewAngle(player, location.Angle)`. Skips (and logs) when the player has no hero pawn | `bool` moved |
+| `TeleportPlayers(players, location, mode)` | `TeleportTo` for each player; players without a pawn are skipped. No alive check | count moved |
+| `SetViewAngle(player, angle)` | Sends `CCitadelUserMsg_SetClientCameraAngles` (pitch, yaw, roll) to that player only | — |
 | `Where(player)` | Hero pawn `Position` and `EyeAngles` | `null` if no pawn |
 
 ## Dangerous constraints
 
 - `Teleport(angles: ...)` rotates the model, not the camera; the camera is set
-  separately with `SetViewAngle`. `TeleportTo` passes `angles: null`, like the
-  archive.
-- Teleporting a dead pawn is not guarded here (the archive did not guard
-  `MoveActivePlayers` either). Callers that must skip dead players check
+  separately with `SetViewAngle`. `TeleportTo` passes `angles: null`.
+- Teleporting a dead pawn is not guarded here. Callers that must skip dead
+  players check
   `IsAlive` first, as `RiftService.ReturnPlayersToDraft` does.
 - Game-thread only.

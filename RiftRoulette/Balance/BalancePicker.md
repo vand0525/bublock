@@ -1,6 +1,6 @@
 # BalancePicker
 
-Pure choice of who moves when auto-balance triggers (Stage 13c). Unit tested.
+Pure choice of who moves when auto-balance triggers. Unit tested.
 
 ## Operation
 

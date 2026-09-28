@@ -1,6 +1,6 @@
 # MatchService
 
-The continuous playtest match loop (Stage 13a). Static; state lives in
+The continuous playtest match loop. Static; state lives in
 `MatchState` plus the countdown timer handles. The `ITimer` comes from the
 caller of `Start` (`GameLoopPlugin`) and is kept for the whole match.
 

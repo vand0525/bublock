@@ -15,6 +15,5 @@ Runs an action with `sv_cheats` temporarily enabled.
 
 ## Invariants
 
-- Same sequence as the archive DevTools `RunWithCheats` helper.
 - Synchronous only: work scheduled on a timer from inside `action` runs after
   cheats are already disabled.

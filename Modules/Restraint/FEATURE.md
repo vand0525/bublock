@@ -8,8 +8,7 @@ and hero swaps. Reloading still works (no disarm). Restrained players are
 also ignored by NPC targeting, and `IsRestrainedPawn` lets the consumer's
 damage hook make them take no damage (Rift Roulette blocks all damage to
 players waiting up top).
-Uses the game's real silence modifier so its status icon shows. Added in
-Stage 13h.
+Uses the game's real silence modifier so its status icon shows.
 
 ## Public operations
 

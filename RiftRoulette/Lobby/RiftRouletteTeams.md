@@ -5,10 +5,10 @@ Rift Roulette team numbers and names. Pure (no game calls), unit tested in
 
 ## Values
 
-| Const | Team number | Source |
+| Const | Team number | Used by |
 |---|---|---|
-| `Amber` | 2 | archive: Amber picks call `ChangeTeam(2)`; unpicked players wait on 2 |
-| `Sapphire` | 3 | archive: Sapphire picks call `ChangeTeam(3)` |
+| `Amber` | 2 | Amber picks call `ChangeTeam(2)`; unpicked players wait on 2 |
+| `Sapphire` | 3 | Sapphire picks call `ChangeTeam(3)` |
 
 ## Operations
 

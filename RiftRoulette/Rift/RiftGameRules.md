@@ -2,8 +2,6 @@
 
 Access to the game's KOTH (rift) scheduler on `CCitadelGameRules`, and the
 two scheduler steps of the known-good rift sequence. Static; no state.
-Extracted from Legacy `Koth` in Stage 10 (field names, values, and order
-unchanged).
 
 ## Operations
 
@@ -18,8 +16,7 @@ unchanged).
 | `ParkScheduler(gameRules)` | window and spawn set to `ParkedTime` (999999); `citadel_koth_enabled 0` |
 | `SetKothEnabled(enabled)` | `ServerConVars.TrySet("citadel_koth_enabled", 1 or 0)`; a missing convar logs one Warning on the `rift` log |
 
-Accessors are created on each access, as the archive created them on each
-`/koth` call.
+Accessors are created on each access.
 
 ## Dangerous constraints
 

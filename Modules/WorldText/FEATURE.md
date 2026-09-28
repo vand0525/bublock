@@ -3,8 +3,7 @@
 ## Purpose
 
 Reusable, game-agnostic in-game text boards (`point_worldtext`): create,
-update, remove, list, and clear by string id. Compiled into consuming DLLs as
-source; no Rift Roulette dependency.
+update, remove, list, and clear by string id. No Rift Roulette dependency.
 
 ## Public operations
 

@@ -4,16 +4,15 @@
 
 The Rift Roulette hero draft: two hero pools, one pick per player, team
 assignment from the pick, starting gold, hero enforcement, the draft boards,
-and the pick commands. Extracted from Legacy in Stages 8 (state) and 9
-(everything else).
+and the pick commands.
 
-Stage 13b: the draft is active only when `GameLoop/MatchConfig.HeroMode`
+The draft is active only when `GameLoop/MatchConfig.HeroMode`
 is `draft`. In `random` (the default) the pool boards are hidden, pick
 commands reply that heroes are random, and `RandomMode/RandomModeService`
 writes its per-round assignments into `DraftState`. The draft code is kept
 for later use.
 
-Stage 13c: in Random mode the stats boards (`Stats/`) take the pool boards'
+In Random mode the stats boards (`Stats/`) take the pool boards'
 spots (`BoardLayout`), `EnforceHero` defers to the Random mode hero guard,
 and `Reset` keeps each player's team.
 
@@ -41,9 +40,6 @@ See `DraftService.md`. Commands:
 - Admin: `/draft_status`, `/draft_assign`, `/draft_release`, `/draft_reset`,
   `/draft_boards`.
 
-The archive names (`/select`, `/unselect`, `/selected`, `/reset`) were
-removed in Stage 12.
-
 Catalogued in `reference/user-commands.md` and `reference/admin-commands.md`.
 
 ## State
@@ -53,11 +49,11 @@ Catalogued in `reference/user-commands.md` and `reference/admin-commands.md`.
 ## Dependencies
 
 - `Modules/WorldText` (boards), `Round/WatchSpot` (send players up, board
-  anchor; Stage 13i replaced the fixed `draft` spot).
+  anchor; never the fixed `draft` spot).
 - `Lobby/RiftRouletteTeams` (team numbers).
 - `Duel/DuelService.GuardHero` and `RandomMode/RandomModeService.GuardHero`
   (hero locks), `Stats/StatsService.RefreshBoards` (when the draft is off).
-- Stage 13g: in 1v1 mode the draft is off like Random mode (`UsesDraft`
+- In 1v1 mode the draft is off like Random mode (`UsesDraft`
   checks) and `EnforceHero` never forces Skyrunner, so players can pick
   heroes from the menu while a build is prepared.
 - `Shared` (`AdminCommand`, `PlayerChat`, logging).

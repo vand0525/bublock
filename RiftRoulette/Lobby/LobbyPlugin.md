@@ -2,7 +2,7 @@
 
 Thin plugin class (Name `Rift Roulette Lobby`) for player connection
 lifecycle, server setup, and the lobby commands. Ops live on
-`LobbyService`. Extracted from Legacy in Stage 8.
+`LobbyService`.
 
 ## Hooks (Clean mode)
 
@@ -17,9 +17,9 @@ lifecycle, server setup, and the lobby commands. Ops live on
 | `OnGameFrame` | `PauseGuard.Tick()` every frame, simulating or not (a paused game does not simulate): the automatic unpause while pausing is off |
 | `OnClientConCommand` | A `PauseRule.IsPauseCommand` command (`pause`, `setpause`, `citadel_pause`, `citadel_toggle_server_pause`) returns `Stop` when `PauseGuard.Block(controller, "command", <name>)` says so; everything else `Continue` |
 | `OnClientConnect` | Returns `AccessService.AllowConnect(SteamId, Name) && AdminSeat.AllowConnect(SteamId, Name)`. Access first: a banned ID gets a statue visit or is refused inside a rejoin lockout (`BanStatueService.AdmitBanned`), and in private mode anyone neither whitelisted nor admin is refused. Then the seat rule: `false` refuses a non-admin once 12 participants are playing (the 13th connection is the admin seat) |
-| `OnClientFullConnect` | When the controller is present: a banned player let in at connect (`BanStatueService.TakeArrival`) becomes a statue and is kicked 10 s later (`Petrify(RejoinKickSeconds, liveBan: false)`); otherwise every admin is seated as a spectator (`AdminSeat.Sit`; `dw_seat_play` to play); everyone else goes through `LobbyService.AdmitPlayer(controller, Timer)` (no bot check, as the archive), which places the player on the smaller team and checks auto-start 2 s later |
+| `OnClientFullConnect` | When the controller is present: a banned player let in at connect (`BanStatueService.TakeArrival`) becomes a statue and is kicked 10 s later (`Petrify(RejoinKickSeconds, liveBan: false)`); otherwise every admin is seated as a spectator (`AdminSeat.Sit`; `dw_seat_play` to play); everyone else goes through `LobbyService.AdmitPlayer(controller, Timer)` (no bot check), which places the player on the smaller team and checks auto-start 2 s later |
 | `OnClientDisconnect` | A map-change disconnect (`args.IsMapChange`, reason `NetworkDisconnectShutdown`) only logs Debug `Map change disconnect, player kept`: Deadworks keeps the player, who reconnects to the next map. Otherwise `LobbyService.RemovePlayer(controller, Timer)` when the controller is present (may auto-end the match, never auto-starts one), else `LobbyService.OnDisconnectWithoutController(Slot, Reason, Timer)` |
-| `player_spawn` | Skips bots and seated admins (`Participants.IsParticipant`, but statues pass so a respawned statue goes back up); gives `WatchGuard.Grace` at once (a respawn at base is not a rescue) and `StreamCam.NoteSpawn` (the camera waits 5 s before following a fresh hero), then on the next tick `WatchSpot.SendUp(player)`: restrained and teleported to the watch spot above the rift being fought, or the next one when idle (archive `ReturnToDraftOnSpawn`; stays here because it needs `Timer`) |
+| `player_spawn` | Skips bots and seated admins (`Participants.IsParticipant`, but statues pass so a respawned statue goes back up); gives `WatchGuard.Grace` at once (a respawn at base is not a rescue) and `StreamCam.NoteSpawn` (the camera waits 5 s before following a fresh hero), then on the next tick `WatchSpot.SendUp(player)`: restrained and teleported to the watch spot above the rift being fought, or the next one when idle (runs here because it needs `Timer`) |
 | `player_death` | `LobbyService.LogDeath` when controller and pawn are present; then `StreamCam.OnDeath(victim, attacker, Timer)` (the camera cuts to the killer if the admin was watching the victim) |
 
 ## Commands
@@ -48,9 +48,6 @@ one, as `dw_seat_play` did at 09:39) the first connected player whose Steam
 ID is in `AdminAuth.SteamIds`; `The admin is not connected.` if none.
 Spectators cannot type in game chat, so a seated admin uses the client
 console (`dw_seat_play`) or the server console.
-
-The archive names `/state`, `/kick`, and `/test` (now `/mv_tp draft`) were
-removed in Stage 12; `/player_kick` replaces the ungated archive `/kick`.
 
 Admin commands call `AdminCommand.Authorize` first (server console trusted;
 accepted and rejected calls logged in `Lobby`), run ops in Debug mode, and

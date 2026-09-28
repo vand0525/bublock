@@ -1,8 +1,8 @@
 # RiftRouletteLocations
 
-Rift Roulette's teleport targets as typed `MovementLocation`s. Values are
-copied unchanged from the archive plugin (`DraftPosition` / `DraftAngle` and
-the four rift start spawns). The two watch spots (Stage 13i) sit above each
+Rift Roulette's teleport targets as typed `MovementLocation`s: the draft
+spot, the two watch spots, and the four rift start spawns. The two watch
+spots sit above each
 rift's spawn (`RiftSides.GreenPosition` / `YellowPosition` x, y) at the
 draft height (the skybox floor). Their camera angles face the welcome
 board (`Round/WatchLayout.LookAt` of the welcome offset (500, 500, 300),
@@ -19,10 +19,9 @@ turned half a turn on yellow): yaw 45 on green, -135 on yellow, pitch -23
 | `YellowSapphire` | `yellow_sapphire` | (-7072.65625, 2209.53125, 248.03125) | (0, -102.15625, 0) |
 | `YellowAmber` | `yellow_amber` | (-8259.5625, -2134.3125, 248.03125) | (0, 80.875, 0) |
 
-The archive had the two yellow starts swapped (Sapphire landed on Amber's
-half). They were swapped back on 2026-09-27, each angle moving with its
-position: Sapphire (team 3, base at +y) starts at +y on both lanes, Amber
-(team 2, base at -y) at -y.
+Sapphire (team 3, base at +y) starts at +y on both lanes, Amber (team 2,
+base at -y) at -y. Each angle belongs to its position; keep them together
+(swapped yellow starts put Sapphire on Amber's half until 2026-09-27).
 
 ## Operations
 
@@ -38,7 +37,7 @@ position: Sapphire (team 3, base at +y) starts at +y on both lanes, Amber
   only makes the names reachable from `/mv_tp` and `/mv_list`.
 - Rift **spawn** positions (where the rift itself appears) are not teleport
   targets and live in `Rift/RiftSide`.
-- Since Stage 13i nothing teleports to `Draft` any more (players go to the
+- Nothing teleports to `Draft` (players go to the
   watch spots through `Round/WatchSpot`); it stays registered for `/mv_tp`.
   The boards are anchored at the current watch spot (`BoardLayout.Origin`).
 - The watch spots and the four starts are **anchors**: players are sent to

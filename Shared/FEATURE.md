@@ -2,8 +2,8 @@
 
 ## Purpose
 
-Cross-cutting helpers compiled into every Bublock plugin DLL as source
-(`Shared.projitems`). Not a plugin; has no hooks or commands.
+Cross-cutting helpers for every Bublock plugin DLL. Not a plugin; has no
+hooks or commands.
 
 ## Public operations
 
@@ -49,16 +49,16 @@ Namespace: `Bublock.Shared`.
 
 - `RiftRoulette.dll`, `DevTools.dll`, `CleanSlate.dll` import `Shared.projitems`.
 - `Tests/Shared.Tests` imports it for local tests.
-- `DevTools` admin commands gate on `AdminAuth.IsAuthorized`.
-- `WorldTextPlugin` (in `RiftRoulette.dll`) gates every command with
-  `AdminCommand.Authorize`; new admin commands use it too.
-- `PlayerChat` is used by Rift Roulette `DraftPlugin` (pick replies) and
-  `LobbyPlugin` (`/status`).
+- Every admin command (DevTools, CleanSlate, Rift Roulette plugin classes)
+  gates with `AdminCommand.Authorize`.
+- `PlayerChat` is used by Rift Roulette plugin classes and services for
+  chat lines to one player (e.g. `DraftPlugin` pick replies, `LobbyPlugin`
+  `/status`).
 
 ## Relation to lifecycle vs commands
 
-- Admin command wrappers call `AdminCommand.Authorize` (or DevTools'
-  `Authenticate`) before running and run their ops with
-  `ExecutionMode.Debug`; lifecycle code uses the default Clean loggers.
+- Admin command wrappers call `AdminCommand.Authorize` before running and
+  run their ops with `ExecutionMode.Debug`; lifecycle code uses the default
+  Clean loggers.
 - `Cheats.Run` is available to any operation that needs `sv_cheats`; no
-  caller uses it yet.
+  caller uses it.

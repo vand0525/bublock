@@ -28,8 +28,7 @@ is required.
 ## Invariants
 
 - Module commands take only generic arguments: team **numbers**, not Rift
-  Rumble team names.
+  Roulette team names.
 - Handlers take `CCitadelPlayerController?` so the server console can run
   them (`dw_mv_*`).
-- `/mv_tp_team` relies on the controller's `TeamNum`; confirmed in game at
-  the Stage 12 push.
+- `/mv_tp_team` relies on the controller's `TeamNum`; confirmed in game.

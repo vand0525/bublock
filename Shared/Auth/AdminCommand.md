@@ -29,5 +29,3 @@ Shared gate and reply helper for admin `[Command]` wrappers.
 - Call `Authorize` first in every admin command, before any side effect.
 - Handlers must take `CCitadelPlayerController?` (nullable) so server-console
   calls reach `Authorize` as `null`.
-- DevTools still uses its own `Authenticate` (silent rejection) until the
-  Stage 12 pass.

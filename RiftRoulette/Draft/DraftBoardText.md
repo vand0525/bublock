@@ -5,8 +5,7 @@ Text for the draft boards and pool listings. Pure; unit tested in
 
 ## Operations
 
-- `TeamBoard(teamName, heroes, isSelected)`: the team board text, same
-  layout as the archive `CreateDraftMessage`:
+- `TeamBoard(teamName, heroes, isSelected)`: the team board text:
 
   ```text
   SAPPHIRE
@@ -19,9 +18,7 @@ Text for the draft boards and pool listings. Pure; unit tested in
   /unpick
   ```
 
-  The footer reads `/pick <hero>` / `/unpick` (archive: `/select <hero>` /
-  `/unselect`). That is the only visual change to the boards (inventory
-  §1.4).
+  The footer lists the pick commands, `/pick <hero>` and `/unpick`.
 - `PoolLine(teamName, heroes, isSelected)`: one line for chat / console,
   e.g. `Sapphire: Shiv (taken), Yamato, ...` (used by `/heroes` and
   `/draft_status`).

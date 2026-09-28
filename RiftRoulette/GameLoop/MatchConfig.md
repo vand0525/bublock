@@ -1,13 +1,13 @@
 # MatchConfig
 
-Match configuration set by the server (Stage 13b). Static, in memory: it
+Match configuration set by the server. Static, in memory: it
 resets to the defaults on every DLL load (deploy or hot reload).
 
 ## Settings
 
 | Setting | Values | Default | Effect |
 |---|---|---|---|
-| `HeroMode` | `Random`, `Draft`, `Duel` | `Random` | Random: each intermission, every player gets a new random hero and build (`Random/RandomModeService`); pool boards and pick commands are off. Draft: the Stage 12 hero draft. Duel (Stage 13g, alias `1v1`): one copied build on both players (`Duel/DuelService`); pool boards and pick commands are off. |
+| `HeroMode` | `Random`, `Draft`, `Duel` | `Random` | Random: each intermission, every player gets a new random hero and build (`Random/RandomModeService`); pool boards and pick commands are off. Draft: the hero draft (`Draft/`, pool boards and `/pick`). Duel (alias `1v1`): one copied build on both players (`Duel/DuelService`); pool boards and pick commands are off. |
 | `Format` | `Continuous` | `Continuous` | Continuous: rounds loop until `/match_end`. Other formats (best of N) come later. |
 
 ## Operations

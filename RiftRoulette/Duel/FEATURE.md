@@ -2,7 +2,7 @@
 
 ## Purpose
 
-1v1 mode (Stage 13g). `/match_mode 1v1` (or `duel`) turns off the draft and
+1v1 mode. `/match_mode 1v1` (or `duel`) turns off the draft and
 unlocks hero switching: players pick heroes from the in-game menu and get
 100,000 souls and level 36 to build. When one player's build is ready, the
 admin runs `/duel_copy <slot>`: that player's exact hero, items (with
@@ -11,7 +11,7 @@ players, they go on opposite teams, and the continuous match starts. During
 the match both are locked to that hero (a menu swap kills and restores) and
 every intermission resets both to the copy with 0 souls.
 
-Since Stage 13j the mode is winner-stays-on with a join queue
+The mode is winner-stays-on with a join queue
 (`Modules/Queue/PlayerQueue`). Players type `/queue`; the first two in the
 queue fight. A capture makes the capturing fighter the winner: the loser
 goes to the back of the queue and the next in line challenges the winner

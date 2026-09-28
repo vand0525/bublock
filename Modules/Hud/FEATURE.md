@@ -3,8 +3,8 @@
 ## Purpose
 
 Reusable, game-agnostic on-screen announcements: the game's HUD banner
-(big title, smaller description) instead of chat. Compiled into consuming
-DLLs as source; no Rift Roulette dependency. Added in Stage 13a.
+(big title, smaller description) instead of chat. No Rift Roulette
+dependency.
 
 ## Public operations
 

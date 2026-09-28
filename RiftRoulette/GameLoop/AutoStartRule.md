@@ -1,6 +1,6 @@
 # AutoStartRule
 
-Pure decision for match auto-start (Stage 13d). Unit tested.
+Pure decision for match auto-start. Unit tested.
 
 ## Operations
 

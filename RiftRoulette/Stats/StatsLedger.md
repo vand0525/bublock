@@ -1,6 +1,6 @@
 # StatsLedger
 
-Pure per-match kill / death / assist counts by Steam ID (Stage 13c). No game
+Pure per-match kill / death / assist counts by Steam ID. No game
 calls; unit tested in `Tests/RiftRoulette.Tests`.
 
 ## Types

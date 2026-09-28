@@ -2,7 +2,7 @@
 
 Pure types describing how a rift round ended. Handed to the caller's
 `RiftRoundSteps.RoundEnded` step once the round is fully over (phase back
-to `Idle`). Added in Stage 13a so the match loop can score rounds.
+to `Idle`). The match loop scores rounds from it.
 
 ## Types
 

@@ -1,6 +1,6 @@
 # AdminSeat
 
-The reserved 13th connection for admins (Stage 13f). The server allows 13
+The reserved 13th connection for admins. The server allows 13
 connections (`maxplayers 13`, browser shows 12); only an admin may take the
 13th. A seated admin is on the spectator side and is not a participant
 (`Participants`), so they get no team, hero, round, stats, or auto-start

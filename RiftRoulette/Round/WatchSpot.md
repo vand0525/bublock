@@ -1,6 +1,6 @@
 # WatchSpot
 
-The spot up top where inactive players wait and watch (Stage 13i). It sits
+The spot up top where inactive players wait and watch. It sits
 above the rift being fought (or the next one), on the skybox floor at the
 old draft height, and replaced every teleport to the fixed `draft` spot.
 
