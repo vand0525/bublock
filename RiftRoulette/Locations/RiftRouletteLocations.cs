@@ -20,6 +20,11 @@ public static class RiftRouletteLocations
     new Vector3(-7560f, 0f, 1536.062500f),
     new Vector3(-23f, -135f, 0f));
 
+  public static readonly MovementLocation WatchCenter = new(
+    "watch_center",
+    new Vector3(0f, 0f, 1536.062500f),
+    new Vector3(-23f, 45f, 0f));
+
   public static readonly MovementLocation GreenSapphire = new(
     "green_sapphire",
     new Vector3(8225.000000f, 1797.718750f, 248.062500f),
@@ -40,8 +45,23 @@ public static class RiftRouletteLocations
     new Vector3(-8259.562500f, -2134.312500f, 248.031250f),
     new Vector3(0.000000f, 80.875000f, 0.000000f));
 
+  // Approximate mid-lane fight starts: green fight offsets scaled toward origin (tune with /spots_walk).
+  public static readonly MovementLocation CenterSapphire = new(
+    "center_sapphire",
+    new Vector3(600f, 1800f, 248.062500f),
+    new Vector3(0.000000f, -100.343750f, 0.000000f));
+
+  public static readonly MovementLocation CenterAmber = new(
+    "center_amber",
+    new Vector3(-600f, -2100f, 248.031250f),
+    new Vector3(0.000000f, 80.718750f, 0.000000f));
+
   public static IReadOnlyList<MovementLocation> All { get; } =
-    [Draft, WatchGreen, WatchYellow, GreenSapphire, GreenAmber, YellowSapphire, YellowAmber];
+  [
+    Draft, WatchGreen, WatchYellow, WatchCenter,
+    GreenSapphire, GreenAmber, YellowSapphire, YellowAmber,
+    CenterSapphire, CenterAmber
+  ];
 
   public static void RegisterAll()
   {

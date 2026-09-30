@@ -13,8 +13,9 @@ ID), runs its op in Debug mode, and replies to the caller's console with a
 | Command | Calls | Reply / errors |
 |---|---|---|
 | `/rift_start` | `Round/RoundFlow.RunRound(Timer, Debug)` (the same composed path the lifecycle runs Clean) | `Rift starting on GREEN.`, or the refusal if a rift is running or gamerules cannot be reached |
-| `/rift_status` | `RiftService.DescribeRift` | two status lines |
-| `/rift_next <green\|yellow>` | `RiftSides.TryParse`, `RiftService.SetNextSide`, then `Round/WatchSpot.MoveAllUp` (everyone alive and the boards move above the new side) | `Next rift: <side>. N player(s) moved to the watch spot.`; error for an unknown side or while a rift is running |
+| `/rift_status` | `RiftService.DescribeRift` | two status lines (includes mid on/off) |
+| `/rift_mid <on\|off>` | `RiftService.SetMiddleEnabled` | `Mid rift on/off. Next=...`; error for a bad argument |
+| `/rift_next <green\|yellow\|center>` | `RiftSides.TryParse`, `RiftService.SetNextSide`, then `Round/WatchSpot.MoveAllUp` (everyone alive and the boards move above the new side) | `Next rift: <side>. N player(s) moved to the watch spot.`; error for an unknown side, mid off when asking for center, or while a rift is running |
 | `/rift_cancel` | `Round/RoundFlow.CancelRound(Timer, Debug)` | summary, or `No rift is running.` |
 | `/rift_cleanup` | `RiftService.CleanupRiftTroopers` (every `npc_trooper`) | count removed |
 

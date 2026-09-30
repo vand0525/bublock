@@ -107,7 +107,6 @@ public class LobbyPlugin : DeadworksPluginBase
         AdminSeat.Forget(player.PlayerSteamId);
 
       AdminSeat.Sit(player, Timer);
-      AdminSeat.SyncSoon(Timer);
     }
     else
       LobbyService.AdmitPlayer(player, Timer);
@@ -142,6 +141,11 @@ public class LobbyPlugin : DeadworksPluginBase
 
     if (player == null || (!Participants.IsParticipant(player) && !BanStatueService.IsStatue(player.PlayerSteamId)))
       return HookResult.Continue;
+
+    // #region agent log
+    if (Bublock.Modules.Loadout.LoadoutStress.Running)
+      return HookResult.Continue;
+    // #endregion
 
     WatchGuard.Grace(player.PlayerSteamId);
     StreamCam.NoteSpawn(player.PlayerSteamId);
@@ -311,7 +315,7 @@ public class LobbyPlugin : DeadworksPluginBase
     AdminCommand.Reply(caller, $"[Lobby] {AdminSeat.RoamNow(player, Timer, ExecutionMode.Debug)}");
   }
 
-  [Command("restart_status", Description = "Auto restart: on/off, map uptime, stuck and in-progress joins")]
+  [Command("restart_status", Description = "Auto restart: on/off, map uptime, stuck and in-progress joins, join budget")]
   public void CmdRestartStatus(CCitadelPlayerController? caller)
   {
     AdminCommand.Authorize(caller, LobbyLog, "restart_status");
@@ -340,6 +344,23 @@ public class LobbyPlugin : DeadworksPluginBase
     };
 
     AdminCommand.Reply(caller, $"[Lobby] {AutoRestartService.SetEnabled(on, ExecutionMode.Debug)}");
+  }
+
+  [Command("restart_budget", Description = "Join budget refresh: show, or set fighter-rounds until the next upload (0 = off): restart_budget [n]")]
+  public void CmdRestartBudget(CCitadelPlayerController? caller, string budget = "")
+  {
+    AdminCommand.Authorize(caller, LobbyLog, "restart_budget");
+
+    if (string.IsNullOrWhiteSpace(budget))
+    {
+      AdminCommand.Reply(caller, $"[Lobby] {MapRefreshService.Describe()}");
+      return;
+    }
+
+    if (!int.TryParse(budget.Trim(), out var value) || value < 0)
+      throw new CommandException("Usage: restart_budget [fighter-rounds, 0 = off]");
+
+    AdminCommand.Reply(caller, $"[Lobby] {MapRefreshService.SetBudget(value, ExecutionMode.Debug)}");
   }
 
   [Command("seat_status", Description = "Show player slots, the admin seat, and maxplayers")]

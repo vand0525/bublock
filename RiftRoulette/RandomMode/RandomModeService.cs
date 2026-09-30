@@ -55,6 +55,8 @@ public static class RandomModeService
 
   public static ulong? Benched => _benched;
 
+  public static int FighterCount => Assignments.Count;
+
   public static void BeginMatch(ExecutionMode mode = ExecutionMode.Clean)
   {
     Clear();

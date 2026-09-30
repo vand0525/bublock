@@ -19,7 +19,7 @@ public static class AdminSeat
   public const int SpectatorTeam = 1;
   public const int HeroCheckSeconds = 2;
 
-  public const Heroes RoamHero = Heroes.Atlas;
+  public const Heroes RoamHero = LobbyService.LobbyHero;
   public const int RoamTeam = RiftRouletteTeams.Amber;
   public const string RoamModifier = "modifier_invis";
   public const int RoamModifierSeconds = 3600;
@@ -116,36 +116,12 @@ public static class AdminSeat
       player.Pawn?.DesignerName ?? "none");
   }
 
-  // Hero swaps made inside OnClientFullConnect are lost, so every switch runs from a timer.
-  public static void SyncSoon(ITimer timer, ExecutionMode mode = ExecutionMode.Clean) =>
-    timer.Once(HeroCheckSeconds.Seconds(), () => Sync(timer, mode));
-
-  public static void Sync(ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
-  {
-    var roam = AdminSeatRule.ShouldRoam(Participants.Humans().Count);
-
-    foreach (var player in Players.GetAll().Where(player => Seated.Contains(player.PlayerSteamId)).ToList())
-    {
-      if (roam == Roaming.Contains(player.PlayerSteamId))
-        continue;
-
-      if (roam)
-        Roam(player, timer, mode);
-      else
-        Spectate(player, timer, mode);
-    }
-  }
-
   public static string RoamNow(CCitadelPlayerController player, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
     var steamId = player.PlayerSteamId;
-    var playing = Participants.Humans().Count;
 
     if (!Seated.Contains(steamId))
       return $"{player.PlayerName} is not in the admin seat. Use dw_seat_spec first.";
-
-    if (!AdminSeatRule.ShouldRoam(playing))
-      return $"{playing} playing: roaming is only while nobody plays.";
 
     if (Roaming.Contains(steamId))
     {
@@ -169,7 +145,7 @@ public static class AdminSeat
     player.SelectHero(RoamHero);
     player.ChangeTeam(RoamTeam, true);
 
-    Log.WithMode(mode).Info(player.ToPlayerRef(), "Admin roaming, server empty Hero={Hero} Team={Team}", RoamHero, RiftRouletteTeams.Name(RoamTeam));
+    Log.WithMode(mode).Info(player.ToPlayerRef(), "Admin roaming Hero={Hero} Team={Team}", RoamHero, RiftRouletteTeams.Name(RoamTeam));
     BublockLog.Master.Info("Admin roaming {Player}", player.PlayerName);
 
     timer.Once(HeroCheckSeconds.Seconds(), () => PlaceAndCloak(steamId, timer, mode, retry: true));
@@ -214,6 +190,16 @@ public static class AdminSeat
       player.SelectHero(RoamHero);
       timer.Once(HeroCheckSeconds.Seconds(), () => PlaceAndCloak(steamId, timer, mode));
       return;
+    }
+
+    // The hero spawned back from spectating came in at 1 health (2026-09-28).
+    var health = pawn.Health;
+    var maxHealth = pawn.GetMaxHealth();
+
+    if (health < maxHealth)
+    {
+      pawn.Heal(maxHealth);
+      log.Info(player.ToPlayerRef(), "Roaming admin healed to full Health={Health} MaxHealth={MaxHealth}", health, maxHealth);
     }
 
     // The respawn from the team change usually placed the admin already; don't pull them back.
@@ -334,7 +320,7 @@ public static class AdminSeat
   }
 
   // Hot reload wipes Seated and Roaming. Every connected admin goes back into the seat; one on a
-  // hero pawn is roaming again (cloak re-applied in place), then Sync settles roam vs spectate.
+  // hero pawn is roaming again (cloak re-applied in place). Mode is manual after that (/seat_roam).
   public static int Restore(ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
     var restored = 0;
@@ -362,7 +348,6 @@ public static class AdminSeat
       Log.WithMode(mode).Info(player.ToPlayerRef(), "Admin seat restored after reload TeamNum={TeamNum} Roaming={Roaming}", player.TeamNum, roaming);
     }
 
-    SyncSoon(timer, mode);
     return restored;
   }
 

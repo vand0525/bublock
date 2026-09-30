@@ -41,6 +41,12 @@ public static class WorldTextService
       return false;
     }
 
+    // Engine 6712 / Deadworks v0.5.0: Create still writes color + fullbright via
+    // keyvalues, but boards were reading solid black in game — stamp again after
+    // spawn so lighting cannot leave the text dark.
+    board.Fullbright = true;
+    board.SetColor(spec.Color.R, spec.Color.G, spec.Color.B, spec.Color.A);
+
     board.Teleport(
       position: spec.Position,
       angles: spec.Angle,

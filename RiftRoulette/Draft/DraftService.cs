@@ -138,7 +138,7 @@ public static class DraftService
     DraftState.Release(player.PlayerSteamId, out _);
 
     player.ChangeTeam(LobbyTeam, true);
-    player.SelectHero(Heroes.Skyrunner);
+    player.SelectHero(LobbyService.LobbyHero);
 
     timer.NextTick(() => WatchSpot.SendUp(player, mode));
 
@@ -173,7 +173,7 @@ public static class DraftService
       if (MatchConfig.UsesDraft)
         player.ChangeTeam(LobbyTeam, true);
 
-      player.SelectHero(Heroes.Skyrunner);
+      player.SelectHero(LobbyService.LobbyHero);
 
       timer.NextTick(() => WatchSpot.SendUp(player, mode));
       reset++;
@@ -190,6 +190,11 @@ public static class DraftService
     if (!Participants.IsParticipant(player))
       return;
 
+    // #region agent log
+    if (Bublock.Modules.Loadout.LoadoutStress.Running)
+      return;
+    // #endregion
+
     if (DuelService.GuardHero(player, pawn, timer))
       return;
 
@@ -198,7 +203,7 @@ public static class DraftService
 
     var expectedHero = DraftState.TryGetPick(player.PlayerSteamId, out var selectedHero)
       ? selectedHero
-      : Heroes.Skyrunner;
+      : LobbyService.LobbyHero;
 
     if (pawn.HeroID != expectedHero)
     {

@@ -24,11 +24,11 @@ admins included), unlike a process restart.
 | `OnConnect(args, allowed)` | Allowed connections only: adds to `Pending`, Information `Client connecting Name= SteamId= Slot= MapChangeReconnect=` |
 | `OnFullConnect(slot, player)` | Removes the slot from `Pending`, Information `Join completed Seconds=` |
 | `OnDisconnect(slot, mapChange)` | A pending slot is removed. Unless it is a map-change disconnect: `StuckJoins++` (once per join) and Warning `Join never completed, client left ... Seconds= StuckJoins=` (copied to master) |
-| `OnMapStart()` | From `LobbyPlugin.OnStartupServer`: Information `Map started, join watch reset`, clears `Pending` and `StuckJoins`, records the map start |
+| `OnMapStart()` | From `LobbyPlugin.OnStartupServer`: Information `Map started, join watch reset`, clears `Pending` and `StuckJoins`, records the map start, then `MapRefreshService.OnMapStart()` (join budget counter reset) |
 | `Check(mode)` | Every `CheckSeconds` (60 s, `LobbyPlugin` timer). Marks pending joins older than 3 min as stuck (Warning `Join stuck, client still connecting`, `StuckJoins++`), then `AutoRestartRule.Reason(Enabled, Participants.Humans().Count, StuckJoins, Pending.Count, UptimeSeconds)`; a reason calls `Restart` |
 | `Restart(reason, mode)` | Refuses while `Server.IsChangingLevel` or with no map name (Warning). Otherwise Warning `Reloading the map Reason= Map= UptimeMinutes= StuckJoins= Pending=` (master too), records the reload time, zeroes `StuckJoins`, `Server.ChangeLevel(map)`. Returns reply text |
 | `SetEnabled(enabled, mode)` | Sets `Enabled` (until the next load), Information and a master line |
-| `Describe()` | On / off, map, uptime, stuck and in-progress joins, one line per pending join |
+| `Describe()` | On / off, map, uptime, stuck and in-progress joins, the join budget line (`MapRefreshService.Describe`), one line per pending join |
 
 ## Side effects
 
@@ -40,8 +40,10 @@ admins included), unlike a process restart.
 
 ## Invariants
 
-- Never reloads with a participant connected (seated admins and statues
-  don't count), and never twice within 10 minutes.
+- `Check` never reloads with a participant connected (seated admins and
+  statues don't count), and never twice within 10 minutes. The join budget
+  refresh (`MapRefreshService`) and `/restart_now` call `Restart` directly
+  and do reload with players (the match is ended first by the refresh).
 - Logs go to `restart-YYYYMMDD.log`.
 
 ## Dangerous Deadworks constraints

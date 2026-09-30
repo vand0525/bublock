@@ -10,7 +10,7 @@ public static class WatchLayout
 
   // The welcome text starts at WelcomeOffset (its bottom-left) and runs toward -y on green, facing -x.
   // Estimated from the font size (64 px, 3 units per px), then nudged by eye in game; not measured.
-  public const float WelcomeHalfWidth = 430f;
+  public const float WelcomeHalfWidth = 825f;
   public const float WelcomeHalfHeight = 70f;
   public const float WelcomeViewDistance = 900f;
   public const float EyeHeight = 64f;
@@ -28,10 +28,12 @@ public static class WatchLayout
   }
 
   public static Vector3 Offset(RiftSide side, Vector3 greenOffset) =>
-    side == RiftSide.Green ? greenOffset : new Vector3(-greenOffset.X, -greenOffset.Y, greenOffset.Z);
+    side == RiftSide.Yellow
+      ? new Vector3(-greenOffset.X, -greenOffset.Y, greenOffset.Z)
+      : greenOffset;
 
   public static float Yaw(RiftSide side, float greenYaw) =>
-    side == RiftSide.Green ? greenYaw : Normalize(greenYaw + 180f);
+    side == RiftSide.Yellow ? Normalize(greenYaw + 180f) : greenYaw;
 
   public static Vector3 Angle(RiftSide side, Vector3 greenAngle) =>
     new(greenAngle.X, Yaw(side, greenAngle.Y), greenAngle.Z);

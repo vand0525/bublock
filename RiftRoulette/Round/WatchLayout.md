@@ -2,20 +2,21 @@
 
 Pure geometry for what surrounds a watch spot (boards, camera). The map is
 point-symmetric, so the yellow layout is the green one turned half a turn
-around the watch spot. All board positions and angles are written for green
-and turned here for yellow.
+around the watch spot. Center uses the green offsets and yaw (no mirror).
+All board positions and angles are written for green and turned here for
+yellow.
 
 ## Operations
 
 | Op | Returns |
 |---|---|
 | `WelcomeOffset` | (500, 500, 300): the welcome board's offset from the watch spot on green (toward the map edge). The watch view angles aim at it |
-| `WelcomeHalfWidth` / `WelcomeHalfHeight` | 430 / 70: half the size of the "RIFT ROULETTE" text. Estimated from the font size (64 px, 3 units per px) as 830, then the width nudged by eye in game (830, 730, 430: each looked off to the right); not measured |
-| `WelcomeCenter` | Estimated middle of the welcome text on green: the text starts at `WelcomeOffset` (its bottom-left) and runs toward -y, facing -x, so the center is `WelcomeOffset + (0, -430, 70)` |
-| `WelcomeFrontOffset` | Green offset of the spot straight in front of that center: `WelcomeViewDistance` (900, nudged from 600 and 750 by eye) toward -x, same y, floor height (z 0) |
-| `WelcomeFront(anchor, side)` | Location `<anchor>#welcome` at `anchor + Offset(side, WelcomeFrontOffset)`, angle `LookAt` from `EyeHeight` (64) above it to the turned center: yaw 0 on green, 180 on yellow, looking slightly up |
-| `Offset(side, greenOffset)` | Green: unchanged. Yellow: (-x, -y, z) |
-| `Yaw(side, greenYaw)` | Green: unchanged. Yellow: `greenYaw + 180`, normalized |
+| `WelcomeHalfWidth` / `WelcomeHalfHeight` | 825 / 70: half the size of the "RIFT ROULETTE" text. Estimated from the font size (64 px, 3 units per px) as ~825 (earlier eye nudges 830→730→430 read off-center) |
+| `WelcomeCenter` | Estimated middle of the welcome text on green: the text starts at `WelcomeOffset` (its bottom-left) and runs toward -y, facing -x, so the center is `WelcomeOffset + (0, -825, 70)` |
+| `WelcomeFrontOffset` | Green offset of the spot straight in front of that center: `WelcomeViewDistance` (900) toward -x, same y, floor height (z 0) |
+| `WelcomeFront(anchor, side)` | Location `<anchor>#welcome` at `anchor + Offset(side, WelcomeFrontOffset)`, angle `LookAt` from `EyeHeight` (64) above it to the turned center: yaw 0 on green/center, 180 on yellow, looking slightly up |
+| `Offset(side, greenOffset)` | Green and Center: unchanged. Yellow: (-x, -y, z) |
+| `Yaw(side, greenYaw)` | Green and Center: unchanged. Yellow: `greenYaw + 180`, normalized |
 | `Angle(side, greenAngle)` | (pitch, `Yaw(side, yaw)`, roll): only yaw turns |
 | `LookAt(from, to)` | (pitch, yaw, 0) in Source convention (pitch positive = down, yaw from +x toward +y), yaw normalized |
 | `Normalize(yaw)` | yaw wrapped into (-180, 180] |

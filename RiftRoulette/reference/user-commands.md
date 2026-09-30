@@ -38,7 +38,7 @@ console) and replies in the caller's chat.
 - **Who:** players, in game (`DraftPlugin`)
 - **Calls:** `DraftService.Unpick`
 - **Mode:** Clean; logged in `draft-*.log`
-- **Side effects:** refused (chat reply) if no pick or dead. Otherwise zeroes gold, ability points, and level; releases the hero; moves the caller to team 2 as Skyrunner; teleports them to the draft area next tick; redraws boards; confirms in chat
+- **Side effects:** refused (chat reply) if no pick or dead. Otherwise zeroes gold, ability points, and level; releases the hero; moves the caller to team 2 as LobbyHero (Abrams); teleports them to the draft area next tick; redraws boards; confirms in chat
 - **Notes:** in Random mode it only replies that heroes are random; in 1v1 mode it gives the 1v1 reply
 
 ### /picks

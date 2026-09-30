@@ -80,6 +80,7 @@ public static class AutoRestartService
     Pending.Clear();
     StuckJoins = 0;
     _mapStartedAt = DateTime.UtcNow;
+    MapRefreshService.OnMapStart();
   }
 
   public static void Check(ExecutionMode mode = ExecutionMode.Clean)
@@ -133,6 +134,7 @@ public static class AutoRestartService
     var hours = UptimeSeconds / 3600;
     yield return $"Auto restart {(Enabled ? "on" : "off")}. Map {Server.MapName} up {hours:0.0} h (reload at {AutoRestartRule.MaxUptimeSeconds / 3600:0} h, or after a stuck join; only with nobody playing).";
     yield return $"Stuck joins since map start: {StuckJoins}. Joins in progress: {Pending.Count}.";
+    yield return MapRefreshService.Describe();
 
     foreach (var (slot, join) in Pending.OrderBy(pair => pair.Key))
       yield return $"  slot {slot}: {join.Name} connecting for {(DateTime.UtcNow - join.Since).TotalSeconds:0} s{(join.Stuck ? " (stuck)" : "")}";

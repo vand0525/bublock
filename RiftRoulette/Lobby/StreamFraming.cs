@@ -16,10 +16,18 @@ public static class StreamFraming
 
   public static readonly CameraPose Default = new(new Vector3(0f, 0f, OverheadHeight), SpectateRule.StraightDownPitch, 0f);
 
-  public static CameraPose Pick(IReadOnlyDictionary<RiftSide, CameraPose> saved, RiftSide side) =>
-    saved.TryGetValue(side, out var pose) ? pose
-      : saved.TryGetValue(RiftSides.Other(side), out var other) ? other
-      : Default;
+  public static CameraPose Pick(IReadOnlyDictionary<RiftSide, CameraPose> saved, RiftSide side)
+  {
+    if (saved.TryGetValue(side, out var pose))
+      return pose;
+
+    // Green ↔ Yellow share a mirrored framing; Center keeps its own (default overhead).
+    if ((side is RiftSide.Green or RiftSide.Yellow) &&
+        saved.TryGetValue(RiftSides.Other(side), out var other))
+      return other;
+
+    return Default;
+  }
 
   public static (Vector3 Position, Vector3 Angle) ToWorld(MovementLocation anchor, CameraPose pose) =>
     (anchor.Offset(pose.Offset).Position, new Vector3(pose.Pitch, SpectateRule.WrapDegrees(anchor.Angle.Y + pose.Yaw), 0f));

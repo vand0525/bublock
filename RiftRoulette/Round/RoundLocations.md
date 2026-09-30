@@ -11,9 +11,11 @@ Which start locations each team uses for a rift side. Pure; unit tested in
 |---|---|---|
 | Green | `green_sapphire` | `green_amber` |
 | Yellow | `yellow_sapphire` | `yellow_amber` |
+| Center | `center_sapphire` | `center_amber` |
 
 `WatchFor(side)` returns the watch spot above that rift: Green →
-`watch_green`, Yellow → `watch_yellow` (used by `WatchSpot`).
+`watch_green`, Yellow → `watch_yellow`, Center → `watch_center` (used by
+`WatchSpot`).
 
 Values are the typed `RiftRouletteLocations` fields, so it never depends on
 the Movement registry having been filled.

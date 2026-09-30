@@ -51,6 +51,7 @@ public class WatchLayoutTests
   [Theory]
   [InlineData(RiftSide.Green)]
   [InlineData(RiftSide.Yellow)]
+  [InlineData(RiftSide.Center)]
   public void Watch_view_angle_points_at_the_welcome_board(RiftSide side)
   {
     var spot = RoundLocations.WatchFor(side);
@@ -64,6 +65,7 @@ public class WatchLayoutTests
   [Theory]
   [InlineData(RiftSide.Green, 0f)]
   [InlineData(RiftSide.Yellow, 180f)]
+  [InlineData(RiftSide.Center, 0f)]
   public void Welcome_front_faces_the_sign_head_on(RiftSide side, float yaw)
   {
     var anchor = RoundLocations.WatchFor(side);
@@ -75,6 +77,15 @@ public class WatchLayoutTests
     Assert.Equal(anchor.Position.Z, front.Position.Z, Tolerance);
     Assert.Equal(center.Y, front.Position.Y, Tolerance);
     Assert.Equal(WatchLayout.WelcomeViewDistance, MathF.Abs(center.X - front.Position.X), Tolerance);
+  }
+
+  [Fact]
+  public void Center_offset_matches_green()
+  {
+    var offset = new Vector3(500f, 500f, 300f);
+
+    Assert.Equal(offset, WatchLayout.Offset(RiftSide.Center, offset));
+    Assert.Equal(-90f, WatchLayout.Yaw(RiftSide.Center, -90f));
   }
 
   [Fact]

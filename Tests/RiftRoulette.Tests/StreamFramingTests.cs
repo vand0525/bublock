@@ -59,6 +59,15 @@ public class StreamFramingTests
   }
 
   [Fact]
+  public void Pick_center_does_not_mirror_green()
+  {
+    var green = new CameraPose(new Vector3(1f, 2f, 3f), 30f, 10f);
+
+    Assert.Equal(StreamFraming.Default, StreamFraming.Pick(new Dictionary<RiftSide, CameraPose> { [RiftSide.Green] = green }, RiftSide.Center));
+    Assert.Equal(green, StreamFraming.Pick(new Dictionary<RiftSide, CameraPose> { [RiftSide.Center] = green }, RiftSide.Center));
+  }
+
+  [Fact]
   public void Serialize_and_Parse_round_trip()
   {
     var poses = new Dictionary<RiftSide, CameraPose>

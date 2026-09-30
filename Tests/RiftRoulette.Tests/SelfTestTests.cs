@@ -76,7 +76,7 @@ public class SelfTestTests
       .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"))
       .SelectMany(path => pattern.Matches(File.ReadAllText(path)))
       .Select(match => match.Groups[1].Success ? match.Groups[1].Value : match.Groups[2].Value)
-      .Where(name => name != "sv_cheats")
+      .Where(name => name is not "sv_cheats" and not "dumpstringtable")
       .ToHashSet();
 
     Assert.True(used.Count >= 15, $"source scan found only {used.Count} convars");

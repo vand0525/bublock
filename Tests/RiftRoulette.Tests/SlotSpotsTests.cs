@@ -10,7 +10,7 @@ public class SlotSpotsTests
   private const int Slots = 13;
   private const float MinSpacing = 90f;
 
-  public static TheoryData<RiftSide> Sides => new() { RiftSide.Green, RiftSide.Yellow };
+  public static TheoryData<RiftSide> Sides => new() { RiftSide.Green, RiftSide.Yellow, RiftSide.Center };
 
   private static List<MovementLocation> All(MovementLocation anchor, Func<MovementLocation, int, MovementLocation> spot) =>
     Enumerable.Range(0, Slots).Select(slot => spot(anchor, slot)).ToList();

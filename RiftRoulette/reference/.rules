@@ -225,15 +225,15 @@ Assume the git repo is rooted at `Bublock/`.
   alone (the hero pawn stays and the client drops). Every player list the game uses
   (teams, heroes, rounds, stats, auto-start) comes from
   `Lobby/Participants.Humans()`, which leaves out bots and seated admins;
-  never build a new ad-hoc human list. A seated admin has two states:
-  spectating while any participant is connected, roaming while none are
-  (`AdminSeatRule.ShouldRoam`): Abrams on Amber facing the welcome sign
+  never build a new ad-hoc human list. A seated admin defaults to
+  spectating on connect (`AdminSeat.Sit`). Roaming is manual
+  (`/seat_roam` / `dw_seat_roam`): Abrams on Amber facing the welcome sign
   (`WatchLayout.WelcomeFront`; back to the watch slot if they fall), not
   restrained, invisible (`modifier_invis`, one 3600 s modifier put back
-  when it runs out and on respawn / reload, never every frame). Roaming
-  admins stay seated (never participants). `/seat_roam` starts roaming (or
-  re-places at the sign) only while nobody plays. `AdminSeat.SyncSoon` switches
-  2 s after a join / leave / statue (never inside `OnClientFullConnect`).
+  when it runs out and on respawn / reload, never every frame), and works
+  while players are connected (game chat). `dw_seat_spec` while roaming
+  returns to spectating. Roaming admins stay seated (never participants).
+  There is no auto roam↔spectate sync on join/leave.
 - Auto restart (`Lobby/AutoRestartService`, rule `AutoRestartRule`):
   after hours up the server can stop letting new players finish joining
   (players in keep playing). Every 60 s, with no participants, it reloads
@@ -243,6 +243,14 @@ Assume the git repo is rooted at `Bublock/`.
   (`IsMapChangeReconnect`). Map starts (`OnStartupServer`) must reset
   per-map state: plugin statics survive a map change, pawns do not
   (`AdminSeat.ResetForMap`).
+- Join budget (`Lobby/MapRefreshService`, rule `MapRefreshRule`): hero
+  swaps grow the string tables sent to every joiner, and past 512 KB no
+  one can join. Each Random mode round adds its fighter count; at a
+  scored round end after 160 fighter-rounds since the map start, everyone
+  gets a chat line that they will reconnect (never a banner), the match
+  ends, and the map reloads 10 s later; auto-start is held until then and
+  starts a fresh match when players are back. Never end a round early for
+  it, and never raise the budget without new join-size data.
 - Hero mode `duel` (`/match_mode 1v1`) copies one player's exact
   hero state (`Modules/Loadout` `LoadoutSnapshot`) onto both players with
   `/duel_copy <slot>` and locks them to it (`Lobby/HeroLock`, one instance

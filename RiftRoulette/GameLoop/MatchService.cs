@@ -157,6 +157,9 @@ public static class MatchService
     BublockLog.Master.Info("Round {Round} result Outcome={Outcome} Score={Score}", State.Round, result.Outcome, score);
     HudService.AnnounceAll(score, MatchState.DescribeResult(result, pointTo), mode);
 
+    if (MapRefreshService.TryBegin(_timer!, mode))
+      return;
+
     ScheduleNextRound(mode);
   }
 
@@ -328,7 +331,10 @@ public static class MatchService
     log.Info("Round started Round={Round} Side={Side}", State.Round, RiftSides.Name(side));
 
     if (MatchConfig.IsRandom)
+    {
       RandomModeService.AnnounceBans(mode);
+      MapRefreshService.AddRound(RandomModeService.FighterCount, mode);
+    }
   }
 
   private static void CloseBetting(int round, ExecutionMode mode)

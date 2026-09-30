@@ -57,7 +57,7 @@ note (loaded from its file).
 - `Duel/DuelService.GuardHero` and `RandomMode/RandomModeService.GuardHero`
   (hero locks), `Stats/StatsService.RefreshBoards` (when the draft is off).
 - In 1v1 mode the draft is off like Random mode (`UsesDraft`
-  checks) and `EnforceHero` never forces Skyrunner, so players can pick
+  checks) and `EnforceHero` never forces `LobbyHero`, so players can pick
   heroes from the menu while a build is prepared.
 - `Shared` (`AdminCommand`, `PlayerChat`, logging).
 

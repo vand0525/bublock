@@ -144,7 +144,7 @@ public static class StreamCam
     [
       $"Auto={state.Auto} | Seated={AdminSeat.IsSeated(admin.PlayerSteamId)} | Observer={SpectateService.IsObserving(admin)} | Mode={SpectateService.Mode(admin)} | FlyCam={SpectateService.IsFlyCam(admin)} | ViewAngle={(angles is { } angle ? $"{angle.X:0.#} {angle.Y:0.#}" : "unreadable")}",
       $"Watching={watching?.PlayerName ?? (target == null ? "none" : target.DesignerName)} | ParkedSide={(state.ParkedSide is { } side ? RiftSides.Name(side) : "-")} Placed={state.Placed} Adjusting={state.Adjusting} | WatchSide={RiftSides.Name(WatchSpot.Side)}",
-      "Framing " + string.Join(" | ", new[] { RiftSide.Green, RiftSide.Yellow }.Select(side =>
+      "Framing " + string.Join(" | ", RiftSides.All.Select(side =>
         $"{RiftSides.Name(side)}={(saved.TryGetValue(side, out var pose) ? DescribePose(pose) : "default")}"))
     ];
   }

@@ -10,7 +10,7 @@ public class RiftPlugin : DeadworksPluginBase
 
   public override string Name => "Rift Roulette Rift";
 
-  [Command("rift_start", Description = "Start the next rift (green/yellow alternating)")]
+  [Command("rift_start", Description = "Start the next rift (green/yellow/center rotation)")]
   public void CmdRiftStart(CCitadelPlayerController? caller)
   {
     AdminCommand.Authorize(caller, RiftLog, "rift_start");
@@ -27,13 +27,32 @@ public class RiftPlugin : DeadworksPluginBase
       AdminCommand.Reply(caller, $"[Rift] {line}");
   }
 
-  [Command("rift_next", Description = "Set the next rift side: rift_next <green|yellow>")]
+  [Command("rift_mid", Description = "Enable or disable the center rift: rift_mid <on|off>")]
+  public void CmdRiftMid(CCitadelPlayerController? caller, string state)
+  {
+    AdminCommand.Authorize(caller, RiftLog, "rift_mid");
+
+    var enabled = state.Trim().ToLowerInvariant() switch
+    {
+      "on" or "1" => true,
+      "off" or "0" => false,
+      _ => throw new CommandException("Use on or off.")
+    };
+
+    RiftService.SetMiddleEnabled(enabled, ExecutionMode.Debug);
+    AdminCommand.Reply(caller, $"[Rift] Mid rift {(enabled ? "on" : "off")}. Next={RiftSides.Name(RiftService.NextSide)}.");
+  }
+
+  [Command("rift_next", Description = "Set the next rift side: rift_next <green|yellow|center>")]
   public void CmdRiftNext(CCitadelPlayerController? caller, string side)
   {
     AdminCommand.Authorize(caller, RiftLog, "rift_next");
 
     if (!RiftSides.TryParse(side, out var nextSide))
-      throw new CommandException($"Unknown side '{side}'. Use green or yellow.");
+      throw new CommandException($"Unknown side '{side}'. Use green, yellow, or center.");
+
+    if (nextSide == RiftSide.Center && !RiftService.MiddleEnabled)
+      throw new CommandException("Mid rift is off. Use /rift_mid on first.");
 
     if (!RiftService.SetNextSide(nextSide, ExecutionMode.Debug))
       throw new CommandException($"A rift is running (Phase={RiftService.Phase}). Wait for it to end or use /rift_cancel.");

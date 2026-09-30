@@ -7,10 +7,18 @@ namespace RiftRoulette.Round;
 public static class RoundLocations
 {
   public static (MovementLocation Sapphire, MovementLocation Amber) StartsFor(RiftSide side) =>
-    side == RiftSide.Green
-      ? (RiftRouletteLocations.GreenSapphire, RiftRouletteLocations.GreenAmber)
-      : (RiftRouletteLocations.YellowSapphire, RiftRouletteLocations.YellowAmber);
+    side switch
+    {
+      RiftSide.Yellow => (RiftRouletteLocations.YellowSapphire, RiftRouletteLocations.YellowAmber),
+      RiftSide.Center => (RiftRouletteLocations.CenterSapphire, RiftRouletteLocations.CenterAmber),
+      _ => (RiftRouletteLocations.GreenSapphire, RiftRouletteLocations.GreenAmber)
+    };
 
   public static MovementLocation WatchFor(RiftSide side) =>
-    side == RiftSide.Green ? RiftRouletteLocations.WatchGreen : RiftRouletteLocations.WatchYellow;
+    side switch
+    {
+      RiftSide.Yellow => RiftRouletteLocations.WatchYellow,
+      RiftSide.Center => RiftRouletteLocations.WatchCenter,
+      _ => RiftRouletteLocations.WatchGreen
+    };
 }

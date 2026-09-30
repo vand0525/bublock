@@ -10,7 +10,7 @@ public class SpotsPlugin : DeadworksPluginBase
 
   public override string Name => "Rift Roulette Spots";
 
-  [Command("spots_list", Description = "List every slot's watch and rift start spots: spots_list [green|yellow]")]
+  [Command("spots_list", Description = "List every slot's watch and rift start spots: spots_list [green|yellow|center]")]
   public void CmdSpotsList(CCitadelPlayerController? caller, string side = "")
   {
     AdminCommand.Authorize(caller, SpotsLog, "spots_list");
@@ -20,7 +20,7 @@ public class SpotsPlugin : DeadworksPluginBase
       AdminCommand.Reply(caller, $"[Spots] {line}");
   }
 
-  [Command("spots_walk", Description = "Teleport yourself through each slot spot and log where you land: spots_walk <watch|sapphire|amber> [green|yellow]")]
+  [Command("spots_walk", Description = "Teleport yourself through each slot spot and log where you land: spots_walk <watch|sapphire|amber> [green|yellow|center]")]
   public void CmdSpotsWalk(CCitadelPlayerController? caller, string group, string side = "")
   {
     AdminCommand.Authorize(caller, SpotsLog, "spots_walk");
@@ -37,10 +37,10 @@ public class SpotsPlugin : DeadworksPluginBase
   }
 
   private static IEnumerable<RiftSide> Sides(string side) =>
-    side.Length == 0 ? [RiftSide.Green, RiftSide.Yellow] : [ParseSide(side)];
+    side.Length == 0 ? RiftSides.All : [ParseSide(side)];
 
   private static RiftSide ParseSide(string side) =>
     RiftSides.TryParse(side, out var parsed)
       ? parsed
-      : throw new CommandException($"Unknown side '{side}'. Use green or yellow.");
+      : throw new CommandException($"Unknown side '{side}'. Use green, yellow, or center.");
 }

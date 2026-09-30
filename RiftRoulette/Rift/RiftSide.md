@@ -1,7 +1,7 @@
 # RiftSide
 
-The two rift sides in rotation and their spawn positions. Pure; unit tested
-in `Tests/RiftRoulette.Tests`.
+The three rift sides in rotation and their spawn positions. Pure; unit
+tested in `Tests/RiftRoulette.Tests`.
 
 ## Values
 
@@ -9,24 +9,24 @@ in `Tests/RiftRoulette.Tests`.
 |---|---|
 | `GreenPosition` | (7612, -0.000661, 444) |
 | `YellowPosition` | (-7560, 0, 424) |
-| `MiddlePosition` | (0, 0, 0). Known but never used; not in rotation (inventory §1.8) |
+| `MiddlePosition` | (0, 0, 448). Approx side-rift KOTH height; no map `info_koth_spawn_location` (forced spawn) |
 
 ## Operations
 
-- `Position(side)`: the green or yellow position.
-- `Other(side)`: the opposite side.
-- `Name(side)`: `GREEN` / `YELLOW` (the spelling used in logs).
+- `All`: Green, Yellow, Center.
+- `Position(side)`: the side's spawn position.
+- `Other(side)`: Green ↔ Yellow (binary; used for stream framing mirror).
+- `NextInRotation(spawned, middleEnabled)`: with mid on, Green → Yellow →
+  Center → Green; with mid off, Green ↔ Yellow (Center advances to Green).
+- `Name(side)`: `GREEN` / `YELLOW` / `CENTER` (the spelling used in logs).
 - `TryMatch(position, out side)`: the side whose position is within
   `MatchDistance` (1000 units) of `position`; false (side Green) when
-  neither is. The rifts are about 15,000 units apart. Used to find the side
-  of a spawner on the map.
-- `Nearest(position)`: the closer of the two sides, with no distance limit
-  (ties go to Green). Used for a leftover `citadel_koth_cashin` whose
-  position is not within `MatchDistance`.
-- `TryParse(name, out side)`: `green` or `yellow`, ignoring case and
-  surrounding spaces. Anything else (including `middle`) returns false with
-  `side` set to Green.
+  none match.
+- `Nearest(position)`: the closest of the three sides (ties keep the first
+  found among nearer distances).
+- `TryParse(name, out side)`: `green`, `yellow`, `center` / `middle` /
+  `mid`, ignoring case and surrounding spaces.
 
 ## Invariants
 
-- Only two sides rotate; Middle is never returned by `Position`.
+- Mid spawn Z is an estimate; tune after a live forced spawn.

@@ -50,13 +50,12 @@ never follows a hero spawned less than 5 s ago.
 Camera calls go through `Modules/Spectate`. A hot reload re-seats every
 connected admin (`AdminSeat.Restore`).
 
-Admin roaming: while no participants are connected, the seated admin plays
-an invisible Abrams (`modifier_invis`, 3600 s, put back when it runs out
-and on respawn) at their watch-spot slot in front of the boards, not
-restrained. 2 s after a participant joins they switch to spectating (the
-stream camera); 2 s after the last participant leaves (or turns to stone)
-they roam again. Roaming admins stay seated, so they are never
-participants.
+Admin roaming: manual only (`/seat_roam`). The seated admin becomes an
+invisible Abrams (`modifier_invis`, 3600 s, put back when it runs out
+and on respawn) in front of the welcome sign, not restrained, and may
+roam while players are connected (game chat). `dw_seat_spec` returns to
+spectating. There is no auto switch on join/leave. Roaming admins stay
+seated, so they are never participants.
 
 Join access: `bublock/access.json` on the server (next to `bublock/logs/`)
 holds banned and whitelisted (`allowed`) Steam64 IDs and the open / private
@@ -120,6 +119,8 @@ startup, hot reload, every join and every intermission;
 | `FlexSlots.cs` | Opens every flex slot on both team entities (`m_nFlexSlotsUnlocked = 15`), `Describe` |
 | `AutoRestartRule.cs` | Pure map reload rule: stuck join or 3 h up, only with nobody playing, not within 10 min of a map start (tested) |
 | `AutoRestartService.cs` | Join watch (connect to full connect), stuck joins, the 60 s check and `Server.ChangeLevel` map reload |
+| `MapRefreshRule.cs` | Pure join budget rule: due at 160 fighter-rounds, rounds left (tested) |
+| `MapRefreshService.cs` | Join budget: counts Random mode fighter-rounds, at the budget warns in chat, ends the match at a round end and reloads the map |
 
 ## Public operations
 
@@ -128,7 +129,8 @@ See `LobbyService.md`. Player commands: `/status`, `/commands` (built by
 `/player_kick`, `/player_team`, `/lobby_setup`, `/lobby_flex`, `/pause_allow`, `dw_seat_spec` (console
 only, any time), `/seat_play`, `/seat_roam`, `/seat_status`, `/spec_auto`,
 `/spec_status`, `/spec_reset` (stream camera), `/restart_status`,
-`/restart_now`, `/restart_auto` (automatic map reload).
+`/restart_now`, `/restart_auto` (automatic map reload), `/restart_budget`
+(join budget refresh).
 Access (admin): `/player_ban <slot>`, `/ban_add`, `/ban_remove`,
 `/ban_list`, `/ban_modifier`, `/allow_add`, `/allow_remove`, `/allow_list`,
 `/access_mode [open|private]` (see `AccessPlugin.md`). Catalogued in
@@ -147,7 +149,9 @@ the pause on / off flag (off after every load), blocked and unpause counts,
 and when each player was last told pausing is off. `AutoRestartService`
 holds the joins in progress, the stuck-join count (both cleared at every
 map start), the on / off flag (on after every load) and the map start /
-last reload times. Otherwise reads and releases picks in `Draft/DraftState` and
+last reload times. `MapRefreshService` holds the fighter-rounds since the
+map start, the budget (default 160 after every load) and the pending
+reload flag. Otherwise reads and releases picks in `Draft/DraftState` and
 redraws boards with `Draft/DraftService.RedrawBoards`.
 
 ## Dependencies

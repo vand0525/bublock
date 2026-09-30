@@ -41,6 +41,8 @@ public static class RiftService
   public static RiftSide? CurrentSide { get; private set; }
   public static string LastOutcome { get; private set; } = "none";
 
+  public static bool MiddleEnabled { get; private set; } = true;
+
   public static bool IsRunning => Phase != RiftPhase.Idle;
 
   public static int RoundNumber => _roundNumber;
@@ -87,9 +89,37 @@ public static class RiftService
     return snapshot;
   }
 
+  /// <summary>
+  /// Treat these trooper indexes as already present so WatchOutcome does not
+  /// end the round on them (Rem assist creeps).
+  /// </summary>
+  public static void NoteTroopers(IEnumerable<int> indexes, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    _troopersBeforeRift ??= [];
+    var added = 0;
+
+    foreach (var index in indexes)
+    {
+      if (_troopersBeforeRift.Add(index))
+        added++;
+    }
+
+    Log.WithMode(mode).Debug("Noted troopers Added={Added} Total={Total}", added, _troopersBeforeRift.Count);
+  }
+
   public static void AlternateSide(RiftSide spawnedSide)
   {
-    NextSide = RiftSides.Other(spawnedSide);
+    NextSide = RiftSides.NextInRotation(spawnedSide, MiddleEnabled);
+  }
+
+  public static void SetMiddleEnabled(bool enabled, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    MiddleEnabled = enabled;
+
+    if (!enabled && NextSide == RiftSide.Center && !IsRunning)
+      NextSide = RiftSide.Green;
+
+    Log.WithMode(mode).Info("Mid rift Enabled={Enabled} NextSide={NextSide}", enabled, RiftSides.Name(NextSide));
   }
 
   public static bool SetNextSide(RiftSide side, ExecutionMode mode = ExecutionMode.Clean)
@@ -99,6 +129,12 @@ public static class RiftService
     if (IsRunning)
     {
       log.Info("Next side refused while running Phase={Phase}", Phase);
+      return false;
+    }
+
+    if (side == RiftSide.Center && !MiddleEnabled)
+    {
+      log.Info("Next side refused, mid rift off");
       return false;
     }
 
@@ -191,7 +227,7 @@ public static class RiftService
 
   public static IReadOnlyList<string> DescribeRift() =>
   [
-    $"Phase={Phase} | Current={(CurrentSide is { } side ? RiftSides.Name(side) : "-")} | Next={RiftSides.Name(NextSide)}",
+    $"Phase={Phase} | Current={(CurrentSide is { } side ? RiftSides.Name(side) : "-")} | Next={RiftSides.Name(NextSide)} | Mid={(MiddleEnabled ? "on" : "off")}",
     $"LastOutcome={LastOutcome} | Round={BublockLog.RoundId ?? "-"} | Snapshot={(_troopersBeforeRift == null ? "none" : $"{_troopersBeforeRift.Count} trooper(s)")}"
   ];
 

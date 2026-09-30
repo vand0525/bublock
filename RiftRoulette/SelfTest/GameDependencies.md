@@ -12,10 +12,13 @@ by `SelfTestTests`.
   through the console (`citadel_koth_warning_time`,
   `citadel_koth_early_warning_time`, `citadel_player_override_spawn_time`,
   which `ConVar.Find` may not see), `citadel_active_lane` and
-  `citadel_crate_disable_early_spawn` (may not exist), and the three pause
+  `citadel_crate_disable_early_spawn` (may not exist), the three pause
   convars (`citadel_allow_pausing`, `citadel_allow_pause_in_match`,
   `citadel_pause_allow_in_pregame`, expected 0; a WARN on value in private
-  mode or after `/pause_allow on` is expected); `Fail` otherwise.
+  mode or after `/pause_allow on` is expected), and after engine 6712 /
+  Deadworks v0.5.0 also `maxplayers` and `citadel_hero_demo_unlock_flex_slots`
+  (missing on the live server; seat cap stays host-side, flex unlock is
+  `Lobby/FlexSlots`); `Fail` otherwise.
 - `RequiredEntities`: must exist (`citadel_gamerules`; `citadel_team_manager`,
   the team entities `Lobby/FlexSlots` writes to open the flex slots; the
   name is repeated as a literal because the tests build without Deadworks).

@@ -204,7 +204,7 @@ position, entity index.
 - **Who:** admin
 - **Calls:** `LobbyService.ApplyServerConvars`
 - **Mode:** Debug
-- **Side effects:** re-applies the startup convars and commands (team size 6, max players 13 with 12 shown in the browser (the 13th is the admin seat), KOTH off and warning times 1, override spawn time 1, purchasing anywhere, duplicate heroes, `citadel_hero_demo_unlock_flex_slots 1` and every flex slot opened on both teams (`FlexSlots.UnlockAll`), pause convars from `PauseGuard`). Note `citadel_koth_enabled 0` would close the KOTH gate if run mid-rift
+- **Side effects:** re-applies the startup convars and commands (team size 6, max players 13 with 12 shown in the browser (the 13th is the admin seat), KOTH off and warning times 1, override spawn time 1, purchasing anywhere, duplicate heroes, `citadel_hero_demo_unlock_flex_slots 1` and every flex slot opened on both teams (`FlexSlots.UnlockAll`), `citadel_voice_all_talk 1`, pause convars from `PauseGuard`). Note `citadel_koth_enabled 0` would close the KOTH gate if run mid-rift
 
 #### /lobby_flex
 
@@ -231,7 +231,7 @@ position, entity index.
 - **Calls:** `AdminSeat.Sit` (→ `DraftState.Release`, `RandomModeService.Forget`, `DuelService.Forget`, `RestraintService.Release`, `WatchGuard.Forget`, `StatsService.RefreshBoards`, `AutoStartService.Check`; next tick `ChangeTeam(1, false)` + `MakeObserver()`)
 - **Mode:** Debug
 - **Side effects:** works at any time, also during a rift round. Moves the admin to the spectator side, outside Sapphire and Amber, and removes their hero pawn (observer camera). They stop counting for teams, auto-start, stats, Random mode and 1v1; a running match may auto-end if fewer than 2 players remain, and the teams are evened at the next Random mode intermission. Logs `Admin seat taken, spectating next tick Phase=...`, then `Admin spectating TeamNum=... HeroPawn=... Observer=...`, and a master line
-- **Notes:** `ChangeTeam(1)` alone leaves the hero pawn alive and dropped the admin's client 12-23 s later (two crashes on 2026-09-27); `MakeObserver` prevents that. Spectators cannot type in game chat, so getting back out needs the console. Every admin is seated automatically on connect (use `dw_seat_play` to play). While no participants are connected a seated admin roams as an invisible, unrestrained Abrams in front of the welcome sign (`/seat_roam` forces it) and switches to spectating 2 s after someone joins; `dw_seat_spec` while roaming switches to spectating right away (the next join or leave may roam them again if the server is still empty)
+- **Notes:** `ChangeTeam(1)` alone leaves the hero pawn alive and dropped the admin's client 12-23 s later (two crashes on 2026-09-27); `MakeObserver` prevents that. Spectators cannot type in game chat, so use `/seat_roam` for chat or the console for seat commands. Every admin is seated automatically on connect (use `dw_seat_play` to play, `/seat_roam` to roam). `dw_seat_spec` while roaming switches to spectating right away; mode does not auto-flip on join/leave
 
 #### /seat_play
 
@@ -239,7 +239,7 @@ position, entity index.
 - **Who:** admin. Same target as `dw_seat_spec`: the caller, else the connected player with the admin Steam ID
 - **Calls:** `AdminSeat.Stand` (→ `LobbyService.AdmitPlayer`)
 - **Mode:** Debug
-- **Side effects:** takes the admin out of the seat (ending roaming and its cloak) and admits them like a new connection: smaller team, Skyrunner, watch spot (restrained), Random mode joiner or 1v1 setup souls, auto-start check. 2 s later logs whether a hero spawned (`Admin hero after leaving the seat`, or the Warning `Admin has no hero after leaving the seat`)
+- **Side effects:** takes the admin out of the seat (ending roaming and its cloak) and admits them like a new connection: smaller team, LobbyHero (Abrams), watch spot (restrained), Random mode joiner or 1v1 setup souls, auto-start check. 2 s later logs whether a hero spawned (`Admin hero after leaving the seat`, or the Warning `Admin has no hero after leaving the seat`)
 - **Notes:** refused when not seated, or when 12 players are already playing. Takes no slot argument: a seated admin's console command can arrive without a caller (seen 2026-09-27), so both seat commands fall back to the admin Steam ID
 
 #### /seat_roam
@@ -248,9 +248,8 @@ position, entity index.
 - **Who:** admin. Same target as `dw_seat_spec`: the caller, else the connected player with the admin Steam ID
 - **Calls:** `AdminSeat.RoamNow` (→ `Roam`, or `PlaceAndCloak` when already roaming)
 - **Mode:** Debug
-- **Side effects:** a spectating admin becomes Abrams on Amber and, 2 s later, is teleported straight in front of the welcome sign facing it and cloaked (`modifier_invis`, 3600 s), not restrained. An admin already roaming is teleported back in front of the sign and cloaked again. Still seated, so never a participant. Logs `Admin roaming, server empty` (and a master line) or the placement / cloak lines
-- **Notes:** refused when not seated (`Use dw_seat_spec first`) or when anyone is playing. The next join still switches the admin to spectating 2 s later
-
+- **Side effects:** a spectating admin becomes Abrams on Amber and, 2 s later, is teleported straight in front of the welcome sign facing it and cloaked (`modifier_invis`, 3600 s), not restrained. An admin already roaming is teleported back in front of the sign and cloaked again. Still seated, so never a participant. Allowed while players are connected. Logs `Admin roaming` (and a master line) or the placement / cloak lines
+- **Notes:** refused when not seated (`Use dw_seat_spec first`). Mode stays until `dw_seat_spec` or `/seat_play`
 #### /seat_status
 
 - **Invocation:** chat `/seat_status` | console `dw_seat_status`
@@ -276,7 +275,7 @@ stuck join is logged in `restart-*.log`.
 - **Who:** admin
 - **Calls:** `AutoRestartService.Describe`
 - **Mode:** Debug; read-only
-- **Side effects:** auto on / off, map name and uptime, stuck joins since the map started, joins in progress (one line each: slot, name, seconds connecting, stuck)
+- **Side effects:** auto on / off, map name and uptime, stuck joins since the map started, the join budget line (`MapRefreshService.Describe`: fighter-rounds / budget, rounds left at the last team size, reload pending), joins in progress (one line each: slot, name, seconds connecting, stuck)
 
 #### /restart_now
 
@@ -293,6 +292,21 @@ stuck join is logged in `restart-*.log`.
 - **Calls:** `AutoRestartService.SetEnabled`
 - **Mode:** Debug
 - **Side effects:** turns the automatic reload on or off until the next load or upload (on by default); master line `Auto restart on|off`. Error for any other argument
+
+#### /restart_budget
+
+Join budget refresh (`Lobby/MapRefreshService`): every Random mode round
+adds its fighter count; at a scored round end once the budget is reached
+(default 160 fighter-rounds: round 40 at 2v2, 27 at 3v3, 20 at 4v4, 16 at
+5v5, 14 at 6v6) everyone gets a chat warning, the match ends, the map
+reloads 10 s later, and auto-start begins a fresh match when players are
+back. It keeps the join package under the 512 KB limit.
+
+- **Invocation:** chat `/restart_budget [n]` | console `dw_restart_budget [n]`
+- **Who:** admin
+- **Calls:** no argument: `MapRefreshService.Describe`; a number: `MapRefreshService.SetBudget`
+- **Mode:** Debug
+- **Side effects:** no argument is read-only. A number sets the budget in fighter-rounds until the next load or upload (0 = off); `restart-*.log` line `Join budget set` and a master line. Error for a negative number or text
 
 ### Stream camera (`LobbyPlugin`, `Lobby/StreamCam`)
 
@@ -467,7 +481,7 @@ hero and build (the death is not counted in stats).
 - **Who:** admin
 - **Calls:** `DraftService.Reset`
 - **Mode:** Debug
-- **Side effects:** clears all picks; for every alive player zeroes gold, ability points, and level, moves them to team 2 as Skyrunner (Random mode keeps their team so teams stay even), and teleports them to the draft area next tick; dead players are skipped (Debug line in `draft-*.log`); redraws boards; replies with the number of players reset
+- **Side effects:** clears all picks; for every alive player zeroes gold, ability points, and level, moves them to team 2 as LobbyHero (Abrams) (Random mode keeps their team so teams stay even), and teleports them to the draft area next tick; dead players are skipped (Debug line in `draft-*.log`); redraws boards; replies with the number of players reset
 
 #### /draft_boards
 
@@ -512,16 +526,25 @@ one rift runs at a time.
 - **Who:** admin
 - **Calls:** `RiftService.DescribeRift`
 - **Mode:** Debug; read-only
-- **Side effects:** prints phase (Idle / WaitingForSpawn / Live / Ending), current side, next side, last outcome (none / finished / tied / spawn timed out / cancelled), round id, and the trooper snapshot size
+- **Side effects:** prints phase (Idle / WaitingForSpawn / Live / Ending), current side, next side, mid on/off, last outcome (none / finished / tied / spawn timed out / cancelled), round id, and the trooper snapshot size
 
-#### /rift_next <green|yellow>
+#### /rift_mid <on|off>
+
+- **Invocation:** chat `/rift_mid <on|off>` | console `dw_rift_mid <on|off>`
+- **Who:** admin
+- **Calls:** `RiftService.SetMiddleEnabled`
+- **Mode:** Debug
+- **Side effects:** turns the center rift in the rotation on or off (default on: Green → Yellow → Center → Green; off: Green ↔ Yellow). If mid turns off while idle and the next side was Center, next becomes Green. Replies `Mid rift on/off. Next=...`
+- **Notes:** also accepts `1` / `0`
+
+#### /rift_next <green|yellow|center>
 
 - **Invocation:** chat `/rift_next <side>` | console `dw_rift_next <side>`
 - **Who:** admin
 - **Calls:** `RiftSides.TryParse`, `RiftService.SetNextSide`, `WatchSpot.MoveAllUp`
 - **Mode:** Debug
-- **Side effects:** sets the side of the next `/rift_start`, then moves every live player (restrained) and the boards to the watch spot above that side. Replies `Next rift: <side>. N player(s) moved to the watch spot.` Errors for an unknown side or while a rift is running (the flip on spawn would overwrite it)
-- **Notes:** the middle rift is not selectable
+- **Side effects:** sets the side of the next `/rift_start`, then moves every live player (restrained) and the boards to the watch spot above that side. Replies `Next rift: <side>. N player(s) moved to the watch spot.` Errors for an unknown side, center while mid is off, or while a rift is running (the flip on spawn would overwrite it)
+- **Notes:** `center`, `middle`, and `mid` are accepted aliases when mid is on
 
 #### /rift_cancel
 
@@ -598,7 +621,7 @@ matches by hand.
 - **Who:** admin
 - **Calls:** `MatchService.End` (`RoundFlow.CancelRound` if a rift is running, `RandomModeService.EndMatch` in Random mode, `DraftService.Reset`, `HudService.AnnounceAll`)
 - **Mode:** Debug
-- **Side effects:** stops the countdown; cancels a running rift round (a spawned rift objective stays on the map); in Random mode resets each alive player's hero (clears the build) and forgets teams; clears all picks and returns every alive player to the lobby as Skyrunner with zero gold (same as `/draft_reset`); banner `Match over` / final score (1v1: `Best streaks: A 5, B 3`); resets the score (1v1: clears the streak leaderboard). Replies `Match ended after N round(s). Final: ... M player(s) returned to the lobby.` or `No match is running.`
+- **Side effects:** stops the countdown; cancels a running rift round (a spawned rift objective stays on the map); in Random mode resets each alive player's hero (clears the build) and forgets teams; clears all picks and returns every alive player to the lobby as LobbyHero (Abrams) with zero gold (same as `/draft_reset`); banner `Match over` / final score (1v1: `Best streaks: A 5, B 3`); resets the score (1v1: clears the streak leaderboard). Replies `Match ended after N round(s). Final: ... M player(s) returned to the lobby.` or `No match is running.`
 - **Notes:** with auto-start on (the default), a new match starts again on the next connect or disconnect while 2+ players are on; use `/match_auto off` first to keep it ended
 
 #### /match_auto <on|off>
@@ -632,7 +655,7 @@ matches by hand.
 - **Who:** admin
 - **Calls:** `MatchConfig.TryParseHeroMode`, `MatchService.SetHeroMode` (→ `ShopAccess.Sync`, `DraftService.Reset`; 1v1: `DuelService.EnterSetup` / `Leave`; `ModeBanner`)
 - **Mode:** Debug
-- **Side effects:** sets how heroes are chosen for the next match. `random` (default): each intermission everyone gets a new random hero with one of its top 3 builds, draft pool boards hidden, pick commands off. `draft`: the hero draft with pool boards. `duel` or `1v1`: draft off, free hero switching from the menu, 100,000 souls and level 36 for everyone until `/duel_copy`; leaving 1v1 drops the copied build. Buying anywhere (`citadel_allow_purchasing_anywhere`) is on only in 1v1 setup and off in every other mode (the map shops are disabled by CleanSlate). Resets the lobby (everyone alive back to Skyrunner in the draft area, picks cleared, boards redrawn for the mode). Banner to everyone: `Random mode` / `Random hero and build every round`, `1v1 mode` / `Shop open anywhere - build your hero`, or `Draft mode` / `Pick your heroes`. Replies `Mode set to random. N player(s) returned to the lobby.`
+- **Side effects:** sets how heroes are chosen for the next match. `random` (default): each intermission everyone gets a new random hero with one of its top 3 builds, draft pool boards hidden, pick commands off. `draft`: the hero draft with pool boards. `duel` or `1v1`: draft off, free hero switching from the menu, 100,000 souls and level 36 for everyone until `/duel_copy`; leaving 1v1 drops the copied build. Buying anywhere (`citadel_allow_purchasing_anywhere`) is on only in 1v1 setup and off in every other mode (the map shops are disabled by CleanSlate). Resets the lobby (everyone alive back to LobbyHero (Abrams) in the draft area, picks cleared, boards redrawn for the mode). Banner to everyone: `Random mode` / `Random hero and build every round`, `1v1 mode` / `Shop open anywhere - build your hero`, or `Draft mode` / `Pick your heroes`. Replies `Mode set to random. N player(s) returned to the lobby.`
 - **Notes:** refused during a match (`/match_end` first; with auto-start on and 2+ players, `/match_auto off` before `/match_end`) and when the mode is unchanged; error for an unknown mode. Resets to `random` on plugin reload
 
 #### /match_format <continuous>
@@ -818,7 +841,7 @@ trusted). Debug mode; `[Loadout]` replies. Module commands (game-agnostic).
 - **Calls:** `HeroBuildCatalog.TryParseHero` / `BuildsFor`, `LoadoutService.Swap` (→ `Apply`)
 - **Mode:** Debug (per-ability and per-item detail in `loadout-*.log`)
 - **Side effects:** swaps the player in that slot to the hero (enum name like `inferno` or game name like `Infernus`), then 1 s later shops the build's items in order within the cap (20,000 souls unless `/loadout_cap` changed it) and the item limit for that cap (`ItemSlots`: 9 below 16,000, 10 from 16,000, 11 from 22,000, 12 from 28,000; the HUD still shows 12 slots): every required item plus one random item per optional group; Monster Rounds, Cultist Sacrifice, Golden Goose Egg, Trophy Collector and Healing Rite skipped; upgrades replace their components; unaffordable items skipped (later cheaper ones still bought); with the slots full it sells the build's marked sell-priority items first, else the cheapest and earliest, for pricier ones; only when the limit is 12: empty slots left after the build are filled from its optional items, most expensive first, and a final pass upgrades every held component item (T1 to T2 to T3) while the cap allows. It then resets the hero, sets the level a real hero has at the cap, whatever the items cost (Deadlock's soul table: for example 20,000 souls is level 25 with 4 unlocks and 21 ability points), applies the build's ability order only as far as those unlocks and points pay for (tiers cost 1, 2, 5; it stops at the first step that does not fit), grants the items with imbues, sets souls, ability points and unlocks to 0, and heals to full. The `Loadout applied` line in `loadout-*.log` shows `Value`, `Cap`, `Sold` / `Skipped` counts, `Level`, `Boons`, `Unlocks`, `Points`, `PointsLeft`, `Steps` / `StepsTotal` and the ranks set; `Loadout shopping` names the sold, skipped, filled and upgraded items. Items past 9 need every flex slot open (`Lobby/FlexSlots`, check with `/lobby_flex`). `build` is 1-3; 0 or omitted picks one at random
-- **Notes:** test tool. Errors: empty slot, unknown hero, no builds, bad build number, dead player. In Draft mode, Draft's hero enforcement switches a player without a matching pick back to their pick or Skyrunner, so use it in Random mode or on a player whose pick is that hero
+- **Notes:** test tool. Errors: empty slot, unknown hero, no builds, bad build number, dead player. In Draft mode, Draft's hero enforcement switches a player without a matching pick back to their pick or LobbyHero (Abrams), so use it in Random mode or on a player whose pick is that hero
 
 #### /loadout_show <slot>
 

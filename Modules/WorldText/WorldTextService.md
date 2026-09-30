@@ -21,7 +21,7 @@ feature log (`worldtext-YYYYMMDD.log`, prefix `[<Dll>.WorldText]`) via
 
 | Op | Behavior | Returns |
 |---|---|---|
-| `Create(id, spec, mode)` | Removes any existing board with that id, then `CPointWorldText.Create(text, position, fontSize, worldUnitsPerPx, r, g, b, a, reorientMode)` followed by `Teleport(position, angle, Vector3.Zero)`. Warning if the create returns null | `bool` |
+| `Create(id, spec, mode)` | Removes any existing board with that id, then `CPointWorldText.Create(...)`, stamps `Fullbright = true` and `SetColor(r,g,b,a)` again (engine 6712 boards were solid black from Create keyvalues alone), then `Teleport(position, angle, Vector3.Zero)`. Warning if the create returns null | `bool` |
 | `Update(id, text, mode)` | `SetMessage(text)` on a live board and stores the new text | `false` if no live board with that id |
 | `Remove(id, mode)` | Removes one tracked board | `false` if no live board with that id |
 | `ClearAll(mode)` | Removes **every** `point_worldtext` on the map (tracked or not) and empties the registry | count removed |

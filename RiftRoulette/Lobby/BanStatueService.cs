@@ -93,7 +93,7 @@ public static class BanStatueService
     if (!liveBan)
     {
       var team = TeamBalance.SmallerTeam(Participants.Humans().Select(other => other.TeamNum), Random.Shared);
-      player.SelectHero(Heroes.Skyrunner);
+      player.SelectHero(LobbyService.LobbyHero);
       player.ChangeTeam(team, true);
     }
 
@@ -179,7 +179,6 @@ public static class BanStatueService
 
     StatsService.RefreshBoards(mode);
     AutoStartService.Check(timer, mode, steamId);
-    AdminSeat.SyncSoon(timer, mode);
   }
 
   private static void Hold(CCitadelPlayerController player)

@@ -30,6 +30,9 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
 - `BenchRotation`: a `Modules/Queue` `PlayerQueue`, next to sit out first
   (`BenchRule.Next`).
 - `_benched` (public `Benched`): who sits out this round, or null.
+- `FighterCount`: players with an assignment this round (bench excluded);
+  `MatchService.StartRound` counts it for the join budget
+  (`Lobby/MapRefreshService`).
   `_returning`: last round's bench player, placed into the gap this round.
   `_benchRound`: the `MatchState.Round` the bench was chosen for, so a
   reroll in the same intermission keeps the bench.

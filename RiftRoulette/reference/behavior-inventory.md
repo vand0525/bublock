@@ -58,7 +58,7 @@ command set below follows SourceMod / CounterStrikeSharp conventions.
 
 | Behavior | Source | Owner | Op | Command | Gate | Log |
 |---|---|---|---|---|---|---|
-| Set convars: `citadel_team_size 6`, `maxplayers 12` (now 13: admin seat), `sv_visiblemaxplayers 12`, `citadel_koth_enabled 0`, `citadel_allow_purchasing_anywhere 1`, `citadel_allow_duplicate_heroes 1` (now also `citadel_hero_demo_unlock_flex_slots 1` and `FlexSlots.UnlockAll`: `CCitadelTeam.m_nFlexSlotsUnlocked = 15` on both team entities) | 123–133 | `RiftRoulette/Lobby` | `ApplyServerConvars` | hook `OnStartupServer`; `/lobby_setup` (new) | admin | lobby |
+| Set convars: `citadel_team_size 6`, `maxplayers 12` (now 13: admin seat), `sv_visiblemaxplayers 12`, `citadel_koth_enabled 0`, `citadel_allow_purchasing_anywhere 1`, `citadel_allow_duplicate_heroes 1` (now also `citadel_hero_demo_unlock_flex_slots 1` and `FlexSlots.UnlockAll`: `CCitadelTeam.m_nFlexSlotsUnlocked = 15` on both team entities; `citadel_voice_all_talk 1`) | 123–133 | `RiftRoulette/Lobby` | `ApplyServerConvars` | hook `OnStartupServer`; `/lobby_setup` (new) | admin | lobby |
 | Execute `citadel_koth_warning_time 1`, `citadel_koth_early_warning_time 1`, `citadel_player_override_spawn_time 1` | 129–131 | `RiftRoulette/Lobby` | `ApplyServerConvars` | hook `OnStartupServer` | — | lobby |
 | Draw draft boards next tick after startup | 134 | `RiftRoulette/Draft` (via WorldText) | `RedrawBoards` | hook `OnStartupServer` | — | draft |
 
@@ -66,7 +66,7 @@ command set below follows SourceMod / CounterStrikeSharp conventions.
 
 | Behavior | Source | Owner | Op | Command | Gate | Log |
 |---|---|---|---|---|---|---|
-| On full connect: `SelectHero(Skyrunner)`, `ChangeTeam(2, true)`, teleport to draft (no bot check) | 222–232 | `RiftRoulette/Lobby` (uses Movement) | `AdmitPlayer` | hook `OnClientFullConnect` | — | lobby |
+| On full connect: `SelectHero(LobbyHero)`, `ChangeTeam(2, true)`, teleport to draft (no bot check) | 222–232 | `RiftRoulette/Lobby` (uses Movement) | `AdmitPlayer` | hook `OnClientFullConnect` | — | lobby |
 | On disconnect: release draft selection (log + redraw boards if one existed), then remove hero pawn and controller | 234–257 | `RiftRoulette/Lobby` (calls Draft `ReleaseSelection`) | `RemovePlayer` | hook `OnClientDisconnect` | — | lobby |
 | On `player_spawn` (non-bot): teleport to draft next tick | 203–220 | `RiftRoulette/Lobby` (uses Movement) | `ReturnToDraftOnSpawn` | hook `player_spawn` | — | lobby |
 | On `player_death`: diagnostic line (slot, life state, health, position) | 183–201 | `RiftRoulette/Lobby` | `LogDeath` | hook `player_death` | — | players |
@@ -79,10 +79,10 @@ command set below follows SourceMod / CounterStrikeSharp conventions.
 | Draft state: `SelectedHeroes` set, `PlayerSelections` (Steam ID → hero) | 34–36 | `RiftRoulette/Draft` | `DraftState` | — | — | — |
 | Select a hero: refuse while dead, unknown hero, already selected by caller, hero already drafted, hero not in a pool. On success: record selection, `ChangeTeam` (Sapphire → 3, Amber → 2), `SelectHero`, starting progression next tick, redraw boards, chat confirm | 266–342 | `RiftRoulette/Draft` | `SelectHero` | `/pick <hero>` (archive `/select`) | player | draft |
 | List selected heroes in chat | 344–348 | `RiftRoulette/Draft` | `ListPicks` | `/picks` (archive `/selected`) | player | draft |
-| Unselect: refuse if no selection or dead. Zero gold/AP/level, release, `ChangeTeam(2, true)`, `SelectHero(Skyrunner)`, teleport to draft next tick, redraw boards, chat confirm | 350–400 | `RiftRoulette/Draft` | `UnselectHero` | `/unpick` (archive `/unselect`) | player | draft |
-| Reset draft: clear state; for each **alive** player zero gold/AP/level, team 2, Skyrunner, teleport to draft next tick (dead players skipped and logged); redraw boards | 402–406, 990–1029 | `RiftRoulette/Draft` | `ResetDraft` | `/draft_reset` (archive `/reset`) | **admin** (archive: anyone) | draft |
+| Unselect: refuse if no selection or dead. Zero gold/AP/level, release, `ChangeTeam(2, true)`, `SelectHero(LobbyHero)`, teleport to draft next tick, redraw boards, chat confirm | 350–400 | `RiftRoulette/Draft` | `UnselectHero` | `/unpick` (archive `/unselect`) | player | draft |
+| Reset draft: clear state; for each **alive** player zero gold/AP/level, team 2, LobbyHero, teleport to draft next tick (dead players skipped and logged); redraw boards | 402–406, 990–1029 | `RiftRoulette/Draft` | `ResetDraft` | `/draft_reset` (archive `/reset`) | **admin** (archive: anyone) | draft |
 | Caller pawn state (slot, life state, alive, health, max health, position, entity index). Replies to the caller and logs it (the archive printed it to the server console only) | 408–430 | `RiftRoulette/Lobby` | `DescribePlayer` | `/status` (archive `/state`) | player | players |
-| Hero enforcement on `player_hero_changed`: expected hero = selection or Skyrunner. If wrong hero and alive → `SelectHero(expected)`; if dead → skip and log. If right hero and no selection → zero gold/AP/level | 137–181 | `RiftRoulette/Draft` | `EnforceHero` | hook `player_hero_changed` | — | draft |
+| Hero enforcement on `player_hero_changed`: expected hero = selection or LobbyHero. If wrong hero and alive → `SelectHero(expected)`; if dead → skip and log. If right hero and no selection → zero gold/AP/level | 137–181 | `RiftRoulette/Draft` | `EnforceHero` | hook `player_hero_changed` | — | draft |
 | Starting progression: if still selected, set gold to 25,000. **Quirk to preserve:** the archive log line says "25,000 souls and 24 AP" but only gold is set | 973–988 | `RiftRoulette/Draft` | `GiveStartingProgression` | — (called by `SelectHero`) | — | draft |
 | Release selection helper (used by disconnect and kick) | 242–252, 474–478 | `RiftRoulette/Draft` | `ReleaseSelection` | — | — | draft |
 | `CanChangeHero`: pawn exists and `IsAlive` | 1058–1064 | `RiftRoulette/Draft` | `CanChangeHero` | — | — | — |
@@ -124,7 +124,7 @@ Preserve this sequence exactly (see `.rules` §8).
 |---|---|---|---|---|---|---|
 | Find `citadel_gamerules`, read `CCitadelGameRulesProxy.m_pGameRules`; abort with a log line if missing or null | 533–553 | `RiftRoulette/Rift` | `ResolveGameRules` | — | — | rift |
 | Schema accessors `m_vNextKothLocation`, `m_timeNextKothSpawnWindowTime`, `m_timeNextKothSpawn`, `m_timeKothGiveUp` | 555–573 | `RiftRoulette/Rift` | `RiftSchema` | — | — | — |
-| Pick side from `_nextRiftIsGreen` (green (7612, -0.000661, 444) / yellow (-7560, 0, 424)); middle rift (0,0,0) defined but unused | 44–56, 575–582 | `RiftRoulette/Rift` | `NextSide` | `/rift_next <green\|yellow>` (new) | admin | rift |
+| Pick side from rotation (green (7612, -0.000661, 444) / yellow (-7560, 0, 424) / center (0, 0, 448)); mid on by default (`/rift_mid`) | 44–56, 575–582 | `RiftRoulette/Rift` | `NextSide`, `NextInRotation` | `/rift_next <green\|yellow\|center>`, `/rift_mid` | admin | rift |
 | Snapshot existing spawner and trooper entity indexes (scoping only; see `.rules` §8 on EntityIndex) | 584–596 | `RiftRoulette/Rift` | `SnapshotRiftEntities` | — | — | rift |
 | Configure: koth off, set location, window 0, spawn 0, koth on | 603–611 | `RiftRoulette/Rift` | `ConfigureNextRift` | — | — | rift |
 | Wait each tick for a new `citadel_item_koth_spawner`; timeout at run 320 → park scheduler, koth off, log, side unchanged | 614–880 | `RiftRoulette/Rift` | `WaitForSpawner` | — | — | rift |
@@ -140,7 +140,7 @@ Preserve this sequence exactly (see `.rules` §8).
 | Item | Source | Decision |
 |---|---|---|
 | `LogPlayerLifeStates` (never called) | 1031–1056 | Body of `/player_list` (Lobby) |
-| `MiddleRiftPosition` (never used) | 54–56 | Registered constant in Rift; not in rotation |
+| `MiddlePosition` (center spawn, z 448) | — | In rotation when `MiddleEnabled`; `/rift_mid` toggles |
 | Unused `using` lines (`System.ComponentModel`, `X509Certificates`, `Microsoft.VisualBasic`) | 1–5 | Not carried over |
 | `[Rift Wars]` log prefix | 533–873 | Logs use `[RiftRoulette.Rift]` |
 | "24 AP" log text with no AP grant | 985–987 | Behavior kept (gold only); the log message states what actually happens |
@@ -226,10 +226,11 @@ column); `new` = no archive equivalent.
 | `/pause_allow [on\|off]` | — | Lobby | `PauseGuard.Describe` / `SetAllowed` | Show whether players can pause, or turn pausing on / off (every load sets it from private mode) | new |
 | `dw_seat_spec` | — | Lobby | `AdminSeat.Sit` | Admin (caller, else the admin Steam ID) to the spectator seat, outside teams. Console only (`ConsoleOnly`); any time (spectator team + `MakeObserver`). Admins are seated on every connect | new |
 | `/seat_play` | — | Lobby | `AdminSeat.Stand` | Admin (caller, else the admin Steam ID) out of the seat and onto a team (console: `dw_seat_play`, no arguments) | new |
-| `/seat_roam` | — | Lobby | `AdminSeat.RoamNow` | Seated admin roams now as invisible Abrams in front of the welcome sign, or is put back there if already roaming; only while nobody plays (console: `dw_seat_roam`) | new |
-| `/restart_status` | — | Lobby | `AutoRestartService.Describe` | Auto restart on / off, map uptime, stuck and in-progress joins | new |
+| `/seat_roam` | — | Lobby | `AdminSeat.RoamNow` | Seated admin roams now as invisible Abrams in front of the welcome sign, or is put back there if already roaming; allowed while players are connected (console: `dw_seat_roam`) | new |
+| `/restart_status` | — | Lobby | `AutoRestartService.Describe` | Auto restart on / off, map uptime, stuck and in-progress joins, join budget | new |
 | `/restart_now` | — | Lobby | `AutoRestartService.Restart` | Reload the map now (`changelevel`); every connected client reconnects by itself | new |
 | `/restart_auto <on\|off>` | — | Lobby | `AutoRestartService.SetEnabled` | Automatic map reload (stuck join or 3 h up, nobody playing) on or off until the next load | new |
+| `/restart_budget [n]` | — | Lobby | `MapRefreshService.Describe` / `SetBudget` | Join budget refresh: show, or set fighter-rounds before the round-end map reload (default 160, 0 = off) until the next load | new |
 | `/seat_status` | — | Lobby | `AdminSeat.Describe` | Player slots, admin seat, `maxplayers` | new |
 | `/spec_auto <on\|off>` | — | Lobby | `StreamCam.SetAuto` | Automatic stream camera on or off for the seated admin (default on; console `dw_spec_auto`) | new |
 | `/spec_status` | — | Lobby | `StreamCam.Describe` | Who is on camera, fly cam, view angle read, saved framing per side | new |
@@ -254,7 +255,8 @@ column); `new` = no archive equivalent.
 | `/draft_note [text]` | — | Draft | `WelcomeNoteStore.Set` + `RedrawBoards` | Set or clear the saved note under the welcome board | new |
 | `/rift_start` | `/koth` | Rift | `RunRift` | Run the known-good rift sequence | archive |
 | `/rift_status` | — | Rift | `DescribeRift` | Next side, phase (idle / waiting for spawn / live / ending), last outcome | new |
-| `/rift_next <green\|yellow>` | — | Rift | `SetNextSide`, `WatchSpot.MoveAllUp` | Force the next side; players and boards move above it | new |
+| `/rift_next <green\|yellow\|center>` | — | Rift | `SetNextSide`, `WatchSpot.MoveAllUp` | Force the next side; players and boards move above it | new |
+| `/rift_mid <on\|off>` | — | Rift | `SetMiddleEnabled` | Include or skip the center rift in the rotation (default on) | new |
 | `/rift_cancel` | — | Rift | `CancelRift` | End our round early: stop the wait/watch sequences, park the scheduler, KOTH off, return alive players to the watch spot, remove rift troopers. The rift objective already on the map stays (no known safe way to remove it) | new |
 | `/rift_cleanup` | — | Rift | `CleanupRiftTroopers` | Remove every rift trooper on the map | new |
 | `/spots_list [green\|yellow]` | — | Round | `SpotCheck.Describe` | Every slot's watch, Sapphire and Amber spot | new |

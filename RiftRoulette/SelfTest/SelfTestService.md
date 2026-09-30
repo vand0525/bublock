@@ -19,7 +19,7 @@ and an Error with stack; the other areas still run):
 | RiftPoints | nearest `info_koth_spawn_location` to each `RiftSides` position within 100 | none found / too far: WARN |
 | Heroes | `HeroBuildCatalog.SkippedHeroIds` empty; build data fetched within 14 days | WARN |
 | Items | `ItemInfo.Exists` for every item in `hero-builds.json` (build items, category items, imbue items, components); banned items still exist | missing build items: FAIL (first 8 listed); banned gone: WARN |
-| Floor | `Trace.Ray` from 32 above to 96 below each per-slot spot (`SlotSpots`) for both watch anchors and the four fight anchors, mask `Solid | PlayerClip | WorldGeometry` | any spot without floor: WARN |
+| Floor | `Trace.Ray` from 32 above to 96 below each per-slot spot (`SlotSpots`) for both watch anchors and the four fight anchors, mask `InteractionLayer.Solid | PlayerClip | WorldGeometry` (Deadworks v0.5.0 renamed `MaskTrace` → `InteractionLayer`) | any spot without floor: WARN |
 | Players | per playing human: SteamID non-zero, pawn present, `HeroID` defined | SteamID 0: FAIL; else WARN |
 | Events | `EventCounters.Count` > 0 for each `GameDependencies.Events` name | WARN (normal right after an upload) |
 

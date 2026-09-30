@@ -3,27 +3,28 @@
 ## Purpose
 
 The rift itself: force the game's KOTH (rift) to spawn on the next side
-(green / yellow alternating), park the natural scheduler, watch for a finish
-(troopers spawn) or a tie (the cash-in disappears), then after 3 seconds end
-the round and remove the rift's troopers. Known-good sequence; do not
-reorder. Moving players is not done here: the caller hands in those steps
-(`RiftRoundSteps`), supplied by `Round/RoundFlow`.
+(green → yellow → center when mid is on, else green ↔ yellow), park the
+natural scheduler, watch for a finish (troopers spawn) or a tie (the cash-in
+disappears), then after 3 seconds end the round and remove the rift's
+troopers. Known-good sequence; do not reorder. Moving players is not done
+here: the caller hands in those steps (`RiftRoundSteps`), supplied by
+`Round/RoundFlow`.
 
 ## Files
 
 | File | Role |
 |---|---|
-| `RiftSide.cs` | `RiftSide` enum, side positions, name, parse, flip, side from a position (pure) |
+| `RiftSide.cs` | `RiftSide` enum, side positions, name, parse, flip, rotation, side from a position (pure) |
 | `RiftWatch.cs` | Per-tick outcome decision: waiting / cash-in appeared / finished / tied (pure) |
 | `RiftGameRules.cs` | Gamerules pointer, KOTH schema accessors, configure and park steps |
-| `RiftService.cs` | State and ops: `RunRift`, `AlternateSide`, `SetNextSide`, `CleanupRiftTroopers`, `ScheduleLateSweeps`, `EndRound`, `CancelRift`, `DescribeRift`; `RiftRoundSteps` |
+| `RiftService.cs` | State and ops: `RunRift`, `AlternateSide`, `SetNextSide`, `NoteTroopers`, `CleanupRiftTroopers`, `ScheduleLateSweeps`, `EndRound`, `CancelRift`, `DescribeRift`; `RiftRoundSteps` |
 | `RiftRoundResult.cs` | `RiftOutcome` strings and `RiftRoundResult(Outcome, Side, WinnerTeam)` handed to the `RoundEnded` step (pure) |
 | `RiftPlugin.cs` | Admin command wrappers |
 
 ## Public operations
 
 See `RiftService.md`. Admin commands: `/rift_start`, `/rift_status`,
-`/rift_next`, `/rift_cancel`,
+`/rift_mid`, `/rift_next`, `/rift_cancel`,
 `/rift_cleanup`. Catalogued in `reference/admin-commands.md`. No player
 commands. `/rift_start` and `/rift_cancel` go through `Round/RoundFlow`.
 

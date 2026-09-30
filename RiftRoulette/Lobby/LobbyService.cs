@@ -18,6 +18,12 @@ public static class LobbyService
 
   private static readonly Logger PlayersLog = BublockLog.For("Players");
 
+  /// <summary>
+  /// Placeholder hero for lobby / draft reset / statue rejoin. Skyrunner
+  /// (70) stopped spawning after engine 6712 (asset playable=False).
+  /// </summary>
+  public const Heroes LobbyHero = Heroes.Atlas;
+
   public const double OrphanSweepSeconds = 1.0;
 
   public static void ApplyServerConvars(ExecutionMode mode = ExecutionMode.Clean)
@@ -31,6 +37,7 @@ public static class LobbyService
     Server.ExecuteCommand("citadel_player_override_spawn_time 1");
     ServerConVars.TrySet("citadel_allow_duplicate_heroes", 1, LobbyLog);
     ServerConVars.TrySet("citadel_hero_demo_unlock_flex_slots", 1, LobbyLog);
+    ServerConVars.TrySet("citadel_voice_all_talk", 1, LobbyLog);
     FlexSlots.UnlockAll(mode);
     ShopAccess.Sync(mode);
     PauseGuard.FollowAccess(mode);
@@ -51,7 +58,7 @@ public static class LobbyService
     var team = TeamBalance.SmallerTeam(others, Random.Shared);
 
     FlexSlots.UnlockAll(mode);
-    player.SelectHero(Heroes.Skyrunner);
+    player.SelectHero(LobbyHero);
     player.ChangeTeam(team, true);
     WatchSpot.SendUp(player, mode);
 
@@ -64,7 +71,6 @@ public static class LobbyService
 
     StatsService.RefreshBoards(mode);
     AutoStartService.CheckSoon(timer, mode);
-    AdminSeat.SyncSoon(timer, mode);
     return team;
   }
 
@@ -95,7 +101,6 @@ public static class LobbyService
 
     StatsService.RefreshBoards(mode);
     AutoStartService.Check(timer, mode, steamId);
-    AdminSeat.SyncSoon(timer, mode);
   }
 
   // A pawn left without its client keeps queuing network changes the server cannot send

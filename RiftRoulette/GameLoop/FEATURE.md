@@ -22,6 +22,17 @@ every load); with it off, admins use `/match_start` / `/match_end`.
 In 1v1 mode it counts the players in the 1v1 queue instead of everyone
 connected, and also checks after every queue join / leave.
 
+## Join budget refresh
+
+Every Random mode round adds its fighter count to
+`Lobby/MapRefreshService`. At a scored round end, once 160 fighter-rounds
+have been played since the map started (the join package nears the
+512 KB limit; see `Lobby/MapRefreshRule.md`), `OnRoundEnded` does not
+schedule the next round: everyone gets a chat warning that they will
+reconnect, the match ends, and the map reloads 10 s later. Auto-start is
+held until the reload, then starts a fresh match (score and souls reset)
+once 2 humans are back.
+
 ## Configuration
 
 `MatchConfig`: hero mode `random` (default), `draft`, or `duel` (`1v1`),
@@ -104,6 +115,8 @@ to random / continuous on every DLL load), and `AutoStartService.Enabled`
 - `Stats/StatsService` (reset at start, round counts) and
   `Balance/BalanceService` (reset at start, round results).
 - `Modules/Hud` for banners.
+- `Lobby/MapRefreshService` (join budget count, round-end refresh, holds
+  auto-start while a reload is pending).
 
 ## Lifecycle vs commands
 

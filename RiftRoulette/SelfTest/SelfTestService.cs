@@ -27,7 +27,8 @@ public static class SelfTestService
 
   public const double LiveCheckSeconds = 1.0;
 
-  private const MaskTrace FloorMask = MaskTrace.Solid | MaskTrace.PlayerClip | MaskTrace.WorldGeometry;
+  private const InteractionLayer FloorMask =
+    InteractionLayer.Solid | InteractionLayer.PlayerClip | InteractionLayer.WorldGeometry;
 
   private static readonly Logger Log = BublockLog.For("SelfTest");
 
@@ -223,6 +224,9 @@ public static class SelfTestService
         ? new CheckResult("RiftPoints", RiftSides.Name(side), CheckStatus.Pass, $"map point {distance:0} units away")
         : new CheckResult("RiftPoints", RiftSides.Name(side), CheckStatus.Warn, $"nearest map point {nearest} is {distance:0} units away; update RiftSide");
     }
+
+    // Mid has no info_koth_spawn_location; forced spawn uses MiddlePosition.
+    yield return new CheckResult("RiftPoints", RiftSides.Name(RiftSide.Center), CheckStatus.Warn, $"forced at {RiftSides.MiddlePosition} (no map KOTH point)");
   }
 
   private static IEnumerable<CheckResult> CheckHeroes()
@@ -264,10 +268,13 @@ public static class SelfTestService
     {
       (RiftRouletteLocations.WatchGreen, true),
       (RiftRouletteLocations.WatchYellow, true),
+      (RiftRouletteLocations.WatchCenter, true),
       (RiftRouletteLocations.GreenSapphire, false),
       (RiftRouletteLocations.GreenAmber, false),
       (RiftRouletteLocations.YellowSapphire, false),
-      (RiftRouletteLocations.YellowAmber, false)
+      (RiftRouletteLocations.YellowAmber, false),
+      (RiftRouletteLocations.CenterSapphire, false),
+      (RiftRouletteLocations.CenterAmber, false)
     };
 
     foreach (var (anchor, watch) in groups)

@@ -10,7 +10,7 @@ stays game-agnostic.
 
 | Member | Doc |
 |---|---|
-| `RiftRouletteLocations.Draft`, `WatchGreen`, `WatchYellow`, `GreenSapphire`, `GreenAmber`, `YellowSapphire`, `YellowAmber`, `All` | `RiftRouletteLocations.md` |
+| `RiftRouletteLocations.Draft`, `WatchGreen`, `WatchYellow`, `WatchCenter`, `GreenSapphire`, `GreenAmber`, `YellowSapphire`, `YellowAmber`, `CenterSapphire`, `CenterAmber`, `All` | `RiftRouletteLocations.md` |
 | `RiftRouletteLocations.RegisterAll()` | `RiftRouletteLocations.md` |
 
 ## Invariants

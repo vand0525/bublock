@@ -43,6 +43,10 @@ public static class AutoStartService
 
     switch (action)
     {
+      case AutoStartAction.Start when MapRefreshService.Pending:
+        log.Debug("Auto-start waiting for the refresh reload Humans={Humans}", humans);
+        return AutoStartAction.None;
+
       case AutoStartAction.Start when MatchConfig.IsDuel && !DuelService.HasSnapshot:
         log.Debug("Auto-start waiting for a 1v1 build Humans={Humans}", humans);
         return AutoStartAction.None;
@@ -84,7 +88,7 @@ public static class AutoStartService
   }
 
   private static bool IsWaiting(int humans) =>
-    Enabled && !MatchService.State.IsRunning && humans > 0 && humans < MinPlayers;
+    Enabled && !MatchService.State.IsRunning && !MapRefreshService.Pending && humans > 0 && humans < MinPlayers;
 
   public static void CheckSoon(ITimer timer, ExecutionMode mode = ExecutionMode.Clean) =>
     timer.Once(JoinCheckDelaySeconds.Seconds(), () => Check(timer, mode));

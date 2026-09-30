@@ -38,6 +38,7 @@ logger.
 | Member | Meaning |
 |---|---|
 | `NextSide` | Side of the next rift; starts Green |
+| `MiddleEnabled` | When true (default), rotation includes Center; `/rift_mid` toggles it |
 | `Phase` | see `RiftPhase` |
 | `CurrentSide` | Side of the running rift, or null |
 | `LastOutcome` | `none`, `finished`, `tied`, `spawn timed out`, or `cancelled` |
@@ -55,13 +56,15 @@ logger.
 | `GoLive` (private) | `ParkScheduler`; `CurrentSide` = the side; `steps.MoveTeamsToRift(side)`, log moved, log give-up (Debug), `AlternateSide(side)`, log next side / window / spawn, phase `Live`, start `WatchOutcome`. The watch spot (`WatchSpotRule`) follows `CurrentSide` | — |
 | `WatchOutcome` (private, per tick) | `RiftWatch.Observe(new trooper?, cash-in exists?)`. `CashinAppeared`: Debug VData name / handle / give-up. `Finished`: log with `TrooperIndex` and `TrooperTeam` (the new trooper's `TeamNum`, kept as the winner team), phase `Ending`, `EndRound` after 3 s. `Tied`: same without a winner | — |
 | `SnapshotRiftEntities()` | Stores the trooper snapshot; returns the spawner and cash-in snapshot | `RiftSnapshot` |
-| `AlternateSide(spawnedSide)` | `NextSide` = the other side (only after a successful spawn) | — |
-| `SetNextSide(side, mode)` | Refused while running (the flip on spawn would overwrite it) | `bool` |
+| `NoteTroopers(indexes, mode)` | Adds trooper entity indexes to the pre-rift snapshot so `WatchOutcome` ignores them (Rem assist creeps). Safe when no snapshot is open yet (creates an empty set) | — |
+| `AlternateSide(spawnedSide)` | `NextSide` = `RiftSides.NextInRotation(spawnedSide, MiddleEnabled)` (only after a successful spawn) | — |
+| `SetMiddleEnabled(enabled, mode)` | Sets `MiddleEnabled`; if mid turns off and idle `NextSide` is Center, advances to Green. Logs `Mid rift Enabled=` | — |
+| `SetNextSide(side, mode)` | Refused while running, or Center while mid is off | `bool` |
 | `CleanupRiftTroopers(mode)` | Removes every `npc_trooper` on the map (lane troopers are off, CleanSlate `citadel_trooper_spawn_enabled 0`, so every one is a rift trooper). Debug line `Rift troopers removed` | count |
 | `ScheduleLateSweeps(timer, mode)` | `CleanupRiftTroopers` again 5 s and 10 s later (`LateSweepSeconds`), each skipped (Debug) while a rift is running; Information `Late rift troopers removed Removed= Delay=` when it removed any. The cash-in wave keeps spawning after the 3 s end timer, and those troopers used to stay forever | — |
 | `EndRound(outcome, steps, timer, mode, winnerTeam = null)` | Log ending; `steps.ReturnPlayersToDraft()`; `CleanupRiftTroopers`; `ScheduleLateSweeps`; log round ended; round finishes (`RoundEnded` with the winner team) | — |
 | `CancelRift(steps, timer, mode)` | Idle: refuse. Else cancel the three handles; `ParkScheduler` (or just KOTH off if gamerules cannot be resolved); `steps.ReturnPlayersToDraft()`; clean up troopers and `ScheduleLateSweeps`; round finishes as `cancelled`. Side is unflipped if the rift never spawned. A rift objective that already spawned stays on the map (verified in game); only our round ends. The game spawns no new rift while it is up; the next round's `WaitForSpawner` adopts it by its `citadel_koth_cashin` | reply line |
-| `DescribeRift()` | Phase, current side, next side, last outcome, round id, snapshot size | 2 lines |
+| `DescribeRift()` | Phase, current side, next side, mid on/off, last outcome, round id, snapshot size | 2 lines |
 
 ## Dangerous constraints
 

@@ -60,7 +60,7 @@ more than 50 units or 3 degrees since the last update
    and still in fly cam means `Placed`. Nothing else that update.
 2. Candidates: during a spotlight, only the statue once its hero pawn is
    alive and at least `FollowGrace` (5 s) old (a rejoining statue gets a
-   new Skyrunner pawn). Otherwise participants (`Participants.Humans()`)
+   new lobby pawn). Otherwise participants (`Participants.Humans()`)
    with a live hero pawn spawned at least `FollowGrace` ago, shuffled;
    only the fighting (not restrained) ones if there are any.
 3. Candidates: follow.
