@@ -562,3 +562,11 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Verified fact (code):** `RiftSide.Center`, `MiddlePosition = (0,0,448)` (side-rift height under mid floor; raised to 576 briefly then reverted — capture under mid was uneven), `NextInRotation` with `MiddleEnabled` (default on, `/rift_mid`), `WatchCenter` + N/S `CenterSapphire` / `CenterAmber` toward team bases.
 - **Used as:** `/rift_next center`, `/rift_mid on|off`, `/spots_walk … center`.
 - **Link / path:** `Bublock/RiftRoulette/Rift/RiftSide.cs`, `Locations/RiftRouletteLocations.cs`
+
+### 2026-10-01 — The disconnect hook still lists the leaving player; clients drop on a game update
+
+- **Why hard / useful:** a leave that ends the match (auto-start, under 2 humans) resets every participant's hero inside `OnClientDisconnect`, and nothing in the plugin logs shows the failure; only the engine console does.
+- **Verified fact (engine console, 18:08:28 UTC):** after `RemovePlayer` removed gsu's pawns and controller, `Players.GetAll()` still returned his controller in the same hook. `DraftService.Reset` called `SelectHero` on it (`[deadworks] [WRN] SelectHeroInternal skipped: pawn ... has no live controller (m_hController is stale)`), and its next-tick `WatchSpot.SendUp` threw (`[TimerEngine] NextTick callback threw: Object reference not set to an instance of an object.`).
+- **Same session:** all three clients dropped within 15 s with no server error: two `NETWORK_DISCONNECT_DISCONNECT_BY_USER`, one keepalive timeout. The GC had asked for version 6728 since 17:06 UTC while the server ran 6726 (`Engine version check. Forcing true. GC wants: 6728`); most likely the client update closing the game, not the plugin.
+- **Used as:** `Participants.MarkLeaving` at the start of `LobbyService.RemovePlayer`, cleared in `OnClientConnect`; `Participants.Humans()` leaves the leaver out, so the match-end hero resets, send-ups and boards skip them (the HUD banner module still uses `Players.GetAll()`; a banner to the leaver is harmless).
+- **Link / path:** `Bublock/RiftRoulette/Lobby/Participants.cs`, `Bublock/logs/engine/console-crash.log` (pulled by hand)

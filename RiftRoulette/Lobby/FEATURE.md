@@ -102,7 +102,7 @@ startup, hot reload, every join and every intermission;
 | `TeamBalance.cs` | `Even` (fewest moves to even teams) and `SmallerTeam` (pure, tested) |
 | `CommandList.cs` | Player command list for `/commands` (reflects `[Command]` attributes) |
 | `AboutText.cs` | Chat lines for `/about`: the mode and betting (pure, tested) |
-| `Participants.cs` | Who plays: connected players minus bots, seated admins and statues |
+| `Participants.cs` | Who plays: connected players minus bots, players whose disconnect is being handled, seated admins and statues |
 | `AdminSeatRule.cs` | Pure seat rules: cap 12, `CanConnect`, `CanStand`, `SeatOnJoin` (every admin; tested) |
 | `AdminSeat.cs` | Admin seat service: connect gate, `Sit`, `Stand`, `Forget`, `Restore` (after hot reload), `Describe` |
 | `StreamCam.cs` | Automatic stream camera for seated admins: follow, killer cut, park at the saved framing, save the admin's framing |

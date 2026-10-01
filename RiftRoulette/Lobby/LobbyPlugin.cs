@@ -86,6 +86,7 @@ public class LobbyPlugin : DeadworksPluginBase
   public override bool OnClientConnect(ClientConnectEvent args)
   {
     EventCounters.Hit("client_connect");
+    Participants.ClearLeaving(args.SteamId);
     var allowed = AccessService.AllowConnect(args.SteamId, args.Name) && AdminSeat.AllowConnect(args.SteamId, args.Name);
     AutoRestartService.OnConnect(args, allowed);
     return allowed;

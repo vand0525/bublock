@@ -224,8 +224,9 @@ Assume the git repo is rooted at `Bublock/`.
   then `MakeObserver()` on the next tick. Never spectate with `ChangeTeam`
   alone (the hero pawn stays and the client drops). Every player list the game uses
   (teams, heroes, rounds, stats, auto-start) comes from
-  `Lobby/Participants.Humans()`, which leaves out bots and seated admins;
-  never build a new ad-hoc human list. A seated admin defaults to
+  `Lobby/Participants.Humans()`, which leaves out bots, seated admins and
+  a player whose disconnect is being handled (the disconnect hook still
+  lists the leaving controller); never build a new ad-hoc human list. A seated admin defaults to
   spectating on connect (`AdminSeat.Sit`). Roaming is manual
   (`/seat_roam` / `dw_seat_roam`): Abrams on Amber facing the welcome sign
   (`WatchLayout.WelcomeFront`; back to the watch slot if they fall), not

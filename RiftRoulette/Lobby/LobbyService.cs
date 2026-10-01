@@ -77,6 +77,7 @@ public static class LobbyService
   public static void RemovePlayer(CCitadelPlayerController player, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
     var steamId = player.PlayerSteamId;
+    Participants.MarkLeaving(steamId);
     AdminSeat.Forget(steamId);
     BanStatueService.Forget(steamId);
     RestraintService.Forget(steamId);
