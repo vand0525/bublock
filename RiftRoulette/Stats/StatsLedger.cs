@@ -11,6 +11,8 @@ public sealed record PlayerStats(int Kills, int Deaths, int Assists)
 
 public readonly record struct Participant(ulong SteamId, int Team);
 
+public sealed record DeathCredit(int Team, IReadOnlyList<ulong> Assisters);
+
 public sealed class StatsLedger
 {
   private readonly Dictionary<ulong, PlayerStats> _stats = [];
@@ -19,7 +21,7 @@ public sealed class StatsLedger
 
   public PlayerStats Get(ulong steamId) => _stats.GetValueOrDefault(steamId, PlayerStats.Empty);
 
-  public int? RecordDeath(Participant victim, Participant? attacker, IEnumerable<Participant> assisters)
+  public DeathCredit? RecordDeath(Participant victim, Participant? attacker, IEnumerable<Participant> assisters)
   {
     Bump(victim.SteamId, deaths: 1);
 
@@ -28,17 +30,19 @@ public sealed class StatsLedger
 
     Bump(killer.SteamId, kills: 1);
 
-    var credited = new HashSet<ulong> { killer.SteamId, victim.SteamId };
+    var seen = new HashSet<ulong> { killer.SteamId, victim.SteamId };
+    var credited = new List<ulong>();
 
     foreach (var assister in assisters)
     {
-      if (assister.SteamId == 0 || assister.Team != killer.Team || !credited.Add(assister.SteamId))
+      if (assister.SteamId == 0 || assister.Team != killer.Team || !seen.Add(assister.SteamId))
         continue;
 
       Bump(assister.SteamId, assists: 1);
+      credited.Add(assister.SteamId);
     }
 
-    return killer.Team;
+    return new DeathCredit(killer.Team, credited);
   }
 
   public PlayerStats Total(IEnumerable<ulong> steamIds) =>

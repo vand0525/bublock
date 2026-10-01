@@ -29,8 +29,11 @@ public static class BoardLayout
   public static WorldTextSpec Welcome(string text) =>
     Place(text, WatchLayout.WelcomeOffset, WelcomeAngle, WelcomeColor, 3f);
 
-  public static WorldTextSpec Note(string text) =>
+  public static WorldTextSpec Hint(string text) =>
     Place(text, WatchLayout.WelcomeOffset - new Vector3(0f, 0f, NoteDrop), WelcomeAngle, WelcomeColor, NoteFontScale);
+
+  public static WorldTextSpec Note(string text) =>
+    Place(text, WatchLayout.WelcomeOffset - new Vector3(0f, 0f, 2f * NoteDrop), WelcomeAngle, WelcomeColor, NoteFontScale);
 
   public static WorldTextSpec Side(int team, string text) =>
     team == RiftRouletteTeams.Sapphire

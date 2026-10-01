@@ -8,12 +8,14 @@ calls; unit tested in `Tests/RiftRoulette.Tests`.
 - `PlayerStats(Kills, Deaths, Assists)`: `Empty`, `Score` (K + A - D, used
   by auto-balance to rank players), `Line` (`"K / D / A"`).
 - `Participant(SteamId, Team)`: a player at the moment of the death.
+- `DeathCredit(Team, Assisters)`: the team credited with a kill and the
+  Steam IDs that got an assist for it (in the order given, each once).
 
 ## Operations
 
 | Op | Behavior | Returns |
 |---|---|---|
-| `RecordDeath(victim, attacker?, assisters)` | Victim always gets a death. The attacker gets a kill only if present, non-zero, not the victim, and on another team (suicides, world / trooper kills, and team kills give no kill). Assisters get an assist only if non-zero, on the attacker's team, and not the attacker or victim; each at most once | team credited with the kill, or `null` |
+| `RecordDeath(victim, attacker?, assisters)` | Victim always gets a death. The attacker gets a kill only if present, non-zero, not the victim, and on another team (suicides, world / trooper kills, and team kills give no kill). Assisters get an assist only if non-zero, on the attacker's team, and not the attacker or victim; each at most once | `DeathCredit` (killer's team and the credited assisters), or `null` when no kill is credited |
 | `Get(steamId)` | Stats, or `Empty` | `PlayerStats` |
 | `Total(steamIds)` | Sum of those players' stats | `PlayerStats` |
 | `Reset()` | Clears everything | — |

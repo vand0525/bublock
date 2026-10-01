@@ -101,6 +101,7 @@ startup, hot reload, every join and every intermission;
 | `RiftRouletteTeams.cs` | Team numbers and names (Amber 2, Sapphire 3) |
 | `TeamBalance.cs` | `Even` (fewest moves to even teams) and `SmallerTeam` (pure, tested) |
 | `CommandList.cs` | Player command list for `/commands` (reflects `[Command]` attributes) |
+| `AboutText.cs` | Chat lines for `/about`: the mode and betting (pure, tested) |
 | `Participants.cs` | Who plays: connected players minus bots, seated admins and statues |
 | `AdminSeatRule.cs` | Pure seat rules: cap 12, `CanConnect`, `CanStand`, `SeatOnJoin` (every admin; tested) |
 | `AdminSeat.cs` | Admin seat service: connect gate, `Sit`, `Stand`, `Forget`, `Restore` (after hot reload), `Describe` |
@@ -125,7 +126,7 @@ startup, hot reload, every join and every intermission;
 ## Public operations
 
 See `LobbyService.md`. Player commands: `/status`, `/commands` (built by
-`CommandList`). Admin commands: `/player_list`, `/player_info`,
+`CommandList`), `/about` (`AboutText`). Admin commands: `/player_list`, `/player_info`,
 `/player_kick`, `/player_team`, `/lobby_setup`, `/lobby_flex`, `/pause_allow`, `dw_seat_spec` (console
 only, any time), `/seat_play`, `/seat_roam`, `/seat_status`, `/spec_auto`,
 `/spec_status`, `/spec_reset` (stream camera), `/restart_status`,
@@ -188,4 +189,4 @@ redraws boards with `Draft/DraftService.RedrawBoards`.
 
 - Hooks run in Clean mode (lifecycle).
 - Admin commands run the same ops in Debug mode.
-- `/status` and `/commands` are player commands (Clean).
+- `/status`, `/commands` and `/about` are player commands (Clean).

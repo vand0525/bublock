@@ -13,7 +13,7 @@ public static class RiftSides
 {
   public static readonly Vector3 GreenPosition = new(7612f, -0.000661f, 444f);
   public static readonly Vector3 YellowPosition = new(-7560f, 0f, 424f);
-  // Approx side-rift KOTH height; no map info_koth_spawn_location at mid — tune after a live spawn.
+  // Below mid floor (576) so the objective hangs into the undercroft; side-rift height.
   public static readonly Vector3 MiddlePosition = new(0f, 0f, 448f);
 
   public const float MatchDistance = 1000f;

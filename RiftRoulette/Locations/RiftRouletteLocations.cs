@@ -45,16 +45,16 @@ public static class RiftRouletteLocations
     new Vector3(-8259.562500f, -2134.312500f, 248.031250f),
     new Vector3(0.000000f, 80.875000f, 0.000000f));
 
-  // Approximate mid-lane fight starts: green fight offsets scaled toward origin (tune with /spots_walk).
+  // Mid fight: N/S toward each team's base (Sapphire +y, Amber -y), facing mid — not E/W side lanes.
   public static readonly MovementLocation CenterSapphire = new(
     "center_sapphire",
-    new Vector3(600f, 1800f, 248.062500f),
-    new Vector3(0.000000f, -100.343750f, 0.000000f));
+    new Vector3(0f, 2000f, 384f),
+    new Vector3(0.000000f, -90.000000f, 0.000000f));
 
   public static readonly MovementLocation CenterAmber = new(
     "center_amber",
-    new Vector3(-600f, -2100f, 248.031250f),
-    new Vector3(0.000000f, 80.718750f, 0.000000f));
+    new Vector3(0f, -2000f, 384f),
+    new Vector3(0.000000f, 90.000000f, 0.000000f));
 
   public static IReadOnlyList<MovementLocation> All { get; } =
   [

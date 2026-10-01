@@ -40,7 +40,7 @@ command set below follows SourceMod / CounterStrikeSharp conventions.
 - **Targets are slot numbers** (`<slot>`).
 - **Help.** Deadworks' built-in `dw_help` is a console command only (no chat
   form); it lists every non-hidden command, admin ones included. Players get
-  `/commands` in chat. Every command sets `Description`. Do not name a
+  `/commands` in chat, and `/about` for how the mode and betting work. Every command sets `Description`. Do not name a
   command `help`.
 - **Admin gate.** Every admin command checks `AdminAuth`. The archive
   commands `/reset`, `/kick`, `/koth`, `/test` and four DevTools commands
@@ -204,6 +204,7 @@ column); `new` = no archive equivalent.
 | `/heroes` | — | Draft | `ListPools` | Both pools with which heroes are still available (Random mode: "heroes are random") | new |
 | `/status` | `/state` | Lobby | `DescribePlayer` | Your slot, team, hero, pick, life state, health, position; replies to you | archive |
 | `/commands` | — | Lobby | `CommandList.PlayerCommands` | Chat list of the player commands (`dw_help` is console-only) | new |
+| `/about` | — | Lobby | `AboutText.Lines` | How the mode and betting work, in chat | new |
 | `/score` | — | GameLoop | `MatchService.DescribeScore` | Match round and score in chat (1v1: best-streak leaderboard) | new |
 | `/stats` | — | Stats | `StatsService.Describe` | Your match K / D / A and both team totals | new |
 | `/bet <sapphire\|amber>` (or type the team name in chat) | — | Betting | `BettingService.TryBet` | Bet all your souls on the next round (own team only while fighting) | new |

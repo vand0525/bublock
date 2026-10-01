@@ -498,7 +498,7 @@ hero and build (the death is not counted in stats).
 - **Who:** admin
 - **Calls:** `WelcomeNoteStore.Set`, then `DraftService.RedrawBoards`
 - **Mode:** Debug
-- **Side effects:** sets the note under the welcome board (`draft.note`; words joined with spaces, `\n` is a line break) and saves it to `bublock/welcomenote.txt` on the server, then redraws the boards; no text clears the note. Replies `[Draft] Note set: <preview>` or `[Draft] Note cleared`
+- **Side effects:** sets the note under the welcome board, below the fixed `/about` hint line (`draft.note`; words joined with spaces, `\n` is a line break) and saves it to `bublock/welcomenote.txt` on the server, then redraws the boards; no text clears the note. Replies `[Draft] Note set: <preview>` or `[Draft] Note cleared`
 - **Notes:** the note survives redraws, uploads and restarts; edits to `draft.welcome` made with `/wt_update` do not
 
 ### Rift (`RiftPlugin`, in RiftRoulette.dll)
@@ -816,7 +816,7 @@ chat line `Auto-balance: A <-> B`.
 ### Betting (`BettingPlugin`, in RiftRoulette.dll)
 
 Round betting runs by itself in Random mode (see `user-commands.md` `/bet`):
-100 starting souls, 100 per kill, all-in bets on the next round during the
+100 starting souls, 100 per kill, 50 per assist, all-in bets on the next round during the
 intermission, a win doubles the stake, a `BETTING` board on the empty side
 of the watch spot. Admin (`AdminCommand.Authorize` with the `Betting` log;
 server console trusted). `[Betting]` replies.

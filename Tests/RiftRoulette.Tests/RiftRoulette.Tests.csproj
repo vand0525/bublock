@@ -37,6 +37,7 @@
     <Compile Include="..\..\RiftRoulette\Draft\DraftBoardText.cs" Link="RiftRoulette\Draft\DraftBoardText.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\RiftRouletteTeams.cs" Link="RiftRoulette\Lobby\RiftRouletteTeams.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\CommandList.cs" Link="RiftRoulette\Lobby\CommandList.cs" />
+    <Compile Include="..\..\RiftRoulette\Lobby\AboutText.cs" Link="RiftRoulette\Lobby\AboutText.cs" />
     <Compile Include="..\..\RiftRoulette\Locations\RiftRouletteLocations.cs" Link="RiftRoulette\Locations\RiftRouletteLocations.cs" />
     <Compile Include="..\..\RiftRoulette\Rift\RiftSide.cs" Link="RiftRoulette\Rift\RiftSide.cs" />
     <Compile Include="..\..\RiftRoulette\Rift\RiftWatch.cs" Link="RiftRoulette\Rift\RiftWatch.cs" />

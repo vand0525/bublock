@@ -17,14 +17,15 @@ board always sits toward the map edge.
 |---|---|
 | `Origin` | Current board anchor (watch spot position) |
 | `Welcome(text)` | `WorldTextSpec`: white, scale 3, angle (0, -90, 90), origin + `WatchLayout.WelcomeOffset` (500, 500, 300) |
-| `Note(text)` | Like `Welcome` but `NoteDrop` (120) units lower and scale `NoteFontScale` (1.2): a line under the RIFT ROULETTE sign (first guess, tune in game) |
+| `Hint(text)` | Like `Welcome` but `NoteDrop` (120) units lower and scale `NoteFontScale` (1.2): the first line under the RIFT ROULETTE sign (the fixed `/about` hint) |
+| `Note(text)` | Like `Hint` but `2 x NoteDrop` (240) units below the sign: the second line, under the hint (the admin note). First guess, tune in game; a multi-line hint would overlap it |
 | `Side(team, text)` | Sapphire: (0,150,255), angle (0, 360, 90), origin + (-90, 500, 0). Any other team: Amber, (255,70,0), angle (0, 180, 90), origin + (90, -500, 0). Scale `SideFontScale` (0.8) |
 | `Back(text)` | White, angle (0, 90, 90), origin + (-500, 0, 0), scale `SideFontScale`: the empty side behind the watch view, between the side boards, facing the watch spot (board yaw = wall direction - 90, like the side boards). First guess, tune in game |
 
 ## Used by
 
-- `DraftService.RedrawBoards`: welcome board, the note under it, and the
-  Draft mode pool boards.
+- `DraftService.RedrawBoards`: welcome board, the hint and the note under
+  it, and the Draft mode pool boards.
 - `Stats/StatsService.RefreshBoards`: the Random mode stats boards, in the
   same spots as the pool boards.
 - `Betting/BettingService.RefreshBoard`: the Random mode betting board at

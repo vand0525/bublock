@@ -49,6 +49,26 @@ public class BetBookTests
   }
 
   [Fact]
+  public void An_assist_adds_half_a_kill()
+  {
+    var book = new BetBook();
+
+    Assert.Equal(150, book.AwardAssist(1));
+    Assert.Equal(250, book.AwardKill(1));
+    Assert.Equal(300, book.AwardAssist(1));
+  }
+
+  [Fact]
+  public void An_assist_during_a_bet_adds_unstaked_chips()
+  {
+    var book = new BetBook();
+    book.Place(1, S, Both);
+
+    Assert.Equal(50, book.AwardAssist(1));
+    Assert.Equal(150, book.Total(1));
+  }
+
+  [Fact]
   public void Place_stakes_every_chip()
   {
     var book = new BetBook();

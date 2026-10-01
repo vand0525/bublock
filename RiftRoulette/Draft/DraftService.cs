@@ -22,6 +22,8 @@ public static class DraftService
 
   public const string DuelModeReply = "1v1 mode - pick a hero from the hero menu; the admin copies one build onto both players.";
 
+  public const string AboutHint = "Type /about to learn how to play and bet";
+
   public static string NoDraftReply => MatchConfig.IsDuel ? DuelModeReply : RandomModeReply;
 
   private static readonly Logger Log = BublockLog.For("Draft");
@@ -232,6 +234,7 @@ public static class DraftService
     WorldTextService.ClearAll(mode);
 
     WorldTextService.Create("draft.welcome", BoardLayout.Welcome("RIFT ROULETTE"), mode);
+    WorldTextService.Create("draft.hint", BoardLayout.Hint(AboutHint), mode);
 
     var note = WelcomeNoteStore.Text;
 

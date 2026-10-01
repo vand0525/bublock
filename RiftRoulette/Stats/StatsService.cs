@@ -75,18 +75,20 @@ public static class StatsService
       attacker == null ? null : ToParticipant(attacker),
       assisters.Select(ToParticipant));
 
-    if (credited is { } team)
+    if (credited != null)
     {
-      BalanceService.RecordKill(team);
+      BalanceService.RecordKill(credited.Team);
       BettingService.OnKill(attacker!.PlayerSteamId, mode);
+      BettingService.OnAssists(credited.Assisters, mode);
     }
 
     log.Debug(
       victim.ToPlayerRef(),
-      "Death recorded Attacker={Attacker} Assisters={Assisters} CreditedTeam={CreditedTeam}",
+      "Death recorded Attacker={Attacker} Assisters={Assisters} CreditedTeam={CreditedTeam} CreditedAssists={CreditedAssists}",
       attacker?.PlayerName ?? "-",
       string.Join(",", assisters.Select(assister => assister.PlayerName)),
-      credited is { } number ? RiftRouletteTeams.Name(number) : "-");
+      credited != null ? RiftRouletteTeams.Name(credited.Team) : "-",
+      credited?.Assisters.Count ?? 0);
 
     RefreshBoards(mode);
   }

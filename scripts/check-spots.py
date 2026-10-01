@@ -39,10 +39,13 @@ LOD = 0
 GROUPS = [
     ("watch", "watch_green", False),
     ("watch", "watch_yellow", False),
+    ("watch", "watch_center", False),
     ("fight", "green_sapphire", True),
     ("fight", "green_amber", True),
     ("fight", "yellow_sapphire", True),
     ("fight", "yellow_amber", True),
+    ("fight", "center_sapphire", True),
+    ("fight", "center_amber", True),
 ]
 
 

@@ -2,7 +2,9 @@
 
 Unit tests for `RiftRoulette/Betting/BetBook`.
 
-- New players have the starting souls; a kill adds 100 each time.
+- New players have the starting souls; a kill adds 100 each time, an assist
+  50.
+- An assist during an open bet adds unstaked souls (the stake is unchanged).
 - `TrySpend` takes unstaked souls only; a short balance, a zero amount, or
   souls staked on a bet are refused and nothing changes.
 - A bet stakes every soul (souls 0, total unchanged).

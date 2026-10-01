@@ -1,5 +1,6 @@
 using Bublock.Shared;
 using DeadworksManaged.Api;
+using RiftRoulette.Betting;
 using RiftRoulette.Draft;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Round;
@@ -186,6 +187,13 @@ public class LobbyPlugin : DeadworksPluginBase
       PlayerChat.Send(player, line);
 
     PlayerChat.Send(player, CommandList.Footer);
+  }
+
+  [Command("about", Description = "How Rift Roulette and betting work")]
+  public void CmdAbout(CCitadelPlayerController player)
+  {
+    foreach (var line in AboutText.Lines(BettingService.LingerSeconds))
+      PlayerChat.Send(player, line);
   }
 
   [Command("player_list", Description = "List every player with team, hero, pick, and health")]

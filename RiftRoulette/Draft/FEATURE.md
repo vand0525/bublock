@@ -16,9 +16,11 @@ In Random mode the stats boards (`Stats/`) take the pool boards'
 spots (`BoardLayout`), `EnforceHero` defers to the Random mode hero guard,
 and `Reset` keeps each player's team.
 
-Note board: `RedrawBoards` draws the `WelcomeNoteStore` note (`draft.note`)
-under the welcome board whenever it is not empty. It moves with the welcome
-board (watch spot) and is redrawn with it. `/draft_note` sets it; the text
+Hint and note boards: right under the welcome board `RedrawBoards` always
+draws the fixed hint `Type /about to learn how to play and bet`
+(`draft.hint`, `DraftService.AboutHint`). Under the hint it draws the
+`WelcomeNoteStore` note (`draft.note`) whenever it is not empty. Both move
+with the welcome board (watch spot) and are redrawn with it. `/draft_note` sets it; the text
 is saved in `bublock/welcomenote.txt` on the server, so it survives
 uploads and restarts.
 

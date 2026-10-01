@@ -94,7 +94,7 @@ public static class BettingService
     {
       BetResult.Placed => $"Bet {BetBoardText.Format(bet.Stake)} souls on {RiftRouletteTeams.Name(team)}.",
       BetResult.Changed => $"Bet moved: {BetBoardText.Format(bet.Stake)} souls on {RiftRouletteTeams.Name(team)}.",
-      BetResult.NoChips => "No souls - get a kill.",
+      BetResult.NoChips => "No souls - get a kill or an assist.",
       _ => $"You're fighting for {RiftRouletteTeams.Name(allowed[0])} - you can only bet on your team."
     };
   }
@@ -106,6 +106,22 @@ public static class BettingService
 
     var chips = Book.AwardKill(killerId);
     Log.WithMode(mode).Debug("Kill chips awarded SteamId={SteamId} Chips={Chips}", killerId, chips);
+    RefreshBoard(mode);
+  }
+
+  public static void OnAssists(IReadOnlyCollection<ulong> assisterIds, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    if (!Active || assisterIds.Count == 0)
+      return;
+
+    var log = Log.WithMode(mode);
+
+    foreach (var steamId in assisterIds)
+    {
+      var chips = Book.AwardAssist(steamId);
+      log.Debug("Assist chips awarded SteamId={SteamId} Chips={Chips}", steamId, chips);
+    }
+
     RefreshBoard(mode);
   }
 

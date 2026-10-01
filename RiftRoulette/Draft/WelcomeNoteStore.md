@@ -1,6 +1,7 @@
 # WelcomeNoteStore
 
-Keeps the note drawn under the welcome board (`draft.note`) in
+Keeps the note drawn under the welcome board, below the fixed `/about`
+hint (`draft.note`), in
 `bublock/welcomenote.txt` on the server (next to `bublock/logs/` and
 `access.json`), so it survives redraws, uploads (hot reloads) and restarts.
 

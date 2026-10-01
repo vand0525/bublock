@@ -559,6 +559,6 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 ### 2026-09-30 — Mid rift enabled (approximate)
 
 - **Why hard / useful:** Center spawn lived at `(0,0,0)` and was excluded from rotation; watch/fight/boards only knew Green/Yellow.
-- **Verified fact (code):** `RiftSide.Center`, `MiddlePosition = (0,0,448)`, `NextInRotation` with `MiddleEnabled` (default on, `/rift_mid`), `WatchCenter` + approximate `CenterSapphire` / `CenterAmber`, boards via green `WatchLayout` offsets on the center watch anchor.
+- **Verified fact (code):** `RiftSide.Center`, `MiddlePosition = (0,0,448)` (side-rift height under mid floor; raised to 576 briefly then reverted — capture under mid was uneven), `NextInRotation` with `MiddleEnabled` (default on, `/rift_mid`), `WatchCenter` + N/S `CenterSapphire` / `CenterAmber` toward team bases.
 - **Used as:** `/rift_next center`, `/rift_mid on|off`, `/spots_walk … center`.
 - **Link / path:** `Bublock/RiftRoulette/Rift/RiftSide.cs`, `Locations/RiftRouletteLocations.cs`

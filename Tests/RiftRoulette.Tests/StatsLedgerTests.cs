@@ -15,9 +15,11 @@ public class StatsLedgerTests
   {
     var ledger = new StatsLedger();
 
-    var team = ledger.RecordDeath(Victim, Killer, [Helper]);
+    var credit = ledger.RecordDeath(Victim, Killer, [Helper]);
 
-    Assert.Equal(RiftRouletteTeams.Sapphire, team);
+    Assert.NotNull(credit);
+    Assert.Equal(RiftRouletteTeams.Sapphire, credit.Team);
+    Assert.Equal([Helper.SteamId], credit.Assisters);
     Assert.Equal(new PlayerStats(0, 1, 0), ledger.Get(Victim.SteamId));
     Assert.Equal(new PlayerStats(1, 0, 0), ledger.Get(Killer.SteamId));
     Assert.Equal(new PlayerStats(0, 0, 1), ledger.Get(Helper.SteamId));
@@ -50,8 +52,9 @@ public class StatsLedgerTests
   {
     var ledger = new StatsLedger();
 
-    ledger.RecordDeath(Victim, Killer, [Helper, Helper, Killer, Victim, Enemy]);
+    var credit = ledger.RecordDeath(Victim, Killer, [Helper, Helper, Killer, Victim, Enemy]);
 
+    Assert.Equal([Helper.SteamId], credit!.Assisters);
     Assert.Equal(1, ledger.Get(Helper.SteamId).Assists);
     Assert.Equal(0, ledger.Get(Killer.SteamId).Assists);
     Assert.Equal(0, ledger.Get(Enemy.SteamId).Assists);

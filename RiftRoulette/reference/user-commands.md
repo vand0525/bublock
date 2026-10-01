@@ -71,8 +71,17 @@ console) and replies in the caller's chat.
 - **Who:** players, in game (`LobbyPlugin`)
 - **Calls:** `CommandList.PlayerCommands` (reads the `[Command]` attributes in RiftRoulette.dll)
 - **Mode:** Clean; read-only; not logged
-- **Side effects:** one chat line per player command (`/name - Description`, sorted: `/bet`, `/commands`, `/heroban`, `/heroes`, `/pick`, `/picks`, `/queue`, `/reserve`, `/score`, `/souls`, `/stats`, `/status`, `/unpick`, `/unqueue`), then `Full list: dw_help in console`
+- **Side effects:** one chat line per player command (`/name - Description`, sorted: `/about`, `/bet`, `/commands`, `/heroban`, `/heroes`, `/pick`, `/picks`, `/queue`, `/reserve`, `/score`, `/souls`, `/stats`, `/status`, `/unpick`, `/unqueue`), then `Full list: dw_help in console`
 - **Notes:** Deadworks' built-in `dw_help` only runs from the game console (there is no chat `/help`) and lists every visible command, admin ones included; `/commands` gives players a chat list of just their commands
+
+### /about
+
+- **Invocation:** chat `/about` or `!about` | console `dw_about`
+- **Who:** players, in game (`LobbyPlugin`)
+- **Calls:** `AboutText.Lines(BettingService.LingerSeconds)`
+- **Mode:** Clean; read-only; not logged
+- **Side effects:** seven chat lines to the caller: Rift Roulette gives everyone a random hero with one of its top builds every round; teams stay even and with an odd count one player sits out; betting souls are separate from in-game souls (start 100, 100 per kill, 50 per assist); bet everything on the next round by typing `sapphire` / `amber` or `/bet`, open between rounds until 10 s into the round, a win doubles the stake; fighters bet only on their own team, the player sitting out on either; `/reserve <hero>` (1,000, next 3 rounds) and `/heroban <hero>` (1,000, one round, both teams); `/souls` and `/commands`
+- **Notes:** not named `help` (Deadworks' `dw_help` is the console command list). The numbers come from the betting constants, so the text follows them
 
 ### /score
 
@@ -117,7 +126,7 @@ console) and replies in the caller's chat.
 - **Calls:** `BettingService.TryBet` → `BetBook.Place`
 - **Mode:** Clean; logged in `betting-*.log`
 - **Side effects:** bets all your souls on that team for the next round; typing the other team before the round starts moves the bet. Players in the coming round's fight may only bet on their own team; the player sitting out may bet on either. Chat reply: `Bet 300 souls on Amber.` At round end: `You won 600 souls (now 600).`, `You lost 300 souls (now 0).`, or `No result - your 300 souls are back.` (tie, cancel, match end). The betting board updates
-- **Notes:** everyone starts a match with 100 souls and earns 100 per kill. Betting opens at the start of the intermission (5 s) and closes 10 s into the round (`Betting is closed - it opens again after this round.`); with 0 souls: `No souls - get a kill.` A plain team-name chat message outside a Random match is ignored; `/bet` then replies that betting is only open during a Random mode match
+- **Notes:** everyone starts a match with 100 souls and earns 100 per kill and 50 per assist (added even while a bet is open). Betting opens at the start of the intermission (5 s) and closes 10 s into the round (`Betting is closed - it opens again after this round.`); with 0 souls: `No souls - get a kill or an assist.` A plain team-name chat message outside a Random match is ignored; `/bet` then replies that betting is only open during a Random mode match
 
 ### /souls
 

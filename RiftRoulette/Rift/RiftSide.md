@@ -9,7 +9,7 @@ tested in `Tests/RiftRoulette.Tests`.
 |---|---|
 | `GreenPosition` | (7612, -0.000661, 444) |
 | `YellowPosition` | (-7560, 0, 424) |
-| `MiddlePosition` | (0, 0, 448). Approx side-rift KOTH height; no map `info_koth_spawn_location` (forced spawn) |
+| `MiddlePosition` | (0, 0, 448). Side-rift KOTH height (below mid floor ~576); no map `info_koth_spawn_location` |
 
 ## Operations
 

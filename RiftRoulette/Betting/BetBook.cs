@@ -23,6 +23,7 @@ public sealed class BetBook
 {
   public const int StartingChips = 100;
   public const int ChipsPerKill = 100;
+  public const int ChipsPerAssist = 50;
   public const int PayoutMultiplier = 2;
 
   private readonly Dictionary<ulong, int> _chips = [];
@@ -40,6 +41,8 @@ public sealed class BetBook
   public bool TryGetBet(ulong steamId, out Bet bet) => _bets.TryGetValue(steamId, out bet);
 
   public int AwardKill(ulong steamId) => _chips[steamId] = Chips(steamId) + ChipsPerKill;
+
+  public int AwardAssist(ulong steamId) => _chips[steamId] = Chips(steamId) + ChipsPerAssist;
 
   // Staked chips are not in the balance, so they can't be spent.
   public bool TrySpend(ulong steamId, int amount)

@@ -34,7 +34,7 @@ server. Never deployed to the server.
   `StatsBoardText.cs`, `RiftRoulette/Balance/BalanceTracker.cs`,
   `BalancePicker.cs`, `RiftRoulette/Betting/BetBook.cs`, `BetBoardText.cs`) rather than referencing the plugin DLL: pick
   bookkeeping, hero pool team lookup, draft board / pool text, team name
-  parsing, the `/commands` list filter, rift sides, the rift outcome
+  parsing, the `/commands` list filter, the `/about` text, rift sides, the rift outcome
   decision, each side's team starts (each team on its own half) and watch
   spot, which side the watch spot is above, the yellow board layout and
   watch view angles, the below-the-watch-spot line, the 1v1 winner / loser

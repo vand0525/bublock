@@ -157,7 +157,7 @@ Assume the git repo is rooted at `Bublock/`.
 - Betting (Random mode, `Betting/BettingService`): 100 starting betting
   souls (a separate balance, not in-game souls; player text always says
   souls, never chips; they never add fighting power), 100 per credited
-  kill, all-in bets on the next round from the start of the intermission
+  kill, 50 per credited assist, all-in bets on the next round from the start of the intermission
   (default 5 s, `MatchService.DefaultIntermissionSeconds`)
   until 10 s into the round (`BettingService.LingerSeconds`), a win doubles
   the stake, no result refunds. Fighters bet only on their own team. Bets
@@ -493,8 +493,9 @@ Names follow SourceMod / CounterStrikeSharp conventions. Target command set:
 - Commands that act on another player take a slot number (`<slot>`).
 - No aliases: only the names in `behavior-inventory.md` §4 exist.
 - Help: the built-in `dw_help` is console-only and lists every visible
-  command; players use `/commands` in chat. Every command sets
-  `Description`. Never name a command `help`.
+  command; players use `/commands` in chat, and `/about` explains the
+  mode and betting. Every command sets `Description`. Never name a
+  command `help`.
 - Every admin command checks `AdminAuth`. A null caller (server console) is
   trusted.
 - Command names must not collide across Bublock DLLs (they register

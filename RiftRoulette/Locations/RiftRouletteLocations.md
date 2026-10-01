@@ -19,12 +19,12 @@ board.
 | `GreenAmber` | `green_amber` | (7025.65625, -2088.59375, 256.03125) | (0, 80.71875, 0) |
 | `YellowSapphire` | `yellow_sapphire` | (-7072.65625, 2209.53125, 248.03125) | (0, -102.15625, 0) |
 | `YellowAmber` | `yellow_amber` | (-8259.5625, -2134.3125, 248.03125) | (0, 80.875, 0) |
-| `CenterSapphire` | `center_sapphire` | (600, 1800, 248.0625) | (0, -100.34375, 0) |
-| `CenterAmber` | `center_amber` | (-600, -2100, 248.03125) | (0, 80.71875, 0) |
+| `CenterSapphire` | `center_sapphire` | (0, 2000, 384) | (0, -90, 0) |
+| `CenterAmber` | `center_amber` | (0, -2000, 384) | (0, 90, 0) |
 
 Sapphire (team 3, base at +y) starts at +y on both lanes, Amber (team 2,
-base at -y) at -y. Center fight starts are approximate (green offsets
-scaled toward origin); tune with `/spots_walk` and `scripts/check-spots.py`.
+base at -y) at -y. Center fight starts sit on the N/S axis toward each
+team's base (facing mid) — not the mid bridge and not the E/W side lanes.
 
 ## Operations
 
