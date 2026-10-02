@@ -301,7 +301,7 @@ public class LobbyPlugin : DeadworksPluginBase
     AdminCommand.Reply(caller, $"[Lobby] {AdminSeat.Sit(player, Timer, ExecutionMode.Debug)}");
   }
 
-  [Command("seat_play", Description = "Admin seat: move the admin from spectator onto a team (console: dw_seat_play)")]
+  [Command("seat_play", Description = "Admin seat: move the admin from spectating or roaming onto a team (console: dw_seat_play)")]
   public void CmdSeatPlay(CCitadelPlayerController? caller)
   {
     AdminCommand.Authorize(caller, LobbyLog, "seat_play");
@@ -310,7 +310,7 @@ public class LobbyPlugin : DeadworksPluginBase
     AdminCommand.Reply(caller, $"[Lobby] {AdminSeat.Stand(player, Timer, ExecutionMode.Debug)}");
   }
 
-  [Command("seat_roam", Description = "Admin seat: roam as invisible Abrams in front of the welcome sign while nobody plays (console: dw_seat_roam)")]
+  [Command("seat_roam", Description = "Admin seat: roam as invisible Abrams in front of the welcome sign, from spectating or playing (console: dw_seat_roam)")]
   public void CmdSeatRoam(CCitadelPlayerController? caller)
   {
     AdminCommand.Authorize(caller, LobbyLog, "seat_roam");

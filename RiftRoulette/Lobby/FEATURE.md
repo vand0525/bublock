@@ -53,7 +53,8 @@ never follows a hero spawned less than 5 s ago.
 Camera calls go through `Modules/Spectate`. A hot reload keeps each
 admin's mode, read back from the pawn (`AdminSeat.Restore`).
 
-Admin roaming: manual only (`/seat_roam`). The seated admin becomes an
+Admin roaming: manual only (`/seat_roam`, from spectating or playing; a
+playing admin leaves their team first). The admin becomes an
 invisible Abrams (`modifier_invis`, 3600 s, put back when it runs out
 and on respawn) in front of the welcome sign, not restrained, and may
 roam while players are connected (game chat). `dw_seat_spec` returns to

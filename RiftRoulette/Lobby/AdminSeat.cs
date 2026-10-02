@@ -138,7 +138,16 @@ public static class AdminSeat
     var steamId = player.PlayerSteamId;
 
     if (!Seated.Contains(steamId))
-      return $"{player.PlayerName} is not in the admin seat. Use dw_seat_spec first.";
+    {
+      var pawn = player.GetHeroPawn();
+
+      if (pawn != null && !pawn.IsAlive)
+        return $"{player.PlayerName} is dead. Roam after the respawn.";
+
+      Sit(player, timer, mode);
+      Roam(player, timer, mode);
+      return $"{player.PlayerName} left the team and is roaming (invisible Abrams in front of the welcome sign in 2 s).";
+    }
 
     if (Roaming.Contains(steamId))
     {

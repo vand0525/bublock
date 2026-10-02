@@ -231,7 +231,7 @@ Assume the git repo is rooted at `Bublock/`.
   a player whose disconnect is being handled (the disconnect hook still
   lists the leaving controller); never build a new ad-hoc human list. A seated admin
   spectates (`AdminSeat.Sit`). Roaming is manual
-  (`/seat_roam` / `dw_seat_roam`): Abrams on Amber facing the welcome sign
+  (`/seat_roam` / `dw_seat_roam`, from spectating or playing): Abrams on Amber facing the welcome sign
   (`WatchLayout.WelcomeFront`; back to the watch slot if they fall), not
   restrained, invisible (`modifier_invis`, one 3600 s modifier put back
   when it runs out and on respawn / reload, never every frame), and works

@@ -227,7 +227,7 @@ column); `new` = no archive equivalent.
 | `/pause_allow [on\|off]` | — | Lobby | `PauseGuard.Describe` / `SetAllowed` | Show whether players can pause, or turn pausing on / off (every load sets it from private mode) | new |
 | `dw_seat_spec` | — | Lobby | `AdminSeat.Sit` | Admin (caller, else the admin Steam ID) to the spectator seat, outside teams. Console only (`ConsoleOnly`); any time (spectator team + `MakeObserver`). Admins are seated on every connect | new |
 | `/seat_play` | — | Lobby | `AdminSeat.Stand` | Admin (caller, else the admin Steam ID) out of the seat and onto a team (console: `dw_seat_play`, no arguments) | new |
-| `/seat_roam` | — | Lobby | `AdminSeat.RoamNow` | Seated admin roams now as invisible Abrams in front of the welcome sign, or is put back there if already roaming; allowed while players are connected (console: `dw_seat_roam`) | new |
+| `/seat_roam` | — | Lobby | `AdminSeat.RoamNow` | Spectating or playing admin roams now as invisible Abrams in front of the welcome sign, or is put back there if already roaming; allowed while players are connected (console: `dw_seat_roam`) | new |
 | `/restart_status` | — | Lobby | `AutoRestartService.Describe` | Auto restart on / off, map uptime, stuck and in-progress joins, join budget | new |
 | `/restart_now` | — | Lobby | `AutoRestartService.Restart` | Reload the map now (`changelevel`); every connected client reconnects by itself | new |
 | `/restart_auto <on\|off>` | — | Lobby | `AutoRestartService.SetEnabled` | Automatic map reload (stuck join or 3 h up, nobody playing) on or off until the next load | new |

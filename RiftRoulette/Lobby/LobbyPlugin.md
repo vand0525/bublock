@@ -37,8 +37,8 @@ lifecycle, server setup, and the lobby commands. Ops live on
 | `/lobby_flex` | admin | `FlexSlots.UnlockAll(Debug)`, replies with the team count, then `FlexSlots.Describe()` (each team's flex slot flags; 15 = all open) |
 | `/pause_allow [on\|off]` | admin | No argument: `PauseGuard.Describe` (on/off, paused state, counts). `on` / `off` (or `1` / `0`): `PauseGuard.SetAllowed(Debug)`, which sets the pause convars and writes a master line; error for another value. Lasts until the next load or `/access_mode` change, which set pausing from the private flag |
 | `dw_seat_spec` | admin, console only (`ConsoleOnly`; chat `/seat_spec` does not run) | `AdminSeat.Sit`: the admin moves to the spectator seat (`MakeObserver` on the next tick); works any time, including mid-round; a roaming admin stops roaming and spectates |
-| `/seat_play` | admin | `AdminSeat.Stand`: the admin goes back onto a team through `AdmitPlayer`; refused when 12 are playing |
-| `/seat_roam` | admin | `AdminSeat.RoamNow`: roam now (invisible Abrams in front of the welcome sign), or back in front of the sign if already roaming; refused only when not seated |
+| `/seat_play` | admin | `AdminSeat.Stand`: from spectating or roaming, the admin goes back onto a team through `AdmitPlayer`; refused when 12 are playing |
+| `/seat_roam` | admin | `AdminSeat.RoamNow`: from spectating or playing, roam now (invisible Abrams in front of the welcome sign), or back in front of the sign if already roaming; refused only while a playing admin's hero is dead |
 | `/seat_status` | admin | `AdminSeat.Describe` |
 | `/restart_status` | admin | `AutoRestartService.Describe`: on / off, map uptime, stuck joins, joins in progress, join budget (fighter-rounds / budget, rounds left) |
 | `/restart_now` | admin | `AutoRestartService.Restart("admin", Debug)`: reloads the map now, even with players (they reconnect by themselves) |
