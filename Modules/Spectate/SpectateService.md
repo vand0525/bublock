@@ -45,9 +45,9 @@ where to park (Rift Roulette: `RiftRoulette/Lobby/StreamCam`).
 - The fly cam ignores `CCitadelUserMsg_SetClientCameraAngles` (the
   message behind `SetViewAngle` and the API's `SetCameraAngles`): the
   view kept the angle the admin joined with (2026-10-02). The angle is
-  passed to the observer teleport instead; whether that turns the fly cam
-  is to confirm in game (`Park angle did not take` in `spectate-*.log`
-  says it did not).
+  passed to the observer teleport instead, which turns the fly cam
+  (confirmed in game, 2026-10-02; `Park angle did not take` in
+  `spectate-*.log` would flag a regression).
 - `spec_goto` cannot be used either, and it ignores pitch and yaw.
 - `v_angle` follows the fly cam view on the observer pawn (the saved
   framing logged the admin's real pitch, 2026-10-02).
