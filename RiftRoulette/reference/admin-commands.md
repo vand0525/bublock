@@ -641,7 +641,7 @@ trusted). Debug mode; `[Random]` replies.
 - **Who:** admin
 - **Calls:** `RandomModeService.Describe`
 - **Mode:** Debug; read-only
-- **Side effects:** a config line (mode, format, assigned, pending, teams, `Bench=` who sits out this round or `none`), a bans line (`Bans: this round=<heroes or none> | pending Sapphire=<hero (buyer)> Amber=...`; admins see both teams' pending bans), then one line per player: slot, name, team, hero, build name and ID, `PENDING` if their swap waits for a respawn, `SITTING OUT` for the bench player, and their reservation
+- **Side effects:** a config line (mode, format, assigned, pending, teams, `Bench=` who sits out this round or `none`), a bans line (`Bans: this round=<heroes or none> | pending Sapphire=<hero (buyer)> Amber=...`; admins see both teams' pending bans), a `Priority=` line (each priority hero with `in pool` or `no builds`, or `none`), then one line per player: slot, name, team, hero, build name and ID, `PENDING` if their swap waits for a respawn, `SITTING OUT` for the bench player, and their reservation
 
 #### /random_reroll
 

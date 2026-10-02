@@ -14,7 +14,7 @@ and an Error with stack; the other areas still run):
 | Area | Check | Status |
 |---|---|---|
 | Convars | each `GameDependencies.ConVars` entry: found, and value = expected | missing: `IfMissing`; wrong value: WARN |
-| Schema | the internal `SchemaAccessor.Offset` (read by reflection) of `CCitadelGameRulesProxy.m_pGameRules`, the four `CCitadelGameRules` KOTH fields , `CCitadelTeam.m_nFlexSlotsUnlocked` (`Lobby/FlexSlots`) and `CBasePlayerPawn.v_angle` (`SpectateService.ViewAngle`, the stream camera's hand-move check); then `RiftGameRules.TryResolve`; then reads `NextSpawn` / `KothGiveUp` | offset <= 0: FAIL; offset unreadable: WARN; resolve not Found: FAIL; non-finite timers: FAIL |
+| Schema | the internal `SchemaAccessor.Offset` (read by reflection) of `CCitadelGameRulesProxy.m_pGameRules`, the four `CCitadelGameRules` KOTH fields, `CCitadelTeam.m_nFlexSlotsUnlocked` (`Lobby/FlexSlots`), `CBasePlayerPawn.v_angle` (`SpectateService.ViewAngle`, the stream camera's hand-move check) and `CBasePlayerPawn.m_hController` (`LobbyService.PawnController`, the leaver's observer sweep); then `RiftGameRules.TryResolve`; then reads `NextSpawn` / `KothGiveUp` | offset <= 0: FAIL; offset unreadable: WARN; resolve not Found: FAIL; non-finite timers: FAIL |
 | Entities | `ByDesignerName` counts: required > 0, kept > 0, cleaned = 0 | required missing: FAIL; kept missing / cleaned left: WARN |
 | RiftPoints | nearest `info_koth_spawn_location` to each `RiftSides` position within 100 | none found / too far: WARN |
 | Heroes | `HeroBuildCatalog.SkippedHeroIds` empty; build data fetched within 14 days | WARN |

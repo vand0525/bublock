@@ -94,9 +94,11 @@ public static class LobbyService
     else if (MatchService.State.IsRunning && MatchConfig.IsMirror)
       MirrorModeService.OnLeave(steamId, timer, mode);
 
+    var slot = player.Slot;
+    var controller = player.EntityHandle;
     RemovePawns(player, log);
     player.Remove();
-    timer.Once(OrphanSweepSeconds.Seconds(), () => SweepOrphanObservers(mode));
+    timer.Once(OrphanSweepSeconds.Seconds(), () => SweepOrphanObservers(slot, controller, mode));
 
     StatsService.RefreshBoards(mode);
     AutoStartService.Check(timer, mode, steamId);
@@ -127,28 +129,55 @@ public static class LobbyService
   public static void OnDisconnectWithoutController(int slot, ENetworkDisconnectionReason reason, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
     LobbyLog.WithMode(mode).Warn("Disconnect without a controller Slot={Slot} Reason={Reason}", slot, reason);
-    timer.Once(OrphanSweepSeconds.Seconds(), () => SweepOrphanObservers(mode));
+    timer.Once(OrphanSweepSeconds.Seconds(), () => SweepOrphanObservers(slot, OrphanObserverRule.NoHandle, mode));
   }
 
+  public static SchemaAccessor<uint> PawnController => new("CBasePlayerPawn"u8, "m_hController"u8);
+
   // Only observer pawns: hero pawns lose their controller for a moment during a rebuild.
-  public static int SweepOrphanObservers(ExecutionMode mode = ExecutionMode.Clean)
+  public static int SweepOrphanObservers(int leaverSlot, uint leaverController, ExecutionMode mode = ExecutionMode.Clean)
   {
-    var owned = Players.GetAll()
-      .Select(player => player.Pawn?.EntityHandle)
-      .OfType<uint>()
-      .ToHashSet();
+    var log = LobbyLog.WithMode(mode);
+    var accessor = PawnController;
+    var slotConnected = Players.IsConnected(leaverSlot);
+    var slotController = Players.FromSlot(leaverSlot)?.EntityHandle ?? OrphanObserverRule.NoHandle;
+    var seen = 0;
     var removed = 0;
+    var unowned = 0;
 
     foreach (var entity in Entities.ByDesignerName(SpectateService.ObserverDesignerName).ToList())
     {
-      if (owned.Contains(entity.EntityHandle))
+      if (!entity.IsValid)
         continue;
 
-      LobbyLog.WithMode(mode).Warn("Orphan observer pawn removed Index={Index} Class={Class}", entity.EntityIndex, entity.Classname);
+      if (accessor.GetAddress(entity.Handle) == entity.Handle)
+      {
+        log.Warn("Orphan observer sweep skipped, m_hController not in the schema Slot={Slot}", leaverSlot);
+        return 0;
+      }
+
+      seen++;
+      var owner = accessor.Get(entity.Handle);
+      if (owner == OrphanObserverRule.NoHandle)
+        unowned++;
+
+      if (!OrphanObserverRule.ShouldRemove(owner, leaverSlot, leaverController, slotController, slotConnected))
+      {
+        log.Debug("Observer pawn kept Index={Index} OwnerSlot={OwnerSlot}", entity.EntityIndex, OrphanObserverRule.SlotOf(owner));
+        continue;
+      }
+
+      log.Info("Leaver observer pawn removed Index={Index} Slot={Slot}", entity.EntityIndex, leaverSlot);
       entity.Remove();
       removed++;
     }
 
+    log.Info(
+      "Orphan observer sweep Slot={Slot} Seen={Seen} Removed={Removed} Unowned={Unowned}",
+      leaverSlot,
+      seen,
+      removed,
+      unowned);
     return removed;
   }
 

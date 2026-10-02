@@ -89,4 +89,86 @@ public class HeroDrawTests
   {
     Assert.Empty(HeroDraw.Draw([1, 2], [], None, new Random(0)));
   }
+
+  [Fact]
+  public void Draw_always_assigns_a_priority_hero_in_the_pool()
+  {
+    var players = new ulong[] { 1, 2, 3 };
+
+    for (var seed = 0; seed < 200; seed++)
+    {
+      var drawn = HeroDraw.Draw(players, Pool, None, new Random(seed), mustInclude: [Heroes.Kelvin]);
+
+      Assert.Contains(Heroes.Kelvin, drawn.Values);
+      Assert.Equal(drawn.Count, drawn.Values.Distinct().Count());
+    }
+  }
+
+  [Fact]
+  public void Draw_skips_a_priority_hero_missing_from_the_pool()
+  {
+    for (var seed = 0; seed < 50; seed++)
+    {
+      var drawn = HeroDraw.Draw([1, 2, 3], Pool, None, new Random(seed), mustInclude: [Heroes.Bebop]);
+
+      Assert.DoesNotContain(Heroes.Bebop, drawn.Values);
+      Assert.Equal(3, drawn.Count);
+    }
+  }
+
+  [Fact]
+  public void Draw_gives_the_priority_hero_to_a_player_without_a_reservation()
+  {
+    var players = new ulong[] { 1, 2, 3 };
+    var fixedHeroes = new Dictionary<ulong, Heroes> { [1] = Heroes.Haze, [2] = Heroes.Shiv };
+
+    for (var seed = 0; seed < 50; seed++)
+    {
+      var drawn = HeroDraw.Draw(players, Pool, None, new Random(seed), fixedHeroes, [Heroes.Kelvin]);
+
+      Assert.Equal(Heroes.Haze, drawn[1]);
+      Assert.Equal(Heroes.Shiv, drawn[2]);
+      Assert.Equal(Heroes.Kelvin, drawn[3]);
+    }
+  }
+
+  [Fact]
+  public void Draw_with_more_priority_heroes_than_players_gives_each_player_one()
+  {
+    var priority = new[] { Heroes.Haze, Heroes.Shiv, Heroes.Wraith };
+
+    for (var seed = 0; seed < 50; seed++)
+    {
+      var drawn = HeroDraw.Draw([1, 2], Pool, None, new Random(seed), mustInclude: priority);
+
+      Assert.Equal(2, drawn.Count);
+      Assert.All(drawn.Values, hero => Assert.Contains(hero, priority));
+      Assert.Equal(2, drawn.Values.Distinct().Count());
+    }
+  }
+
+  [Fact]
+  public void Draw_rotates_the_priority_hero_away_from_last_rounds_holder()
+  {
+    var players = new ulong[] { 1, 2, 3 };
+    var previous = new Dictionary<ulong, Heroes> { [1] = Heroes.Kelvin };
+
+    for (var seed = 0; seed < 50; seed++)
+    {
+      var drawn = HeroDraw.Draw(players, Pool, previous, new Random(seed), mustInclude: [Heroes.Kelvin]);
+
+      Assert.Contains(Heroes.Kelvin, drawn.Values);
+      Assert.NotEqual(Heroes.Kelvin, drawn[1]);
+    }
+  }
+
+  [Fact]
+  public void Draw_with_no_priority_heroes_matches_the_plain_draw()
+  {
+    var players = new ulong[] { 1, 2, 3, 4 };
+
+    Assert.Equal(
+      HeroDraw.Draw(players, Pool, None, new Random(11)),
+      HeroDraw.Draw(players, Pool, None, new Random(11), mustInclude: []));
+  }
 }

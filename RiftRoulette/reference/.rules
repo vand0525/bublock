@@ -185,7 +185,12 @@ Assume the git repo is rooted at `Bublock/`.
   never revealed early; at round start everyone gets the chat line
   `Banned this round: <heroes>` (heroes only, never who, never a banner).
   A ban on a reserved hero uses one of the holder's rounds (random hero,
-  private chat line). A mark (`/mark <slot>`, `Betting/MarkBook`): 300
+  private chat line). Priority heroes (`RandomMode/PriorityHeroes`, a
+  list fixed in code): each one with stored builds goes into every Random
+  draw (`HeroDraw.Draw` `mustInclude`, and `AssignLate` when its holder
+  left), and is never reservable or bannable (refused before any souls
+  are spent). Mirror mode never reads the list; its random hero keeps
+  rolling across the whole pool. A mark (`/mark <slot>`, `Betting/MarkBook`): 300
   souls while betting is open, a fighter marks an enemy fighter for that
   round (one mark per marker; `/mark` alone lists them by slot). The
   marker's credited kill on the target that round steals a quarter of the

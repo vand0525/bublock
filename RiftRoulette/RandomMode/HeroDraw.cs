@@ -11,7 +11,8 @@ public static class HeroDraw
     IReadOnlyList<Heroes> pool,
     IReadOnlyDictionary<ulong, Heroes> previous,
     Random rng,
-    IReadOnlyDictionary<ulong, Heroes>? fixedHeroes = null)
+    IReadOnlyDictionary<ulong, Heroes>? fixedHeroes = null,
+    IReadOnlyCollection<Heroes>? mustInclude = null)
   {
     var fixedHere = (fixedHeroes ?? new Dictionary<ulong, Heroes>())
       .Where(pair => players.Contains(pair.Key))
@@ -20,11 +21,15 @@ public static class HeroDraw
     var rest = players.Where(player => !fixedHere.ContainsKey(player)).ToList();
     var free = pool.Where(hero => !fixedHere.ContainsValue(hero)).ToList();
     var restPool = free.Count > 0 ? free : pool;
+    var priority = (mustInclude ?? [])
+      .Distinct()
+      .Where(hero => restPool.Contains(hero) && !fixedHere.ContainsValue(hero))
+      .ToList();
 
-    var drawn = DrawOnce(rest, restPool, previous, rng);
+    var drawn = DrawOnce(rest, restPool, previous, rng, priority);
 
     for (var attempt = 1; attempt < Attempts && Repeats(drawn, previous); attempt++)
-      drawn = DrawOnce(rest, restPool, previous, rng);
+      drawn = DrawOnce(rest, restPool, previous, rng, priority);
 
     foreach (var (player, hero) in fixedHere)
       drawn[player] = hero;
@@ -39,7 +44,8 @@ public static class HeroDraw
     IReadOnlyList<ulong> players,
     IReadOnlyList<Heroes> pool,
     IReadOnlyDictionary<ulong, Heroes> previous,
-    Random rng)
+    Random rng,
+    IReadOnlyList<Heroes> priority)
   {
     var drawn = new Dictionary<ulong, Heroes>();
 
@@ -47,8 +53,25 @@ public static class HeroDraw
       return drawn;
 
     var available = Shuffled(pool, rng);
+    var waiting = Shuffled(players, rng);
 
-    foreach (var player in Shuffled(players, rng))
+    // Priority heroes go out first, each to a random player who did not have it last round when possible.
+    foreach (var hero in Shuffled(priority, rng))
+    {
+      if (waiting.Count == 0)
+        break;
+
+      var index = waiting.FindIndex(player => !previous.TryGetValue(player, out var last) || last != hero);
+
+      if (index < 0)
+        index = 0;
+
+      drawn[waiting[index]] = hero;
+      waiting.RemoveAt(index);
+      available.Remove(hero);
+    }
+
+    foreach (var player in waiting)
     {
       bool IsNew(Heroes hero) => !previous.TryGetValue(player, out var last) || hero != last;
 

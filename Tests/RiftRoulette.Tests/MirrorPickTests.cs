@@ -104,6 +104,24 @@ public class MirrorPickTests
   }
 
   [Fact]
+  public void Unpinned_keeps_switching_across_the_whole_pool()
+  {
+    var rng = new Random(5);
+    Heroes? last = null;
+    var seen = new HashSet<Heroes>();
+
+    for (var round = 0; round < 40; round++)
+    {
+      var hero = MirrorPick.Resolve(MirrorPins.None, Pool, ThreeBuilds, last, rng)!.Hero;
+      Assert.NotEqual(last, hero);
+      seen.Add(hero);
+      last = hero;
+    }
+
+    Assert.Equal(Pool.Count, seen.Count);
+  }
+
+  [Fact]
   public void Share_gives_every_fighter_the_same_hero_and_build()
   {
     var fighters = new ulong[] { 1, 2, 3, 4, 5, 6, 3 };

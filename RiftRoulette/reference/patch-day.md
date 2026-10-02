@@ -169,6 +169,7 @@ Map dump counts (build 6698): `info_koth_spawn_location` 2, `info_super_trooper_
 | `CCitadelGameRules.m_timeKothGiveUp` | float | same (read only) |
 | `CCitadelTeam.m_nFlexSlotsUnlocked` | `EFlexSlotTypes_t` (uint16 flags, 15 = all four flex slots) | `Lobby/FlexSlots.cs` |
 | `CBasePlayerPawn.v_angle` | `QAngle` (read as `Vector3`: pitch, yaw, roll), the observer's view angle | `Modules/Spectate/SpectateService.cs` (`ViewAngle`) |
+| `CBasePlayerPawn.m_hController` | entity handle (uint), an observer pawn's owner controller | `Lobby/LobbyService.cs` (`PawnController`, the leaver's observer sweep) |
 | `CGameRules.m_bGamePaused`, `CCitadelGameRules.m_bServerPaused` | bool (API `GameRules.GamePaused` / `ServerPaused`) | `Lobby/PauseGuard.cs` |
 
 ### Net messages

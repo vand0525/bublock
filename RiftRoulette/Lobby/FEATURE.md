@@ -128,6 +128,7 @@ startup, hot reload, every join and every intermission;
 | `AccessService.cs` | Access file load / save, connect gate, list changes, statue banned players, kick private-mode outsiders |
 | `AccessPlugin.cs` | Admin access commands (`/player_ban`, `/ban_*`, `/ban_modifier`, `/allow_*`, `/access_mode`) |
 | `BanJoinRule.cs` | Pure rejoin rule: statue visit or refuse; strikes lock out 10 min, 30 min, then until restart (tested) |
+| `OrphanObserverRule.cs` | Pure disconnect sweep rule: only the leaver's `observer` pawns are removed, never another slot's (tested) |
 | `BanStatueService.cs` | Statue: out of the game, up top, modifier, chat, timed kick; rejoin strikes; `Sustain` |
 | `PauseRule.cs` | Pure pause rules: pause commands, pause convars, unpause and chat throttles (tested) |
 | `PauseGuard.cs` | Pause service: convars, blocking pause requests, automatic unpause, `/pause_allow` state |

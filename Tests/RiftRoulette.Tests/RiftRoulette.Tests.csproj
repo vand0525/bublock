@@ -44,6 +44,7 @@
     <Compile Include="..\..\RiftRoulette\GameLoop\MatchConfig.cs" Link="RiftRoulette\GameLoop\MatchConfig.cs" />
     <Compile Include="..\..\RiftRoulette\GameLoop\AutoStartRule.cs" Link="RiftRoulette\GameLoop\AutoStartRule.cs" />
     <Compile Include="..\..\RiftRoulette\RandomMode\HeroDraw.cs" Link="RiftRoulette\RandomMode\HeroDraw.cs" />
+    <Compile Include="..\..\RiftRoulette\RandomMode\PriorityHeroes.cs" Link="RiftRoulette\RandomMode\PriorityHeroes.cs" />
     <Compile Include="..\..\RiftRoulette\RandomMode\BenchRule.cs" Link="RiftRoulette\RandomMode\BenchRule.cs" />
     <Compile Include="..\..\RiftRoulette\RandomMode\HeroReservations.cs" Link="RiftRoulette\RandomMode\HeroReservations.cs" />
     <Compile Include="..\..\RiftRoulette\RandomMode\HeroBans.cs" Link="RiftRoulette\RandomMode\HeroBans.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="..\..\RiftRoulette\Lobby\AccessRule.cs" Link="RiftRoulette\Lobby\AccessRule.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\AccessList.cs" Link="RiftRoulette\Lobby\AccessList.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\BanJoinRule.cs" Link="RiftRoulette\Lobby\BanJoinRule.cs" />
+    <Compile Include="..\..\RiftRoulette\Lobby\OrphanObserverRule.cs" Link="RiftRoulette\Lobby\OrphanObserverRule.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\PauseRule.cs" Link="RiftRoulette\Lobby\PauseRule.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\StreamFraming.cs" Link="RiftRoulette\Lobby\StreamFraming.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\StreamCamRule.cs" Link="RiftRoulette\Lobby\StreamCamRule.cs" />

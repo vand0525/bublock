@@ -5,14 +5,20 @@ when heroes later come from a real match ID.
 
 ## Operations
 
-`Draw(players, pool, previous, rng, fixedHeroes = null)` returns Steam ID to hero:
+`Draw(players, pool, previous, rng, fixedHeroes = null, mustInclude = null)` returns Steam ID to hero:
 
 - `fixedHeroes` (hero reservations, `HeroReservations.Take`): each listed
   player who is in `players` gets that hero, with no repeat check. Their
   heroes leave the pool for everyone else (unless that would empty it).
   Players not in `players` are ignored. Null or empty: the draw below runs
   unchanged over every player.
-- Shuffles the pool and the players, then gives each player the first
+- `mustInclude` (priority heroes, `PriorityHeroes.InPool`): each one that
+  is in the pool and not a fixed hero goes out first, to a random
+  non-fixed player who did not have it last round (else any of them). With
+  more priority heroes than non-fixed players, a random subset goes out,
+  one per player. Null or empty: the same draw as without it (same `Random`
+  calls).
+- Shuffles the pool and the players, then gives each remaining player the first
   remaining hero that is not the one they had last round (`previous`).
   Heroes are unique while the pool lasts.
 - If a player's only remaining hero is their previous one, the whole draw

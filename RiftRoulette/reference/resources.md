@@ -520,6 +520,15 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **To confirm in game:** disconnect from the admin seat on an empty server; the spam should stop. If it continues and the log shows both pawns removed, match the logged indexes against the entity number in the spam.
 - **Link / path:** `Bublock/RiftRoulette/Lobby/LobbyService.cs`, `Bublock/RiftRoulette/Lobby/LobbyPlugin.cs`
 
+### 2026-10-02 — The orphan observer sweep crashed a spectating admin
+
+- **Why hard / useful:** The admin's client crashed with nothing in the server logs except a later disconnect; the cause was our own cleanup, one second after someone else left.
+- **Seen (`lobby-20261002.log`):** 20:45:41 a player left, 20:45:42 `Orphan observer pawn removed Index=1140` and `3118`, 20:45:53 the seated admin disconnected with `Disconnect pawns removed Hero=none Current=none` (a spectator always holds an `observer` pawn, so theirs was gone). Same at 16:43:10 to 19 (pawn 1097). Sweeps at 16:14 and 19:44 also removed observer pawns whose index sat next to a live player's hero pawn (695 / 696, 922 / 923, 1056 / 1058, 2602 / 2604).
+- **Verified fact:** every connected Deadlock hero player owns a spare `observer` pawn (`CCitadelObserverPawn`) besides the hero pawn; `controller.Pawn` points to the hero, so a sweep on "no player's `Pawn` points to it" removes live players' observers. The owner is `CBasePlayerPawn.m_hController` (Deadworks exposes it only as `CBasePlayerPawn.Controller`, and `As<CBasePlayerPawn>()` returns null for `CCitadelObserverPawn`, so read it with a `SchemaAccessor<uint>`). Deadworks' `EntityIndex` is `handle & 0x3FFF`; a controller's index is slot + 1.
+- **Used as:** `LobbyService.SweepOrphanObservers(leaverSlot, leaverController)` removes only observers owned by the leaver (`Lobby/OrphanObserverRule`, tested) and logs `Orphan observer sweep Slot= Seen= Removed= Unowned=`.
+- **To confirm in game:** spectate from the admin seat while a player leaves; no crash, and the sweep line shows `Removed=` 1 (the leaver's spare) or 0.
+- **Link / path:** `Bublock/RiftRoulette/Lobby/LobbyService.cs`, `Bublock/RiftRoulette/Lobby/OrphanObserverRule.cs`
+
 ### 2026-09-28 — A changed API member type silently kills the whole hook
 
 - **Why hard / useful:** Nothing reached our logs. Players who left stayed in game as "disconnected" with their pawns standing, and even a `kickid` left no disconnect line.

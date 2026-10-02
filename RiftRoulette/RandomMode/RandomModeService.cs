@@ -116,7 +116,8 @@ public static class RandomModeService
     var banned = Bans.Take(MatchService.State.Round);
     var turns = Reservations.Take(fighters.Keys, MatchService.State.Round, banned);
     var reserved = turns.ToDictionary(turn => turn.SteamId, turn => turn.Hero);
-    var heroes = HeroDraw.Draw(fighters.Keys.ToList(), Unbanned(catalog.Heroes), LastHero, Random.Shared, reserved);
+    var priority = Priority(catalog, log);
+    var heroes = HeroDraw.Draw(fighters.Keys.ToList(), Unbanned(catalog.Heroes), LastHero, Random.Shared, reserved, priority);
 
     Assignments.Clear();
     Values.Clear();
@@ -171,6 +172,19 @@ public static class RandomModeService
 
     PlayerChat.Send(player, HeroReservations.BurnedLine(HeroBuildCatalog.Default.DisplayName(turn.Hero), turn.Use));
     log.Info(player.ToPlayerRef(), "Reserved hero banned, round used Hero={Hero} Use={Use} Of={Of}", turn.Hero, turn.Use, HeroReservations.Rounds);
+  }
+
+  private static readonly HashSet<Heroes> PriorityWarned = [];
+
+  private static IReadOnlyList<Heroes> Priority(HeroBuildCatalog catalog, Logger log)
+  {
+    foreach (var hero in PriorityHeroes.List.Where(hero => !catalog.Heroes.Contains(hero)))
+    {
+      if (PriorityWarned.Add(hero))
+        log.Warn("Priority hero has no builds, skipped Hero={Hero}", hero);
+    }
+
+    return PriorityHeroes.InPool(catalog.Heroes);
   }
 
   // When the bans cover the whole pool (a tiny test catalog), they are ignored so the draw still works.
@@ -270,8 +284,12 @@ public static class RandomModeService
     if (pool.Count == 0)
       return;
 
-    var turn = Reservations.TakeLate(steamId, MatchService.State.Round, taken, Bans.Current);
-    var hero = turn?.Hero ?? HeroDraw.Draw([steamId], pool, LastHero, Random.Shared)[steamId];
+    // An unheld priority hero (its holder left) goes to the late player; no reserved round is used.
+    var unheld = Priority(catalog, Log.WithMode(mode)).Where(hero => !taken.Contains(hero)).ToList();
+    var turn = unheld.Count > 0 ? null : Reservations.TakeLate(steamId, MatchService.State.Round, taken, Bans.Current);
+    var hero = unheld.Count > 0
+      ? unheld[Random.Shared.Next(unheld.Count)]
+      : turn?.Hero ?? HeroDraw.Draw([steamId], pool, LastHero, Random.Shared)[steamId];
     Assign(steamId, hero, catalog);
 
     if (turn != null)
@@ -418,7 +436,8 @@ public static class RandomModeService
       $"{MatchConfig.Describe()} | Assigned={Assignments.Count} | Pending={Lock.PendingCount} | Teams={Teams.Count} | " +
       $"Bench={(_benched is { } benched ? Find(benched)?.PlayerName ?? benched.ToString() : "none")}",
       $"Bans: this round={HeroList(Bans.Current)} | pending " +
-      $"Sapphire={PendingBan(RiftRouletteTeams.Sapphire)} Amber={PendingBan(RiftRouletteTeams.Amber)}"
+      $"Sapphire={PendingBan(RiftRouletteTeams.Sapphire)} Amber={PendingBan(RiftRouletteTeams.Amber)}",
+      $"Priority={DescribePriority(catalog)}"
     };
 
     foreach (var player in Players.GetAll())
@@ -442,6 +461,12 @@ public static class RandomModeService
 
     return lines;
   }
+
+  private static string DescribePriority(HeroBuildCatalog catalog) =>
+    PriorityHeroes.List.Count == 0
+      ? "none"
+      : string.Join(", ", PriorityHeroes.List.Order().Select(hero =>
+          $"{catalog.DisplayName(hero)} ({(catalog.Heroes.Contains(hero) ? "in pool" : "no builds")})"));
 
   private static string HeroList(IEnumerable<Heroes> heroes)
   {
@@ -472,6 +497,9 @@ public static class RandomModeService
 
     if (!TryParseReservable(catalog, text, out var hero))
       return $"No hero called '{text}'. Use the hero's name, for example /reserve haze.";
+
+    if (PriorityHeroes.Contains(hero))
+      return PriorityHeroes.RefusedLine(catalog.DisplayName(hero), "reserved");
 
     if (Reservations.Position(steamId) != null)
       return $"You already have a reservation. {DescribeReservation(player)}";
@@ -544,6 +572,9 @@ public static class RandomModeService
 
     if (!TryParseReservable(catalog, text, out var hero))
       return $"No hero called '{text}'. Use the hero's name, for example /heroban haze.";
+
+    if (PriorityHeroes.Contains(hero))
+      return PriorityHeroes.RefusedLine(catalog.DisplayName(hero), "banned");
 
     if (Bans.TryGetPending(team, out var pending, out var by))
       return $"Your team already banned {catalog.DisplayName(pending)} ({PlayerName(by)}). One ban per team per round.";
