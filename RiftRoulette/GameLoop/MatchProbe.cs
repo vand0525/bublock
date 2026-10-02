@@ -32,7 +32,7 @@ public static class MatchProbe
     var map = string.Join(" ", CountedDesignerNames.Select(name => $"{name}={Entities.ByDesignerName(name).Count()}"));
 
     Log.Info(
-      "Probe {Reason} MatchRound={MatchRound} Mode={Mode} Phase={Phase} WatchSide={WatchSide} BoardSide={BoardSide} NextSide={NextSide} Rift={Rift} RiftSide={RiftSide} BuyAnywhere={BuyAnywhere} ConVar={ConVar} Restrained={Restrained} Rescues={Rescues} Map={Map}",
+      "Probe {Reason} MatchRound={MatchRound} Mode={Mode} Phase={Phase} WatchSide={WatchSide} BoardSide={BoardSide} NextSide={NextSide} Rift={Rift} RiftSide={RiftSide} BuyAnywhereConVar={BuyAnywhereConVar} Restrained={Restrained} Rescues={Rescues} Map={Map}",
       reason,
       MatchService.State.Round,
       MatchConfig.HeroMode,
@@ -42,7 +42,6 @@ public static class MatchProbe
       RiftSides.Name(RiftService.NextSide),
       RiftService.Phase,
       RiftService.CurrentSide is { } current ? RiftSides.Name(current) : "-",
-      ShopAccess.BuyAnywhere,
       ShopAccess.ConVarValue?.ToString() ?? "missing",
       RestraintService.Count,
       WatchGuard.Rescues,

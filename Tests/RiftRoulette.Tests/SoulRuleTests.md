@@ -8,6 +8,6 @@ Unit tests for `RiftRoulette/GameLoop/SoulRule`.
 - Without a match nothing is blocked.
 - Spending and losses (0 or negative amounts) pass.
 - Ability point and unlock gains from level-ups and the starting grant are
-  blocked during a match when ranks come from the build (Random, 1v1).
-- They pass in Draft mode, without a match, from `ECheats`, and when spent.
+  blocked during a match (ranks come from the build).
+- They pass without a match, from `ECheats`, and when spent.
 - Other currencies (item enhancements) pass.

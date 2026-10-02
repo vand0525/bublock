@@ -1,63 +1,15 @@
 using System.Numerics;
-using System.Text.Json;
-using Bublock.Modules.Movement;
-using Bublock.Modules.Spectate;
 using RiftRoulette.Rift;
 
 namespace RiftRoulette.Lobby;
 
-// Offset is (forward, right, up) from the watch spot anchor; Yaw is relative to the anchor's yaw.
-public sealed record CameraPose(Vector3 Offset, float Pitch, float Yaw);
-
 public static class StreamFraming
 {
-  // Above the players' floor up top (z 1536), so the straight-down view covers the platform.
-  public const float OverheadHeight = 264f;
-
-  public static readonly CameraPose Default = new(new Vector3(0f, 0f, OverheadHeight), SpectateRule.StraightDownPitch, 0f);
-
-  public static CameraPose Pick(IReadOnlyDictionary<RiftSide, CameraPose> saved, RiftSide side)
+  // World position and view angle (pitch, yaw, roll), captured in fly cam with getpos_exact.
+  public static (Vector3 Position, Vector3 Angle) Spot(RiftSide side) => side switch
   {
-    if (saved.TryGetValue(side, out var pose))
-      return pose;
-
-    // Green ↔ Yellow share a mirrored framing; Center keeps its own (default overhead).
-    if ((side is RiftSide.Green or RiftSide.Yellow) &&
-        saved.TryGetValue(RiftSides.Other(side), out var other))
-      return other;
-
-    return Default;
-  }
-
-  public static (Vector3 Position, Vector3 Angle) ToWorld(MovementLocation anchor, CameraPose pose) =>
-    (anchor.Offset(pose.Offset).Position, new Vector3(pose.Pitch, SpectateRule.WrapDegrees(anchor.Angle.Y + pose.Yaw), 0f));
-
-  public static CameraPose FromWorld(MovementLocation anchor, Vector3 position, Vector3 angle) =>
-    new(anchor.LocalOf(position), angle.X, SpectateRule.WrapDegrees(angle.Y - anchor.Angle.Y));
-
-  public static Dictionary<RiftSide, CameraPose> Parse(string json)
-  {
-    var root = JsonSerializer.Deserialize<Dictionary<string, PoseJson>>(json) ?? [];
-    var poses = new Dictionary<RiftSide, CameraPose>();
-
-    foreach (var (name, pose) in root)
-    {
-      if (RiftSides.TryParse(name, out var side) && pose.Offset is { Length: 3 } offset)
-        poses[side] = new CameraPose(new Vector3(offset[0], offset[1], offset[2]), pose.Pitch, pose.Yaw);
-    }
-
-    return poses;
-  }
-
-  public static string Serialize(IReadOnlyDictionary<RiftSide, CameraPose> poses) =>
-    JsonSerializer.Serialize(
-      poses.ToDictionary(
-        entry => RiftSides.Name(entry.Key).ToLowerInvariant(),
-        entry => new PoseJson([entry.Value.Offset.X, entry.Value.Offset.Y, entry.Value.Offset.Z], entry.Value.Pitch, entry.Value.Yaw)),
-      new JsonSerializerOptions { WriteIndented = true });
-
-  private sealed record PoseJson(
-    [property: System.Text.Json.Serialization.JsonPropertyName("offset")] float[]? Offset,
-    [property: System.Text.Json.Serialization.JsonPropertyName("pitch")] float Pitch,
-    [property: System.Text.Json.Serialization.JsonPropertyName("yaw")] float Yaw);
+    RiftSide.Green => (new Vector3(7121.0f, -119.90625f, 2142.375f), new Vector3(12.28125f, -1.9375f, 0f)),
+    RiftSide.Yellow => (new Vector3(-7063.34375f, 47.59375f, 1664.28125f), new Vector3(-4.75f, 174.84375f, 0f)),
+    _ => (new Vector3(-479.6875f, 70.34375f, 1639.96875f), new Vector3(-13.25f, -8.625f, 0f))
+  };
 }

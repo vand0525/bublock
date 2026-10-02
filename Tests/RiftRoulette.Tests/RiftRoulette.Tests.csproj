@@ -32,9 +32,7 @@
   <Import Project="..\..\Modules\Spectate\Spectate.projitems" />
 
   <ItemGroup>
-    <Compile Include="..\..\RiftRoulette\Draft\DraftState.cs" Link="RiftRoulette\Draft\DraftState.cs" />
-    <Compile Include="..\..\RiftRoulette\Draft\DraftPools.cs" Link="RiftRoulette\Draft\DraftPools.cs" />
-    <Compile Include="..\..\RiftRoulette\Draft\DraftBoardText.cs" Link="RiftRoulette\Draft\DraftBoardText.cs" />
+    <Compile Include="..\..\RiftRoulette\Round\RoundHeroes.cs" Link="RiftRoulette\Round\RoundHeroes.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\RiftRouletteTeams.cs" Link="RiftRoulette\Lobby\RiftRouletteTeams.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\CommandList.cs" Link="RiftRoulette\Lobby\CommandList.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\AboutText.cs" Link="RiftRoulette\Lobby\AboutText.cs" />
@@ -59,19 +57,17 @@
     <Compile Include="..\..\RiftRoulette\Lobby\BanJoinRule.cs" Link="RiftRoulette\Lobby\BanJoinRule.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\PauseRule.cs" Link="RiftRoulette\Lobby\PauseRule.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\StreamFraming.cs" Link="RiftRoulette\Lobby\StreamFraming.cs" />
+    <Compile Include="..\..\RiftRoulette\Lobby\StreamCamRule.cs" Link="RiftRoulette\Lobby\StreamCamRule.cs" />
     <Compile Include="..\..\RiftRoulette\Round\RoundLocations.cs" Link="RiftRoulette\Round\RoundLocations.cs" />
     <Compile Include="..\..\RiftRoulette\Round\WatchSpotRule.cs" Link="RiftRoulette\Round\WatchSpotRule.cs" />
     <Compile Include="..\..\RiftRoulette\Round\WatchLayout.cs" Link="RiftRoulette\Round\WatchLayout.cs" />
     <Compile Include="..\..\RiftRoulette\Round\WatchGuardRule.cs" Link="RiftRoulette\Round\WatchGuardRule.cs" />
     <Compile Include="..\..\RiftRoulette\Round\SlotSpots.cs" Link="RiftRoulette\Round\SlotSpots.cs" />
     <EmbeddedResource Include="..\..\RiftRoulette\Round\Data\spots.json" LogicalName="RiftRoulette.Round.spots.json" Link="RiftRoulette\Round\Data\spots.json" />
-    <Compile Include="..\..\RiftRoulette\GameLoop\ShopRule.cs" Link="RiftRoulette\GameLoop\ShopRule.cs" />
     <Compile Include="..\..\RiftRoulette\GameLoop\SoulRule.cs" Link="RiftRoulette\GameLoop\SoulRule.cs" />
     <Compile Include="..\..\RiftRoulette\SelfTest\SelfTestResult.cs" Link="RiftRoulette\SelfTest\SelfTestResult.cs" />
     <Compile Include="..\..\RiftRoulette\SelfTest\GameDependencies.cs" Link="RiftRoulette\SelfTest\GameDependencies.cs" />
     <Compile Include="..\..\RiftRoulette\SelfTest\EventCounters.cs" Link="RiftRoulette\SelfTest\EventCounters.cs" />
-    <Compile Include="..\..\RiftRoulette\Duel\KothRule.cs" Link="RiftRoulette\Duel\KothRule.cs" />
-    <Compile Include="..\..\RiftRoulette\Duel\StreakBoard.cs" Link="RiftRoulette\Duel\StreakBoard.cs" />
     <Compile Include="..\..\RiftRoulette\Stats\StatsLedger.cs" Link="RiftRoulette\Stats\StatsLedger.cs" />
     <Compile Include="..\..\RiftRoulette\Stats\DamageLedger.cs" Link="RiftRoulette\Stats\DamageLedger.cs" />
     <Compile Include="..\..\RiftRoulette\Stats\StatsBoardText.cs" Link="RiftRoulette\Stats\StatsBoardText.cs" />

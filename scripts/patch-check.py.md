@@ -37,7 +37,7 @@ convar names and entity-name strings.
 | Area | HIT when |
 |---|---|
 | Convar | a convar we set was in the baseline list and is gone (flag changes and never-listed convars are NOTEs; the upstream list can lag a patch) |
-| Hero | a `hero-builds.json` hero is no longer playable or its class name changed; a new playable hero is not in the `Heroes` enum; a `Heroes.X` used in Draft / Lobby is not in the enum or has no hero in the asset (new playable heroes are NOTEs: rerun `fetch-builds.py`) |
+| Hero | a `hero-builds.json` hero is no longer playable or its class name changed; a new playable hero is not in the `Heroes` enum; a `Heroes.X` used in `Lobby/LobbyService` is not in the enum or has no hero in the asset (new playable heroes are NOTEs: rerun `fetch-builds.py`) |
 | Item / Ability | an item (build, category, imbue, component, banned list) or ability in `hero-builds.json` is gone from the items asset |
 | Map | a map-placed entity count differs from the baseline, for names our source uses (NOTE for the others). Only changes after a fresh map dump |
 | API | a public member of a type our source names is gone or its signature changed, when our source also uses that member name; a type we name is gone |

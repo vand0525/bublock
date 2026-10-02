@@ -3,8 +3,6 @@ namespace RiftRoulette.GameLoop;
 public enum HeroMode
 {
   Random,
-  Draft,
-  Duel,
   Mirror
 }
 
@@ -19,30 +17,15 @@ public static class MatchConfig
 
   public static MatchFormat Format { get; private set; } = MatchFormat.Continuous;
 
-  public const string DuelAlias = "1v1";
-
   public static bool IsRandom => HeroMode == HeroMode.Random;
 
-  public static bool IsDuel => HeroMode == HeroMode.Duel;
-
   public static bool IsMirror => HeroMode == HeroMode.Mirror;
-
-  public static bool UsesDraft => HeroMode == HeroMode.Draft;
 
   public static void SetHeroMode(HeroMode mode) => HeroMode = mode;
 
   public static void SetFormat(MatchFormat format) => Format = format;
 
-  public static bool TryParseHeroMode(string text, out HeroMode mode)
-  {
-    if (string.Equals(text.Trim(), DuelAlias, StringComparison.OrdinalIgnoreCase))
-    {
-      mode = HeroMode.Duel;
-      return true;
-    }
-
-    return TryParseName(text, out mode);
-  }
+  public static bool TryParseHeroMode(string text, out HeroMode mode) => TryParseName(text, out mode);
 
   public static bool TryParseFormat(string text, out MatchFormat format) => TryParseName(text, out format);
 

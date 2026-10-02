@@ -27,27 +27,6 @@ public class StatsBoardTextTests
   }
 
   [Fact]
-  public void StreakBoard_ranks_by_best_then_name_and_skips_zero()
-  {
-    var rows = new[]
-    {
-      new StreakRow("sam", 3),
-      new StreakRow("Zed", 0),
-      new StreakRow("Theo", 5),
-      new StreakRow("Ann", 3)
-    };
-
-    Assert.Equal("STREAKS\n\n1  Theo   5\n2  Ann   3\n3  sam   3", StatsBoardText.StreakBoard(rows));
-  }
-
-  [Fact]
-  public void StreakBoard_empty_says_no_streaks()
-  {
-    Assert.Equal("STREAKS\n\nNo streaks yet", StatsBoardText.StreakBoard([]));
-    Assert.Equal(["No streaks yet"], StatsBoardText.StreakLines([new StreakRow("Zed", 0)]));
-  }
-
-  [Fact]
   public void Trim_cuts_long_names()
   {
     Assert.Equal("Short", StatsBoardText.Trim("Short"));

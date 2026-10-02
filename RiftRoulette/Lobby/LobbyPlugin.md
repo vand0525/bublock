@@ -9,7 +9,7 @@ lifecycle, server setup, and the lobby commands. Ops live on
 | Hook | Does |
 |---|---|
 | `OnLoad(isReload: true)` | `LobbyService.ApplyServerConvars()` (a hot reload skips `OnStartupServer`; keeps `maxplayers 13` and the buying convar right after an upload), then `AdminSeat.Restore(Timer)` (each admin's mode read back from the pawn: spectating and roaming admins go back into the seat, roaming ones re-cloaked; a playing admin stays a player), then `BanStatueService.KickConnectedBanned()` (the reload dropped statue state and kick timers, so banned players still connected are kicked) |
-| `OnLoad` (every load) | `Timer.Every(StreamCam.TickSeconds, StreamCam.Tick)`: the stream camera check every 2 s; `Timer.Every(AutoStartService.WaitingReminderSeconds, RemindWaiting)`: the waiting chat line every 30 s while a lone player waits for a match; `Timer.Every(BanStatueService.SustainSeconds, Sustain)`: keeps statues restrained and re-adds the statue modifier every 1 s; `Timer.Every(AutoRestartService.CheckSeconds, Check)`: the automatic map reload check every 60 s (timers die on hot reload, so all start here) |
+| `OnLoad` (every load) | `Timer.Every(StreamCam.TickSeconds, ...)`: every 2 s the stream camera check (`StreamCam.Tick`), then `AdminSeat.FollowWatchSpot` (a roaming admin moves to the welcome sign of the new watch spot side); `Timer.Every(AutoStartService.WaitingReminderSeconds, RemindWaiting)`: the waiting chat line every 30 s while a lone player waits for a match; `Timer.Every(BanStatueService.SustainSeconds, Sustain)`: keeps statues restrained and re-adds the statue modifier every 1 s; `Timer.Every(AutoRestartService.CheckSeconds, Check)`: the automatic map reload check every 60 s (timers die on hot reload, so all start here) |
 | `OnLoad` (every load) | Hooks the two incoming pause net messages, `CCLCMsg_RequestPause` and `CCitadelClientMsg_Pause` (`NetMessages.HookIncoming`); each returns `Stop` when `PauseGuard.Block(SenderSlot, "message", <type>)` says so. A message type without a registered ID logs a Warning in `Lobby` and is skipped. The handles are kept for `OnUnload` |
 | `OnUnload` | Cancels the pause message hooks, so a hot reload does not stack them |
 | `OnPrecacheResources` | `Precache.AddHero(BanStatueService.StatueLookHero)` (Vyper), logs `Precached hero` in `Lobby`. Runs at map load only, not on hot reload |
@@ -20,19 +20,20 @@ lifecycle, server setup, and the lobby commands. Ops live on
 | `OnClientFullConnect` | First `AutoRestartService.OnFullConnect(Slot, controller)` (join completed). When the controller is present: a banned player let in at connect (`BanStatueService.TakeArrival`) becomes a statue and is kicked 10 s later (`Petrify(RejoinKickSeconds, liveBan: false)`); otherwise an admin whose `AdminSeat.JoinMode` is `Spectate` or `Roam` (their last mode, or the 13th connection) goes through `AdminSeat.Join` (old seat forgotten, seated, and roaming again for `Roam`); everyone else, including an admin rejoining in `Play`, goes through `LobbyService.AdmitPlayer(controller, Timer)` (no bot check), which places the player on the smaller team and checks auto-start 2 s later |
 | `OnClientDisconnect` | First `AutoRestartService.OnDisconnect(Slot, IsMapChange)` (a join that never completed counts as stuck). A map-change disconnect (`args.IsMapChange`, reason `NetworkDisconnectShutdown`) only logs Debug `Map change disconnect, player kept`: Deadworks keeps the player, who reconnects to the next map. Otherwise `LobbyService.RemovePlayer(controller, Timer)` when the controller is present (may auto-end the match, never auto-starts one), else `LobbyService.OnDisconnectWithoutController(Slot, Reason, Timer)` |
 | `player_spawn` | A roaming admin (`AdminSeat.IsRoaming`) gets `AdminSeat.PlaceAndCloak` on the next tick (in front of the welcome sign, cloak, no restraint) and nothing else. Otherwise skips bots and seated admins (`Participants.IsParticipant`, but statues pass so a respawned statue goes back up); gives `WatchGuard.Grace` at once (a respawn at base is not a rescue) and `StreamCam.NoteSpawn` (the camera waits 5 s before following a fresh hero), then on the next tick `WatchSpot.SendUp(player)`: restrained and teleported to the watch spot above the rift being fought, or the next one when idle (runs here because it needs `Timer`) |
+| `player_hero_changed` | Null check (pawn and its controller present), then `LobbyHeroes.Enforce(controller, pawn, Timer)` (Random / Mirror hero guard, else the round hero or the lobby hero) |
 | `player_death` | `LobbyService.LogDeath` when controller and pawn are present; then `StreamCam.OnDeath(victim, attacker, Timer)` (the camera cuts to the killer if the admin was watching the victim) |
 
 ## Commands
 
 | Command | Who | Does |
 |---|---|---|
-| `/status` | player (in game) | `DescribePlayer` for the caller, sent to them in chat and logged at Information in `Players` |
+| `/status` | player (in game) | `DescribePlayer` for the caller (slot, team, round hero, hero, health), sent to them in chat and logged at Information in `Players` |
 | `/commands` | player (in game) | `CommandList.PlayerCommands` for this assembly, one chat line each, then `Full list: dw_help in console` |
 | `/about` | player (in game) | `AboutText.Lines(BettingService.LingerSeconds)` (mirror mode: `AboutText.MirrorLines()`), one chat line each: the mode and how betting works. Not logged |
 | `/player_list` | admin | count, then `DescribePlayer` for every player, to the caller's console |
 | `/player_info <slot>` | admin | `DescribePlayer` for one slot; also logged in `Players` |
 | `/player_kick <slot>` | admin | `LobbyService.KickPlayer`; error if the slot is empty |
-| `/player_team <slot> <sapphire\|amber>` | admin | `LobbyService.SetTeam`; errors for an unknown team, empty slot, or a player with a pick |
+| `/player_team <slot> <sapphire\|amber>` | admin | `LobbyService.SetTeam`; errors for an unknown team, empty slot, or a player holding a round hero (`<name> is fighting as <hero> this round; move them between rounds.`) |
 | `/lobby_setup` | admin | `LobbyService.ApplyServerConvars(Debug)` |
 | `/lobby_flex` | admin | `FlexSlots.UnlockAll(Debug)`, replies with the team count, then `FlexSlots.Describe()` (each team's flex slot flags; 15 = all open) |
 | `/pause_allow [on\|off]` | admin | No argument: `PauseGuard.Describe` (on/off, paused state, counts). `on` / `off` (or `1` / `0`): `PauseGuard.SetAllowed(Debug)`, which sets the pause convars and writes a master line; error for another value. Lasts until the next load or `/access_mode` change, which set pausing from the private flag |
@@ -45,8 +46,7 @@ lifecycle, server setup, and the lobby commands. Ops live on
 | `/restart_auto <on\|off>` | admin | `AutoRestartService.SetEnabled(Debug)` until the next load; error for another value |
 | `/restart_budget [n]` | admin | No argument: `MapRefreshService.Describe`. A number: `MapRefreshService.SetBudget(n, Debug)` (fighter-rounds before the join budget reload, 0 = off) until the next load; error for a negative or non-number |
 | `/spec_auto <on\|off>` | admin | `StreamCam.SetAuto`: the automatic stream camera on or off (default on; resets that admin's camera state); error for another value |
-| `/spec_status` | admin | `StreamCam.Describe`: auto, seated, observer mode, fly cam, the view angle read; who is on camera, parked side, placed / adjusting, watch side; the saved framing per side |
-| `/spec_reset` | admin | `StreamCam.ResetFraming(Debug)`: forgets the saved framing (`streamcam.json`), so the next park is the top-down default |
+| `/spec_status` | admin | `StreamCam.Describe`: auto, seated, observer mode, fly cam, the view angle read; who is on camera, parked side, placed / handled, watch side; the camera spot (position and angle) for the current watch side |
 
 Seat and `spec_*` commands take no player argument. They target the caller, or without a
 caller (server console, or a client console command that arrived without
@@ -62,9 +62,10 @@ reply with `AdminCommand.Reply`. Errors use `CommandException`.
 ## Invariants
 
 - `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`,
-  `player_spawn` and `player_death` each call `SelfTest/EventCounters.Hit`
-  first (`client_connect`, `client_full_connect`, `client_disconnect`,
-  `player_spawn`, `player_death`), so `dw_selftest_run` can tell whether the
+  `player_spawn`, `player_hero_changed` and `player_death` each call
+  `SelfTest/EventCounters.Hit` first (`client_connect`,
+  `client_full_connect`, `client_disconnect`, `player_spawn`,
+  `player_hero_changed`, `player_death`), so `dw_selftest_run` can tell whether the
   hook still fires after a game update.
 
 - Hooks never throw; missing controllers or pawns are skipped.
@@ -73,5 +74,5 @@ reply with `AdminCommand.Reply`. Errors use `CommandException`.
   `ClientDisconnectedEvent.Reason` an `ENetworkDisconnectionReason` enum)
   fails before its first line on every call, and only the host console
   shows it: from 2026-09-28 06:01 to the fix, no disconnect was cleaned up.
-- State: the pause message hook handles; picks live in `Draft/DraftState`, camera state
+- State: the pause message hook handles; round heroes live in `Round/RoundHeroes`, camera state
   in `StreamCam`, pause state in `PauseGuard`.

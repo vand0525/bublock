@@ -36,8 +36,8 @@ Random mode. Static state; called by `GameLoop/MatchService` only when
 | Op | Behavior | Returns |
 |---|---|---|
 | `BeginMatch(mode)` | Clears match state (pins stay); `TeamBalance.Even` over connected humans' teams | — |
-| `PrepareRound(timer, mode)` | Prunes teams to `Participants.Humans()`, places late joiners on the smaller team, picks the bench on a new intermission (`BenchRule.Next`), fighting teams (`BenchRule.FightingTeams`), `BalanceService.TryBalance`; resets `Fighters` and `DraftState`, then `ApplyChoice(roll: true)` | players swapped now |
-| `ApplyChoice` (private) | Rolls a new `MirrorChoice` when asked, when there is none, or when it no longer matches the pins; else keeps the current one (and its item order). Draws `_itemOrder` when there is none. Then for every connected fighter: `DraftState` pick of the shared hero (so `RoundFlow` moves them in), `LoadoutService.Swap(hero, that one build, RandomModeService.Options with { ItemOrder = _itemOrder })` when alive, else pending. Logs `Round prepared Hero= Build= BuildId= Slot= Pins= Fighters= Swapped= Pending= ItemOrder=`; refreshes the stats boards | swapped |
+| `PrepareRound(timer, mode)` | Prunes teams to `Participants.Humans()`, places late joiners on the smaller team, picks the bench on a new intermission (`BenchRule.Next`), fighting teams (`BenchRule.FightingTeams`), `BalanceService.TryBalance`; resets `Fighters` and `RoundHeroes`, then `ApplyChoice(roll: true)` | players swapped now |
+| `ApplyChoice` (private) | Rolls a new `MirrorChoice` when asked, when there is none, or when it no longer matches the pins; else keeps the current one (and its item order). Draws `_itemOrder` when there is none. Then for every connected fighter: `RoundHeroes.Set` to the shared hero (so `RoundFlow` moves them in), `LoadoutService.Swap(hero, that one build, RandomModeService.Options with { ItemOrder = _itemOrder })` when alive, else pending. Logs `Round prepared Hero= Build= BuildId= Slot= Pins= Fighters= Swapped= Pending= ItemOrder=`; refreshes the stats boards | swapped |
 | `PinHero(text, timer, mode)` | Empty: `DescribePins`. `clear`: drops both pins. Else parses the hero (`TryParseHero`, also without spaces; must have stored builds) and `Pins.PinHero` (keeps the slot when the hero has it). Then `AfterPinChange` | reply |
 | `PinBuild(text, timer, mode)` | Refused with no hero pinned. Empty: the pinned hero's numbered builds. `clear`: drops the slot. Else `Pins.TryPinSlot` (1 to the hero's build count). Then `AfterPinChange` | reply |
 | `AfterPinChange` (private) | Not mirror mode: saved. No match: used at match start. In a round: used next intermission. In a mirror intermission: `ApplyChoice(roll: false)` now (same fighters and bench; banners re-show as loadouts land) | reply suffix |
@@ -62,7 +62,7 @@ Random mode. Static state; called by `GameLoop/MatchService` only when
 - A pinned hero is never replaced by a roll (unless it has no stored
   builds, which `PinHero` refuses; logged as a Warning). A pinned slot is
   never rolled.
-- The bench player gets no hero and no `DraftState` pick, so `RoundFlow`
+- The bench player gets no hero and no `RoundHeroes` entry, so `RoundFlow`
   leaves them up top, restrained.
 
 ## Logs
@@ -77,6 +77,3 @@ details are in `loadout-*.log`.
   spawn.
 - Several players on one hero needs `citadel_enable_duplicate_heroes`,
   which `LobbyService.ApplyServerConvars` turns on at startup.
-- `DraftState` keeps one hero entry for every pick of it; releasing one
-  fighter drops the hero from `SelectedHeroes` (only the draft boards read
-  it, and they are off in mirror mode).

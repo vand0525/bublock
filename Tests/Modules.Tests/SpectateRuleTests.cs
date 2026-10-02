@@ -91,31 +91,4 @@ public class SpectateRuleTests
   {
     Assert.Equal(expected, SpectateRule.HandMoved(distance, turned));
   }
-
-  [Fact]
-  public void FramingStep_parks_a_still_camera_that_is_not_placed()
-  {
-    Assert.Equal(FramingAction.Park, SpectateRule.FramingStep(placed: false, adjusting: false, moved: false, spotChanged: false));
-  }
-
-  [Fact]
-  public void FramingStep_waits_while_flying_before_the_first_park()
-  {
-    Assert.Equal(FramingAction.Wait, SpectateRule.FramingStep(placed: false, adjusting: false, moved: true, spotChanged: false));
-  }
-
-  [Fact]
-  public void FramingStep_moving_a_placed_camera_adjusts_then_saves_when_still()
-  {
-    Assert.Equal(FramingAction.Adjust, SpectateRule.FramingStep(placed: true, adjusting: false, moved: true, spotChanged: false));
-    Assert.Equal(FramingAction.Adjust, SpectateRule.FramingStep(placed: false, adjusting: true, moved: true, spotChanged: false));
-    Assert.Equal(FramingAction.Save, SpectateRule.FramingStep(placed: false, adjusting: true, moved: false, spotChanged: true));
-  }
-
-  [Fact]
-  public void FramingStep_stays_placed_and_reparks_when_the_spot_changes()
-  {
-    Assert.Equal(FramingAction.Stay, SpectateRule.FramingStep(placed: true, adjusting: false, moved: false, spotChanged: false));
-    Assert.Equal(FramingAction.Park, SpectateRule.FramingStep(placed: true, adjusting: false, moved: false, spotChanged: true));
-  }
 }

@@ -12,15 +12,6 @@ public enum SpectateReason
 
 public readonly record struct SpectateChoice(SpectateReason Reason, ulong? Target);
 
-public enum FramingAction
-{
-  Wait,
-  Adjust,
-  Save,
-  Park,
-  Stay
-}
-
 public static class SpectateRule
 {
   // Source caps view pitch at 89; 90 would be clamped or flip the view.
@@ -60,16 +51,4 @@ public static class SpectateRule
 
   public static bool HandMoved(float distance, float turned) =>
     distance > MoveUnits || turned > TurnDegrees;
-
-  // placed: the camera was put at the framing (and has not been moved since); adjusting: the viewer moved it from there.
-  public static FramingAction FramingStep(bool placed, bool adjusting, bool moved, bool spotChanged)
-  {
-    if (moved)
-      return placed || adjusting ? FramingAction.Adjust : FramingAction.Wait;
-
-    if (adjusting)
-      return FramingAction.Save;
-
-    return !placed || spotChanged ? FramingAction.Park : FramingAction.Stay;
-  }
 }

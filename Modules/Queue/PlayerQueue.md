@@ -2,7 +2,8 @@
 
 An ordered line of unique Steam IDs. Pure C# (no Deadworks calls), game
 agnostic, unit tested in `Tests/Modules.Tests`. Not static: each consumer
-owns its own instance (Rift Roulette's 1v1 mode owns one in `DuelService`).
+owns its own instance (Rift Roulette's bench rotation: one in
+`RandomModeService`, one in `MirrorModeService`).
 
 ## Operations
 

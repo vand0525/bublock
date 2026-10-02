@@ -87,9 +87,9 @@ def scan_source():
     return identifiers, convars, entity_names
 
 
-def draft_and_lobby_heroes():
+def lobby_heroes():
     names = set()
-    for rel in ["RiftRoulette/Draft/DraftPools.cs", "RiftRoulette/Draft/DraftService.cs", "RiftRoulette/Lobby/LobbyService.cs"]:
+    for rel in ["RiftRoulette/Lobby/LobbyService.cs"]:
         names.update(re.findall(r"\bHeroes\.(\w+)\b(?!\s*[(<])", open(os.path.join(BUBLOCK, rel), encoding="utf-8").read()))
     return names
 
@@ -282,9 +282,9 @@ def compare(base, fresh):
             if enum_ids and int(hero_id) not in enum_ids:
                 hit("Hero", f"{hero['name']} (id {hero_id}) is not in the Heroes enum; update lib/ and rebuild")
     if hero_enum:
-        for name in sorted(draft_and_lobby_heroes()):
+        for name in sorted(lobby_heroes()):
             if name not in hero_enum:
-                hit("Hero", f"Heroes.{name} (used in Draft / Lobby) is not in the enum")
+                hit("Hero", f"Heroes.{name} (used in Lobby) is not in the enum")
             else:
                 hero = fresh["heroes"].get(str(hero_enum[name]))
                 if hero is None:

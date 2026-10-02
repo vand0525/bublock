@@ -43,7 +43,7 @@ arguments take the rest of the line; type `\n` for a line break.
 - **Who:** admin
 - **Calls:** `WorldTextService.List`
 - **Mode:** Debug; read-only
-- **Side effects:** prints the count, then `id | Position | preview` (40 characters) for each board created through WorldText (draft boards appear as `draft.welcome`, `draft.sapphire`, `draft.amber`)
+- **Side effects:** prints the count, then `id | Position | preview` (40 characters) for each board created through WorldText (Rift Roulette boards appear as `board.welcome`, `board.hint`, `board.note`)
 
 #### /wt_create <id> <text...>
 
@@ -59,7 +59,7 @@ arguments take the rest of the line; type `\n` for a line break.
 - **Who:** admin
 - **Calls:** `WorldTextService.Update`
 - **Mode:** Debug
-- **Side effects:** changes the board's text in place; error if the id is unknown. Draft boards are redrawn by the game on the next pick/unpick/reset, which overwrites manual edits
+- **Side effects:** changes the board's text in place; error if the id is unknown. Rift Roulette boards are redrawn by the game when the watch spot moves, which overwrites manual edits
 
 #### /wt_remove <id>
 
@@ -75,7 +75,7 @@ arguments take the rest of the line; type `\n` for a line break.
 - **Who:** admin
 - **Calls:** `WorldTextService.ClearAll`
 - **Mode:** Debug
-- **Side effects:** removes **every** `point_worldtext` on the map (including draft boards and any text not created through WorldText) and replies with the count. Draft boards come back on the next draft redraw
+- **Side effects:** removes **every** `point_worldtext` on the map (including Rift Roulette boards and any text not created through WorldText) and replies with the count. Rift Roulette boards come back on the next redraw (`/board_redraw`)
 
 ### Movement (`MovementPlugin`, in RiftRoulette.dll)
 
@@ -162,7 +162,7 @@ All: admin (`AdminCommand.Authorize`; server console trusted; rejected
 callers get "You are not allowed to use this command." and a Warning in the
 `Lobby` log with name and Steam ID). Ops run in Debug mode. Results go to
 the caller's console. Player lines use `LobbyService.DescribePlayer`: slot,
-name, Steam ID, team, pick, hero, life state, alive, health, max health,
+name, Steam ID, team, round hero, hero, life state, alive, health, max health,
 position, entity index.
 
 #### /player_list
@@ -187,7 +187,7 @@ position, entity index.
 - **Who:** admin
 - **Calls:** `LobbyService.KickPlayer`
 - **Mode:** Debug
-- **Side effects:** logs the kick with the player's name and Steam ID; releases their pick and redraws the draft boards if they had one; runs `kickid <slot>`. Empty slot: Warning in `lobby` (copied to master) and an error reply
+- **Side effects:** logs the kick with the player's name and Steam ID; runs `kickid <slot>` (the disconnect hook then drops their round hero). Empty slot: Warning in `lobby` (copied to master) and an error reply
 
 #### /player_team <slot> <sapphire|amber>
 
@@ -195,7 +195,7 @@ position, entity index.
 - **Who:** admin
 - **Calls:** `RiftRouletteTeams.TryParse`, `LobbyService.SetTeam`
 - **Mode:** Debug
-- **Side effects:** moves a player without a pick to Sapphire (3) or Amber (2) with `ChangeTeam`. Errors for an unknown team name, an empty slot, or a player who has a pick (the pick decides their team; they must unpick first)
+- **Side effects:** moves a player to Sapphire (3) or Amber (2) with `ChangeTeam`. Errors for an unknown team name, an empty slot, or a player who holds a hero for the current round (`<name> is fighting as <hero> this round; move them between rounds.`)
 - **Notes:** team names are allowed here because Lobby is Rift Roulette code, not a module
 
 #### /lobby_setup
@@ -204,7 +204,7 @@ position, entity index.
 - **Who:** admin
 - **Calls:** `LobbyService.ApplyServerConvars`
 - **Mode:** Debug
-- **Side effects:** re-applies the startup convars and commands (team size 6, max players 13 with 12 shown in the browser (the 13th is the admin seat), KOTH off and warning times 1, override spawn time 1, purchasing anywhere, duplicate heroes, `citadel_hero_demo_unlock_flex_slots 1` and every flex slot opened on both teams (`FlexSlots.UnlockAll`), `citadel_voice_all_talk 1`, pause convars from `PauseGuard`). Note `citadel_koth_enabled 0` would close the KOTH gate if run mid-rift
+- **Side effects:** re-applies the startup convars and commands (team size 6, max players 13 with 12 shown in the browser (the 13th is the admin seat), KOTH off and warning times 1, override spawn time 1, purchasing anywhere off (`ShopAccess.Disable`), duplicate heroes, `citadel_hero_demo_unlock_flex_slots 1` and every flex slot opened on both teams (`FlexSlots.UnlockAll`), `citadel_voice_all_talk 1`, pause convars from `PauseGuard`). Note `citadel_koth_enabled 0` would close the KOTH gate if run mid-rift
 
 #### /lobby_flex
 
@@ -228,9 +228,9 @@ position, entity index.
 
 - **Invocation:** console only (`ConsoleOnly`), no arguments: `dw_seat_spec` from the client dev console or the server console. Chat `/seat_spec` does not run it
 - **Who:** admin. Targets the caller, or without a caller (server console, or a client command that arrives without one) the connected player with the admin Steam ID (`AdminAuth.SteamIds`); replies `The admin is not connected.` otherwise
-- **Calls:** `AdminSeat.Sit` (→ `DraftState.Release`, `RandomModeService.Forget`, `DuelService.Forget`, `RestraintService.Release`, `WatchGuard.Forget`, `StatsService.RefreshBoards`, `AutoStartService.Check`; next tick `ChangeTeam(1, false)` + `MakeObserver()`)
+- **Calls:** `AdminSeat.Sit` (→ `RoundHeroes.Remove`, `RandomModeService.Forget`, `MirrorModeService.Forget`, `RestraintService.Release`, `WatchGuard.Forget`, `StatsService.RefreshBoards`, `AutoStartService.Check`; next tick `ChangeTeam(1, false)` + `MakeObserver()`)
 - **Mode:** Debug
-- **Side effects:** works at any time, also during a rift round. Moves the admin to the spectator side, outside Sapphire and Amber, and removes their hero pawn (observer camera). They stop counting for teams, auto-start, stats, Random mode and 1v1; a running match may auto-end if fewer than 2 players remain, and the teams are evened at the next Random mode intermission. Logs `Admin seat taken, spectating next tick Phase=...`, then `Admin spectating TeamNum=... HeroPawn=... Observer=...`, and a master line
+- **Side effects:** works at any time, also during a rift round. Moves the admin to the spectator side, outside Sapphire and Amber, and removes their hero pawn (observer camera). They stop counting for teams, auto-start, stats, Random and Mirror mode; a running match may auto-end if fewer than 2 players remain, and the teams are evened at the next Random mode intermission. Logs `Admin seat taken, spectating next tick Phase=...`, then `Admin spectating TeamNum=... HeroPawn=... Observer=...`, and a master line
 - **Notes:** `ChangeTeam(1)` alone leaves the hero pawn alive and dropped the admin's client 12-23 s later (two crashes on 2026-09-27); `MakeObserver` prevents that. Spectators cannot type in game chat, so use `/seat_roam` for chat or the console for seat commands. An admin rejoins (map change or reconnect) in their last mode: spectating, roaming or playing. `dw_seat_spec` while roaming switches to spectating right away; mode does not auto-flip on join/leave
 
 #### /seat_play
@@ -239,7 +239,7 @@ position, entity index.
 - **Who:** admin. Same target as `dw_seat_spec`: the caller, else the connected player with the admin Steam ID
 - **Calls:** `AdminSeat.Stand` (→ `LobbyService.AdmitPlayer`)
 - **Mode:** Debug
-- **Side effects:** takes the admin out of the seat (ending roaming and its cloak) and admits them like a new connection: smaller team, LobbyHero (Abrams), watch spot (restrained), Random mode joiner or 1v1 setup souls, auto-start check. 2 s later logs whether a hero spawned (`Admin hero after leaving the seat`, or the Warning `Admin has no hero after leaving the seat`)
+- **Side effects:** takes the admin out of the seat (ending roaming and its cloak) and admits them like a new connection: smaller team, LobbyHero (Abrams), watch spot (restrained), Random / Mirror mode joiner, auto-start check. 2 s later logs whether a hero spawned (`Admin hero after leaving the seat`, or the Warning `Admin has no hero after leaving the seat`)
 - **Notes:** works from spectating or roaming; refused when already playing (not seated), or when 12 players are already playing. Takes no slot argument: a seated admin's console command can arrive without a caller (seen 2026-09-27), so both seat commands fall back to the admin Steam ID
 
 #### /seat_roam
@@ -248,8 +248,8 @@ position, entity index.
 - **Who:** admin. Same target as `dw_seat_spec`: the caller, else the connected player with the admin Steam ID
 - **Calls:** `AdminSeat.RoamNow` (→ `Roam`, or `PlaceAndCloak` when already roaming; from playing, `Sit` first)
 - **Mode:** Debug
-- **Side effects:** a playing admin first leaves their team like `dw_seat_spec` (pick released, out of Random mode / 1v1, unrestrained, boards and auto-start updated) but roams instead of spectating. A spectating or playing admin becomes Abrams on Amber and, 2 s later, is teleported straight in front of the welcome sign facing it and cloaked (`modifier_invis`, 3600 s), not restrained. An admin already roaming is teleported back in front of the sign and cloaked again. Still seated, so never a participant. Allowed while players are connected. Logs `Admin roaming` (and a master line) or the placement / cloak lines
-- **Notes:** refused while the playing admin's hero is dead (`Roam after the respawn`; `SelectHero` needs a living pawn). Mode stays until `dw_seat_spec` or `/seat_play`
+- **Side effects:** a playing admin first leaves their team like `dw_seat_spec` (round hero dropped, out of Random / Mirror mode, unrestrained, boards and auto-start updated) but roams instead of spectating. A spectating or playing admin becomes Abrams on Amber and, 2 s later, is teleported straight in front of the welcome sign facing it and cloaked (`modifier_invis`, 3600 s), not restrained. An admin already roaming is teleported back in front of the sign and cloaked again. Still seated, so never a participant. Allowed while players are connected. Logs `Admin roaming` (and a master line) or the placement / cloak lines
+- **Notes:** refused while the playing admin's hero is dead (`Roam after the respawn`; `SelectHero` needs a living pawn). Mode stays until `dw_seat_spec` or `/seat_play`. When the watch spot moves to another rift side, a live roaming Abrams is teleported in front of the welcome sign there within 2 s (`AdminSeat.FollowWatchSpot`, log `Roaming admin follows the watch spot From= To=`)
 #### /seat_status
 
 - **Invocation:** chat `/seat_status` | console `dw_seat_status`
@@ -311,13 +311,15 @@ back. It keeps the join package under the 512 KB limit.
 ### Stream camera (`LobbyPlugin`, `Lobby/StreamCam`)
 
 While an admin is seated as an observer the stream camera runs by itself
-(no command needed): with players to watch it follows one (in-eye) and
-cuts to the killer when they die; with nobody to watch it parks at the
-saved framing for the current rift side (default straight down over the
-watch spot; the park only moves the view in fly cam, C). Move the camera
-after that park and let go: that becomes the saved framing
-(`bublock/streamcam.json`), mirrored to the other side. The camera never
-moves while you move it. These commands are optional. They take no player
+(no command needed): while a round is fought it follows a fighter
+(in-eye) and cuts to the killer when they die; with nobody fighting
+(between rounds, everyone up top is restrained) it parks at the fixed spot
+for the current rift side (`StreamFraming.Spot`: green, center, yellow,
+captured in fly cam). The server cannot switch you into fly cam, so press
+C between rounds: outside fly cam the park is re-sent every 6 s, so fly
+cam lands on the spot. The camera never moves while you move it; a camera
+you moved after it landed stays until the side changes or a round starts.
+These commands are optional. They take no player
 argument: they target the caller, else the connected admin (same fallback
 as `dw_seat_spec`). Spectators have no chat, so use the client console
 (`dw_spec_*`).
@@ -328,7 +330,7 @@ as `dw_seat_spec`). Spectators have no chat, so use the client console
 - **Who:** admin
 - **Calls:** `StreamCam.SetAuto`
 - **Mode:** Debug
-- **Side effects:** turns the automatic camera on or off for that admin (default on) and resets its camera state (the saved framing stays). Off leaves the camera where it is for manual control. `on`/`1`, `off`/`0`; anything else errors. Resets to on when the admin stands up or disconnects
+- **Side effects:** turns the automatic camera on or off for that admin (default on) and resets its camera state. Off leaves the camera where it is for manual control. `on`/`1`, `off`/`0`; anything else errors. Resets to on when the admin stands up or disconnects
 
 #### /spec_status
 
@@ -336,16 +338,8 @@ as `dw_seat_spec`). Spectators have no chat, so use the client console
 - **Who:** admin
 - **Calls:** `StreamCam.Describe`
 - **Mode:** Debug; read-only
-- **Side effects:** three lines: auto, seated, observer, observer mode, fly cam, the view angle read (`ViewAngle=pitch yaw` or `unreadable`); who is on camera, parked side, placed, adjusting, watch side; the saved framing per side (offset, pitch, yaw) or `default`
-- **Notes:** `ViewAngle` changing while you turn in fly cam confirms the framing angle can be saved
-
-#### /spec_reset
-
-- **Invocation:** console `dw_spec_reset` | chat `/spec_reset`
-- **Who:** admin
-- **Calls:** `StreamCam.ResetFraming` (→ `StreamFramingStore.Reset`)
-- **Mode:** Debug
-- **Side effects:** forgets the saved framing for both sides (rewrites `bublock/streamcam.json`); the next park (nobody to watch, fly cam) goes to the top-down default
+- **Side effects:** three lines: auto, seated, observer, observer mode, fly cam, the view angle read (`ViewAngle=pitch yaw` or `unreadable`); who is on camera, parked side, placed, handled, watch side; the camera spot for the current watch side (`Spot <side>: position x y z, angle pitch yaw roll`)
+- **Notes:** `ViewAngle` changing while you turn in fly cam confirms the hand-move check can see you
 
 ### Access (`AccessPlugin`, in RiftRoulette.dll)
 
@@ -435,71 +429,32 @@ numbers are refused.
 - **Mode:** Debug
 - **Side effects:** no argument prints the mode, the file path, and both lists. `private` saves the mode, kicks every connected player who is neither whitelisted nor an admin (reply lists who) and turns pausing on (`Pausing is on.` in the reply; for an organised event). `open` saves the mode, kicks nobody and turns pausing off; anyone not banned can join again (the 12-player seat cap still applies). Pausing follows the saved mode on every load too; `/pause_allow` overrides it until then
 
-### Draft (`DraftPlugin`, in RiftRoulette.dll)
+### Boards (`BoardsPlugin`, in RiftRoulette.dll)
 
 All: admin (`AdminCommand.Authorize`; server console trusted; rejected
 callers get "You are not allowed to use this command." and a Warning in the
-`Draft` log with name and Steam ID). Ops run in Debug mode, so detail lines
-appear in `draft-*.log`. Results go to the caller's console with a
-`[Draft]` prefix. In Random mode (`/match_mode random`, the default)
-`/draft_assign` and `/draft_release` reply "Heroes are random this
-match..." and change nothing, and `/draft_boards` draws the welcome board
-plus the Sapphire / Amber stats boards instead of the pool boards. 1v1
-mode behaves the same way (draft off, stats
-boards), and Draft's hero enforcement never runs there. In Random mode Draft's hero enforcement defers to
-`RandomModeService.GuardHero`: a player who changes hero from the menu
-after their build was applied is killed and respawns with their assigned
-hero and build (the death is not counted in stats).
+`Boards` log with name and Steam ID). Ops run in Debug mode, so detail lines
+appear in `boards-*.log`. Results go to the caller's console with a
+`[Boards]` prefix. The boards are drawn by themselves next tick after every
+map start and hot reload, and move with the watch spot.
 
-#### /draft_status
+#### /board_redraw
 
-- **Invocation:** chat `/draft_status` | console `dw_draft_status`
+- **Invocation:** chat `/board_redraw` | console `dw_board_redraw`
 - **Who:** admin
-- **Calls:** `DraftService.DescribeDraft`
-- **Mode:** Debug; read-only
-- **Side effects:** prints both pools (taken heroes marked), the pick count, then `Hero | Name | slot N | SteamID=` per pick (`(offline)` when the picker is not connected)
-
-#### /draft_assign <slot> <hero>
-
-- **Invocation:** chat `/draft_assign <slot> <hero>` | console `dw_draft_assign <slot> <hero>`
-- **Who:** admin
-- **Calls:** `DraftService.Pick` for the player in that slot
+- **Calls:** `BoardService.Redraw`
 - **Mode:** Debug
-- **Side effects:** same rules and effects as that player running `/pick <hero>` (refusals included). The outcome line goes to the player's chat and to the caller's console. Error if the slot is empty
-
-#### /draft_release <slot>
-
-- **Invocation:** chat `/draft_release <slot>` | console `dw_draft_release <slot>`
-- **Who:** admin
-- **Calls:** `DraftService.Unpick` for the player in that slot
-- **Mode:** Debug
-- **Side effects:** same rules and effects as that player running `/unpick`. The outcome line goes to the player's chat and to the caller's console. Error if the slot is empty
-
-#### /draft_reset
-
-- **Invocation:** chat `/draft_reset` | console `dw_draft_reset`
-- **Who:** admin
-- **Calls:** `DraftService.Reset`
-- **Mode:** Debug
-- **Side effects:** clears all picks; for every alive player zeroes gold, ability points, and level, moves them to team 2 as LobbyHero (Abrams) (Random mode keeps their team so teams stay even), and teleports them to the draft area next tick; dead players are skipped (Debug line in `draft-*.log`); redraws boards; replies with the number of players reset
-
-#### /draft_boards
-
-- **Invocation:** chat `/draft_boards` | console `dw_draft_boards`
-- **Who:** admin
-- **Calls:** `DraftService.RedrawBoards`
-- **Mode:** Debug
-- **Side effects:** removes **every** `point_worldtext` on the map, then redraws the three draft boards from the current picks (Random mode: welcome board plus the two stats boards)
+- **Side effects:** removes **every** `point_worldtext` on the map, then draws the welcome board, the `/about` hint and the note (if set), the Sapphire / Amber stats boards and the betting leaderboard at the current watch spot. Replies `[Boards] Boards redrawn`
 - **Notes:** use after `/wt_clear` or manual `/wt_update` edits
 
-#### /draft_note
+#### /board_note [text]
 
-- **Invocation:** chat `/draft_note [text]` | console `dw_draft_note [text]`
+- **Invocation:** chat `/board_note [text]` | console `dw_board_note [text]`
 - **Who:** admin
-- **Calls:** `WelcomeNoteStore.Set`, then `DraftService.RedrawBoards`
+- **Calls:** `WelcomeNoteStore.Set`, then `BoardService.Redraw`
 - **Mode:** Debug
-- **Side effects:** sets the note under the welcome board, below the fixed `/about` hint line (`draft.note`; words joined with spaces, `\n` is a line break) and saves it to `bublock/welcomenote.txt` on the server, then redraws the boards; no text clears the note. Replies `[Draft] Note set: <preview>` or `[Draft] Note cleared`
-- **Notes:** the note survives redraws, uploads and restarts; edits to `draft.welcome` made with `/wt_update` do not
+- **Side effects:** sets the note under the welcome board, below the fixed `/about` hint line (`board.note`; words joined with spaces, `\n` is a line break) and saves it to `bublock/welcomenote.txt` on the server, then redraws the boards; no text clears the note. Replies `[Boards] Note set: <preview>` or `[Boards] Note cleared`
+- **Notes:** the note survives redraws, uploads and restarts; edits to `board.welcome` made with `/wt_update` do not
 
 ### Rift (`RiftPlugin`, in RiftRoulette.dll)
 
@@ -515,9 +470,9 @@ one rift runs at a time.
 
 - **Invocation:** chat `/rift_start` | console `dw_rift_start`
 - **Who:** admin
-- **Calls:** `RoundFlow.RunRound` (the same composed path the lifecycle runs in Clean mode) → `RiftService.RunRift` (`RiftGameRules.ConfigureNextRift`, wait for spawner, `ParkScheduler`, `RoundFlow.MoveTeamsToRift`, `AlternateSide`, watch, `EndRound` with `RoundFlow.ReturnPlayersToDraft`)
+- **Calls:** `RoundFlow.RunRound` (the same composed path the lifecycle runs in Clean mode) → `RiftService.RunRift` (`RiftGameRules.ConfigureNextRift`, wait for spawner, `ParkScheduler`, `RoundFlow.MoveTeamsToRift`, `AlternateSide`, watch, `EndRound` with `RoundFlow.SendPlayersUp`)
 - **Mode:** Debug
-- **Side effects:** forces the next rift (green / yellow alternating, starts green) through the game's KOTH scheduler. When the spawner appears: parks the natural scheduler (KOTH off), moves Sapphire picks and Amber picks to their own slot spots around that side's team starts (`SlotSpots.Fight`), flips the next side. Watches each tick: new troopers mean finished; a cash-in that appears then disappears means tied. 3 s later returns alive players, restrained, to the watch spot above the next rift, and moves the boards there (dead ones return through Lobby's `player_spawn`) and removes troopers spawned since the start. If no spawner appears within 320 ticks: parks the scheduler, Warning in the log, side not flipped. Sets the log round id `r<n>` for the rift
+- **Side effects:** forces the next rift (green / yellow alternating, starts green) through the game's KOTH scheduler. When the spawner appears: parks the natural scheduler (KOTH off), moves the Sapphire and Amber fighters (players with a round hero) to their own slot spots around that side's team starts (`SlotSpots.Fight`), flips the next side. Watches each tick: new troopers mean finished; a cash-in that appears then disappears means tied. 3 s later returns alive players, restrained, to the watch spot above the next rift, and moves the boards there (dead ones return through Lobby's `player_spawn`) and removes troopers spawned since the start. If no spawner appears within 320 ticks: parks the scheduler, Warning in the log, side not flipped. Sets the log round id `r<n>` for the rift
 - **Notes:** refuses with "A rift is already running (Phase=...). Use /rift_cancel." while a rift is in progress. Replies "Could not reach CCitadelGameRules" (Error in log) if gamerules cannot be found. Known-good sequence; do not alter
 
 #### /rift_status
@@ -550,7 +505,7 @@ one rift runs at a time.
 
 - **Invocation:** chat `/rift_cancel` | console `dw_rift_cancel`
 - **Who:** admin
-- **Calls:** `RoundFlow.CancelRound` → `RiftService.CancelRift` (with `RoundFlow.ReturnPlayersToDraft`)
+- **Calls:** `RoundFlow.CancelRound` → `RiftService.CancelRift` (with `RoundFlow.SendPlayersUp`)
 - **Mode:** Debug
 - **Side effects:** stops the spawn wait, the watch, and the end timer; parks the KOTH scheduler and turns KOTH off; returns alive players to the watch spot above the next rift (restrained); removes every rift trooper (`npc_trooper`) now and again 5 s and 10 s later; outcome becomes `cancelled`. If the rift had not spawned yet, the next side is unchanged. Replies "No rift is running." when idle
 - **Notes:** ends **our** round only: a rift objective that already spawned stays on the map (verified in game; there is no known safe way to remove it). If it is captured later, nothing watches it; `/rift_cleanup` removes its troopers. During a match (`/match_start`) the cancelled round scores no point and the loop continues
@@ -610,18 +565,18 @@ matches by hand.
 
 - **Invocation:** chat `/match_start` | console `dw_match_start`
 - **Who:** admin
-- **Calls:** `MatchService.Start` → in Random mode `RandomModeService.BeginMatch`, then each intermission `RandomModeService.PrepareRound` → after each intermission `RoundFlow.RunRound` (the lifecycle path)
+- **Calls:** `MatchService.Start` → `RandomModeService.BeginMatch` (Mirror mode: `MirrorModeService.BeginMatch`), then each intermission `PrepareRound` on the same service → after each intermission `RoundFlow.RunRound` (the lifecycle path)
 - **Mode:** Debug (the loop and its rounds log in detail)
-- **Side effects:** resets the score; in Random mode (the default) balances teams once and, at the start of every intermission, swaps every player to a new random hero with a top build; banner `Match starting` / `Round 1 in 5s` (1v1: `1v1` / the pairing); then, forever until `/match_end`: countdown (Random mode: 3 s in, each player sees `<Hero>` / `<build> - 12,345 souls`; 3 s before the round, everyone sees `Round N` / the score, or the pairing in 1v1), start the next rift round (no banner), score the result when it ends (banner `Sapphire 1 - 0 Amber` / `Sapphire took the rift`). If the new rift does not spawn but one is already on the map (left by a cancelled round), that rift is used. A captured rift gives 1 point to the team of the first new rift trooper; tied, cancelled, and timed-out rounds give none. Master log: match started, each round result, match ended
-- **Notes:** refuses while a match or a rift is running. Players who die during a round respawn at the watch spot above the rift still being fought, silenced and unable to use items, shoot or melee (they can reload), and are out until the next round. Draft mode: picks carry over; players can `/pick` or `/unpick` during the intermission. Random mode: teams stay; players dead at the start of an intermission get their new hero on respawn. `/rift_start` during a countdown makes the loop wait for that rift instead of starting another
+- **Side effects:** resets the score; in Random mode (the default) balances teams once and, at the start of every intermission, swaps every player to a new random hero with a top build; banner `Match starting` / `Round 1 in 5s`; then, forever until `/match_end`: countdown (3 s in, each player sees `<Hero>` / `<build> - 12,345 souls`; 3 s before the round, everyone sees `Round N` / the score), start the next rift round (no banner), score the result when it ends (banner `Sapphire 1 - 0 Amber` / `Sapphire took the rift`). If the new rift does not spawn but one is already on the map (left by a cancelled round), that rift is used. A captured rift gives 1 point to the team of the first new rift trooper; tied, cancelled, and timed-out rounds give none. Master log: match started, each round result, match ended
+- **Notes:** refuses while a match or a rift is running. Players who die during a round respawn at the watch spot above the rift still being fought, silenced and unable to use items, shoot or melee (they can reload), and are out until the next round. Teams stay; players dead at the start of an intermission get their new hero on respawn. `/rift_start` during a countdown makes the loop wait for that rift instead of starting another
 
 #### /match_end
 
 - **Invocation:** chat `/match_end` | console `dw_match_end`
 - **Who:** admin
-- **Calls:** `MatchService.End` (`RoundFlow.CancelRound` if a rift is running, `RandomModeService.EndMatch` in Random mode, `DraftService.Reset`, `HudService.AnnounceAll`)
+- **Calls:** `MatchService.End` (`RoundFlow.CancelRound` if a rift is running, `BettingService.EndMatch` and `RandomModeService.EndMatch` in Random mode, `MirrorModeService.EndMatch` in Mirror mode, `LobbyHeroes.ReturnAll`, `BoardService.Redraw`, `HudService.AnnounceAll`)
 - **Mode:** Debug
-- **Side effects:** stops the countdown; cancels a running rift round (a spawned rift objective stays on the map); in Random mode resets each alive player's hero (clears the build) and forgets teams; clears all picks and returns every alive player to the lobby as LobbyHero (Abrams) with zero gold (same as `/draft_reset`); banner `Match over` / final score (1v1: `Best streaks: A 5, B 3`); resets the score (1v1: clears the streak leaderboard). Replies `Match ended after N round(s). Final: ... M player(s) returned to the lobby.` or `No match is running.`
+- **Side effects:** stops the countdown; cancels a running rift round (a spawned rift objective stays on the map); forgets the mode's teams and assignments; clears the round heroes and returns every alive player (teams kept) to LobbyHero (Abrams) with zero gold, ability points and level, sent up to the watch spot next tick; redraws the boards; banner `Match over` / final score; resets the score. Replies `Match ended after N round(s). Final: ... M player(s) returned to the lobby.` or `No match is running.`
 - **Notes:** with auto-start on (the default), a new match starts again on the next connect or disconnect while 2+ players are on; use `/match_auto off` first to keep it ended
 
 #### /match_auto <on|off>
@@ -639,7 +594,7 @@ matches by hand.
 - **Who:** admin
 - **Calls:** `MatchService.DescribeMatch`
 - **Mode:** Debug; read-only
-- **Side effects:** two lines: phase (Idle / Intermission / InRound), round, score, ties, auto-start on/off; mode and format, intermission length, rift phase, next side. In 1v1 the first line shows `King=<name> xN` instead of score and ties, followed by the best-streak leaderboard lines
+- **Side effects:** two lines: phase (Idle / Intermission / InRound), round, score, ties, auto-start on/off; mode and format, intermission length, rift phase, next side
 
 #### /match_intermission <seconds>
 
@@ -649,13 +604,13 @@ matches by hand.
 - **Mode:** Debug
 - **Side effects:** sets the seconds between rounds (5-120, default 5; betting opens here and stays open 10 s into the round); applies from the next countdown; lost on plugin reload
 
-#### /match_mode <random|draft|duel|1v1|mirror>
+#### /match_mode <random|mirror>
 
-- **Invocation:** chat `/match_mode <random|draft|duel|1v1|mirror>` | console `dw_match_mode <mode>`
+- **Invocation:** chat `/match_mode <random|mirror>` | console `dw_match_mode <mode>`
 - **Who:** admin
-- **Calls:** `MatchConfig.TryParseHeroMode`, `MatchService.SetHeroMode` (→ `ShopAccess.Sync`, `DraftService.Reset`; 1v1: `DuelService.EnterSetup` / `Leave`; `ModeBanner`)
+- **Calls:** `MatchConfig.TryParseHeroMode`, `MatchService.SetHeroMode` (→ `LobbyHeroes.ReturnAll`, `BoardService.Redraw`, `ModeBanner`)
 - **Mode:** Debug
-- **Side effects:** sets how heroes are chosen for the next match. `random` (default): each intermission everyone gets a new random hero with one of its top 3 builds, draft pool boards hidden, pick commands off. `draft`: the hero draft with pool boards. `duel` or `1v1`: draft off, free hero switching from the menu, 100,000 souls and level 36 for everyone until `/duel_copy`; leaving 1v1 drops the copied build. `mirror`: each intermission every fighter gets the same hero and the same build (one pick, or the `/mirror_hero` / `/mirror_build` pins); teams, bench and balance as in Random; no betting. Buying anywhere (`citadel_allow_purchasing_anywhere`) is on only in 1v1 setup and off in every other mode (the map shops are disabled by CleanSlate). Resets the lobby (everyone alive back to LobbyHero (Abrams) in the draft area, picks cleared, boards redrawn for the mode). Banner to everyone: `Random mode` / `Random hero and build every round`, `1v1 mode` / `Shop open anywhere - build your hero`, `Mirror mode` / `Everyone has the same hero and build`, or `Draft mode` / `Pick your heroes`. Replies `Mode set to random. N player(s) returned to the lobby.`
+- **Side effects:** sets how heroes are chosen for the next match. `random` (default): each intermission everyone gets a new random hero with one of its top 3 builds. `mirror`: each intermission every fighter gets the same hero and the same build (one pick, or the `/mirror_hero` / `/mirror_build` pins); teams, bench and balance as in Random; no betting. Buying stays off in both (the map shops are disabled by CleanSlate). Resets the lobby (round heroes cleared, everyone alive back to LobbyHero (Abrams) up top, boards redrawn). Banner to everyone: `Random mode` / `Random hero and build every round` or `Mirror mode` / `Everyone has the same hero and build`. Replies `Mode set to random. N player(s) returned to the lobby.`
 - **Notes:** refused during a match (`/match_end` first; with auto-start on and 2+ players, `/match_auto off` before `/match_end`) and when the mode is unchanged; error for an unknown mode. Resets to `random` on plugin reload
 
 #### /match_format <continuous>
@@ -730,65 +685,6 @@ changes and map reloads; a plugin reload clears them.
 - **Mode:** Debug; read-only
 - **Side effects:** a config line (mode, fighters, pending, bench), the pins, the current shared hero and build (`Build N=<name> (<id>)`), the pinned hero's numbered builds, then one line per player: slot, name, team, `fighting` / `SITTING OUT`, `PENDING`
 
-### Duel (`DuelPlugin`, in RiftRoulette.dll)
-
-Admin (`AdminCommand.Authorize` with the `Duel` log; server console
-trusted). Debug mode; `[Duel]` replies. Used after `/match_mode 1v1`.
-Players join a queue (`/queue`) and the
-first two fight, winner stays on; see `user-commands.md`.
-
-#### /duel_copy <slot>
-
-- **Invocation:** chat `/duel_copy <slot>` | console `dw_duel_copy <slot>`
-- **Who:** admin
-- **Calls:** `DuelService.Copy` (→ `LoadoutService.Capture`, `MatchService.Start` → `DuelService.BeginMatch`)
-- **Mode:** Debug (the copy's detail in `duel-*.log` and `loadout-*.log`)
-- **Side effects:** captures the slot's exact hero, items (with imbues), ability upgrades, level, ability points and unlocks, then starts the match. The first two in the queue fight on opposite teams and, at the start of every intermission, the two fighters are set to that hero with the copied build and 0 souls. During the match a hero change from the menu kills the player, who respawns with the copy (the death is not counted). Replies `Copied <hero> from <name>. Match started...`
-- **Notes:** refused unless the mode is 1v1, no match is running, and at least 2 players are in the queue (the source does not have to be queued); error for an empty slot or a dead player. The build and the queue stay after the match ends, so auto-start continues with them when 2 are queued again
-
-#### /duel_clear
-
-- **Invocation:** chat `/duel_clear` | console `dw_duel_clear`
-- **Who:** admin
-- **Calls:** `DuelService.ClearSnapshot` (→ `EnterSetup(announce: true)`)
-- **Mode:** Debug
-- **Side effects:** drops the copied build; players get 100,000 souls again and can switch heroes to build a new one (buying anywhere stays on during setup); each alive player sees `1v1 setup` / `Shop open anywhere - build your hero`
-- **Notes:** refused during a match (`/match_end` first; with auto-start on, auto-start will not restart a 1v1 match without a build)
-
-#### /duel_status
-
-- **Invocation:** chat `/duel_status` | console `dw_duel_status`
-- **Who:** admin
-- **Calls:** `DuelService.Describe`
-- **Mode:** Debug; read-only
-- **Side effects:** config line with lock state, pending count, queue size and king / streak, the copied build (hero, level, AP, unlocks, ability upgrade bits, item count, source), the item list, then one line per player: slot, name, team, current hero, queue position, `FIGHTER`, `PENDING` if waiting for a respawn
-
-#### /duel_queue
-
-- **Invocation:** chat `/duel_queue` | console `dw_duel_queue`
-- **Who:** admin
-- **Calls:** `DuelService.DescribeQueue`
-- **Mode:** Debug; read-only
-- **Side effects:** the next pairing, then the queue in order (`1. Theo (fighting, king, streak 3)`)
-
-#### /duel_queue_add <slot>
-
-- **Invocation:** chat `/duel_queue_add <slot>` | console `dw_duel_queue_add <slot>`
-- **Who:** admin
-- **Calls:** `DuelService.JoinQueue`, then `AutoStartService.Check`
-- **Mode:** Debug
-- **Side effects:** same as the player typing `/queue` (may auto-start the match)
-- **Notes:** error for an empty slot; refused outside 1v1 mode or for a seated admin
-
-#### /duel_queue_remove <slot>
-
-- **Invocation:** chat `/duel_queue_remove <slot>` | console `dw_duel_queue_remove <slot>`
-- **Who:** admin
-- **Calls:** `DuelService.LeaveQueue(force: true)`, then `AutoStartService.Check`
-- **Mode:** Debug
-- **Side effects:** takes the player out of the queue, even a fighter between rounds (the next pair then fights after one more intermission). With fewer than 2 queued, auto-start ends the match
-- **Notes:** refused while that player is fighting in a running rift (`/rift_cancel` first)
-
 ### Stats (`StatsPlugin`, in RiftRoulette.dll)
 
 Admin (`AdminCommand.Authorize` with the `Stats` log; server console
@@ -800,7 +696,7 @@ trusted). Debug mode; `[Stats]` replies.
 - **Who:** admin
 - **Calls:** `StatsService.RefreshBoards`, `StatsService.DescribeAll`
 - **Mode:** Debug
-- **Side effects:** redraws the Sapphire and Amber stats boards (Random mode: team K/D/A; 1v1 mode: the best-streak leaderboard on both; not in Draft mode; creates them if missing), then lists match running, tracked players, rounds, and one line per player (team, K/D/A, score)
+- **Side effects:** redraws the Sapphire and Amber stats boards (team K/D/A; creates them if missing), then lists match running, tracked players, rounds, and one line per player (team, K/D/A, score)
 
 #### /stats_reset
 
@@ -874,7 +770,7 @@ trusted). Debug mode; `[Loadout]` replies. Module commands (game-agnostic).
 - **Calls:** `HeroBuildCatalog.TryParseHero` / `BuildsFor`, `LoadoutService.Swap` (→ `Apply`)
 - **Mode:** Debug (per-ability and per-item detail in `loadout-*.log`)
 - **Side effects:** swaps the player in that slot to the hero (enum name like `inferno` or game name like `Infernus`), then 1 s later shops the build's items in order within the cap (20,000 souls unless `/loadout_cap` changed it) and the item limit for that cap (`ItemSlots`: 9 below 16,000, 10 from 16,000, 11 from 22,000, 12 from 28,000; the HUD still shows 12 slots): every required item plus one random item per optional group; Monster Rounds, Cultist Sacrifice, Golden Goose Egg, Trophy Collector and Healing Rite skipped; upgrades replace their components; unaffordable items skipped (later cheaper ones still bought); with the slots full it sells the build's marked sell-priority items first, else the cheapest and earliest, for pricier ones; only when the limit is 12: empty slots left after the build are filled from its optional items, most expensive first, and a final pass upgrades every held component item (T1 to T2 to T3) while the cap allows. It then resets the hero, sets the level a real hero has at the cap, whatever the items cost (Deadlock's soul table: for example 20,000 souls is level 25 with 4 unlocks and 21 ability points), applies the build's ability order only as far as those unlocks and points pay for (tiers cost 1, 2, 5; it stops at the first step that does not fit), grants the items with imbues, sets souls, ability points and unlocks to 0, and heals to full. The `Loadout applied` line in `loadout-*.log` shows `Value`, `Cap`, `Sold` / `Skipped` counts, `Level`, `Boons`, `Unlocks`, `Points`, `PointsLeft`, `Steps` / `StepsTotal` and the ranks set; `Loadout shopping` names the sold, skipped, filled and upgraded items. Items past 9 need every flex slot open (`Lobby/FlexSlots`, check with `/lobby_flex`). `build` is 1-3; 0 or omitted picks one at random
-- **Notes:** test tool. Errors: empty slot, unknown hero, no builds, bad build number, dead player. In Draft mode, Draft's hero enforcement switches a player without a matching pick back to their pick or LobbyHero (Abrams), so use it in Random mode or on a player whose pick is that hero
+- **Notes:** test tool. Errors: empty slot, unknown hero, no builds, bad build number, dead player. Outside a match, Lobby's hero enforcement (`LobbyHeroes.Enforce`) switches a player without a round hero back to LobbyHero (Abrams); once a Random / Mirror build was applied, that mode's hero guard kills a player whose hero differs from their assignment
 
 #### /loadout_show <slot>
 
@@ -892,7 +788,7 @@ trusted). Debug mode; `[Loadout]` replies. Module commands (game-agnostic).
 - **Calls:** `LoadoutService.Capture`, `LoadoutService.SwapSnapshot` (→ `ApplySnapshot`)
 - **Mode:** Debug
 - **Side effects:** copies the exact hero, items (with imbues), ability upgrades, level, ability points and unlocks of the player in slot `from` onto the player in slot `to` (hero swap, then 1 s later the copy; souls set to 0). No cap and no banned-item filter. Replies with a one-line summary of the copy
-- **Notes:** test tool for 1v1 mode. Errors: empty slot, source dead, target dead. Draft's hero enforcement may undo it in Draft mode (use it in 1v1 or Random mode)
+- **Notes:** test tool. Errors: empty slot, source dead, target dead. Lobby's hero enforcement may undo it (see `/loadout_give`)
 
 #### /loadout_list <hero>
 
@@ -917,7 +813,7 @@ trusted). Debug mode; `[Loadout]` replies. Module commands (game-agnostic).
 - **Calls:** `LoadoutPlanner.TryParseCap`, then `LoadoutService.SetMaxValue`
 - **Mode:** Debug
 - **Side effects:** no argument: shows the current cap, its item limit and the default (20,000). With a value (1,000 to 200,000, or `default`): the most a Random mode build's items may be worth from the next build handed out, the item limit at that value (`ItemSlots.ForSouls`, shown in the reply as `N items`), and the net worth the hero's level and ability ranks are set to (every build at the same cap gets the same level). A 1,000 cap gives one 800 item. Builds already on players stay until the next intermission (`/random_reroll` in an intermission applies it now). Logged in `loadout-*.log` and master. In memory only: every upload or restart resets it to 20,000. Bad input: error naming the range
-- **Notes:** 1v1 copies and 1v1 setup gold do not use the cap
+- **Notes:** `/loadout_copy` copies do not use the cap
 
 ### Restraint (`RestraintPlugin`, in RiftRoulette.dll)
 

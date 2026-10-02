@@ -16,8 +16,3 @@ Unit tests for `Modules/Spectate/SpectateRule`.
 - `Turned` wraps yaw (179 to -179 is 2) and takes the larger of pitch and
   yaw.
 - `HandMoved` is true past 50 units or 3 degrees (the edges do not count).
-- `FramingStep`: a still camera that is not placed parks; flying before
-  the first park waits; moving a placed camera (or one already being
-  adjusted) adjusts, and letting go saves (even if the spot changed
-  meanwhile); a placed still camera stays, and parks again when the spot
-  changes.

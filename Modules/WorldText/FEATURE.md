@@ -37,8 +37,8 @@ spec). One registry per DLL (separate load contexts).
 
 ## Lifecycle vs commands
 
-- Game code (Rift Roulette `DraftService.RedrawBoards`) calls the service in
-  Clean mode: `ClearAll()` then `Create("draft.*", ...)`.
+- Game code (Rift Roulette `Boards/BoardService.Redraw`) calls the service in
+  Clean mode: `ClearAll()` then `Create("board.*", ...)`.
 - Admin commands (`/wt_list`, `/wt_create`, `/wt_update`, `/wt_remove`,
   `/wt_clear`) call the same ops in Debug mode. See
   `RiftRoulette/reference/admin-commands.md`.

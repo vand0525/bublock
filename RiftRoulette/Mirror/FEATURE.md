@@ -43,7 +43,7 @@ pair, the last shared hero, build values, bench rotation and its own
   intermission `PrepareRound`, then 3 s in `AnnounceBuilds`; `End` calls
   `EndMatch`. `StartRound` adds `FighterCount` to the join budget.
   `LobbyService` / `BanStatueService` call `AddJoiner` / `OnLeave`,
-  `AdminSeat.Sit` calls `Forget`, `DraftService.EnforceHero` calls
+  `AdminSeat.Sit` calls `Forget`, `LobbyHeroes.Enforce` calls
   `GuardHero`, `StatsService.RecordDeath` calls `ConsumeEnforcementKill`.
 - Admin commands (Debug): pin changes during a mirror intermission reapply
   the shared pair right away; otherwise they wait for the next one.
@@ -56,4 +56,4 @@ pair, the last shared hero, build values, bench rotation and its own
 - `Balance/BalanceService.TryBalance`.
 - `Modules/Loadout` (`HeroBuildCatalog`, `LoadoutService.Swap`),
   `Modules/Hud`, `Modules/Queue`.
-- `Draft/DraftState` (fighters hold a pick so `Round/RoundFlow` moves them).
+- `Round/RoundHeroes` (fighters hold a round hero so `Round/RoundFlow` moves them).

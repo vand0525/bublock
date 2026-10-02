@@ -36,24 +36,24 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Feature | What it does | Game dependencies | Proof |
 |---|---|---|---|
 | Session (`Session/`) | Session id, map name, registers locations | `Server.MapName`, `OnLoad` / `OnStartupServer` | `dw_session_info` |
-| Lobby (`Lobby/`) | Admits players, balances teams, convars, kick, respawn to watch spot; the admin roams as an invisible Abrams on an empty server | `OnClientConnect` / `FullConnect` / `Disconnect`, `player_spawn`, `player_death`, `SelectHero(LobbyService.LobbyHero)` (Atlas), roam same, `ChangeTeam`, `kickid`, `modifier_invis`, lobby convars | join; `/status`; `dw_player_list`; `dw_seat_status`; `dw_selftest_live` Roam row |
+| Lobby (`Lobby/`) | Admits players, balances teams, convars, kick, respawn to watch spot, hero enforcement (`LobbyHeroes`, `player_hero_changed`); the admin roams as an invisible Abrams on an empty server | `OnClientConnect` / `FullConnect` / `Disconnect`, `player_spawn`, `player_death`, `player_hero_changed`, `SelectHero(LobbyService.LobbyHero)` (Atlas), roam same, `ChangeTeam`, `kickid`, `modifier_invis`, lobby convars | join; `/status`; `dw_player_list`; `dw_seat_status`; `dw_selftest_live` Roam row |
 | AdminSeat (`Lobby/AdminSeat`) | 13th seat on the spectator side | `maxplayers`, `sv_visiblemaxplayers`, team 1 | `dw_seat_status` |
-| Stream camera (`Lobby/StreamCam`, `Modules/Spectate`) | Seated admin's automatic camera: follow, killer cut, park at the saved framing | `observer` pawn designer name, `ObserverServices` (`InEye`, `Roaming`, `SetObserverTarget`), observer `Teleport`, `CBasePlayerPawn.v_angle` (framing angle; self-test schema), `bublock/streamcam.json` (no client commands: the client refuses `spec_*` from the server) | `dw_spec_status` (`ViewAngle=` changes while turning), `dw_selftest_run` |
+| Stream camera (`Lobby/StreamCam`, `Modules/Spectate`) | Seated admin's automatic camera: follow fighters, killer cut, park at the fixed spot per rift side between rounds | `observer` pawn designer name, `ObserverServices` (`InEye`, `Roaming`, `SetObserverTarget`), observer `Teleport`, `CCitadelUserMsg_SetClientCameraAngles` (park angle), `CBasePlayerPawn.v_angle` (hand-move check; self-test schema), the fixed spots in `StreamFraming` (map coordinates; recapture with `getpos_exact` in fly cam if the map moves) (no client commands: the client refuses `spec_*` from the server) | `dw_spec_status` (`ViewAngle=` changes while turning), `dw_selftest_run` |
 | Access (`Lobby/Access*`, `BanStatueService`) | Bans / private mode from `bublock/access.json`; banned players turned to stone then kicked | `OnClientConnect` returning false, `kickid`, `AddModifier` (statue modifier) | `/access_mode`, `/ban_list`, `/ban_modifier` |
-| Draft (`Draft/`) | Draft picks, boards (off in Random mode) | `player_hero_changed`, `SelectHero`, `Heroes` pools, `point_worldtext` | `/draft_status`, `/draft_boards` |
+| Boards (`Boards/`) | Welcome / hint / note boards, redraw of the stats and betting boards | `point_worldtext` (through WorldText), `bublock/welcomenote.txt` | boards visible at the watch spot; `/board_redraw` |
 | Rift (`Rift/`) | Forces a rift at a side, detects capture / tie, cleans troopers | KOTH schema fields, `citadel_gamerules`, `citadel_item_koth_spawner`, `citadel_koth_cashin`, `npc_trooper`, `citadel_koth_enabled`, rift positions | `/rift_start green`, `rift-*.log` |
 | Round (`Round/`) | Round flow, watch spot, per-slot spots, WatchGuard | `Teleport`, camera net message, anchors, `spots.json`, skybox floor z 1536 | `/spots_walk`, `/rift_start` |
-| GameLoop (`GameLoop/`) | Match loop, auto-start, shop access, probe | `OnGameFrame`, `citadel_allow_purchasing_anywhere` | `/match_status`, `probe-*.log` |
+| GameLoop (`GameLoop/`) | Match loop, auto-start, shop access (always off), probe | `OnGameFrame`, `citadel_allow_purchasing_anywhere` | `/match_status`, `probe-*.log` |
 | Random (`RandomMode/`) | Random hero + stored build each intermission | `player_respawned`, `player_spawn`, `hero-builds.json`, `Heroes` enum | `/random_status`, `loadout-*.log` |
+| Mirror (`Mirror/`) | One shared hero + build for every fighter each intermission | same as Random, `citadel_enable_duplicate_heroes` | `/mirror_status`, `loadout-*.log` |
 | Stats (`Stats/`) | Kills / deaths / assists boards | `player_death` fields (`Attacker*`, `Assister1..5controller`) | `/stats` after a kill |
 | Balance (`Balance/`) | Swaps players between rounds | `ChangeTeam` | `/balance_status` |
-| Duel (`Duel/`) | 1v1 copy build, queue, winner stays | `LoadoutSnapshot` (abilities, items, imbues), `SelectHero`, `Hurt` | `/duel_status`, `/duel_copy` |
 | WorldText (`Modules/WorldText`) | In-world text boards | `CPointWorldText.Create`, `point_worldtext` | boards visible; `dw_wt_list` |
 | Movement (`Modules/Movement`) | Named locations, teleports, camera angle | `Teleport`, `CCitadelUserMsg_SetClientCameraAngles` | `dw_mv_tp`, `dw_mv_angle` |
 | Hud (`Modules/Hud`) | Banners | `HudAnnounce` | `dw_hud_announce` |
 | Loadout (`Modules/Loadout`) | Give a stored build, copy a hero | `AddItem`, `ImbueItem`, `ItemInfo`, `FindAbilityByName`, `UpgradeBits`, `ResetHero`, `Level`, currencies | `dw_loadout_give <slot> <hero>` |
 | Restraint (`Modules/Restraint`) | Silence / no items / no shooting / no melee up top; NPCs ignore restrained players and they take no damage | `modifier_citadel_silenced`, `EModifierState` values, `OnGameFrame`, `OnTakeDamage` (GameLoop, `HookResult.Stop`) | `dw_restrain <slot>`, `dw_restrain_list`; self-test counter `damage_blocked_restrained` |
-| Queue (`Modules/Queue`) | Player queue | none | `/queue` in 1v1 mode |
+| Queue (`Modules/Queue`) | Player queue (bench rotation) | none | `/random_status` `Bench=` with an odd player count |
 | CleanSlate (`CleanSlate.dll`) | Removes bosses / shops / powerups, disables shop triggers, spawn convars | designer names in `CleanSlateService`, spawn convars | `dw_cleanup_run` |
 | DevTools (`DevTools.dll`) | Entity inspection, log path | `Entities.All`, `ByDesignerName`, `SubclassVData` | `dw_ent_find koth` |
 | Shared | Auth, chat, logging | `CCitadelUserMsg_ChatMsg`, `PrintToConsole`, log path from the API assembly | `dw_dev_logpath` |
@@ -68,7 +68,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 4. Round: teams land in rows at their starts, restraint lifts, rift spawns at the right side.
 5. Capture the rift: round result banner, score changes, everyone back up top.
 6. Kill someone: `/stats` counts it.
-7. `/match_mode 1v1`, `/duel_copy <slot>`: both players get the same build.
+7. `/match_mode mirror` (between matches), then a match: every fighter gets the same hero and build.
 8. `dw_cleanup_run` reports 0 of everything already removed; no bosses or shop kiosks visible.
 
 ---
@@ -91,7 +91,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Loadouts stop at 9 items (`Loadout incomplete` `Failed=` 1-3) | team entity renamed, `m_nFlexSlotsUnlocked` renamed / re-typed, flag count changed, or the slot count changed | `dw_lobby_flex` (each team should show 15); self-test Entities `citadel_team_manager` / Schema `CCitadelTeam.m_nFlexSlotsUnlocked`; `lobby-*.log` `Flex slots not unlocked` | new names from `CCitadelTeam.h` / `EFlexSlotTypes_t` into `Lobby/FlexSlots`; update `LoadoutPlanner.DefaultSlots` |
 | Loadout level or ranks look wrong for the cap | boon / point thresholds or tier costs changed | `loadout-*.log` `Loadout applied` `Level=` `Points=` `Ranks=` vs the hero panel; wiki soul table | update `Modules/Loadout/Progression.cs` and `LoadoutPlanner.UpgradeCosts`, then `ProgressionTests` |
 | Random mode never gives some hero / new hero missing | new hero id not in enum or builds | patch-check Heroes HIT; self-test Heroes WARN | update `lib/`, `fetch-builds.py` |
-| Joining fails / players stuck in hero select | `Heroes.Skyrunner` removed or not selectable | patch-check `Skyrunner`; `lobby-*.log` | pick another lobby hero in `LobbyService` / `DraftService` |
+| Joining fails / players stuck in hero select | `Heroes.Skyrunner` removed or not selectable | patch-check `Skyrunner`; `lobby-*.log` | pick another lobby hero in `LobbyService` |
 | New players never finish joining (players in keep playing) | unknown; seen after hours up | `restart-*.log` `Join never completed` / `Join stuck`; `/restart_status` | automatic map reload with nobody playing, or `/restart_now`; if joins still fail after a reload, restart the server process |
 | Players fall from the watch spot | skybox floor moved or removed | self-test Map floor WARN (compare to baseline); `watch-*.log` rescues | new map dump; move the watch anchors; `check-spots.py` |
 | Players spawn in walls at rift starts | map geometry changed | `/spots_walk sapphire|amber`; `check-spots.py` | new map dump, move anchors / `spots.json` |
@@ -102,9 +102,10 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Settings not applied (team size, respawn, duplicates) | convar renamed / removed / hidden | self-test Convars FAIL; `Convar missing` warning in master log | new name from `cvarlist.md` upstream |
 | Banner or camera angle missing | protobuf message changed | `dw_hud_announce`, `dw_mv_angle` | check the message in the new `lib/` |
 | Boards missing | `point_worldtext` / `CPointWorldText` changed | `dw_wt_create test` | check `CPointWorldText` in `/tmp/dwapi.cs` |
-| Stream camera saves the wrong framing angle | `v_angle` moved or no longer tracks the observer view | self-test Schema `CBasePlayerPawn.v_angle`; `dw_spec_status` `ViewAngle=`; `lobby-*.log` `framing saved ... AngleRead=` | new field name into `SpectateService.ViewAngle`; `dw_spec_reset` meanwhile |
+| Stream camera moves while the admin flies it (or never sees the hand move) | `v_angle` moved or no longer tracks the observer view | self-test Schema `CBasePlayerPawn.v_angle`; `dw_spec_status` `ViewAngle=` changes while turning | new field name into `SpectateService.ViewAngle`; `dw_spec_auto off` meanwhile |
+| Stream camera parks at the wrong place between rounds | the map moved the rift areas | `dw_spec_status` `Spot <side>:` line vs the view in fly cam | capture new spots with `getpos_exact` in fly cam into `StreamFraming.Spot` |
 | Stream camera stuck / not following | observer pawn renamed or observer services changed | `dw_spec_status` (`Observer=False`, `Mode=`); `spectate-*.log` | check `CPlayer_ObserverServices` and the pawn designer name in `/tmp/dwapi.cs` |
-| Top-down never moves (camera stays in the directed view) | The admin is not in fly cam (C); the server cannot switch it. If a patch gives a `spec_*` command `server_can_execute`, the server could send it | `lobby-*.log` `Reason=repark` every 6 s; `server_can_execute` in the `patch-check.py` convar diff | press C; or send the newly allowed command from `SpectateService.Park` |
+| Park never moves (camera stays in the directed view) | The admin is not in fly cam (C); the server cannot switch it. If a patch gives a `spec_*` command `server_can_execute`, the server could send it | `lobby-*.log` `Reason=repark` every 6 s; `server_can_execute` in the `patch-check.py` convar diff | press C; or send the newly allowed command from `SpectateService.Park` |
 
 ---
 
@@ -124,7 +125,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | `citadel_allow_duplicate_heroes` | 1 | `LobbyService` |
 | `citadel_hero_demo_unlock_flex_slots` | 1 (missing after engine 6712; never opened slots alone — `Lobby/FlexSlots` does) | `LobbyService` |
 | `citadel_voice_all_talk` | 1 | `LobbyService` |
-| `citadel_allow_purchasing_anywhere` | 0, or 1 in 1v1 setup | `GameLoop/ShopAccess.cs` |
+| `citadel_allow_purchasing_anywhere` | 0 | `GameLoop/ShopAccess.cs` |
 | `citadel_allow_pausing` | 0 when open, 1 in private mode or after `/pause_allow on` (devonly, replicated) | `Lobby/PauseRule.cs` `ConVars`, set by `PauseGuard.Apply` |
 | `citadel_allow_pause_in_match` | 0 when open, 1 in private mode or after `/pause_allow on` | same |
 | `citadel_pause_allow_in_pregame` | 0 | same |
@@ -204,16 +205,16 @@ invisibility item and reading `modifiers-*.log`.
 
 ### Events and hooks
 
-`player_spawn` (Lobby, Duel, Random), `player_death` (Lobby, Stats, stream camera), `player_respawned` (Duel, Random), `player_hero_changed` (Draft); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnAddModifier` (DevTools `ModifierProbe`, `AddModifierEvent.ModifierVData.Name`; diagnostics only), `OnLoad`, `OnStartupServer` (also each map reload: `AutoRestartService.OnMapStart`, `AdminSeat.ResetForMap`).
+`player_spawn` (Lobby, Random, Mirror, Stats), `player_death` (Lobby, Stats, stream camera), `player_respawned` (Random, Mirror), `player_hero_changed` (Lobby); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnAddModifier` (DevTools `ModifierProbe`, `AddModifierEvent.ModifierVData.Name`; diagnostics only), `OnLoad`, `OnStartupServer` (also each map reload: `AutoRestartService.OnMapStart`, `AdminSeat.ResetForMap`).
 
 Map reload: `Server.ChangeLevel(Server.MapName)`, `Server.IsChangingLevel`, `IsMapChangeReconnect` on the connect events, `GlobalVars.CurTime` (uptime after a hot reload) in `Lobby/AutoRestartService`. Check with `/restart_status` after an update; `/restart_now` on an empty server should bring every connected client back.
 
 ### Enums and hero data
 
-- `LobbyService.LobbyHero` (`Heroes.Atlas` / Abrams) is the lobby placeholder and admin roam hero (Skyrunner stopped spawning after engine 6712); draft pools in `Draft/DraftPools.cs`.
+- `LobbyService.LobbyHero` (`Heroes.Atlas` / Abrams) is the lobby placeholder and admin roam hero (Skyrunner stopped spawning after engine 6712).
 - `hero-builds.json` (38 heroes, 161 items, 154 abilities, per-build sell priorities), banned items in `Modules/Loadout/LoadoutPlanner.cs`.
 - Item slots: universal (any item in any slot), 9 open by default (one flex slot already open), 12 with every flex slot (`LoadoutPlanner.DefaultSlots`); each enemy Walker opens one in a real match, which `Modules/Loadout/ItemSlots` mirrors by soul value (`scripts/walker-souls.py`).
-- `EAbilitySlot.Signature1..4`, `ECurrencyType.EGold` / `EAbilityPoints` / `EAbilityUnlocks`, `ECurrencySource.ECheats` / `EStartingAmount` / `EItemSale` (the sources `GameLoop/SoulRule` lets through for gold; for ability points and unlocks only `ECheats` passes in Random and 1v1 matches), `ImbueResult.Success`.
+- `EAbilitySlot.Signature1..4`, `ECurrencyType.EGold` / `EAbilityPoints` / `EAbilityUnlocks`, `ECurrencySource.ECheats` / `EStartingAmount` / `EItemSale` (the sources `GameLoop/SoulRule` lets through for gold; for ability points and unlocks only `ECheats` passes in any match), `ImbueResult.Success`.
 - Level table: 36 soul thresholds, unlock rows and 32 points in `Modules/Loadout/Progression.cs`, from the wiki's [Data:SoulUnlockData.json](https://deadlock.wiki/index.php?title=Data:SoulUnlockData.json&action=raw) (+600 each). Upgrade tier costs 1 / 2 / 5 in `LoadoutPlanner.UpgradeCosts`. An economy patch that moves boons or points needs both updated (`ProgressionTests` pins the current values).
 - Teams: Amber 2, Sapphire 3, spectator 1.
 - Observer: `ObserverMode_t.InEye` (player view) and `Roaming` (free cam); no client commands: `spec_player` / `spec_mode` are `clientcmd_can_execute`, not `server_can_execute`, and the client refuses them from the server, so parks only move a viewer already in fly cam (C). Never `IsValidObserverTarget` (rejects team 3).
@@ -222,7 +223,7 @@ Map reload: `Server.ChangeLevel(Server.MapName)`, `Server.IsChangingLevel`, `IsM
 
 - Anchors: `Locations/RiftRouletteLocations.cs`. Watch spots on the skybox floor at z 1536.0625.
 - Rift positions: `Rift/RiftSide.cs` (Green (7612, 0, 444), Yellow (-7560, 0, 424)).
-- Per-slot offsets: `Round/Data/spots.json`; board offsets in `Round/WatchLayout.cs`, `Draft/BoardLayout.cs`.
+- Per-slot offsets: `Round/Data/spots.json`; board offsets in `Round/WatchLayout.cs`, `Boards/BoardLayout.cs`.
 
 ---
 

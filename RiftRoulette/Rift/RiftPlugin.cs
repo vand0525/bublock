@@ -61,7 +61,7 @@ public class RiftPlugin : DeadworksPluginBase
     AdminCommand.Reply(caller, $"[Rift] Next rift: {RiftSides.Name(nextSide)}. {moved} player(s) moved to the watch spot.");
   }
 
-  [Command("rift_cancel", Description = "End the running rift round and return players to draft (a spawned rift stays)")]
+  [Command("rift_cancel", Description = "End the running rift round and send players up top (a spawned rift stays)")]
   public void CmdRiftCancel(CCitadelPlayerController? caller)
   {
     AdminCommand.Authorize(caller, RiftLog, "rift_cancel");

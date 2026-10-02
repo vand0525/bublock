@@ -3,8 +3,6 @@ using Bublock.Modules.Restraint;
 using Bublock.Modules.Spectate;
 using Bublock.Shared;
 using DeadworksManaged.Api;
-using RiftRoulette.Draft;
-using RiftRoulette.Duel;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Mirror;
 using RiftRoulette.RandomMode;
@@ -34,6 +32,9 @@ public static class AdminSeat
   private static readonly HashSet<ulong> Roaming = [];
 
   private static readonly Dictionary<ulong, int> CloakGeneration = [];
+
+  // The watch spot side the roaming admin was last placed at.
+  private static readonly Dictionary<ulong, RiftSide> RoamSide = [];
 
   // Kept through disconnects and map changes (not Forget / ResetForMap): a rejoin restores the mode.
   private static readonly Dictionary<ulong, AdminMode> LastMode = [];
@@ -89,15 +90,11 @@ public static class AdminSeat
     if (!Seated.Add(steamId))
       return $"{player.PlayerName} is already in the admin seat.";
 
-    if (DraftState.Release(steamId, out var hero))
-    {
-      log.Info(player.ToPlayerRef(), "Seated player released pick Hero={Hero}", hero);
-      DraftService.RedrawBoards(mode);
-    }
+    if (RoundHeroes.Remove(steamId, out var hero))
+      log.Info(player.ToPlayerRef(), "Seated player dropped round hero Hero={Hero}", hero);
 
     RandomModeService.Forget(steamId);
     MirrorModeService.Forget(steamId);
-    DuelService.Forget(steamId);
     RestraintService.Release(player, mode);
     WatchGuard.Forget(steamId);
 
@@ -167,6 +164,7 @@ public static class AdminSeat
     LastMode[steamId] = AdminMode.Roam;
     Roaming.Add(steamId);
     CloakGeneration.Remove(steamId);
+    RoamSide.Remove(steamId);
     StreamCam.Forget(steamId);
     RestraintService.Release(player, mode);
     WatchGuard.Forget(steamId);
@@ -185,6 +183,7 @@ public static class AdminSeat
     var steamId = player.PlayerSteamId;
     Roaming.Remove(steamId);
     CloakGeneration.Remove(steamId);
+    RoamSide.Remove(steamId);
 
     // Deleting the pawn with the cloak still on leaves the client's red invisibility tint on screen.
     var uncloaked = player.GetHeroPawn()?.RemoveModifier(RoamModifier) ?? false;
@@ -235,10 +234,37 @@ public static class AdminSeat
     if (retry && CloakGeneration.ContainsKey(steamId))
       return;
 
+    Place(player, timer, mode);
+    Cloak(player, timer, mode);
+  }
+
+  // Every StreamCam tick: a roaming admin placed at another watch spot side is moved to the current one.
+  // Not placed yet means PlaceAndCloak is still on its way (the hero swap after roaming starts).
+  public static void FollowWatchSpot(ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    var side = WatchSpot.BoardSide;
+
+    foreach (var steamId in Roaming.ToList())
+    {
+      if (!RoamSide.TryGetValue(steamId, out var placed) || placed == side)
+        continue;
+
+      if (Find(steamId) is not { } player || player.GetHeroPawn() is not { IsAlive: true })
+        continue;
+
+      Log.WithMode(mode).Info(player.ToPlayerRef(), "Roaming admin follows the watch spot From={From} To={To}", RiftSides.Name(placed), RiftSides.Name(side));
+      Place(player, timer, mode);
+    }
+  }
+
+  private static void Place(CCitadelPlayerController player, ITimer timer, ExecutionMode mode)
+  {
+    var steamId = player.PlayerSteamId;
     var side = WatchSpot.BoardSide;
     var anchor = WatchSpot.Location(side);
+
+    RoamSide[steamId] = side;
     MovementService.TeleportTo(player, WatchLayout.WelcomeFront(anchor, side), mode);
-    Cloak(player, timer, mode);
     timer.Once(FloorCheckSeconds.Seconds(), () => CatchFall(steamId, anchor, mode));
   }
 
@@ -298,6 +324,7 @@ public static class AdminSeat
     Seated.Remove(steamId);
     Roaming.Remove(steamId);
     CloakGeneration.Remove(steamId);
+    RoamSide.Remove(steamId);
     StreamCam.Forget(steamId);
     player.GetHeroPawn()?.RemoveModifier(RoamModifier);
 
@@ -334,6 +361,7 @@ public static class AdminSeat
     Seated.Remove(steamId);
     Roaming.Remove(steamId);
     CloakGeneration.Remove(steamId);
+    RoamSide.Remove(steamId);
     StreamCam.Forget(steamId);
   }
 
@@ -347,6 +375,7 @@ public static class AdminSeat
     Seated.Clear();
     Roaming.Clear();
     CloakGeneration.Clear();
+    RoamSide.Clear();
   }
 
   // Hot reload wipes every static here. The mode is read back from the pawn: observing is spectate,
@@ -379,6 +408,7 @@ public static class AdminSeat
       if (adminMode == AdminMode.Roam)
       {
         Roaming.Add(steamId);
+        RoamSide[steamId] = WatchSpot.BoardSide;
         timer.NextTick(() =>
         {
           if (Find(steamId) is { } current)

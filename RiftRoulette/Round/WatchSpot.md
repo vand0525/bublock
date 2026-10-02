@@ -6,7 +6,7 @@ old draft height, and replaced every teleport to the fixed `draft` spot.
 
 ## State
 
-- `_boardSide`: the side the draft/stats boards were last drawn at. Starts
+- `_boardSide`: the side the boards were last drawn at. Starts
   as `Side` on first use.
 
 ## Operations
@@ -18,16 +18,16 @@ old draft height, and replaced every teleport to the fixed `draft` spot.
 | `Location(side)` | `RoundLocations.WatchFor(side)` (`watch_green` / `watch_yellow`). |
 | `SendUp(player, mode, side = null)` | `RestraintService.Restrain(player)`, then teleports to the player's own slot spot `SlotSpots.Watch(Location(side ?? Side), player.Slot)` (same camera angle as the anchor, facing the board) and gives the player `WatchGuard.Grace`. No banner. Returns the teleport result. |
 | `MoveAllUp(mode)` | When no rift runs: sends every live participant up to `Side` and moves the boards there. Returns how many moved; 0 while a rift runs. Logs Info. |
-| `RefreshBoards(side, mode)` | If `side` differs from `BoardSide`, stores it and calls `DraftService.RedrawBoards` (which also redraws the stats boards). False when unchanged. |
+| `RefreshBoards(side, mode)` | If `side` differs from `BoardSide`, stores it and calls `Boards/BoardService.Redraw` (welcome, stats and betting boards). False when unchanged. |
 
 ## Callers
 
-- `RoundFlow.ReturnPlayersToDraft` (round end): `SendUp(..., NextSide)` for
+- `RoundFlow.SendPlayersUp` (round end): `SendUp(..., NextSide)` for
   live players, `Restrain` for dead ones, then `RefreshBoards(NextSide)`.
   `NextSide` is passed explicitly because the rift is still marked running
   at that moment.
 - `LobbyPlugin` spawn hook (every spawn / respawn), `LobbyService.AdmitPlayer`,
-  `DraftService.Unpick` / `Reset`: `SendUp(player)` (one player at a time).
+  `Lobby/LobbyHeroes.ReturnAll`: `SendUp(player)` (one player at a time).
 - `RiftPlugin` `/rift_next`: `MoveAllUp` (only moves anyone when idle).
 - `WatchGuard.Check`: `SendUp(player, mode, side)`.
 

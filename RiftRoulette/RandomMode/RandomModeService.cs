@@ -6,9 +6,9 @@ using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Balance;
 using RiftRoulette.Betting;
-using RiftRoulette.Draft;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Lobby;
+using RiftRoulette.Round;
 using RiftRoulette.Stats;
 using ITimer = DeadworksManaged.Api.ITimer;
 
@@ -122,7 +122,7 @@ public static class RandomModeService
     Values.Clear();
     _buildsAnnounced = false;
     Lock.ClearAllPending();
-    DraftState.Clear();
+    RoundHeroes.Clear();
 
     var swapped = 0;
 
@@ -615,8 +615,7 @@ public static class RandomModeService
     LastHero[steamId] = hero;
     Lock.Unapply(steamId);
 
-    if (!DraftState.IsSelected(hero))
-      DraftState.Add(steamId, hero);
+    RoundHeroes.Set(steamId, hero);
 
     return assignment;
   }

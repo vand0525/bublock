@@ -6,8 +6,7 @@ Runs a continuous playtest match. An admin starts it once with
 `/match_start`; rounds then start themselves after a short intermission,
 each round's result updates a running score, and every player sees the
 score in the game's on-screen banner (Hud module). `/match_end` stops the
-loop and returns everyone to the lobby. In 1v1 mode there is no team
-score: the only score is the best-streak leaderboard (`Duel/FEATURE.md`).
+loop and returns everyone to the lobby hero up top.
 
 ## Auto-start
 
@@ -19,12 +18,10 @@ only end a match, never start one (starting one during a disconnect
 crashed the server); the join check is delayed
 so the joiner's own `SelectHero` does not swallow the match's hero swaps. `/match_auto <on|off>` switches it (on after
 every load); with it off, admins use `/match_start` / `/match_end`.
-In 1v1 mode it counts the players in the 1v1 queue instead of everyone
-connected, and also checks after every queue join / leave.
 
 ## Join budget refresh
 
-Every Random mode round adds its fighter count to
+Every round adds its fighter count to
 `Lobby/MapRefreshService`. At a scored round end, once 160 fighter-rounds
 have been played since the map started (the join package nears the
 512 KB limit; see `Lobby/MapRefreshRule.md`), `OnRoundEnded` does not
@@ -35,22 +32,17 @@ once 2 humans are back.
 
 ## Configuration
 
-`MatchConfig`: hero mode `random` (default), `draft`, `duel` (`1v1`), or
-`mirror`, and format
+`MatchConfig`: hero mode `random` (default) or `mirror`, and format
 `continuous` (the only one for now). Set with `/match_mode` and
 `/match_format` between matches; `/match_config` shows it. In Random mode,
 `RandomMode/RandomModeService` balances teams at match start and gives
 everyone a new hero and build at the start of each intermission; 3 s in, a
-banner shows each player their hero, build and its soul value. In 1v1 mode,
-`Duel/DuelService` locks the two fighters to one copied build and
-re-applies it every intermission; the match only starts once a build is
-copied. The fighters are the first two in the 1v1 queue:
-`OnRoundEnded` sends the loser to the back (`DuelService.RecordResult`)
-and the banners name the winner, streak and next pairing. In Mirror mode,
+banner shows each player their hero, build and its soul value. In Mirror mode,
 `Mirror/MirrorModeService` gives every fighter the same hero and the same
 build each intermission: one pick, or the admin's pins (`/mirror_hero`,
 `/mirror_build`); teams, bench and balance work like Random mode, with
-the same build banner 3 s in.
+the same build banner 3 s in. Both modes write each round's fighters into
+`Round/RoundHeroes`; `RoundFlow` moves only those players into the rift.
 
 ## Rules (playtest)
 
@@ -58,30 +50,25 @@ the same build banner 3 s in.
   (auto-start on) stops it.
 - A captured rift (`finished`) gives 1 point to the team that owns the
   first new rift trooper. Ties, cancels, and spawn timeouts give no point.
-- A player who dies during a round respawns in the draft area and is out
+- A player who dies during a round respawns up top and is out
   until the next round (existing Lobby behavior). Wiping a team does not
   end the round.
-- Draft mode: picks carry over between rounds; players may `/pick` or
-  `/unpick` during the intermission.
 - Random mode: heroes and builds change every intermission; teams stay
   unless auto-balance (`Balance/`) swaps players between rounds.
-- 1v1 mode: both players have the same copied hero and build, reset every
-  intermission; a menu hero swap kills and restores.
 - Mirror mode: every fighter has the same hero and build, chosen again each
   intermission unless pinned; a menu hero swap kills and restores.
-- Buying: CleanSlate disables every shop, and `ShopAccess` turns buying
-  anywhere on only during 1v1 setup (1v1 mode, no match). Random builds and
-  the 1v1 copy are given with `AddItem`, not bought.
-- Banners, only what players need: match start, round result, the Random
-  mode build banner (hero, build, souls), and `Round N` / score 3 s before
+- Buying: CleanSlate disables every shop, and `ShopAccess` keeps buying
+  anywhere off. Builds are given with `AddItem`, not bought.
+- Banners, only what players need: match start, round result, the
+  build banner (hero, build, souls), and `Round N` / score 3 s before
   each round (no banner when the round starts); `/match_mode` shows a mode
   banner. No debug-style banners or chat lines.
 - Souls: while a match runs every earned soul gain (kills, assists, orbs,
   passive and team income) is blocked (`SoulRule`, applied by
   `GameLoopPlugin.OnModifyCurrency`). Power comes only from the round's
   build; bounties grew with the game clock and made one team snowball.
-- Kills, deaths and assists count from match start (`Stats/`); Random and
-  1v1 mode show them on the Sapphire and Amber boards.
+- Kills, deaths and assists count from match start (`Stats/`) and show on
+  the Sapphire and Amber boards.
 
 ## Files
 
@@ -91,9 +78,8 @@ the same build banner 3 s in.
 | `MatchState.cs` | Phase, round, score, ties, result text (pure, unit tested) |
 | `MatchService.cs` | Loop: start, countdown, start round, score round, end; mode and format setters |
 | `AutoStartRule.cs` | Start / end / nothing decision from player count (pure, unit tested) |
-| `AutoStartService.cs` | Counts participants (no bots, no seated admin), starts or ends the match (1v1: only with a copied build), waiting banner, on/off flag |
-| `ShopRule.cs` | Buying anywhere only in 1v1 setup (pure, unit tested) |
-| `ShopAccess.cs` | Owns `citadel_allow_purchasing_anywhere`; `Sync` from startup, match start / end, mode change |
+| `AutoStartService.cs` | Counts participants (no bots, no seated admin), starts or ends the match, waiting chat line, on/off flag |
+| `ShopAccess.cs` | Owns `citadel_allow_purchasing_anywhere`; `Disable` from startup and `/lobby_setup` |
 | `SoulRule.cs` | Which soul gains are blocked while a match runs (pure, unit tested) |
 | `MatchProbe.cs` | Snapshot lines to `probe-*.log` at match start and 1 s after each move in / up |
 | `GameLoopPlugin.cs` | `OnLoad` auto-start check; `OnGameFrame` / `OnClientConCommand` for `Round/WatchGuard`; `OnModifyCurrency` soul block; `/match_start`, `/match_end`, `/match_auto`, `/match_status`, `/match_intermission`, `/match_mode`, `/match_format`, `/match_config`, `/score` |
@@ -115,9 +101,10 @@ to random / continuous on every DLL load), and `AutoStartService.Enabled`
 - `Round/RoundFlow` (`RunRound`, `CancelRound`); `RoundFlow.Steps` wires
   the rift's `RoundEnded` step to `MatchService.OnRoundEnded`.
 - `Rift/RiftService` (phase, next side), `Rift/RiftRoundResult`.
-- `Draft/DraftService.Reset` for `/match_end` and mode changes.
-- `RandomMode/RandomModeService` in Random mode; `Duel/DuelService` in 1v1
-  mode; `Mirror/MirrorModeService` in Mirror mode.
+- `Lobby/LobbyHeroes.ReturnAll` and `Boards/BoardService.Redraw` for
+  `/match_end` and mode changes.
+- `RandomMode/RandomModeService` in Random mode; `Mirror/MirrorModeService`
+  in Mirror mode.
 - `Stats/StatsService` (reset at start, round counts) and
   `Balance/BalanceService` (reset at start, round results).
 - `Modules/Hud` for banners.
@@ -135,6 +122,6 @@ to random / continuous on every DLL load), and `AutoStartService.Enabled`
 
 ## Logs
 
-`match-YYYYMMDD.log` (including `Buying anywhere State=`); master gets
+`match-YYYYMMDD.log` (including `Buying anywhere off`, Debug); master gets
 match start, round results, match end, and `Match auto-started` /
 `Match auto-ended` lines. `probe-YYYYMMDD.log`: `MatchProbe` snapshots.

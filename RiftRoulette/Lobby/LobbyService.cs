@@ -2,8 +2,6 @@ using Bublock.Modules.Restraint;
 using Bublock.Modules.Spectate;
 using Bublock.Shared;
 using DeadworksManaged.Api;
-using RiftRoulette.Draft;
-using RiftRoulette.Duel;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Mirror;
 using RiftRoulette.RandomMode;
@@ -20,7 +18,7 @@ public static class LobbyService
   private static readonly Logger PlayersLog = BublockLog.For("Players");
 
   /// <summary>
-  /// Placeholder hero for lobby / draft reset / statue rejoin. Skyrunner
+  /// Placeholder hero for lobby / match end / statue rejoin. Skyrunner
   /// (70) stopped spawning after engine 6712 (asset playable=False).
   /// </summary>
   public const Heroes LobbyHero = Heroes.Atlas;
@@ -40,7 +38,7 @@ public static class LobbyService
     ServerConVars.TrySet("citadel_hero_demo_unlock_flex_slots", 1, LobbyLog);
     ServerConVars.TrySet("citadel_voice_all_talk", 1, LobbyLog);
     FlexSlots.UnlockAll(mode);
-    ShopAccess.Sync(mode);
+    ShopAccess.Disable(mode);
     PauseGuard.FollowAccess(mode);
 
     LobbyLog.WithMode(mode).Info(
@@ -63,14 +61,12 @@ public static class LobbyService
     player.ChangeTeam(team, true);
     WatchSpot.SendUp(player, mode);
 
-    LobbyLog.WithMode(mode).Info(player.ToPlayerRef(), "Player admitted to draft Team={Team}", RiftRouletteTeams.Name(team));
+    LobbyLog.WithMode(mode).Info(player.ToPlayerRef(), "Player admitted Team={Team}", RiftRouletteTeams.Name(team));
 
     if (MatchService.State.IsRunning && MatchConfig.IsRandom)
       RandomModeService.AddJoiner(player, team, timer, mode);
     else if (MatchService.State.IsRunning && MatchConfig.IsMirror)
       MirrorModeService.AddJoiner(player, team, timer, mode);
-    else if (!MatchService.State.IsRunning && MatchConfig.IsDuel)
-      DuelService.GrantSetup(player, timer, mode, announce: true);
 
     StatsService.RefreshBoards(mode);
     AutoStartService.CheckSoon(timer, mode);
@@ -85,17 +81,13 @@ public static class LobbyService
     BanStatueService.Forget(steamId);
     RestraintService.Forget(steamId);
     WatchGuard.Forget(steamId);
-    DuelService.Forget(steamId);
     StatsService.Forget(steamId);
 
     var log = LobbyLog.WithMode(mode);
     log.Info(player.ToPlayerRef(), "Player disconnected");
 
-    if (DraftState.Release(player.PlayerSteamId, out var hero))
-    {
+    if (RoundHeroes.Remove(steamId, out var hero))
       log.Info(player.ToPlayerRef(), "Disconnected player removed Hero={Hero}", hero);
-      DraftService.RedrawBoards(mode);
-    }
 
     if (MatchService.State.IsRunning && MatchConfig.IsRandom)
       RandomModeService.OnLeave(steamId, timer, mode);
@@ -173,12 +165,6 @@ public static class LobbyService
 
     log.Info(player.ToPlayerRef(), "Kicking player");
 
-    if (DraftState.Release(player.PlayerSteamId, out var hero))
-    {
-      log.Info(player.ToPlayerRef(), "Released pick before kick Hero={Hero}", hero);
-      DraftService.RedrawBoards(mode);
-    }
-
     Server.ExecuteCommand($"kickid {slot}");
     return true;
   }
@@ -195,10 +181,10 @@ public static class LobbyService
 
   public static string DescribePlayer(CCitadelPlayerController player)
   {
-    var pick = DraftState.TryGetPick(player.PlayerSteamId, out var hero) ? hero.ToString() : "-";
+    var roundHero = RoundHeroes.TryGet(player.PlayerSteamId, out var hero) ? hero.ToString() : "-";
     var head =
       $"Slot={player.Slot} | Name={player.PlayerName} | SteamID={player.PlayerSteamId} | " +
-      $"Team={RiftRouletteTeams.Name(player.TeamNum)} | Pick={pick}";
+      $"Team={RiftRouletteTeams.Name(player.TeamNum)} | RoundHero={roundHero}";
 
     var pawn = player.GetHeroPawn();
 
@@ -218,9 +204,9 @@ public static class LobbyService
   {
     var log = LobbyLog.WithMode(mode);
 
-    if (DraftState.TryGetPick(player.PlayerSteamId, out var hero))
+    if (RoundHeroes.TryGet(player.PlayerSteamId, out var hero))
     {
-      log.Info(player.ToPlayerRef(), "Team change refused, player has a pick Hero={Hero}", hero);
+      log.Info(player.ToPlayerRef(), "Team change refused, player holds a round hero Hero={Hero}", hero);
       return false;
     }
 

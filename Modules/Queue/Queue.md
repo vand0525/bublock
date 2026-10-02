@@ -1,7 +1,6 @@
 # Queue.projitems
 
-Adds `PlayerQueue` (no commands; Rift Roulette's `/queue`, `/unqueue`,
-`/duel_queue*` live on `DuelPlugin`).
+Adds `PlayerQueue` (no commands).
 
 ```xml
 <Import Project="..\Modules\Queue\Queue.projitems" />

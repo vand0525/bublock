@@ -3,8 +3,6 @@ using Bublock.Modules.Loadout;
 using Bublock.Modules.Restraint;
 using Bublock.Shared;
 using DeadworksManaged.Api;
-using RiftRoulette.Draft;
-using RiftRoulette.Duel;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Mirror;
 using RiftRoulette.RandomMode;
@@ -170,10 +168,7 @@ public static class BanStatueService
   private static void TakeOutOfGame(CCitadelPlayerController player, ITimer timer, ExecutionMode mode)
   {
     var steamId = player.PlayerSteamId;
-    DuelService.Forget(steamId);
-
-    if (DraftState.Release(steamId, out _))
-      DraftService.RedrawBoards(mode);
+    RoundHeroes.Remove(steamId, out _);
 
     if (MatchService.State.IsRunning && MatchConfig.IsRandom)
       RandomModeService.OnLeave(steamId, timer, mode);

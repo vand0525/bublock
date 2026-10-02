@@ -1,6 +1,6 @@
 # BoardLayout
 
-Where the draft-area boards sit.
+Where the boards around the watch spot sit.
 Positions are offsets from the watch spot the boards are drawn at
 (`Round/WatchSpot.Location(WatchSpot.BoardSide)`), so the boards
 move with the watch spot between rounds.
@@ -24,10 +24,9 @@ board always sits toward the map edge.
 
 ## Used by
 
-- `DraftService.RedrawBoards`: welcome board, the hint and the note under
-  it, and the Draft mode pool boards.
-- `Stats/StatsService.RefreshBoards`: the Random mode stats boards, in the
-  same spots as the pool boards.
+- `Boards/BoardService.Redraw`: welcome board, and the hint and the note
+  under it.
+- `Stats/StatsService.RefreshBoards`: the stats boards at `Side`.
 - `Betting/BettingService.RefreshBoard`: the Random mode betting board at
   `Back`.
 

@@ -86,8 +86,7 @@ and `LoadoutService.MaxValue` (the current cap, reset on every load).
   apart) when the hero has not changed yet; a `SelectHero` in the same
   frame as another one can be lost (2026-09-27 playtest: no builds after a
   join-triggered auto-start).
-- Rift Roulette `Duel/DuelService` calls `Capture` for `/duel_copy` and
-  `SwapSnapshot` (0 gold) for both players each 1v1 intermission.
+- Rift Roulette `SelfTest` calls `Capture` to check the loadout read path.
 - Admin `/loadout_give` and `/loadout_copy` call the same ops in Debug mode
   (test tools). See
   `RiftRoulette/reference/admin-commands.md`.

@@ -28,7 +28,7 @@ See `AccessList.md` for the file shape.
   (creates the `bublock/` folder if needed). A failed write logs an Error,
   forces a re-read on the next `Load`, and throws `CommandException` so the
   admin sees it.
-- Kicks go through `LobbyService.KickPlayer` (releases a draft pick first).
+- Kicks go through `LobbyService.KickPlayer`.
 
 ## Invariants
 

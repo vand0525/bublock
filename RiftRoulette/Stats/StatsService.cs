@@ -3,8 +3,7 @@ using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Balance;
 using RiftRoulette.Betting;
-using RiftRoulette.Draft;
-using RiftRoulette.Duel;
+using RiftRoulette.Boards;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Lobby;
 using RiftRoulette.Mirror;
@@ -56,8 +55,7 @@ public static class StatsService
       return;
 
     if (RandomModeService.ConsumeEnforcementKill(victim.PlayerSteamId) ||
-        MirrorModeService.ConsumeEnforcementKill(victim.PlayerSteamId) ||
-        DuelService.ConsumeEnforcementKill(victim.PlayerSteamId))
+        MirrorModeService.ConsumeEnforcementKill(victim.PlayerSteamId))
     {
       log.Debug(victim.ToPlayerRef(), "Death skipped, hero swap enforcement");
       return;
@@ -132,18 +130,7 @@ public static class StatsService
 
   public static void RefreshBoards(ExecutionMode mode = ExecutionMode.Clean)
   {
-    if (MatchConfig.UsesDraft)
-      return;
-
     var live = WorldTextService.List().Select(board => board.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-    if (MatchConfig.IsDuel)
-    {
-      var text = StatsBoardText.StreakBoard(DuelService.StreakRows());
-      Write(SapphireBoard, RiftRouletteTeams.Sapphire, text, live, mode);
-      Write(AmberBoard, RiftRouletteTeams.Amber, text, live, mode);
-      return;
-    }
 
     Draw(SapphireBoard, RiftRouletteTeams.Sapphire, live, mode);
     Draw(AmberBoard, RiftRouletteTeams.Amber, live, mode);

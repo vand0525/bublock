@@ -1,6 +1,6 @@
 # HeroLock
 
-Reusable "you may not change hero" guard. Random mode and 1v1 (Duel) mode each own one instance; the owner
+Reusable "you may not change hero" guard. Random mode and Mirror mode each own one instance; the owner
 decides which hero a player should have and how to rebuild them.
 
 ## State (per instance)

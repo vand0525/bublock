@@ -14,11 +14,11 @@ Debug mode; a few lines per event, no per-frame work.
 
 ## Lines
 
-- **Header** `Probe Reason=... MatchRound= Mode= Phase= WatchSide= BoardSide= NextSide= Rift= RiftSide= BuyAnywhere= ConVar= Restrained= Rescues= Map=...`:
+- **Header** `Probe Reason=... MatchRound= Mode= Phase= WatchSide= BoardSide= NextSide= Rift= RiftSide= BuyAnywhereConVar= Restrained= Rescues= Map=...`:
   `Map` counts live `npc_trooper_boss` (guardians), `npc_boss_tier2`
   (walkers), `npc_barrack_boss` and `citadel_shop_prop_dynamic` (shop
-  kiosks); all should be 0 after CleanSlate. `ConVar` is the live
-  `citadel_allow_purchasing_anywhere` value.
+  kiosks); all should be 0 after CleanSlate. `BuyAnywhereConVar` is the live
+  `citadel_allow_purchasing_anywhere` value (should be 0).
 - **One per participant** (with `PlayerRef`): team, hero, alive, position and
   eye angles (`MovementService.Where`), `Half` (Sapphire when y > 0, else
   Amber), restrained, and which `RestraintService.States` are on.

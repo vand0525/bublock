@@ -93,12 +93,12 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
    fixedHeroes)`: reserved fighters get their hero, everyone else is drawn
    randomly from the rest, never a banned hero (unless the bans cover the
    whole pool, then they are ignored). The bench player
-   gets no hero, no assignment and no `DraftState` pick, so `RoundFlow`
+   gets no hero, no assignment and no `RoundHeroes` entry, so `RoundFlow`
    leaves them up top, restrained, for the round.
-6. Clears `Assignments`, `Values`, `Pending`, `DraftState`, and the
+6. Clears `Assignments`, `Values`, `Pending`, `RoundHeroes`, and the
    build-banner flag. For each fighter: a
    random build of the drawn hero; records the assignment and last hero;
-   `DraftState.Add` (so the disconnect release, `/status`, and `RoundFlow`
+   `RoundHeroes.Set` (so the disconnect cleanup, `/status`, and `RoundFlow`
    team moves keep working).
 7. `Start` per fighter:
    - Dead or no pawn: pending (Debug line), applied on the next spawn.
@@ -118,11 +118,11 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
 
 ### GuardHero (hero swap guard)
 
-Called from `DraftService.EnforceHero` on `player_hero_changed` (after
-`DuelService.GuardHero`, which only handles 1v1 mode). The kill itself is
-`HeroLock.Enforce`.
+Called from `Lobby/LobbyHeroes.Enforce` on `player_hero_changed`. The kill
+itself is `HeroLock.Enforce`.
 
-- Not Random mode, or no assignment: returns false (Draft enforcement runs).
+- Not Random mode, or no assignment: returns false (Mirror's guard, then
+  the lobby hero rule, runs).
 - Right hero, not yet applied, pending, or dead: returns true, does nothing
   (the running swap or the pending respawn fixes the hero).
 - Otherwise (the player changed hero from the menu after their loadout was
@@ -147,5 +147,5 @@ punishments, match end. Loadout details are in `loadout-*.log`.
   not in our `lib/` yet); it counts as a normal death.
 - Players come from `Participants.Humans()`: bots and seated admins are
   skipped.
-- `DraftState` keeps heroes unique; a duplicate hero (possible only when
-  the pool is smaller than the lobby) is not added to `DraftState`.
+- `RoundHeroes` allows a duplicate hero (possible only when the pool is
+  smaller than the lobby); every fighter gets an entry.

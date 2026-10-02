@@ -2,8 +2,9 @@
 
 ## Purpose
 
-Custom Deadlock game mode plugin: draft/staging, hero select, real Rift (KOTH)
-rounds, return to draft. See `reference/chat-handoff.md` and
+Custom Deadlock game mode plugin: players wait up top, get a hero and build
+each round (Random or Mirror mode), fight real Rift (KOTH) rounds, and go
+back up. See `reference/chat-handoff.md` and
 `reference/master-plan.md`.
 
 ## Current state
@@ -11,28 +12,30 @@ rounds, return to draft. See `reference/chat-handoff.md` and
 - All behavior lives in feature plugin classes.
 - Includes `Bublock/Shared/`.
 - Includes `Modules/WorldText`: `WorldTextPlugin` hosts the `/wt_*` admin
-  commands, and Draft draws its boards through `WorldTextService`.
+  commands, and `Boards/BoardService` draws the boards through
+  `WorldTextService`.
 - Includes `Modules/Movement`: `MovementPlugin` hosts the `/mv_*` admin
-  commands; Lobby, Draft, and Round teleport through `MovementService` using
+  commands; Lobby and Round teleport through `MovementService` using
   the typed positions in `Locations/RiftRouletteLocations.cs`.
 - `Lobby/LobbyPlugin` owns startup convars, connect / disconnect / spawn /
-  death hooks, kick, team moves, `/status`, and the player command list
-  `/commands`.
-- `Draft/DraftPlugin` owns hero pools, picks, hero enforcement, starting
-  progression, draft reset, and the draft boards. Picks live in
-  `Draft/DraftState`, read by Lobby and Round.
+  death hooks, hero enforcement (`player_hero_changed`, `LobbyHeroes`),
+  kick, team moves, `/status`, and the player command list `/commands`.
+- `Round/RoundHeroes` holds each fighter's hero for the round, set by the
+  Random / Mirror mode services and read by Lobby and Round.
+- `Boards/BoardsPlugin` draws the welcome, hint and note boards and
+  redraws the stats and betting boards (`/board_redraw`, `/board_note`).
 - `Rift/RiftPlugin` and `RiftService` own the rift itself: spawn, park,
   watch, end round, cleanup, green / yellow alternation.
-- `Round/RoundFlow` composes a round from Rift, Draft, and Movement ops
-  (team moves, return to draft). It is the Clean lifecycle entry; the admin
-  commands call it in Debug.
+- `Round/RoundFlow` composes a round from Rift and Movement ops
+  (team moves, sending players back up). It is the Clean lifecycle entry;
+  the admin commands call it in Debug.
 - `GameLoop/GameLoopPlugin` and `MatchService` run the continuous playtest
   match: `/match_start` once, then intermission → round → score banner,
   repeated until `/match_end`.
 - Includes `Modules/Hud`: on-screen banners through `HudService`;
   `HudPlugin` hosts `/hud_announce`.
 - `GameLoop/MatchConfig` picks the hero mode: `random` (default) or
-  `draft`. In Random mode `RandomMode/RandomPlugin` and
+  `mirror`. In Random mode `RandomMode/RandomPlugin` and
   `RandomModeService` balance teams once and give everyone a new random
   hero and top build every intermission.
 - `Stats/` counts kills, deaths and assists per match and shows them on the
@@ -52,11 +55,6 @@ rounds, return to draft. See `reference/chat-handoff.md` and
   `/seat_status`). Admins are seated on every connect. A seated admin is
   left out of teams, heroes, rounds, stats and auto-start
   (`Lobby/Participants`).
-- 1v1 mode (`/match_mode 1v1`, `Duel/`): free hero switching and
-  100,000 souls while a build is prepared, then `/duel_copy <slot>` copies
-  that player's exact hero, items, abilities and level onto both players
-  (`Modules/Loadout` snapshot) and starts the match; both stay locked to it
-  (`Lobby/HeroLock`) and are reset to it every intermission.
 - Mirror mode (`/match_mode mirror`, `Mirror/`): every fighter gets the
   same hero and the same build each intermission, picked once or pinned
   by an admin (`/mirror_hero`, `/mirror_build`).
@@ -67,9 +65,8 @@ rounds, return to draft. See `reference/chat-handoff.md` and
 - The waiting spot sits above the rift being fought, or the next one
   between rounds (`Round/WatchSpot`); it only changes when players are
   sent back up after a round, and the boards move with it.
-- 1v1 mode is winner-stays-on with a join queue (`/queue`, `/unqueue`;
-  reusable `Modules/Queue`): the first two queued fight, the loser goes to
-  the back, the winner builds a streak.
+- With an odd player count one player sits out each round
+  (`RandomMode/BenchRule`, a rotation over the reusable `Modules/Queue`).
 - Includes `Modules/Loadout`: the embedded top-3 builds per hero
   (`Data/hero-builds.json`, from `scripts/fetch-builds.py`) and
   `LoadoutService` (reset, level from the cap, abilities, items shopped
@@ -92,15 +89,14 @@ they call each other with typed C# (no command/convar messaging):
 | `Modules/WorldText/` (module) | `WorldTextPlugin` | boards / in-game text |
 | `Modules/Movement/` (module) | `MovementPlugin` | named locations, teleports |
 | `Locations/` | — (data) | Rift Roulette positions registered with Movement |
-| `Lobby/` | `LobbyPlugin` | connect/disconnect/spawn/death, teams, kick, status, startup convars, admin seat, participants, hero lock |
-| `Draft/` | `DraftPlugin` | hero pools, selections, enforcement, starting progression, draft boards |
+| `Lobby/` | `LobbyPlugin` | connect/disconnect/spawn/death, teams, kick, status, startup convars, admin seat, participants, hero lock, hero enforcement |
+| `Boards/` | `BoardsPlugin` | welcome / hint / note boards, board layout, redraw of every board |
 | `Rift/` | `RiftPlugin` | spawn / park / watch / cleanup / alternation |
-| `Round/` | — (composer) | the parity round: Rift ops + team moves + return to the watch spot |
+| `Round/` | — (composer) | the parity round: Rift ops + team moves + return to the watch spot; round heroes |
 | `Modules/Hud/` (module) | `HudPlugin` | on-screen banners |
 | `GameLoop/` | `GameLoopPlugin` | continuous match loop, score, match end, match config, auto-start |
 | `Modules/Loadout/` (module) | `LoadoutPlugin` | stored top builds, apply build to a pawn |
 | `RandomMode/` | `RandomPlugin` | Random mode: teams, per-round hero + build, pending swaps, joiners, hero guard |
-| `Duel/` | `DuelPlugin` | 1v1 mode: copied build, hero lock, setup souls, queue, winner stays on |
 | `Mirror/` | `MirrorPlugin` | Mirror mode: one shared hero + build per round, admin pins, hero guard |
 | `Modules/Restraint/` (module) | `RestraintPlugin` | silence / no items, shooting or melee until released |
 | `Modules/Queue/` (module) | — (data) | reusable player queue |
@@ -114,9 +110,7 @@ they call each other with typed C# (no command/convar messaging):
 
 ## Public surface (today)
 
-- Draft (`DraftPlugin`): player `/pick`, `/unpick`, `/picks`, `/heroes`;
-  admin `draft_status`, `draft_assign`, `draft_release`, `draft_reset`,
-  `draft_boards`, `draft_note`
+- Boards (`BoardsPlugin`): admin `board_redraw`, `board_note`
 - Rift (`RiftPlugin`): admin `rift_start`, `rift_status`, `rift_next`,
   `rift_cancel`, `rift_cleanup`
 - Lobby (`LobbyPlugin`): player `/status`, `/commands`; admin
@@ -126,9 +120,6 @@ they call each other with typed C# (no command/convar messaging):
   `match_end`, `match_auto`, `match_status`, `match_intermission`, `match_mode`,
   `match_format`, `match_config`
 - Random (`RandomPlugin`): player `/reserve [hero]`, `/heroban [hero]`; admin `random_status`, `random_reroll`
-- Duel (`DuelPlugin`): player `/queue`, `/unqueue`; admin `duel_copy`,
-  `duel_clear`, `duel_status`, `duel_queue`, `duel_queue_add`,
-  `  duel_queue_remove`
 - Mirror (`MirrorPlugin`): admin `mirror_hero`, `mirror_build`, `mirror_status`
 - Restraint admin commands (`RestraintPlugin`): `restrain`,
   `restrain_release`, `restrain_list`, `status_add`, `status_remove`
@@ -147,23 +138,23 @@ they call each other with typed C# (no command/convar messaging):
 - Movement admin commands (`MovementPlugin`): `mv_list`, `mv_where`, `mv_tp`,
   `mv_tp_team`, `mv_tp_all`, `mv_angle`, `mv_save`, `mv_remove`
 - Hooks: startup convars, player spawn/death, connect/disconnect (Lobby);
-  boards next tick after startup and `player_hero_changed` enforcement
-  (Draft, with the 1v1, Random and Mirror mode hero locks); `player_respawned` /
-  `player_spawn` pending loadouts (Random, 1v1, Mirror) and 1v1 setup souls (Duel);
+  `player_hero_changed` enforcement (Lobby, with the Random and Mirror
+  mode hero locks); boards next tick after startup (Boards);
+  `player_respawned` / `player_spawn` pending loadouts (Random, Mirror);
   `player_death` stats (Stats); `OnClientConnect` admin-seat gate (Lobby);
   `OnGameFrame` restraint upkeep (Restraint)
 
 ## State ownership
 
-Draft owns picks (`Draft/DraftState`), Rift owns the next side, phase,
+Round owns the round heroes (`Round/RoundHeroes`), Rift owns the next side, phase,
 trooper snapshot, and rift timers (`Rift/RiftService`), GameLoop owns the
 match score and countdown (`GameLoop/MatchService`) and the config
 (`GameLoop/MatchConfig`), Random owns teams / assignments / pending swaps
-(`RandomMode/RandomModeService`), Duel owns the copied build, lock and
-teams, queue and streak (`Duel/DuelService`), Mirror owns the pins and
+(`RandomMode/RandomModeService`), Mirror owns the pins and
 the shared hero and build (`Mirror/MirrorModeService`), Restraint owns the
 restrained players (`Modules/Restraint`), Round's `WatchSpot` remembers the
-board side, Lobby owns the admin seat (`Lobby/AdminSeat`),
+board side, Boards owns the welcome note (`Boards/WelcomeNoteStore`),
+Lobby owns the admin seat (`Lobby/AdminSeat`),
 Stats owns the match ledger
 (`Stats/StatsService`), Balance owns the swap counters
 (`Balance/BalanceService`), Loadout owns the read-only build catalog,
@@ -177,9 +168,9 @@ GameLoop/MatchService ─────────────┐
                                    ├─> RoundFlow.RunRound / CancelRound
 /rift_start, /rift_cancel (Debug) ─┘
       └─> RiftService (order, gamerules, watch, cleanup)
-            └─ steps ─> RoundFlow.MoveTeamsToRift (pick or 1v1 fighter + TeamNum; release restraint)
-                     ├> RoundFlow.ReturnPlayersToDraft (WatchSpot.SendUp above NextSide: restrain + teleport; boards follow)
-                     └> MatchService.OnRoundEnded (score, HudService banner; 1v1: DuelService.RecordResult)
+            └─ steps ─> RoundFlow.MoveTeamsToRift (round hero + TeamNum; release restraint)
+                     ├> RoundFlow.SendPlayersUp (WatchSpot.SendUp above NextSide: restrain + teleport; boards follow)
+                     └> MatchService.OnRoundEnded (score, HudService banner)
                           └─> next intermission: RandomModeService.PrepareRound
                                 (BenchRule: odd count sits one out → BalanceService.TryBalance →
                                  HeroDraw → LoadoutService.Swap per fighter)

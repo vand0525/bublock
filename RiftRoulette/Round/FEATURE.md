@@ -2,9 +2,9 @@
 
 ## Purpose
 
-The round, composed from Draft, Movement, and Rift ops: start a rift,
-move each drafted team to its side's start, and return players to draft
-when the rift ends or is cancelled. One code path; the mode (Clean for
+The round, composed from Movement and Rift ops plus the round heroes:
+start a rift, move each team's fighters (players in `RoundHeroes`) to its
+side's start, and send players back up when the rift ends or is cancelled. One code path; the mode (Clean for
 lifecycle, Debug for admin) changes only logging. The round reports its
 result to the match loop. Players wait at a watch spot above the rift
 (`WatchSpot`), not the fixed `draft` spot, restrained (`Modules/Restraint`)
@@ -15,13 +15,14 @@ health.
 
 | File | Role |
 |---|---|
+| `RoundHeroes.cs` | This round's fighters: Steam ID → hero, written by Random / Mirror mode (pure data, tested) |
 | `RoundLocations.cs` | Side → (Sapphire, Amber) start locations, side → watch spot (pure) |
 | `WatchSpotRule.cs` | Which side the watch spot is above (pure) |
 | `WatchSpot.cs` | Send players up (teleport + restrain), move everyone up, move the boards |
 | `WatchLayout.cs` | Board offsets / yaw turned half a turn on yellow, look-at angles (pure) |
 | `WatchGuardRule.cs` | "Below the watch spot" line: spot z - 300 (pure) |
 | `WatchGuard.cs` | Every 16 frames sends restrained players who dropped below the line back up (no banner); logs restrained players' console commands |
-| `RoundFlow.cs` | Composer: `RunRound`, `CancelRound`, `MoveTeamsToRift`, `ReturnPlayersToDraft`, `Steps` |
+| `RoundFlow.cs` | Composer: `RunRound`, `CancelRound`, `MoveTeamsToRift`, `SendPlayersUp`, `Steps` |
 | `SlotSpots.cs` + `Data/spots.json` | Per-slot spots: anchor + slot offset (forward, right, up) for the watch spot and the rift starts (embedded table) |
 | `SpotCheck.cs` | List the slot spots; walk an admin through one group and log where the pawn lands |
 | `SpotsPlugin.cs` | `/spots_list`, `/spots_walk` |
@@ -45,11 +46,12 @@ confirms in game.
 
 ## State
 
+`RoundHeroes` holds this round's fighters (Steam ID → hero);
 `WatchSpot` remembers which side the boards were last drawn at;
 `WatchGuard` keeps per-player grace times, a command-log repeat filter and a
 rescue count. Round state
-(phase, side, snapshot, timers) is owned by `Rift/RiftService`; picks by
-`Draft/DraftState`; restraint by `Modules/Restraint`.
+(phase, side, snapshot, timers) is owned by `Rift/RiftService`; restraint
+by `Modules/Restraint`.
 
 ## Composition
 
@@ -58,8 +60,8 @@ GameLoop/MatchService ─────────────┐
                                    ├─> RoundFlow.RunRound / CancelRound
 /rift_start, /rift_cancel (Debug) ─┘
       └─> RiftService.RunRift / CancelRift (order, gamerules, watch, cleanup)
-            └─ steps ─> RoundFlow.MoveTeamsToRift  (pick or 1v1 fighter + TeamNum; release restraint; MovementService; heal to full)
-                     ├> RoundFlow.ReturnPlayersToDraft (WatchSpot.SendUp above NextSide, boards follow)
+            └─ steps ─> RoundFlow.MoveTeamsToRift  (RoundHeroes entry + TeamNum; release restraint; MovementService; heal to full)
+                     ├> RoundFlow.SendPlayersUp (WatchSpot.SendUp above NextSide, boards follow)
                      └> MatchService.OnRoundEnded (score + banner; no-op outside a match)
 ```
 
@@ -67,7 +69,7 @@ GameLoop/MatchService ─────────────┐
 
 - `Rift/RiftService`, `Rift/RiftSide`, `Rift/RiftRoundResult`.
 - `GameLoop/MatchService` (round-ended step only).
-- `Draft/DraftState`, `Draft/DraftService` (board redraw), `Duel/DuelService` (fighters), `Lobby/RiftRouletteTeams`.
+- `Boards/BoardService` (board redraw), `Lobby/RiftRouletteTeams`.
 - `Modules/Movement`, `Modules/Restraint`, `Locations/RiftRouletteLocations`.
 - `Shared` (logging, `ExecutionMode`).
 

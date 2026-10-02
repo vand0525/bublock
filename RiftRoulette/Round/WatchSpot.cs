@@ -2,7 +2,7 @@ using Bublock.Modules.Movement;
 using Bublock.Modules.Restraint;
 using Bublock.Shared;
 using DeadworksManaged.Api;
-using RiftRoulette.Draft;
+using RiftRoulette.Boards;
 using RiftRoulette.Lobby;
 using RiftRoulette.Locations;
 using RiftRoulette.Rift;
@@ -64,7 +64,7 @@ public static class WatchSpot
       return false;
 
     _boardSide = side;
-    DraftService.RedrawBoards(mode);
+    BoardService.Redraw(mode);
     Log.WithMode(mode).Debug("Boards moved to the watch spot Side={Side}", RiftSides.Name(side));
     return true;
   }

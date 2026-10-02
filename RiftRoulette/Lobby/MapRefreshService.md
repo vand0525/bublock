@@ -43,8 +43,8 @@ after.`
 
 ## Invariants
 
-- Only Random mode rounds are counted (1v1 copies one build; the draft
-  keeps the same heroes).
+- Random and Mirror mode rounds are counted (`MatchService.StartRound`
+  adds each round's fighter count).
 - Never ends a round early: only at a scored round end.
 - Logs go to `restart-YYYYMMDD.log`.
 

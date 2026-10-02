@@ -25,7 +25,7 @@ None of its own; `RegisterAll()` writes into `MovementService.Locations`.
 
 ## Composition
 
-- Lobby, Draft, and Rift pass the typed locations to `MovementService`.
+- Lobby, Round, and Rift pass the typed locations to `MovementService`.
 - `SessionPlugin.OnLoad` calls `RegisterAll()` so admins can use
   `/mv_tp draft`, `/mv_tp green_sapphire`, etc.
 

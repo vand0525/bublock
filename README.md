@@ -2,7 +2,8 @@
 
 Deadworks server plugins for Deadlock. The main one is **Rift Roulette**:
 round-based rift fights with random heroes and real builds, a continuous
-match loop, auto-balance, and a winner-stays-on 1v1 mode.
+match loop, auto-balance, betting, and a mirror mode where everyone has the
+same hero and build.
 
 ## Currently hosted
 

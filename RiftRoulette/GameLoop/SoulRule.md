@@ -11,11 +11,10 @@ build: its items, and the level and ability ranks the loadout cap buys
 
 | Op | Returns |
 |---|---|
-| `ShouldBlock(type, source, amount, matchRunning, ranksFromBuild = false)` | false when no match is running or `amount <= 0`. Gold (`EGold`): true unless `source` is `ECheats`, `EStartingAmount`, or `EItemSale`. Ability points (`EAbilityPoints`) and unlocks (`EAbilityUnlocks`): true when `ranksFromBuild` and `source` is not `ECheats`. Every other currency: false. |
+| `ShouldBlock(type, source, amount, matchRunning)` | false when no match is running or `amount <= 0`. Gold (`EGold`): true unless `source` is `ECheats`, `EStartingAmount`, or `EItemSale`. Ability points (`EAbilityPoints`) and unlocks (`EAbilityUnlocks`): true unless `source` is `ECheats`. Every other currency: false. |
 
-`GameLoopPlugin` passes `ranksFromBuild = !MatchConfig.UsesDraft`: Random
-mode and 1v1 mode set ability ranks themselves (a budgeted loadout or a
-copied snapshot) and set both wallets with `SetCurrency`.
+Random and Mirror mode set ability ranks themselves (a budgeted loadout)
+and set both wallets with `SetCurrency`.
 
 ## Invariants
 
@@ -25,11 +24,9 @@ copied snapshot) and set both wallets with `SetCurrency`.
   allowed for gold (the loadout then sets gold itself), blocked for ability
   points and unlocks so a late starting grant cannot refill the wallets
   the loadout zeroed. `EItemSale` keeps selling working.
-- `ELevelUp` and `EAbilityPurchase` ability gains are blocked in Random and
-  1v1 matches, so the ranks stay the build's prefix. Draft mode keeps them
-  (a draft pick gets its starting unlock from the game).
+- `ELevelUp` and `EAbilityPurchase` ability gains are blocked during a
+  match, so the ranks stay the build's prefix.
 - `SetCurrency` does not pass through this hook.
-- With no match running (lobby, 1v1 setup) nothing is blocked, so the 1v1
-  setup souls, buying and free ability upgrades still work.
+- With no match running (lobby) nothing is blocked.
 - No game calls; linked into `RiftRoulette.Tests` (`SoulRuleTests`).
   `GameLoopPlugin.OnModifyCurrency` applies it.

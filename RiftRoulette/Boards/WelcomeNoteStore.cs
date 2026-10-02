@@ -1,12 +1,12 @@
 using Bublock.Shared;
 
-namespace RiftRoulette.Draft;
+namespace RiftRoulette.Boards;
 
 public static class WelcomeNoteStore
 {
   public const string FileName = "welcomenote.txt";
 
-  private static readonly Logger Log = BublockLog.For("Draft");
+  private static readonly Logger Log = BublockLog.For("Boards");
 
   private static string? _text;
 

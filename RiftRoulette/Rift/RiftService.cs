@@ -14,7 +14,7 @@ public enum RiftPhase
 
 public sealed record RiftRoundSteps(
   Action<RiftSide> MoveTeamsToRift,
-  Func<int> ReturnPlayersToDraft,
+  Func<int> SendPlayersUp,
   Action<RiftRoundResult> RoundEnded);
 
 public sealed record RiftSnapshot(HashSet<int> Spawners, HashSet<int> Cashins);
@@ -174,12 +174,12 @@ public static class RiftService
 
     log.Info("Ending rift round Outcome={Outcome}", outcome);
 
-    var returned = steps.ReturnPlayersToDraft();
+    var returned = steps.SendPlayersUp();
     var removed = CleanupRiftTroopers(mode);
     ScheduleLateSweeps(timer, mode);
 
     log.Info(
-      "Rift round ended, players returned to draft Outcome={Outcome} Returned={Returned} TroopersRemoved={TroopersRemoved}",
+      "Rift round ended, players sent up Outcome={Outcome} Returned={Returned} TroopersRemoved={TroopersRemoved}",
       outcome,
       returned,
       removed);
@@ -207,7 +207,7 @@ public static class RiftService
     else
       RiftGameRules.SetKothEnabled(false);
 
-    var returned = steps.ReturnPlayersToDraft();
+    var returned = steps.SendPlayersUp();
     var removed = CleanupRiftTroopers(mode);
     ScheduleLateSweeps(timer, mode);
 

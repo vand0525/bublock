@@ -1,26 +1,25 @@
 # StreamFraming
 
-Pure framing math for the stream camera's park (`StreamCam`). No game
-calls; unit tested (`Tests/RiftRoulette.Tests/StreamFramingTests`).
-
-## Types
-
-- `CameraPose(Offset, Pitch, Yaw)`: a camera view relative to a watch spot
-  anchor. `Offset` is `(forward, right, up)` in the anchor's frame
-  (`MovementLocation.Offset`), `Yaw` is added to the anchor's yaw, `Pitch`
-  is absolute.
+The stream camera's fixed spot for each rift side (`StreamCam` parks
+there). Pure data, no game calls; unit tested
+(`Tests/RiftRoulette.Tests/StreamFramingTests`).
 
 ## Operations
 
 | Operation | Result |
 |---|---|
-| `Default` | Offset `(0, 0, OverheadHeight)` (264: above the 1536 floor up top), pitch 89, yaw 0 (the anchor's yaw). |
-| `Pick(saved, side)` | The side's pose; else for Green/Yellow the mirrored other side's; else `Default`. Center never mirrors Green/Yellow. |
-| `ToWorld(anchor, pose)` | World position `anchor.Offset(pose.Offset)` and angle `(pitch, anchor yaw + yaw, 0)` (yaw wrapped). |
-| `FromWorld(anchor, position, angle)` | The inverse: `anchor.LocalOf(position)`, the pitch, the yaw minus the anchor's yaw (wrapped). |
-| `Parse(json)` / `Serialize(poses)` | The `streamcam.json` shape: `{ "green": { "offset": [f, r, u], "pitch": p, "yaw": y }, "yellow": ... }`. `Parse` skips unknown sides and offsets without three numbers. |
+| `Spot(side)` | World position and view angle (pitch, yaw, roll) for that side. |
+
+| Side | Position | Angle |
+|---|---|---|
+| Green | (7121, -119.906, 2142.375) | (12.281, -1.9375, 0) |
+| Yellow | (-7063.344, 47.594, 1664.281) | (-4.75, 174.844, 0) |
+| Center | (-479.688, 70.344, 1639.969) | (-13.25, -8.625, 0) |
 
 ## Invariants
 
-- The two watch spot anchors face each other (half a turn apart), so a
-  pose saved on one side lands mirrored on the other.
+- Absolute world values, captured by the admin in fly cam with
+  `getpos_exact` (it prints `setpos_exact` / `setang_exact`). Not relative
+  to the watch spot anchor: moving an anchor does not move the camera.
+- The angle is handed unchanged to `SpectateService.Park`, which sends it
+  as the client camera angle after the teleport.

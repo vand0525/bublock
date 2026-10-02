@@ -308,8 +308,8 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 ### 2026-09-27 — Hot reload runs OnLoad(isReload: true), not OnStartupServer
 
 - **Why hard / useful:** Startup work silently stops happening after an upload. One upload left guardians and walkers on the map, the boards at the old spot, and `maxplayers` at 12.
-- **Verified fact (server logs):** an upload hot-reloads each DLL: `OnLoad(true)` runs, `OnStartupServer` does not, and timers set by the previous load (CleanSlate's 2 s removal) are dropped with it. Every plugin whose startup work matters must redo it in `OnLoad` when `isReload` is true (CleanSlate cleanup, Lobby convars, Draft boards).
-- **Link / path:** `Bublock/CleanSlate/CleanSlatePlugin.cs`, `Bublock/RiftRoulette/Lobby/LobbyPlugin.cs`, `Bublock/RiftRoulette/Draft/DraftPlugin.cs`
+- **Verified fact (server logs):** an upload hot-reloads each DLL: `OnLoad(true)` runs, `OnStartupServer` does not, and timers set by the previous load (CleanSlate's 2 s removal) are dropped with it. Every plugin whose startup work matters must redo it in `OnLoad` when `isReload` is true (CleanSlate cleanup, Lobby convars, boards).
+- **Link / path:** `Bublock/CleanSlate/CleanSlatePlugin.cs`, `Bublock/RiftRoulette/Lobby/LobbyPlugin.cs`, `Bublock/RiftRoulette/Boards/BoardsPlugin.cs`
 
 ### 2026-09-27 — The archive's yellow rift starts were swapped
 
@@ -341,7 +341,7 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 ### 2026-09-27 — RiftService.NextSide flips at spawn, not at round end
 
 - **Why hard / useful:** Anything that follows "the rift being fought" (the watch spot) goes to the wrong side if it reads `NextSide` mid-round.
-- **Verified fact:** `RiftService.AlternateSide` runs when the rift spawns, so during a live round `NextSide` already points at the other rift; `CurrentSide` holds the side being fought. `CurrentSide` is cleared in `FinishRound`, which runs after the `ReturnPlayersToDraft` step, so at that step the rift still counts as running: pass `NextSide` explicitly there. Rule in `Round/WatchSpotRule.SideFor(running, current, next)`.
+- **Verified fact:** `RiftService.AlternateSide` runs when the rift spawns, so during a live round `NextSide` already points at the other rift; `CurrentSide` holds the side being fought. `CurrentSide` is cleared in `FinishRound`, which runs after the `SendPlayersUp` step, so at that step the rift still counts as running: pass `NextSide` explicitly there. Rule in `Round/WatchSpotRule.SideFor(running, current, next)`.
 - **Link / path:** `Bublock/RiftRoulette/Rift/RiftService.cs`, `Bublock/RiftRoulette/Round/WatchSpot.cs`
 
 ### 2026-09-27 — Disarm blocks reloading; use ShootingDisabled
@@ -578,3 +578,10 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **To confirm in game:** whether `Info.Damage` in `OnTakeDamage` (before the hit) is before or after resistances; compare `Damage=` on `Death recorded` lines in `stats-*.log` with the victim's max health.
 - **Used as:** `Stats/DamageLedger` (20% of the victim's `MaxHealth` dealt since their last spawn), fed by `StatsService.RecordDamage` from `GameLoopPlugin.OnTakeDamage`, capped at the victim's health left.
 - **Link / path:** `Bublock/RiftRoulette/Stats/DamageLedger.cs`, `Bublock/RiftRoulette/Stats/StatsService.cs`
+
+### 2026-10-02 — Capturing a fly cam spot: getpos_exact; no fly cam up / down commands
+
+- **Why hard / useful:** picking stream camera spots by hand needs exact world coordinates and the view angle, and there is no obvious way to raise or lower the fly cam.
+- **Verified fact (in game, client console):** `spec_fly_up` and `spec_fly_down` do not exist in Deadlock (`Unknown command`), so up / down in fly cam is only by looking up or down and moving forward. `getpos_exact` in fly cam prints `setpos_exact x y z;setang_exact pitch yaw roll` in world coordinates (not relative to anything).
+- **Used as:** the three fixed spots in `Lobby/StreamFraming.Spot` (green, center, yellow), copied from the admin's `getpos_exact` output; the angle goes through `SpectateService.Park` unchanged.
+- **Link / path:** `Bublock/RiftRoulette/Lobby/StreamFraming.cs`

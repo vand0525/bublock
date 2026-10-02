@@ -1,6 +1,5 @@
 using Bublock.Shared;
 using DeadworksManaged.Api;
-using RiftRoulette.Duel;
 using RiftRoulette.Lobby;
 using ITimer = DeadworksManaged.Api.ITimer;
 
@@ -29,7 +28,7 @@ public static class AutoStartService
   public static AutoStartAction Check(ITimer timer, ExecutionMode mode = ExecutionMode.Clean, ulong? leavingSteamId = null)
   {
     var log = Log.WithMode(mode);
-    var humans = MatchConfig.IsDuel ? DuelService.QueuedCount(leavingSteamId) : Humans(leavingSteamId).Count;
+    var humans = Humans(leavingSteamId).Count;
     var leaving = leavingSteamId != null;
     var action = AutoStartRule.Decide(Enabled, MatchService.State.IsRunning, humans, MinPlayers, leaving);
 
@@ -45,10 +44,6 @@ public static class AutoStartService
     {
       case AutoStartAction.Start when MapRefreshService.Pending:
         log.Debug("Auto-start waiting for the refresh reload Humans={Humans}", humans);
-        return AutoStartAction.None;
-
-      case AutoStartAction.Start when MatchConfig.IsDuel && !DuelService.HasSnapshot:
-        log.Debug("Auto-start waiting for a 1v1 build Humans={Humans}", humans);
         return AutoStartAction.None;
 
       case AutoStartAction.Start:
@@ -83,7 +78,7 @@ public static class AutoStartService
 
   public static void RemindWaiting(ExecutionMode mode = ExecutionMode.Clean)
   {
-    if (IsWaiting(MatchConfig.IsDuel ? DuelService.QueuedCount() : Humans(null).Count))
+    if (IsWaiting(Humans(null).Count))
       AnnounceWaiting(mode);
   }
 
@@ -94,8 +89,7 @@ public static class AutoStartService
     timer.Once(JoinCheckDelaySeconds.Seconds(), () => Check(timer, mode));
 
   public static string Describe() =>
-    $"Auto-start={(Enabled ? "on" : "off")} | MinPlayers={MinPlayers} | Humans={Humans(null).Count}" +
-    (MatchConfig.IsDuel ? $" | Queued={DuelService.QueuedCount()} (1v1 counts the queue)" : "");
+    $"Auto-start={(Enabled ? "on" : "off")} | MinPlayers={MinPlayers} | Humans={Humans(null).Count}";
 
   // Chat, not a banner: banners go by too fast and long lines don't fit.
   private static void AnnounceWaiting(ExecutionMode mode)
@@ -113,9 +107,6 @@ public static class AutoStartService
 
   private static string WaitingDescription()
   {
-    if (MatchConfig.IsDuel)
-      return $"1v1 starts when {MinPlayers} are queued - /queue";
-
     var missing = Math.Max(1, MinPlayers - Humans(null).Count);
     return missing == 1 ? "Match starts when 1 more player joins" : $"Match starts when {missing} more players join";
   }

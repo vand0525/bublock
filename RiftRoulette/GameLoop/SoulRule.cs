@@ -15,8 +15,7 @@ public static class SoulRule
     ECurrencyType type,
     ECurrencySource source,
     int amount,
-    bool matchRunning,
-    bool ranksFromBuild = false)
+    bool matchRunning)
   {
     if (!matchRunning || amount <= 0)
       return false;
@@ -24,7 +23,7 @@ public static class SoulRule
     return type switch
     {
       ECurrencyType.EGold => !AllowedSources.Contains(source),
-      ECurrencyType.EAbilityPoints or ECurrencyType.EAbilityUnlocks => ranksFromBuild && source != ECurrencySource.ECheats,
+      ECurrencyType.EAbilityPoints or ECurrencyType.EAbilityUnlocks => source != ECurrencySource.ECheats,
       _ => false
     };
   }

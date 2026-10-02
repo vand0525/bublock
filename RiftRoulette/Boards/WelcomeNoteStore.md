@@ -1,7 +1,7 @@
 # WelcomeNoteStore
 
 Keeps the note drawn under the welcome board, below the fixed `/about`
-hint (`draft.note`), in
+hint (`board.note`), in
 `bublock/welcomenote.txt` on the server (next to `bublock/logs/` and
 `access.json`), so it survives redraws, uploads (hot reloads) and restarts.
 
@@ -16,7 +16,8 @@ hint (`draft.note`), in
 ## Side effects
 
 - Reads the file once per load; writes it on every set.
-- Logs Information `Welcome note loaded Length=` on load, Debug on write;
+- Logs (`Boards` feature log, `boards-YYYYMMDD.log`) Information
+  `Welcome note loaded Length=` on load, Debug on write;
   an unreadable file logs Error and draws no note; a failed write logs
   Error and keeps the note for this load only.
 
@@ -26,4 +27,4 @@ hint (`draft.note`), in
   next load.
 - Plain text; a newline in the file is a line break on the board. A hand
   edit applies after the next load.
-- Does not redraw; callers redraw through `DraftService.RedrawBoards`.
+- Does not redraw; callers redraw through `BoardService.Redraw`.

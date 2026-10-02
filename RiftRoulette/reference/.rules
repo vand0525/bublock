@@ -31,13 +31,13 @@ deadworks/                 # Cursor workspace root
       Spectate/            # spectator camera: follow a player, park a free camera (no commands)
     RiftRoulette/            # game mode DLL
       Session/             # session lifecycle lines in the master log
-      Lobby/ Draft/ Rift/  # game-specific plugin classes
-      Round/               # parity round composer (Rift + Draft + Movement ops) + watch spot
+      Lobby/ Rift/         # game-specific plugin classes
+      Boards/              # welcome / hint / note boards, redraw of every board (dw_board_*)
+      Round/               # parity round composer (Rift + Movement ops) + watch spot + round heroes
       GameLoop/            # match loop + MatchConfig (hero mode, format) + auto-start
       RandomMode/          # random hero + build every round
       Stats/               # match kills / deaths / assists, stats boards
       Balance/             # auto-balance swaps between rounds
-      Duel/                # 1v1 mode: copied build, queue, winner stays on
       Mirror/              # mirror mode: everyone the same hero + build, admin pins
       SelfTest/            # patch-day self-test of every game dependency (dw_selftest_*)
     DevTools/              # discovery / diagnostics
@@ -115,18 +115,21 @@ Assume the git repo is rooted at `Bublock/`.
   `--push-access` (the server's old copy stays in the stamp folder).
 - When a stage changes architecture decisions, update `master-plan.md` and this
   `.rules` file in the same change.
-- Round flow is composed by `RiftRoulette/Round/RoundFlow` from Rift, Draft,
-  and Movement ops. The lifecycle calls it in Clean mode; admin commands
+- Round flow is composed by `RiftRoulette/Round/RoundFlow` from Rift and
+  Movement ops; who fights is whoever holds a round hero
+  (`Round/RoundHeroes`, set by the Random / Mirror mode services). The lifecycle calls it in Clean mode; admin commands
   call the same methods in Debug mode.
 - The match loop (`RiftRoulette/GameLoop/MatchService`) is the lifecycle: it
   starts rounds through `RoundFlow` and learns each result through the
   `RiftRoundSteps.RoundEnded` step. Players see match state on the HUD
   banner (`Modules/Hud`), not chat spam.
-- `GameLoop/MatchConfig` holds the match settings (hero mode `random`,
-  `draft`, `duel` or `mirror`, format `continuous`). In Random mode `RandomModeService` gives
+- `GameLoop/MatchConfig` holds the match settings (hero mode `random` or
+  `mirror`, format `continuous`). Draft and 1v1 (duel) modes were removed;
+  draft will be rebuilt later. In Random mode `RandomModeService` gives
   every player a random hero and one of its stored top builds each
-  intermission (through `Modules/Loadout`); draft code stays but its boards
-  and pick commands are off. Build data is fetched offline by
+  intermission (through `Modules/Loadout`). Outside those, Lobby's hero
+  enforcement (`Lobby/LobbyHeroes`) keeps everyone on their round hero or
+  the lobby hero. Build data is fetched offline by
   `scripts/fetch-builds.py` and embedded in the DLL; the server never calls
   the Deadlock API.
 - Loadouts (`Modules/Loadout`, `LoadoutPlanner.Plan`) shop the build in
@@ -156,9 +159,9 @@ Assume the git repo is rooted at `Bublock/`.
 - Random mode fighting teams are always even: with an odd count (3+) one
   player sits out each round (`RandomMode/BenchRule`, a `PlayerQueue`
   rotation owned by `RandomModeService`). The bench player gets no hero and
-  no pick, so `RoundFlow` leaves them up top, restrained. Joins and leaves
+  no round hero, so `RoundFlow` leaves them up top, restrained. Joins and leaves
   in an intermission sub the bench player in; never give a bench player a
-  pick without evening the teams.
+  round hero without evening the teams.
 - Betting (Random mode, `Betting/BettingService`): 100 starting betting
   souls (a separate balance, not in-game souls; player text always says
   souls, never chips; they never add fighting power), 100 per credited
@@ -190,9 +193,6 @@ Assume the git repo is rooted at `Bublock/`.
   bet). The target is told at once that someone marked them, never who
   (chat only). An unused mark ends at round end; refunded on no result,
   a target who didn't fight, or match end.
-- 1v1 mode has no team score: the only score is the best-streak
-  leaderboard (`Duel/StreakBoard`), shown on both stats boards and in
-  `/score`.
 - Join access lives in `bublock/access.json` on the server (banned /
   allowed Steam64 IDs, open or private). `Lobby/AccessService` checks it
   in `OnClientConnect` before the admin seat rule; a ban wins over
@@ -246,7 +246,9 @@ Assume the git repo is rooted at `Bublock/`.
   (`/seat_roam` / `dw_seat_roam`, from spectating or playing): Abrams on Amber facing the welcome sign
   (`WatchLayout.WelcomeFront`; back to the watch slot if they fall), not
   restrained, invisible (`modifier_invis`, one 3600 s modifier put back
-  when it runs out and on respawn / reload, never every frame), and works
+  when it runs out and on respawn / reload, never every frame), moved to
+  the welcome sign of the new side within 2 s when the watch spot changes
+  rift side (`AdminSeat.FollowWatchSpot`), and works
   while players are connected (game chat). `dw_seat_spec` while roaming
   returns to spectating. Roaming admins stay seated (never participants).
   There is no auto roam↔spectate sync on join/leave.
@@ -267,11 +269,6 @@ Assume the git repo is rooted at `Bublock/`.
   ends, and the map reloads 10 s later; auto-start is held until then and
   starts a fresh match when players are back. Never end a round early for
   it, and never raise the budget without new join-size data.
-- Hero mode `duel` (`/match_mode 1v1`) copies one player's exact
-  hero state (`Modules/Loadout` `LoadoutSnapshot`) onto both players with
-  `/duel_copy <slot>` and locks them to it (`Lobby/HeroLock`, one instance
-  per mode), re-applied every intermission. Code that means "the draft is
-  off" checks `MatchConfig.UsesDraft`, not `IsRandom`.
 - Hero mode `mirror` (`Mirror/MirrorModeService`): each intermission one
   hero and one of its stored builds are resolved once (`MirrorPick`) and
   given to every fighter on both teams; never roll a build per player.
@@ -310,11 +307,8 @@ Assume the git repo is rooted at `Bublock/`.
   `SelfTestService` check and into `patch-day.md` section 5 in the same
   change. Set convars with `ServerConVars.TrySet`, never a bare
   `ConVar.Find(...)?.SetInt`.
-- 1v1 mode is winner-stays-on over a `Modules/Queue`
-  `PlayerQueue` owned by `DuelService`: the first two queued are the
-  fighters (`IsFighter`), only they get the build and lock and move into
-  the rift; the loser goes to the back; auto-start counts the queue in 1v1
-  mode. New "wait your turn" features reuse `PlayerQueue`.
+- New "wait your turn" features reuse `Modules/Queue` `PlayerQueue`
+  (the bench rotation already does).
 - Hot reload: an upload hot-reloads each DLL, which runs
   `OnLoad(isReload: true)` but not `OnStartupServer` and drops timers from
   the previous load. Startup work that matters (CleanSlate cleanup, server
@@ -322,9 +316,9 @@ Assume the git repo is rooted at `Bublock/`.
   A reload also ends a running match (`MatchService.State` starts empty),
   and with no match `SoulRule` blocks nothing: after an upload mid-match,
   run `/match_start` again (auto-start only does it with 2+ players).
-- Buying: CleanSlate disables every shop; buying anywhere is on only in 1v1
-  setup (1v1 mode, no match). Only `GameLoop/ShopAccess` sets
-  `citadel_allow_purchasing_anywhere`. Items reach players with `AddItem`.
+- Buying: CleanSlate disables every shop and buying anywhere is always off.
+  Only `GameLoop/ShopAccess` sets `citadel_allow_purchasing_anywhere`
+  (to 0). Items reach players with `AddItem`.
 - Souls: while a match runs every earned soul gain is blocked
   (`GameLoop/SoulRule`, applied in `GameLoopPlugin.OnModifyCurrency`);
   power comes only from the round's build. `ECheats`, `EStartingAmount`
@@ -348,13 +342,12 @@ Assume the git repo is rooted at `Bublock/`.
   and is adopted right away.
 - Stream camera: a seated admin's camera is run by `Lobby/StreamCam`
   (every 2 s and on deaths) through `Modules/Spectate`; no command
-  needed. Players to watch: follow one, cut to the killer. Nobody to
-  watch: park at the saved framing for `WatchSpot.Side`
-  (`StreamFramingStore`, `bublock/streamcam.json`; default straight down
-  264 above the main `WatchSpot.Location` anchor). Moving the camera
-  after that park and letting go saves the new framing, relative to the
-  side's anchor (`StreamFraming`), so it mirrors to the other side;
-  `/spec_reset` forgets it. The server's observer mode does not switch
+  needed. Fighters (unrestrained participants) to watch: follow one, cut
+  to the killer. Nobody fighting (between rounds): park at the fixed spot
+  for `WatchSpot.Side` (`StreamFraming.Spot`: world position and angle per
+  rift side, captured in fly cam with `getpos_exact`; nothing is saved),
+  re-sent every 6 s outside fly cam so pressing C lands on it
+  (`StreamCamRule.ParkStep`). The server's observer mode does not switch
   the client: every park goes through `SpectateService.Park` (teleport,
   then the angle later) and only moves an admin already in fly cam (C;
   the client refuses `spec_*` commands from the server, so none are
@@ -393,7 +386,7 @@ Assume the git repo is rooted at `Bublock/`.
 
 - Each component or feature folder MUST have a `FEATURE.md`
   (examples: `Shared/FEATURE.md`, `Modules/WorldText/FEATURE.md`,
-  `RiftRoulette/Draft/FEATURE.md`, `RiftRoulette/Rift/FEATURE.md`).
+  `RiftRoulette/Boards/FEATURE.md`, `RiftRoulette/Rift/FEATURE.md`).
 - Feature docs use the same read-first / update-last workflow as file docs.
 - A `FEATURE.md` MUST cover:
   - purpose of the component
@@ -475,7 +468,7 @@ PlayerCommand  →  same core operations (game-state rules; Clean by default)
 ```
 
 - Core operations are small, reusable, individually testable units
-  (examples: SpawnRift, MoveTeams, CleanupRift, ReturnToDraft).
+  (examples: SpawnRift, MoveTeams, CleanupRift, SendPlayersUp).
 - Admin and player commands are thin wrappers around core operations.
 - Game lifecycle composes operations; individual commands must not own
   the entire match.
@@ -485,7 +478,7 @@ PlayerCommand  →  same core operations (game-state rules; Clean by default)
 ### Plugin classes and services
 
 - One DLL hosts **many small plugin classes** (one per feature, e.g.
-  `WorldTextPlugin`, `DraftPlugin`, `RiftPlugin`). The Deadworks loader
+  `WorldTextPlugin`, `BoardsPlugin`, `RiftPlugin`). The Deadworks loader
   instantiates every `IDeadworksPlugin` type in a DLL.
 - Plugin classes are thin hosts: hooks and `[Command]` wrappers only.
   Commands must be declared on a plugin class (the loader only scans
@@ -511,10 +504,10 @@ Names follow SourceMod / CounterStrikeSharp conventions. Target command set:
 
 - Every command runs in game as `/name`; Deadworks also registers `!name`
   and `dw_name`.
-- Player commands: short verbs, no prefix (`/pick`, `/unpick`, `/picks`,
-  `/heroes`, `/status`, `/commands`). `/commands` lists non-hidden names
+- Player commands: short verbs, no prefix (`/status`, `/commands`,
+  `/score`, `/bet`). `/commands` lists non-hidden names
   without `_`, so player command names must not contain `_`.
-- Admin commands: feature word first (`/rift_start`, `/draft_reset`,
+- Admin commands: feature word first (`/rift_start`, `/board_redraw`,
   `/player_kick`, `/lobby_setup`, `/session_info`, `/wt_list`, `/mv_tp`,
   `/ent_find`, `/dev_logpath`, `/cleanup_run`).
 - Commands that act on another player take a slot number (`<slot>`).
@@ -571,22 +564,22 @@ When debugging with Cursor: run `pull-logs.sh` first, then inspect
 ### Line structure (every entry)
 
 ```text
-2026-09-26T20:13:00.123Z [Information] [RiftRoulette.Draft] session=a1b2c3d4 round=- player="Theo" steam=76561198192980843 slot=3 | Selected hero Hero=Shiv
+2026-09-26T20:13:00.123Z [Information] [RiftRoulette.Lobby] session=a1b2c3d4 round=- player="Theo" steam=76561198192980843 slot=3 | Player admitted Team=Sapphire
 ```
 
 - ISO-8601 timestamp in **UTC** with milliseconds.
 - Severity: `Trace` | `Debug` | `Information` | `Warning` | `Error` | `Critical`
   (align with .NET `LogLevel`).
 - Prefix: every feature has its own, `[<Dll>.<Feature>]`
-  (e.g. `[RiftRoulette.Draft]`, `[CleanSlate.Cleanup]`,
+  (e.g. `[RiftRoulette.Lobby]`, `[CleanSlate.Cleanup]`,
   `[DevTools.Commands]`). Master lines use `[<Dll>]`.
 - Correlation: `session=` always (one per DLL load); `round=` (`-` when no
   round is active).
 - Affected player: whenever a line is about a player, pass a `PlayerRef`
   (`controller.ToPlayerRef()`) so the line carries name, Steam ID, and slot.
 - Message templates (`{SpawnerIndex}`) rendered as `Name=value` after the
-  level check; never string-built before it. `Hero={Hero}` also renders
-  `Hero=Shiv` (the formatter does not repeat a name the template wrote).
+  level check; never string-built before it. `Team={Team}` also renders
+  `Team=Sapphire` (the formatter does not repeat a name the template wrote).
 - Exceptions with stack on `Error` / `Critical`.
 
 ### Files (master + one per feature)
@@ -595,13 +588,13 @@ When debugging with Cursor: run `pull-logs.sh` first, then inspect
 # On server under bublock/logs/<Dll>/, and after pull under Bublock/logs/<Dll>/:
   master-YYYYMMDD.log      # game story: startup/shutdown, state transitions,
                            # round start/end, plus every feature Warning+
-  <feature>-YYYYMMDD.log   # one per feature: draft, rift, lobby, worldtext,
+  <feature>-YYYYMMDD.log   # one per feature: boards, rift, lobby, worldtext,
                            # movement, hud, match, cleanup, commands,
                            # watch, probe, spectate, betting, pause, restart, ...
 ```
 
-- Every feature gets its own file (`BublockLog.For("Draft")` →
-  `draft-YYYYMMDD.log`).
+- Every feature gets its own file (`BublockLog.For("Boards")` →
+  `boards-YYYYMMDD.log`).
 - **Master log** answers: “What happened to the game?” Feature `Warning`+
   lines are copied to master with `(see <feature>.log)`.
 - **Feature logs** answer: “What exactly happened inside this subsystem?”

@@ -81,15 +81,15 @@ Bublock/
     Restraint/             Restraint.projitems: RestraintService + RestraintPlugin (silence / no items, shooting or melee, dw_restrain*, Stage 13h)
     Queue/                 Queue.projitems: PlayerQueue (reusable join queue, Stage 13j)
   RiftRoulette/              RiftRoulette.dll = Shared + WorldText + Movement + Hud + Loadout + Restraint + Queue + game plugin classes
-    Lobby/                 LobbyPlugin (connect/disconnect, teams, kick, progression; admin seat + Participants 13f; HeroLock 13g)
-    Draft/                 DraftPlugin (hero pools, pick/unpick, enforcement, boards)
+    Lobby/                 LobbyPlugin (connect/disconnect, teams, kick, progression; admin seat + Participants 13f; HeroLock 13g; hero enforcement LobbyHeroes)
+    Boards/                BoardsPlugin + BoardService (welcome / hint / note boards, redraw of every board)
     Rift/                  RiftPlugin (spawn / park / watch / cleanup / alternation)
-    Round/                 RoundFlow composer (Rift ops + team moves + return to the watch spot) + WatchSpot (13i)
+    Round/                 RoundFlow composer (Rift ops + team moves + return to the watch spot) + WatchSpot (13i) + RoundHeroes
     GameLoop/              GameLoopPlugin + MatchService + MatchConfig + AutoStartService (continuous match loop 13a, hero mode 13b, auto-start 13d)
     RandomMode/            RandomPlugin + RandomModeService (random hero + build every round, Stage 13b; joiners + hero guard 13c)
     Stats/                 StatsPlugin + StatsService (match kills / deaths / assists, stats boards, Stage 13c)
     Balance/               BalancePlugin + BalanceService (auto-balance swaps, Stage 13c)
-    Duel/                  DuelPlugin + DuelService (1v1 mode: copied build, hero lock, Stage 13g; queue, winner stays on, 13j)
+    Mirror/                MirrorPlugin + MirrorModeService (everyone the same hero + build)
   DevTools/                DevTools.dll (consumes Shared)
   CleanSlate/              CleanSlate.dll (consumes Shared)
 ```
@@ -98,11 +98,11 @@ Bublock/
 flowchart LR
   subgraph dll [RiftRoulette.dll one load context]
     LobbyPlugin --> MovementSvc
-    DraftPlugin --> WorldTextSvc
+    BoardsPlugin --> WorldTextSvc
     RiftPlugin --> RoundFlow
     RoundFlow --> RiftSvc
     RoundFlow --> MovementSvc
-    RoundFlow --> DraftState
+    RoundFlow --> RoundHeroes
   end
   SharedCode[Shared projitems] --> dll
   Modules[Modules projitems] --> dll
@@ -136,7 +136,7 @@ Why this shape (verified in Deadworks loader source; see Discoveries in
 | Core ops | C# methods on services; real work lives here |
 | Composition | Typed C# calls across plugin classes/services inside the same DLL. **Not** via `Server.ExecuteCommand("dw_…")` |
 | Commands | Thin `[Command]` / chat wrappers around ops, declared on the owning plugin class |
-| Command names | Parity is functionality, not names (SourceMod / CounterStrikeSharp style). Every command runs as `/name` (also `!name`, `dw_name`). Player commands: short verbs (`/pick`, `/unpick`, `/picks`, `/heroes`, `/status`, `/commands`). Admin commands: feature word first (`/rift_start`, `/draft_reset`, `/player_kick`, `/wt_list`, `/mv_tp`, `/ent_find`). Targets are slot numbers. No name collisions across DLLs. Full list: `behavior-inventory.md` §4 |
+| Command names | Parity is functionality, not names (SourceMod / CounterStrikeSharp style). Every command runs as `/name` (also `!name`, `dw_name`). Player commands: short verbs (`/status`, `/commands`, `/score`, `/bet`). Admin commands: feature word first (`/rift_start`, `/board_redraw`, `/player_kick`, `/wt_list`, `/mv_tp`, `/ent_find`). Targets are slot numbers. No name collisions across DLLs. Full list: `behavior-inventory.md` §4 |
 | Archive command names | Removed in Stage 12 (they were hidden aliases during Stages 6–11); only the new names work |
 | Help | Built-in `dw_help` is console-only and lists every visible command; players get `/commands` in chat (Stage 12). Every command sets `Description`; never name a command `help` |
 | Admin gate | Every admin command checks `AdminAuth` (null caller = server console, trusted). Archive `/reset`, `/kick`, `/koth`, `/test` and four DevTools commands were ungated; gating them is an intentional difference |
@@ -564,3 +564,5 @@ Rows before the 2026-09-27 rebrand row use the old name (Rift Rumble,
 | 2026-10-02 | damage-based assists (code) | `player_death` assister fields credited dead fighters up top with free betting souls. New `Stats/DamageLedger` (pure, tested): an assist needs 20% of the victim's max health dealt since their last spawn, killer excluded, recorded from `GameLoopPlugin.OnTakeDamage`; used for boards, balance and betting. Next: upload approval; check `Damage=` in `stats-*.log`. |
 | 2026-10-02 | /mark (code) | New player command `/mark [slot]` (Random mode, fighters, while betting is open): 300 betting souls mark an enemy fighter for the round; the marker's credited kill on them that round steals a quarter of their total souls (`BetBook.Steal`: free souls first, then off the open bet). The target is told someone marked them, never who. New `Betting/MarkBook` (pure, tested), `BetBook.Refund` / `Steal`; `BettingService.OnKill` now takes the victim. Unused marks end at round end; refunded on no result, a target who didn't fight, or match end. In `/about`, the betting-open line and `/souls`. Next: upload approval; mark and kill in game. |
 | 2026-10-02 | mirror mode (code) | New hero mode `mirror` (`/match_mode mirror`, `Mirror/`): each intermission one hero and one of its stored builds are resolved once (`MirrorPick`, pure, tested) and given to every fighter on both teams, so builds always match. Admin pins: `/mirror_hero <hero\|clear>` pins the hero (the build is still rolled once per intermission and shared), `/mirror_build <slot\|clear>` (after a hero pin) pins which of its builds; pins never go random again until changed or cleared and outlive matches, mode changes and map reloads; a pin change in a mirror intermission reapplies at once. Teams, bench and balance as in Random mode; its own `HeroLock`; no betting / reserve / ban. `/mirror_status`; `/about` has mirror lines. Next: upload approval; run a mirror match, pin a hero and a build in game. |
+| 2026-10-02 | remove draft and 1v1 modes (code) | Hero modes are now `random` and `mirror` only; draft will be rebuilt later. Deleted `Draft/` (pools, `/pick` `/unpick` `/picks` `/heroes`, `/draft_*`, pool boards) and `Duel/` (`/duel_*`, `/queue` `/unqueue`, streak board, `KothRule`), `GameLoop/ShopRule` (buying anywhere is always off; `ShopAccess.Disable`), and every `IsDuel` / `UsesDraft` branch. Shared pieces moved: the round hero store is `Round/RoundHeroes` (duplicates allowed), boards are the new `Boards/` feature (`BoardService.Redraw`, `/board_redraw`, `/board_note`, board ids `board.*`, `boards-*.log`), hero enforcement and the lobby reset are `Lobby/LobbyHeroes` (`player_hero_changed` on `LobbyPlugin`). `RoundFlow.ReturnPlayersToDraft` is now `SendPlayersUp`. Tests: 561 pass. Next: upload approval; run a Random and a Mirror match, `/board_note`. |
+| 2026-10-02 | stream camera spots and roam follow (code) | The stream camera parks at three fixed spots (`Lobby/StreamFraming.Spot`: green, center, yellow, world position and angle captured by the admin with `getpos_exact` in fly cam), chosen by `WatchSpot.Side`. It follows only fighters (unrestrained participants), so between rounds it parks; outside fly cam the park is re-sent every 6 s so pressing C lands on the spot, and a camera the admin moved after it landed stays until the side changes (new pure `Lobby/StreamCamRule.ParkStep`, tested). The angle still goes through `SpectateService.Park` unchanged. Removed the saved framing (`StreamFramingStore`, `bublock/streamcam.json` now unused on the server), `/spec_reset` and `SpectateRule.FramingStep`. A roaming admin's Abrams now follows the watch spot to the new rift side within 2 s (`AdminSeat.FollowWatchSpot`). Tests: 558 pass. Next: upload approval; in game, press C between rounds and check each side's spot, and roam through a side change. |

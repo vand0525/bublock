@@ -23,7 +23,7 @@ yellow.
 
 ## Used by
 
-- `Draft/BoardLayout`: every board spec.
+- `Boards/BoardLayout`: every board spec.
 - `Lobby/AdminSeat`: the roaming admin stands at `WelcomeFront`.
 - `Tests/RiftRoulette.Tests/WatchLayoutTests`: checks the
   `RiftRouletteLocations` watch view angles against `LookAt` of the welcome

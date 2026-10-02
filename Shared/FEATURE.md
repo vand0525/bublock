@@ -52,7 +52,7 @@ Namespace: `Bublock.Shared`.
 - Every admin command (DevTools, CleanSlate, Rift Roulette plugin classes)
   gates with `AdminCommand.Authorize`.
 - `PlayerChat` is used by Rift Roulette plugin classes and services for
-  chat lines to one player (e.g. `DraftPlugin` pick replies, `LobbyPlugin`
+  chat lines to one player (e.g. `BettingPlugin` bet replies, `LobbyPlugin`
   `/status`).
 
 ## Relation to lifecycle vs commands

@@ -25,7 +25,7 @@ runbook (`reference/patch-day.md`), next to the offline
 - `SelfTestService.Run(mode)`: all read-only checks.
 - `SelfTestService.Live(caller, player, timer, mode)`: live checks on one
   player, between rounds.
-- `EventCounters.Hit(name)`: called by the Lobby, Draft, Random and GameLoop
+- `EventCounters.Hit(name)`: called by the Lobby, Random and GameLoop
   hooks.
 
 ## State

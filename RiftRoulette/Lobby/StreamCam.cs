@@ -52,7 +52,7 @@ public static class StreamCam
     public Vector3? ParkTarget;
     public bool ParkPending;
     public bool Placed;
-    public bool Adjusting;
+    public bool Handled;
     public Vector3? LastPosition;
     public Vector3? LastAngles;
   }
@@ -111,19 +111,6 @@ public static class StreamCam
     return changed;
   }
 
-  public static void ResetFraming(ExecutionMode mode = ExecutionMode.Clean)
-  {
-    StreamFramingStore.Reset(mode);
-
-    foreach (var state in States.Values)
-    {
-      state.Placed = false;
-      state.Adjusting = false;
-    }
-
-    Log.WithMode(mode).Info("Stream camera framing reset to the default");
-  }
-
   public static void Forget(ulong steamId)
   {
     SpawnedAt.Remove(steamId);
@@ -138,14 +125,14 @@ public static class StreamCam
     var target = SpectateService.Current(admin);
     var watching = Players.GetAll().FirstOrDefault(player => SpectateService.IsWatching(admin, player.GetHeroPawn()));
     var angles = SpectateService.Pose(admin)?.Angles;
-    var saved = StreamFramingStore.All;
+    var side = WatchSpot.Side;
+    var (spotPosition, spotAngle) = StreamFraming.Spot(side);
 
     return
     [
       $"Auto={state.Auto} | Seated={AdminSeat.IsSeated(admin.PlayerSteamId)} | Observer={SpectateService.IsObserving(admin)} | Mode={SpectateService.Mode(admin)} | FlyCam={SpectateService.IsFlyCam(admin)} | ViewAngle={(angles is { } angle ? $"{angle.X:0.#} {angle.Y:0.#}" : "unreadable")}",
-      $"Watching={watching?.PlayerName ?? (target == null ? "none" : target.DesignerName)} | ParkedSide={(state.ParkedSide is { } side ? RiftSides.Name(side) : "-")} Placed={state.Placed} Adjusting={state.Adjusting} | WatchSide={RiftSides.Name(WatchSpot.Side)}",
-      "Framing " + string.Join(" | ", RiftSides.All.Select(side =>
-        $"{RiftSides.Name(side)}={(saved.TryGetValue(side, out var pose) ? DescribePose(pose) : "default")}"))
+      $"Watching={watching?.PlayerName ?? (target == null ? "none" : target.DesignerName)} | ParkedSide={(state.ParkedSide is { } parked ? RiftSides.Name(parked) : "-")} Placed={state.Placed} Handled={state.Handled} | WatchSide={RiftSides.Name(side)}",
+      $"Spot {RiftSides.Name(side)}: position {spotPosition.X:0.#} {spotPosition.Y:0.#} {spotPosition.Z:0.#}, angle {spotAngle.X:0.#} {spotAngle.Y:0.#} {spotAngle.Z:0.#}"
     ];
   }
 
@@ -176,13 +163,13 @@ public static class StreamCam
     if (candidates.Count > 0)
       FollowStep(admin, state, candidates, moved, now, mode);
     else
-      ParkStep(admin, state, pose, flyCam, moved, timer, now, mode);
+      ParkStep(admin, state, flyCam, moved, timer, now, mode);
   }
 
   private static void FollowStep(CCitadelPlayerController admin, CamState state, List<CCitadelPlayerController> candidates, bool moved, DateTime now, ExecutionMode mode)
   {
     state.Placed = false;
-    state.Adjusting = false;
+    state.Handled = false;
     state.ParkedSide = null;
 
     // Never move the camera while the admin flies it: that crashed the client.
@@ -240,7 +227,6 @@ public static class StreamCam
   private static void ParkStep(
     CCitadelPlayerController admin,
     CamState state,
-    (Vector3 Position, Vector3? Angles) pose,
     bool flyCam,
     bool moved,
     ITimer timer,
@@ -255,76 +241,47 @@ public static class StreamCam
     if (!flyCam)
     {
       state.Placed = false;
-      state.Adjusting = false;
-
-      if (state.ParkedSide == side && state.LastParkAt is { } last && now - last < ReparkEvery)
-        return;
-
-      Park(admin, state, side, state.ParkedSide == side ? "repark" : "park", pending: false, timer, now, mode);
-      return;
+      state.Handled = false;
     }
-
-    switch (SpectateRule.FramingStep(state.Placed, state.Adjusting, moved, spotChanged: state.ParkedSide != side))
+    else if (moved && state.Placed)
     {
-      case FramingAction.Adjust:
-        state.Adjusting = true;
-        state.Placed = false;
-        break;
-
-      case FramingAction.Save:
-        SaveFraming(admin, state, pose, state.ParkedSide ?? side, mode);
-        break;
-
-      case FramingAction.Park:
-        Park(admin, state, side, "framing", pending: true, timer, now, mode);
-        break;
+      state.Placed = false;
+      state.Handled = true;
     }
+
+    var action = StreamCamRule.ParkStep(
+      flyCam,
+      parkedForSide: state.ParkedSide == side,
+      state.Placed,
+      state.Handled,
+      moved,
+      state.LastParkAt is { } last ? now - last : null,
+      ReparkEvery);
+
+    if (action != ParkAction.Stay)
+      Park(admin, state, side, action == ParkAction.Park ? "park" : "repark", pending: flyCam, timer, now, mode);
   }
 
   private static void Park(CCitadelPlayerController admin, CamState state, RiftSide side, string reason, bool pending, ITimer timer, DateTime now, ExecutionMode mode)
   {
-    var (position, angle) = StreamFraming.ToWorld(WatchSpot.Location(side), StreamFramingStore.For(side));
+    var (position, angle) = StreamFraming.Spot(side);
 
     if (!SpectateService.Park(admin, position, angle, timer, mode))
       return;
-
-    var firstForSide = state.ParkedSide != side;
 
     state.ParkedSide = side;
     state.LastParkAt = now;
     state.ParkTarget = position;
     state.ParkPending = pending;
     state.Placed = false;
+    state.Handled = false;
 
     var log = Log.WithMode(mode);
 
     if (reason == "repark")
-      log.Debug(admin.ToPlayerRef(), "Stream camera Reason={Reason} Side={Side} Mode={Mode}", reason, RiftSides.Name(side), SpectateService.Mode(admin));
-    else if (firstForSide || pending)
-      log.Info(admin.ToPlayerRef(), "Stream camera Reason={Reason} Side={Side} Mode={Mode}", reason, RiftSides.Name(side), SpectateService.Mode(admin));
-  }
-
-  private static void SaveFraming(CCitadelPlayerController admin, CamState state, (Vector3 Position, Vector3? Angles) pose, RiftSide side, ExecutionMode mode)
-  {
-    var anchor = WatchSpot.Location(side);
-    var previous = StreamFramingStore.For(side);
-    var angles = pose.Angles ?? new Vector3(previous.Pitch, SpectateRule.WrapDegrees(anchor.Angle.Y + previous.Yaw), 0f);
-    var framing = StreamFraming.FromWorld(anchor, pose.Position, angles);
-
-    StreamFramingStore.Save(side, framing, mode);
-
-    state.Adjusting = false;
-    state.Placed = true;
-    state.ParkedSide = side;
-
-    Log.WithMode(mode).Info(
-      admin.ToPlayerRef(),
-      "Stream camera framing saved Side={Side} Offset={Offset} Pitch={Pitch} Yaw={Yaw} AngleRead={AngleRead}",
-      RiftSides.Name(side),
-      framing.Offset,
-      framing.Pitch,
-      framing.Yaw,
-      pose.Angles != null);
+      log.Debug(admin.ToPlayerRef(), "Stream camera Reason={Reason} Side={Side} FlyCam={FlyCam}", reason, RiftSides.Name(side), pending);
+    else
+      log.Info(admin.ToPlayerRef(), "Stream camera Reason={Reason} Side={Side} FlyCam={FlyCam}", reason, RiftSides.Name(side), pending);
   }
 
   private static bool HandMoved(CamState state, (Vector3 Position, Vector3? Angles) pose)
@@ -341,10 +298,7 @@ public static class StreamCam
     state.LastAngles = pose.Angles ?? state.LastAngles;
   }
 
-  private static string DescribePose(CameraPose pose) =>
-    $"offset {pose.Offset.X:0} {pose.Offset.Y:0} {pose.Offset.Z:0}, pitch {pose.Pitch:0.#}, yaw {pose.Yaw:0.#}";
-
-  // During a round, restrained players are waiting up top; the camera prefers players who can fight.
+  // Only fighting players: everyone up top is restrained, so between rounds nobody is followed and the camera parks.
   private static List<CCitadelPlayerController> Candidates()
   {
     var now = DateTime.UtcNow;
@@ -357,13 +311,11 @@ public static class StreamCam
     if (statue != null)
       return [statue];
 
-    var live = Participants.Humans()
+    return Participants.Humans()
       .Where(Followable(now))
+      .Where(player => !RestraintService.IsRestrained(player.PlayerSteamId))
       .OrderBy(_ => Random.Shared.Next())
       .ToList();
-
-    var fighting = live.Where(player => !RestraintService.IsRestrained(player.PlayerSteamId)).ToList();
-    return fighting.Count > 0 ? fighting : live;
   }
 
   private static Func<CCitadelPlayerController, bool> Followable(DateTime now) => player =>

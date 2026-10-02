@@ -3,7 +3,7 @@
 ## Purpose
 
 Random hero mode for the continuous match (the default
-`MatchConfig.HeroMode`). No draft and no shepherding: at match start the
+`MatchConfig.HeroMode`). No picking and no shepherding: at match start the
 teams are evened out (current teams kept where possible), and every
 intermission each player is swapped to a new random hero with one of that
 hero's top 3 real builds (the build's items, one random pick per optional
@@ -74,7 +74,7 @@ bench rotation and bench player, the hero reservation lines
 (`Reservations`, kept by Steam ID for the match), the hero bans (`Bans`),
 and a
 `Lobby/HeroLock` (pending set, applied set, enforcement kills; one per DLL
-load; cleared by `BeginMatch` / `EndMatch`). 1v1 mode owns its own lock.
+load; cleared by `BeginMatch` / `EndMatch`). Mirror mode owns its own lock.
 
 ## Dependencies
 
@@ -82,7 +82,8 @@ load; cleared by `BeginMatch` / `EndMatch`). 1v1 mode owns its own lock.
 - `Modules/Queue` (`PlayerQueue` bench rotation).
 - `Modules/Hud` (per-player build banner: hero, build, soul value),
   `Shared` (`PlayerChat` for the hero-lock line, logging, auth).
-- `Draft/DraftState` (assignments are written as picks), `Lobby/RiftRouletteTeams`,
+- `Round/RoundHeroes` (assignments are written as round heroes, so
+  `RoundFlow` moves the fighters), `Lobby/RiftRouletteTeams`,
   `Lobby/TeamBalance`.
 - `Balance/BalanceService` (auto-balance), `Stats/StatsService` (board refresh).
 - `Betting/BettingService` (`Book.TrySpend` for reservations and bans, `Active`,
@@ -99,17 +100,14 @@ load; cleared by `BeginMatch` / `EndMatch`). 1v1 mode owns its own lock.
 - `Lobby/LobbyService.AdmitPlayer` calls `AddJoiner` for players who connect
   during a Random match; `RemovePlayer` calls `OnLeave` for players who
   disconnect during one.
-- `Draft/DraftService.EnforceHero` calls `DuelService.GuardHero`, then
-  `GuardHero`.
+- `Lobby/LobbyHeroes.Enforce` calls `GuardHero` on every
+  `player_hero_changed`.
 - `Lobby/AdminSeat.Sit` calls `Forget`.
 - `/reserve` (player, Clean) calls `Reserve`; `/souls` shows
   `DescribeReservation`. `/heroban` (player, Clean) calls `Ban`.
 - `/random_reroll` calls the same `PrepareRound` in Debug mode (a reroll
   does not use up another reserved round);
   `/balance_now` calls it with `forceBalance: true`.
-- In Random mode, Draft's pool boards are replaced by the stats boards and
-  `/pick`, `/unpick`, `/heroes`, and `/draft_assign` reply that heroes are
-  random.
 
 ## Logs
 

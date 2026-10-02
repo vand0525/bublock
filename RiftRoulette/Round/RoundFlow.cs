@@ -2,8 +2,6 @@ using Bublock.Modules.Movement;
 using Bublock.Modules.Restraint;
 using Bublock.Shared;
 using DeadworksManaged.Api;
-using RiftRoulette.Draft;
-using RiftRoulette.Duel;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Lobby;
 using RiftRoulette.Rift;
@@ -57,7 +55,7 @@ public static class RoundFlow
     return true;
   }
 
-  public static int ReturnPlayersToDraft(ExecutionMode mode = ExecutionMode.Clean)
+  public static int SendPlayersUp(ExecutionMode mode = ExecutionMode.Clean)
   {
     var log = Log.WithMode(mode);
     var side = RiftService.NextSide;
@@ -98,7 +96,7 @@ public static class RoundFlow
       },
       () =>
       {
-        var returned = ReturnPlayersToDraft(mode);
+        var returned = SendPlayersUp(mode);
 
         if (probeTimer != null)
           MatchProbe.SnapshotLater(probeTimer, "sent-up");
@@ -115,6 +113,5 @@ public static class RoundFlow
 
   private static IEnumerable<CCitadelPlayerController> PlayersOnTeam(int team) =>
     Participants.Humans().Where(player =>
-      player.TeamNum == team &&
-      (MatchConfig.IsDuel ? DuelService.IsFighter(player.PlayerSteamId) : DraftState.HasPick(player.PlayerSteamId)));
+      player.TeamNum == team && RoundHeroes.Has(player.PlayerSteamId));
 }

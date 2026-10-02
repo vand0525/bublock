@@ -28,5 +28,5 @@ carry a `PlayerRef`.
   separately with `SetViewAngle`. `TeleportTo` passes `angles: null`.
 - Teleporting a dead pawn is not guarded here. Callers that must skip dead
   players check
-  `IsAlive` first, as `RiftService.ReturnPlayersToDraft` does.
+  `IsAlive` first, as `RiftService.SendPlayersUp` does.
 - Game-thread only.

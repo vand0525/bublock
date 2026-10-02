@@ -17,11 +17,10 @@ angle. Built for the admin's stream camera.
 | `SpectateRule.Choose(currentId, killerId, candidates)` | `SpectateRule.md` |
 | `SpectateRule.LookDown(yaw)` / `FollowReady` | `SpectateRule.md` |
 | `SpectateRule.Turned` / `WrapDegrees` / `HandMoved` | `SpectateRule.md` |
-| `SpectateRule.FramingStep(placed, adjusting, moved, spotChanged)` | `SpectateRule.md` |
 
 ## State
 
-None. The consumer keeps whom it follows, where it parked and its framing.
+None. The consumer keeps whom it follows and where it parked.
 `Park` schedules its later steps on the caller's `ITimer`.
 
 ## Camera modes
@@ -35,7 +34,7 @@ of the observer pawn (`Park`) moves it.
 
 | File | Role |
 |---|---|
-| `SpectateRule.cs` | Pure choice (keep, killer, any, park), the straight-down angle, view movement checks, the framing step (wait, adjust, save, park, stay) |
+| `SpectateRule.cs` | Pure choice (keep, killer, any, park), the straight-down angle, view movement checks |
 | `SpectateService.cs` | Observer-services calls, the observer's pose, the timed park |
 | `Spectate.projitems` | Service and rule (no commands) |
 

@@ -1,7 +1,7 @@
 using Bublock.Modules.WorldText;
 using Bublock.Shared;
 using DeadworksManaged.Api;
-using RiftRoulette.Draft;
+using RiftRoulette.Boards;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Lobby;
 using RiftRoulette.RandomMode;

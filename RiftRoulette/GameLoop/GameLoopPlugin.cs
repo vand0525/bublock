@@ -57,7 +57,7 @@ public class GameLoopPlugin : DeadworksPluginBase
     EventCounters.Hit("modify_currency");
 
     if (!SoulRule.ShouldBlock(
-          args.CurrencyType, args.Source, args.Amount, MatchService.State.IsRunning, !MatchConfig.UsesDraft))
+          args.CurrencyType, args.Source, args.Amount, MatchService.State.IsRunning))
       return HookResult.Continue;
 
     EventCounters.Hit(args.CurrencyType == ECurrencyType.EGold
@@ -142,7 +142,7 @@ public class GameLoopPlugin : DeadworksPluginBase
     AdminCommand.Reply(caller, $"[Match] Intermission set to {seconds}s (applies from the next countdown)");
   }
 
-  [Command("match_mode", Description = "Set how heroes are chosen: match_mode <random|draft|duel|1v1|mirror>")]
+  [Command("match_mode", Description = "Set how heroes are chosen: match_mode <random|mirror>")]
   public void CmdMatchMode(CCitadelPlayerController? caller, string heroMode)
   {
     AdminCommand.Authorize(caller, MatchLog, "match_mode");

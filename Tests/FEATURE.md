@@ -22,25 +22,23 @@ server. Never deployed to the server.
   (keep, killer, any, park) and straight-down angle. Service ops that touch entities or players are
   not tested here.
 - `RiftRoulette.Tests/` — xUnit tests for pure Rift Roulette pieces, included
-  directly as linked files (`RiftRoulette/Draft/DraftState.cs`,
-  `DraftPools.cs`, `DraftBoardText.cs`, `RiftRoulette/Lobby/RiftRouletteTeams.cs`,
+  directly as linked files (`RiftRoulette/Round/RoundHeroes.cs`,
+  `RiftRoulette/Lobby/RiftRouletteTeams.cs`,
   `CommandList.cs`, `RiftRoulette/Locations/RiftRouletteLocations.cs`,
   `RiftRoulette/Rift/RiftSide.cs`, `RiftWatch.cs`, `RiftRoundResult.cs`,
   `RiftRoulette/Round/RoundLocations.cs`, `WatchSpotRule.cs`, `WatchLayout.cs`,
-  `WatchGuardRule.cs`, `RiftRoulette/Duel/KothRule.cs`,
+  `WatchGuardRule.cs`,
   `RiftRoulette/GameLoop/MatchState.cs`,
-  `MatchConfig.cs`, `AutoStartRule.cs`, `ShopRule.cs`, `RiftRoulette/RandomMode/HeroDraw.cs`, `BenchRule.cs`,
+  `MatchConfig.cs`, `AutoStartRule.cs`, `SoulRule.cs`, `RiftRoulette/RandomMode/HeroDraw.cs`, `BenchRule.cs`,
   `RiftRoulette/Lobby/TeamBalance.cs`, `AdminSeatRule.cs`, `StreamFraming.cs`, `RiftRoulette/Stats/StatsLedger.cs`, `DamageLedger.cs`,
   `StatsBoardText.cs`, `RiftRoulette/Balance/BalanceTracker.cs`,
-  `BalancePicker.cs`, `RiftRoulette/Betting/BetBook.cs`, `BetBoardText.cs`, `MarkBook.cs`) rather than referencing the plugin DLL: pick
-  bookkeeping, hero pool team lookup, draft board / pool text, team name
-  parsing, the `/commands` list filter, the `/about` text, rift sides, the rift outcome
+  `BalancePicker.cs`, `RiftRoulette/Betting/BetBook.cs`, `BetBoardText.cs`, `MarkBook.cs`) rather than referencing the plugin DLL: round
+  hero bookkeeping, team name parsing, the `/commands` list filter, the `/about` text, rift sides, the rift outcome
   decision, each side's team starts (each team on its own half) and watch
   spot, which side the watch spot is above, the yellow board layout and
-  watch view angles, the below-the-watch-spot line, the 1v1 winner / loser
-  / streak rule, match scoring, match config parsing
-  (including the `1v1` alias), when buying is open, the match auto-start decision, the admin
-  seat rules, the stream camera's once-per-round top-down timing and big-ult list,
+  watch view angles, the below-the-watch-spot line, match scoring, match
+  config parsing, which currency gains are blocked, the match auto-start decision, the admin
+  seat rules, the stream camera's fixed spots and park rule,
   the random hero draw, who sits out (bench rotation) and the fighting teams,
   team placement, kill / death / assist counting and
   board text, the auto-balance trigger and pick, and betting souls, payouts,

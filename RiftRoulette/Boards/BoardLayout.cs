@@ -3,7 +3,7 @@ using RiftRoulette.Lobby;
 using RiftRoulette.Round;
 using System.Numerics;
 
-namespace RiftRoulette.Draft;
+namespace RiftRoulette.Boards;
 
 public static class BoardLayout
 {

@@ -60,11 +60,11 @@ unknown.
 
 ### Gold and level
 
-- `pawn.SetCurrency(ECurrencyType.EGold, n)` sets gold (`DraftService`,
+- `pawn.SetCurrency(ECurrencyType.EGold, n)` sets gold (`LobbyHeroes`,
   `LoadoutService`).
 - `pawn.Level = n` then `ModifyCurrency(EGold, 0, ECheats, silent: true)`
   recalculates stats (`LoadoutService`, DeathmatchPlugin example).
-  `DraftService` already resets to level 0 with 0 gold.
+  `LobbyHeroes` already resets to level 0 with 0 gold.
 - Whether gold given by the plugin counts toward level-ups depends on the
   currency source; untested.
 
@@ -147,7 +147,7 @@ two discovery commands (see Suggestions).
 - **Rift Roulette hooks assume rounds.** On spawn, Lobby sends players to
   the watch spot and restrains them; WatchGuard pulls restrained players up;
   CleanSlate removes shops; ShopAccess owns the buy-anywhere convar;
-  Random / 1v1 modes lock heroes; stats and balance run per intermission.
+  Random / Mirror modes lock heroes; stats and balance run per intermission.
   An endless mode must switch all of these off, or they will fight it.
 - **CleanSlate is a separate DLL.** It cannot be told about the mode (no
   cross-DLL calls). Keeping the two mid-lane shop props means changing its

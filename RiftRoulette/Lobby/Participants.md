@@ -20,13 +20,14 @@ banned-player statue (`BanStatueService`).
 
 ## Invariants
 
-- Team counts, auto-start, Random mode teams and heroes, stats boards, the
-  draft reset, and returning players to the draft all use this list, so a
+- Team counts, auto-start, Random and Mirror mode teams and heroes, stats
+  boards, the lobby hero reset, and sending players up top all use this
+  list, so a
   seated admin or a statue never gets a team slot, hero, round, or stats
   row.
 - A leaving player is never in the list. During `OnClientDisconnect`
   `Players.GetAll()` still returns the leaving controller, and a leave can
   end the match (auto-start), which resets every participant's hero
-  (`DraftService.Reset`). Swapping the leaver's hero is skipped by Deadworks
+  (`LobbyHeroes.ReturnAll`). Swapping the leaver's hero is skipped by Deadworks
   (`SelectHeroInternal skipped ... m_hController is stale`) and the
   next-tick send up on the removed controller throws.

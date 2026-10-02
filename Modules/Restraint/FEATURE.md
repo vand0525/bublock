@@ -37,8 +37,7 @@ Uses the game's real silence modifier so its status icon shows.
 ## Lifecycle vs commands
 
 - Rift Roulette restrains a player whenever it sends them up top
-  (`Round/WatchSpot.SendUp`: lobby join, respawn, round end, unpick, draft
-  reset) and releases the fighters in `RoundFlow.MoveTeamsToRift` just
+  (`Round/WatchSpot.SendUp`: lobby join, respawn, round end, match end) and releases the fighters in `RoundFlow.MoveTeamsToRift` just
   before the teleport. Disconnects call `Forget`; the admin seat releases.
 - Admin commands call the same ops in Debug mode; `/status_add` /
   `/status_remove` test any modifier by name. See

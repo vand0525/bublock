@@ -7,8 +7,8 @@ Rift Roulette team numbers and names. Pure (no game calls), unit tested in
 
 | Const | Team number | Used by |
 |---|---|---|
-| `Amber` | 2 | Amber picks call `ChangeTeam(2)`; unpicked players wait on 2 |
-| `Sapphire` | 3 | Sapphire picks call `ChangeTeam(3)` |
+| `Amber` | 2 | Amber team (`ChangeTeam(2)`); roaming admins play on 2 |
+| `Sapphire` | 3 | Sapphire team (`ChangeTeam(3)`) |
 
 ## Operations
 

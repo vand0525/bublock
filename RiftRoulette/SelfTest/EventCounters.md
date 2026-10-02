@@ -13,7 +13,7 @@ whether a hook still fires after a game update.
 | Name | Where |
 |---|---|
 | `client_connect`, `client_full_connect`, `client_disconnect`, `player_spawn`, `player_death` | `Lobby/LobbyPlugin` |
-| `player_hero_changed` | `Draft/DraftPlugin` |
+| `player_hero_changed` | `Lobby/LobbyPlugin` |
 | `player_respawned` | `RandomMode/RandomPlugin` |
 | `game_frame` | `GameLoop/GameLoopPlugin.OnGameFrame` |
 | `modify_currency`, `soul_blocked_<Source>`, `ability_blocked_<Currency>_<Source>` | `GameLoop/GameLoopPlugin.OnModifyCurrency` (every call; each blocked gold or ability-point / unlock gain by `ECurrencySource`, not in `GameDependencies.Events`) |

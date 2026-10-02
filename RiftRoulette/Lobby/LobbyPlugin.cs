@@ -1,7 +1,6 @@
 using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Betting;
-using RiftRoulette.Draft;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Round;
 using RiftRoulette.SelfTest;
@@ -30,7 +29,11 @@ public class LobbyPlugin : DeadworksPluginBase
     HookPauseMessage<CCLCMsg_RequestPause>();
     HookPauseMessage<CCitadelClientMsg_Pause>();
 
-    Timer.Every(StreamCam.TickSeconds.Seconds(), () => StreamCam.Tick(Timer));
+    Timer.Every(StreamCam.TickSeconds.Seconds(), () =>
+    {
+      StreamCam.Tick(Timer);
+      AdminSeat.FollowWatchSpot(Timer);
+    });
     Timer.Every(AutoStartService.WaitingReminderSeconds.Seconds(), () => AutoStartService.RemindWaiting());
     Timer.Every(BanStatueService.SustainSeconds.Seconds(), BanStatueService.Sustain);
     Timer.Every(AutoRestartService.CheckSeconds.Seconds(), () => AutoRestartService.Check());
@@ -151,6 +154,19 @@ public class LobbyPlugin : DeadworksPluginBase
     return HookResult.Continue;
   }
 
+  [GameEventHandler("player_hero_changed")]
+  public HookResult OnPlayerHeroChanged(PlayerHeroChangedEvent args)
+  {
+    EventCounters.Hit("player_hero_changed");
+    var pawn = args.Userid?.As<CCitadelPlayerPawn>();
+
+    if (pawn?.Controller == null)
+      return HookResult.Continue;
+
+    LobbyHeroes.Enforce(pawn.Controller, pawn, Timer);
+    return HookResult.Continue;
+  }
+
   [GameEventHandler("player_death")]
   public HookResult OnPlayerDeath(PlayerDeathEvent args)
   {
@@ -239,8 +255,8 @@ public class LobbyPlugin : DeadworksPluginBase
 
     if (!LobbyService.SetTeam(player, teamNumber, ExecutionMode.Debug))
     {
-      DraftState.TryGetPick(player.PlayerSteamId, out var hero);
-      throw new CommandException($"{player.PlayerName} has picked {hero}; they must unpick first.");
+      RoundHeroes.TryGet(player.PlayerSteamId, out var hero);
+      throw new CommandException($"{player.PlayerName} is fighting as {hero} this round; move them between rounds.");
     }
 
     AdminCommand.Reply(caller, $"[Lobby] Moved {player.PlayerName} to {RiftRouletteTeams.Name(teamNumber)}");
@@ -393,22 +409,13 @@ public class LobbyPlugin : DeadworksPluginBase
     AdminCommand.Reply(caller, $"[Lobby] Stream camera auto {(on ? "on" : "off")}");
   }
 
-  [Command("spec_status", Description = "Stream camera: who is on camera, fly cam, and the saved framing per rift side")]
+  [Command("spec_status", Description = "Stream camera: who is on camera, fly cam, and the camera spot for the current rift side")]
   public void CmdSpecStatus(CCitadelPlayerController? caller)
   {
     AdminCommand.Authorize(caller, LobbyLog, "spec_status");
 
     foreach (var line in StreamCam.Describe(SeatTarget(caller)))
       AdminCommand.Reply(caller, $"[Lobby] {line}");
-  }
-
-  [Command("spec_reset", Description = "Stream camera: forget the saved framing and go back to the top-down default")]
-  public void CmdSpecReset(CCitadelPlayerController? caller)
-  {
-    AdminCommand.Authorize(caller, LobbyLog, "spec_reset");
-
-    StreamCam.ResetFraming(ExecutionMode.Debug);
-    AdminCommand.Reply(caller, "[Lobby] Stream camera framing reset to the top-down default");
   }
 
   // A console command can arrive without a caller, so the seat falls back to the admin Steam ID.

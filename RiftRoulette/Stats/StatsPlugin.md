@@ -8,7 +8,7 @@ Thin plugin class (`Name` = "Rift Roulette Stats").
   Lobby's `player_death` logging hook.
 - `player_spawn`: `StatsService.OnSpawn(player)`, clearing the player's
   damage totals so assists only count damage from the current life. Runs
-  alongside the Lobby, Random and Duel `player_spawn` hooks.
+  alongside the Lobby, Random and Mirror `player_spawn` hooks.
 
 ## Commands
 

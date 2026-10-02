@@ -4,10 +4,10 @@ using Bublock.Modules.Queue;
 using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Balance;
-using RiftRoulette.Draft;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Lobby;
 using RiftRoulette.RandomMode;
+using RiftRoulette.Round;
 using RiftRoulette.Stats;
 using ITimer = DeadworksManaged.Api.ITimer;
 
@@ -113,7 +113,7 @@ public static class MirrorModeService
       log.Info(benchedPlayer.ToPlayerRef(), "Sitting out this round Players={Players}", connected.Count);
 
     Fighters.Clear();
-    DraftState.Clear();
+    RoundHeroes.Clear();
 
     foreach (var steamId in fighters.Keys)
       Fighters.Add(steamId);
@@ -191,12 +191,7 @@ public static class MirrorModeService
   {
     Fighters.Add(steamId);
     Lock.Unapply(steamId);
-
-    if (DraftState.TryGetPick(steamId, out var picked) && picked != hero)
-      DraftState.Release(steamId, out _);
-
-    if (!DraftState.HasPick(steamId))
-      DraftState.Add(steamId, hero);
+    RoundHeroes.Set(steamId, hero);
   }
 
   public static string PinHero(string heroText, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)

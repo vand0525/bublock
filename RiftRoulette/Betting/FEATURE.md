@@ -63,12 +63,12 @@ start. Betting souls last one match.
   kill's credited assisters.
 - `Lobby/AboutText` (`/about`) explains betting to players with the
   `BetBook` numbers.
-- `Draft/DraftService.RedrawBoards`: `RefreshBoard` with the stats boards,
+- `Boards/BoardService.Redraw`: `RefreshBoard` with the stats boards,
   so the board moves with the watch spot.
 - Players bet by typing a team name in chat or `/bet <team>`, mark with
   `/mark [slot]`; `/souls` shows their souls. Admins read everything with
   `/bet_status`.
-- Off in Draft and 1v1 mode.
+- Off in Mirror mode.
 
 ## Logs
 

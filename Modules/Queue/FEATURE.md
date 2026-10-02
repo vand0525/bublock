@@ -3,8 +3,9 @@
 ## Purpose
 
 A reusable join queue of players. Game agnostic: it only knows Steam IDs and
-their order. Used by Rift Roulette's 1v1 mode (winner stays on, the next in
-line comes in); meant for any "wait your turn" feature.
+their order. Used by Rift Roulette's bench rotation (`RandomMode/BenchRule`:
+who sits out next, in Random and Mirror mode); meant for any "wait your
+turn" feature.
 
 ## Files
 
@@ -27,7 +28,8 @@ owns the instance and decides when to prune players who left.
 
 The module registers no commands and has no plugin class, so it never
 clashes with another DLL. Consumers wrap it in their own commands and call
-it from their own lifecycle (Rift Roulette: `DuelService`, `DuelPlugin`).
+it from their own lifecycle (Rift Roulette: `RandomModeService`,
+`MirrorModeService`).
 
 ## Tests
 

@@ -4,7 +4,7 @@ Core rift operations: start a rift through the game's KOTH scheduler, watch
 for the outcome, end the round, cancel, and clean up. Static; state lives
 here, timers come from the calling plugin class (`ITimer`). Known-good
 sequence; do not reorder. The two player-moving steps are handed in by the caller
-(`RiftRoundSteps`, built by `Round/RoundFlow`), so this file has no Draft
+(`RiftRoundSteps`, built by `Round/RoundFlow`), so this file has no round-hero
 or Movement dependency.
 
 ## Logs
@@ -24,9 +24,9 @@ logger.
   forced.
 - `RiftPhase`: `Idle`, `WaitingForSpawn`, `Live` (spawned, watching),
   `Ending` (3 s end timer).
-- `RiftRoundSteps(MoveTeamsToRift, ReturnPlayersToDraft, RoundEnded)`: the
+- `RiftRoundSteps(MoveTeamsToRift, SendPlayersUp, RoundEnded)`: the
   caller's steps. `MoveTeamsToRift(side)` runs right after the scheduler is
-  parked; `ReturnPlayersToDraft()` runs at round end or cancel, before
+  parked; `SendPlayersUp()` runs at round end or cancel, before
   trooper cleanup, and returns how many players moved. `RoundEnded(result)`
   runs last on every ending path (finished, tied, cancelled,
   spawn timed out), after the phase is back to `Idle`, with a
@@ -62,8 +62,8 @@ logger.
 | `SetNextSide(side, mode)` | Refused while running, or Center while mid is off | `bool` |
 | `CleanupRiftTroopers(mode)` | Removes every `npc_trooper` on the map (lane troopers are off, CleanSlate `citadel_trooper_spawn_enabled 0`, so every one is a rift trooper). Debug line `Rift troopers removed` | count |
 | `ScheduleLateSweeps(timer, mode)` | `CleanupRiftTroopers` again 5 s and 10 s later (`LateSweepSeconds`), each skipped (Debug) while a rift is running; Information `Late rift troopers removed Removed= Delay=` when it removed any. The cash-in wave keeps spawning after the 3 s end timer, and those troopers used to stay forever | — |
-| `EndRound(outcome, steps, timer, mode, winnerTeam = null)` | Log ending; `steps.ReturnPlayersToDraft()`; `CleanupRiftTroopers`; `ScheduleLateSweeps`; log round ended; round finishes (`RoundEnded` with the winner team) | — |
-| `CancelRift(steps, timer, mode)` | Idle: refuse. Else cancel the three handles; `ParkScheduler` (or just KOTH off if gamerules cannot be resolved); `steps.ReturnPlayersToDraft()`; clean up troopers and `ScheduleLateSweeps`; round finishes as `cancelled`. Side is unflipped if the rift never spawned. A rift objective that already spawned stays on the map (verified in game); only our round ends. The game spawns no new rift while it is up; the next round's `WaitForSpawner` adopts it by its `citadel_koth_cashin` | reply line |
+| `EndRound(outcome, steps, timer, mode, winnerTeam = null)` | Log ending; `steps.SendPlayersUp()`; `CleanupRiftTroopers`; `ScheduleLateSweeps`; log round ended; round finishes (`RoundEnded` with the winner team) | — |
+| `CancelRift(steps, timer, mode)` | Idle: refuse. Else cancel the three handles; `ParkScheduler` (or just KOTH off if gamerules cannot be resolved); `steps.SendPlayersUp()`; clean up troopers and `ScheduleLateSweeps`; round finishes as `cancelled`. Side is unflipped if the rift never spawned. A rift objective that already spawned stays on the map (verified in game); only our round ends. The game spawns no new rift while it is up; the next round's `WaitForSpawner` adopts it by its `citadel_koth_cashin` | reply line |
 | `DescribeRift()` | Phase, current side, next side, mid on/off, last outcome, round id, snapshot size | 2 lines |
 
 ## Dangerous constraints

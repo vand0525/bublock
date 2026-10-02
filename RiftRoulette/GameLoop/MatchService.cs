@@ -3,8 +3,7 @@ using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Balance;
 using RiftRoulette.Betting;
-using RiftRoulette.Draft;
-using RiftRoulette.Duel;
+using RiftRoulette.Boards;
 using RiftRoulette.Lobby;
 using RiftRoulette.Mirror;
 using RiftRoulette.RandomMode;
@@ -47,30 +46,21 @@ public static class MatchService
     if (RiftService.IsRunning)
       return $"A rift is running (Phase={RiftService.Phase}). Wait for it to end or use /rift_cancel.";
 
-    if (MatchConfig.IsDuel && !DuelService.HasSnapshot)
-      return "1v1 needs a build first: /duel_copy <slot>.";
-
     _timer = timer;
     State.Start();
-    ShopAccess.Sync(mode);
     StatsService.Reset(mode);
     BalanceService.Reset(mode);
     BettingService.Reset(mode);
 
     if (MatchConfig.IsRandom)
       RandomModeService.BeginMatch(mode);
-    else if (MatchConfig.IsDuel)
-      DuelService.BeginMatch(mode);
     else if (MatchConfig.IsMirror)
       MirrorModeService.BeginMatch(mode);
 
     log.Info("Match started {Config} IntermissionSeconds={IntermissionSeconds}", MatchConfig.Describe(), IntermissionSeconds);
     BublockLog.Master.Info("Match started {Config}", MatchConfig.Describe());
 
-    if (MatchConfig.IsDuel)
-      HudService.AnnounceAll("1v1", DuelService.NextPairing(), mode);
-    else
-      HudService.AnnounceAll("Match starting", $"Round 1 in {IntermissionSeconds}s", mode);
+    HudService.AnnounceAll("Match starting", $"Round 1 in {IntermissionSeconds}s", mode);
 
     ScheduleNextRound(mode);
     MatchProbe.Snapshot("match-start");
@@ -85,12 +75,11 @@ public static class MatchService
     if (!State.IsRunning)
       return "No match is running.";
 
-    var score = CurrentScore();
+    var score = State.FormatScore();
     var rounds = State.Round;
 
     CancelCountdown();
     State.Reset();
-    ShopAccess.Sync(mode);
 
     if (RiftService.IsRunning)
       log.Info("Cancelling running rift for match end Result={Result}", RoundFlow.CancelRound(timer, mode));
@@ -105,10 +94,8 @@ public static class MatchService
       MirrorModeService.EndMatch(mode);
     }
 
-    var returned = DraftService.Reset(timer, mode);
-
-    if (MatchConfig.IsDuel)
-      DuelService.EndMatch(timer, mode);
+    var returned = LobbyHeroes.ReturnAll(timer, mode);
+    BoardService.Redraw(mode);
 
     HudService.AnnounceAll("Match over", score, mode);
 
@@ -124,25 +111,6 @@ public static class MatchService
       return;
 
     var log = Log.WithMode(mode);
-
-    if (MatchConfig.IsDuel)
-    {
-      DuelService.RecordResult(result, mode);
-
-      log.Info(
-        "1v1 round ended Round={Round} Outcome={Outcome} WinnerTeam={WinnerTeam} King={King} Streak={Streak}",
-        State.Round,
-        result.Outcome,
-        result.WinnerTeam,
-        DuelService.KingName(),
-        DuelService.Streak);
-      BublockLog.Master.Info("Round {Round} result Outcome={Outcome} Streak={Streak}", State.Round, result.Outcome, DuelService.Streak);
-      HudService.AnnounceAll(DuelService.ResultHeadline(result), $"Next: {DuelService.NextPairing()}", mode);
-
-      ScheduleNextRound(mode);
-      return;
-    }
-
     var pointTo = State.Apply(result);
     var score = State.FormatScore();
 
@@ -190,15 +158,9 @@ public static class MatchService
     if (MatchConfig.HeroMode == heroMode)
       return $"Mode is already {name}.";
 
-    if (MatchConfig.IsDuel)
-      DuelService.Leave(mode);
-
     MatchConfig.SetHeroMode(heroMode);
-    ShopAccess.Sync(mode);
-    var returned = DraftService.Reset(timer, mode);
-
-    if (MatchConfig.IsDuel)
-      DuelService.EnterSetup(timer, mode, announce: false);
+    var returned = LobbyHeroes.ReturnAll(timer, mode);
+    BoardService.Redraw(mode);
 
     var (title, description) = ModeBanner(heroMode);
     HudService.AnnounceAll(title, description, mode);
@@ -225,39 +187,19 @@ public static class MatchService
   public static IReadOnlyList<string> DescribeConfig() =>
   [
     MatchConfig.Describe(),
-    $"Modes={MatchConfig.Names<HeroMode>()} ({MatchConfig.DuelAlias} = duel) | Formats={MatchConfig.Names<MatchFormat>()} | Intermission={IntermissionSeconds}s"
+    $"Modes={MatchConfig.Names<HeroMode>()} | Formats={MatchConfig.Names<MatchFormat>()} | Intermission={IntermissionSeconds}s"
   ];
 
-  public static IReadOnlyList<string> DescribeMatch()
-  {
-    var score = MatchConfig.IsDuel
-      ? $"King={DuelService.KingName()} x{DuelService.Streak}"
-      : $"Score={State.FormatScore()} | Ties={State.Ties}";
+  public static IReadOnlyList<string> DescribeMatch() =>
+  [
+    $"Phase={State.Phase} | Round={State.Round} | Score={State.FormatScore()} | Ties={State.Ties} | Auto={(AutoStartService.Enabled ? "on" : "off")}",
+    $"{MatchConfig.Describe()} | Intermission={IntermissionSeconds}s | Rift={RiftService.Phase} | NextSide={RiftSides.Name(RiftService.NextSide)}"
+  ];
 
-    List<string> lines =
-    [
-      $"Phase={State.Phase} | Round={State.Round} | {score} | Auto={(AutoStartService.Enabled ? "on" : "off")}",
-      $"{MatchConfig.Describe()} | Intermission={IntermissionSeconds}s | Rift={RiftService.Phase} | NextSide={RiftSides.Name(RiftService.NextSide)}"
-    ];
-
-    if (MatchConfig.IsDuel)
-      lines.AddRange(DuelService.DescribeStreaks());
-
-    return lines;
-  }
-
-  public static IReadOnlyList<string> DescribeScore()
-  {
-    if (!State.IsRunning)
-      return ["No match is running."];
-
-    return MatchConfig.IsDuel
-      ? [$"Round {State.Round}", .. DuelService.DescribeStreaks()]
-      : [$"Round {State.Round}: {State.FormatScore()} (ties {State.Ties})"];
-  }
-
-  private static string CurrentScore() =>
-    MatchConfig.IsDuel ? DuelService.StreakSummary() : State.FormatScore();
+  public static IReadOnlyList<string> DescribeScore() =>
+    State.IsRunning
+      ? [$"Round {State.Round}: {State.FormatScore()} (ties {State.Ties})"]
+      : ["No match is running."];
 
   private static void ScheduleNextRound(ExecutionMode mode, bool prepareHeroes = true)
   {
@@ -271,8 +213,6 @@ public static class MatchService
 
     if (prepareHeroes && MatchConfig.IsRandom)
       RandomModeService.PrepareRound(timer, mode);
-    else if (prepareHeroes && MatchConfig.IsDuel)
-      DuelService.PrepareRound(timer, mode);
     else if (prepareHeroes && MatchConfig.IsMirror)
       MirrorModeService.PrepareRound(timer, mode);
 
@@ -283,7 +223,7 @@ public static class MatchService
       _finalCountdown = timer.Once((seconds - FinalCountdownSeconds).Seconds(), () => AnnounceFinalCountdown(mode));
     }
 
-    if (prepareHeroes && (MatchConfig.IsRandom || MatchConfig.IsMirror))
+    if (prepareHeroes)
     {
       var round = State.Round + 1;
 
@@ -311,14 +251,6 @@ public static class MatchService
     if (RiftService.IsRunning)
     {
       log.Warn("Round start skipped, a rift is already running Phase={Phase}", RiftService.Phase);
-      return;
-    }
-
-    if (MatchConfig.IsDuel && !DuelService.ReadyToFight)
-    {
-      log.Info("1v1 round start skipped, two fighters are not ready Queued={Queued}", DuelService.QueuedCount());
-      HudService.AnnounceAll("Waiting for fighters", DuelService.NextPairing(), mode);
-      ScheduleNextRound(mode);
       return;
     }
 
@@ -361,10 +293,8 @@ public static class MatchService
   public static (string Title, string Description) ModeBanner(HeroMode heroMode) =>
     heroMode switch
     {
-      HeroMode.Random => ("Random mode", "Random hero and build every round"),
-      HeroMode.Duel => ("1v1 mode", DuelService.SetupDescription),
       HeroMode.Mirror => ("Mirror mode", "Everyone has the same hero and build"),
-      _ => ("Draft mode", "Pick your heroes")
+      _ => ("Random mode", "Random hero and build every round")
     };
 
   private static void AnnounceBuilds(int round, ExecutionMode mode)
@@ -389,7 +319,7 @@ public static class MatchService
   {
     var title = $"Round {State.Round + 1}";
 
-    HudService.AnnounceAll(title, MatchConfig.IsDuel ? DuelService.NextPairing() : State.FormatScore(), mode);
+    HudService.AnnounceAll(title, State.FormatScore(), mode);
   }
 
   private static void CancelCountdown()
