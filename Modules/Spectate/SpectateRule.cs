@@ -51,4 +51,7 @@ public static class SpectateRule
 
   public static bool HandMoved(float distance, float turned) =>
     distance > MoveUnits || turned > TurnDegrees;
+
+  public static bool AngleClose(Vector3 got, Vector3 wanted) =>
+    Turned(got, wanted) <= TurnDegrees;
 }

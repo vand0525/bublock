@@ -73,7 +73,7 @@ public static class SpectateService
 
   // The teleport only moves the camera if the viewer is already in fly cam (C). The server cannot switch the
   // client there: spec_mode / spec_player lack server_can_execute and the client refuses them.
-  // Order matters: teleport, then the angle a moment later (an angle sent with the teleport is ignored).
+  // The fly cam ignores SetClientCameraAngles (the hero camera message); the angle has to ride on the teleport.
   public static bool Park(CCitadelPlayerController player, Vector3 position, Vector3 angle, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
     var log = Log.WithMode(mode);
@@ -92,7 +92,7 @@ public static class SpectateService
     timer.Once(TeleportDelaySeconds.Seconds(), () =>
     {
       if (Find(steamId) is { } again && Observer(again) is { } pawn)
-        pawn.Teleport(position: position, angles: null, velocity: Vector3.Zero);
+        pawn.Teleport(position: position, angles: angle, velocity: Vector3.Zero);
     });
 
     timer.Once(AngleDelaySeconds.Seconds(), () =>
@@ -107,7 +107,12 @@ public static class SpectateService
         return;
 
       MovementService.SetViewAngle(again, angle);
-      log.Debug(again.ToPlayerRef(), "Parked Position={Position} Angle={Angle} After={After} Mode={Mode}", position, angle, pawn.Position, pawn.ObserverMode);
+      var after = Pose(again)?.Angles;
+
+      if (IsFlyCam(again) && after is { } got && !SpectateRule.AngleClose(got, angle))
+        log.Info(again.ToPlayerRef(), "Park angle did not take Wanted={Wanted} Got={Got}", angle, got);
+      else
+        log.Debug(again.ToPlayerRef(), "Parked Position={Position} Angle={Angle} After={After} AngleAfter={AngleAfter} Mode={Mode}", position, angle, pawn.Position, after, pawn.ObserverMode);
     });
 
     log.Debug(player.ToPlayerRef(), "Park started Position={Position} Angle={Angle}", position, angle);

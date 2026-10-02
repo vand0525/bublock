@@ -348,8 +348,8 @@ Assume the git repo is rooted at `Bublock/`.
   rift side, captured in fly cam with `getpos_exact`; nothing is saved),
   re-sent every 6 s outside fly cam so pressing C lands on it
   (`StreamCamRule.ParkStep`). The server's observer mode does not switch
-  the client: every park goes through `SpectateService.Park` (teleport,
-  then the angle later) and only moves an admin already in fly cam (C;
+  the client: every park goes through `SpectateService.Park` (teleport
+  with the angle; the fly cam ignores `SetClientCameraAngles`) and only moves an admin already in fly cam (C;
   the client refuses `spec_*` commands from the server, so none are
   sent). Fly cam is `SpectateService.IsFlyCam` (observer `Roaming`, no
   target). The view angle is `CBasePlayerPawn.v_angle`

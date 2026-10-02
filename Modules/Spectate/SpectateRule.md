@@ -25,6 +25,7 @@ unit tested (`Tests/Modules.Tests/SpectateRuleTests`).
 | `Turned(from, to)` | The larger of the pitch change and the yaw change (yaw wrapped, so 179 to -179 is 2 degrees). |
 | `WrapDegrees(degrees)` | The angle in [-180, 180). |
 | `HandMoved(distance, turned)` | True when the view moved more than `MoveUnits` or turned more than `TurnDegrees`. |
+| `AngleClose(got, wanted)` | True when `Turned(got, wanted)` is at most `TurnDegrees` (did a park's angle take). |
 
 ## Invariants
 

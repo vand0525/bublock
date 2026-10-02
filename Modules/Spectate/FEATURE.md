@@ -28,7 +28,9 @@ None. The consumer keeps whom it follows and where it parked.
 The server's `SetObserverMode` does not switch the client's camera, and the
 client refuses `spec_mode` / `spec_player` sent by the server (they are not
 `server_can_execute`). The viewer must press C for fly cam before a teleport
-of the observer pawn (`Park`) moves it.
+of the observer pawn (`Park`) moves it. The fly cam ignores the client
+camera angle message (`SetClientCameraAngles`), so `Park` passes the angle
+to the observer teleport.
 
 ## Units
 

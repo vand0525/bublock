@@ -21,5 +21,5 @@ there). Pure data, no game calls; unit tested
 - Absolute world values, captured by the admin in fly cam with
   `getpos_exact` (it prints `setpos_exact` / `setang_exact`). Not relative
   to the watch spot anchor: moving an anchor does not move the camera.
-- The angle is handed unchanged to `SpectateService.Park`, which sends it
-  as the client camera angle after the teleport.
+- The angle is handed unchanged to `SpectateService.Park`, which passes it
+  to the observer teleport.

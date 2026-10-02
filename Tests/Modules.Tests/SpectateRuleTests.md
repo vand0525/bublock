@@ -16,3 +16,5 @@ Unit tests for `Modules/Spectate/SpectateRule`.
 - `Turned` wraps yaw (179 to -179 is 2) and takes the larger of pitch and
   yaw.
 - `HandMoved` is true past 50 units or 3 degrees (the edges do not count).
+- `AngleClose` is true within 3 degrees (yaw wrapped) and false for an
+  angle the park did not set.

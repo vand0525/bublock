@@ -81,8 +81,9 @@ more than 50 units or 3 degrees since the last update
    - `Stay`: nothing. A camera the admin moved after it landed stays where
      they left it until the side changes or a round starts.
    - The park is `SpectateService.Park(admin, spot.Position, spot.Angle)`:
-     the spot's angle is handed over unchanged (that call teleports with no
-     angle, then sends the client camera angle at 0.5 s and 1.0 s).
+     the spot's angle is handed over unchanged (that call teleports the
+     observer with the angle; the fly cam ignores the client camera angle
+     message).
 
 ## Invariants
 

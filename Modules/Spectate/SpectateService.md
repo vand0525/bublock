@@ -17,7 +17,7 @@ where to park (Rift Roulette: `RiftRoulette/Lobby/StreamCam`).
 | `ViewAngle` | `SchemaAccessor<Vector3>` for `CBasePlayerPawn.v_angle` (the observer pawn has no `EyeAngles`; that is on the hero pawn class). In the self-test schema checks. |
 | `Pose(player)` | The observer's position and view angle (`ViewAngle`; null when the field is not in the schema), or null when not observing. |
 | `Follow(player, target, mode)` | Sets `ObserverMode_t.InEye` (the game's PlayerView) and `SetObserverTarget(target hero pawn)`. True if the server accepted it; refused logs Info `Server target refused` and returns false. Logs Debug; false without a change when either pawn is missing. |
-| `Park(player, position, angle, timer, mode)` | Timed sequence. Now: `ObserverMode_t.Roaming` on the server. +`TeleportDelaySeconds` (0.25 s): teleports the observer pawn to `position` with no angles and zero velocity. +`AngleDelaySeconds` (0.5 s) and +`AngleRepeatSeconds` (1.0 s): `MovementService.SetViewAngle(player, angle)`. Each step re-finds the player by Steam ID and does nothing if they left or are no longer observing. Logs Debug `Park started` and, after the last step, `Parked Position= Angle= After= Mode=`. Returns false (nothing sent) when not observing. |
+| `Park(player, position, angle, timer, mode)` | Timed sequence. Now: `ObserverMode_t.Roaming` on the server. +`TeleportDelaySeconds` (0.25 s): teleports the observer pawn to `position` with `angle` and zero velocity. +`AngleDelaySeconds` (0.5 s) and +`AngleRepeatSeconds` (1.0 s): `MovementService.SetViewAngle(player, angle)` (kept as a fallback). Each step re-finds the player by Steam ID and does nothing if they left or are no longer observing. Logs Debug `Park started`. After the last step, in fly cam with the view angle (`Pose`) more than 3 degrees off (`SpectateRule.AngleClose`): Information `Park angle did not take Wanted= Got=`; otherwise Debug `Parked Position= Angle= After= AngleAfter= Mode=`. Returns false (nothing sent) when not observing. |
 ## Side effects
 
 - Changes only the spectating player's camera. Never touches the watched
@@ -27,7 +27,7 @@ where to park (Rift Roulette: `RiftRoulette/Lobby/StreamCam`).
 
 - Entities are compared by `EntityHandle`, never `EntityIndex`.
 - `Follow` always sets the mode before the target.
-- `Park` order is fixed: teleport, then the angle.
+- `Park` order is fixed: teleport (with the angle), then the angle message.
 - Sends no client commands.
 
 ## Dangerous Deadworks constraints
@@ -42,10 +42,12 @@ where to park (Rift Roulette: `RiftRoulette/Lobby/StreamCam`).
 - `SetObserverMode(Roaming)` on the server does not switch the client's
   camera either. A teleport of the observer pawn only moves the camera
   when the viewer is already in fly cam (C in game, confirmed in game).
-- An angle sent in the same tick as the teleport is ignored in fly cam, so
-  the angle goes out after the teleport, twice. If pitch 89 still does not
-  hold, the fallback is writing the observer's view angle field through
-  `SchemaAccessor` (field name to verify first).
+- The fly cam ignores `CCitadelUserMsg_SetClientCameraAngles` (the
+  message behind `SetViewAngle` and the API's `SetCameraAngles`): the
+  view kept the angle the admin joined with (2026-10-02). The angle is
+  passed to the observer teleport instead; whether that turns the fly cam
+  is to confirm in game (`Park angle did not take` in `spectate-*.log`
+  says it did not).
 - `spec_goto` cannot be used either, and it ignores pitch and yaw.
-- Whether `v_angle` follows the fly cam view on the observer pawn is still
-  to confirm in game.
+- `v_angle` follows the fly cam view on the observer pawn (the saved
+  framing logged the admin's real pitch, 2026-10-02).

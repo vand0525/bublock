@@ -91,4 +91,14 @@ public class SpectateRuleTests
   {
     Assert.Equal(expected, SpectateRule.HandMoved(distance, turned));
   }
+
+  [Theory]
+  [InlineData(12f, -2f, 12.28f, -1.94f, true)]
+  [InlineData(0f, 179f, 0f, -179f, true)]
+  [InlineData(0f, -47f, 12.28f, -1.94f, false)]
+  [InlineData(-13f, 175f, -4.75f, 174.84f, false)]
+  public void AngleClose_within_the_turn_threshold(float gotPitch, float gotYaw, float wantedPitch, float wantedYaw, bool expected)
+  {
+    Assert.Equal(expected, SpectateRule.AngleClose(new(gotPitch, gotYaw, 0f), new(wantedPitch, wantedYaw, 0f)));
+  }
 }
