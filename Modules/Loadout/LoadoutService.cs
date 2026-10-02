@@ -188,7 +188,8 @@ public static class LoadoutService
     ITimer timer,
     LoadoutOptions? options = null,
     ExecutionMode mode = ExecutionMode.Clean,
-    Action<CCitadelPlayerController, LoadoutResult>? applied = null)
+    Action<CCitadelPlayerController, LoadoutResult>? applied = null,
+    Action<CCitadelPlayerController>? swapFailed = null)
   {
     var log = Log.WithMode(mode);
     var pawn = player.GetHeroPawn();
@@ -203,7 +204,7 @@ public static class LoadoutService
     log.Debug(player.ToPlayerRef(), "Hero selected, loadout pending Hero={Hero} BuildId={BuildId}", hero, build.BuildId);
 
     AfterSwap(player.PlayerSteamId, hero, timer, log, (current, currentPawn) =>
-      applied?.Invoke(current, Apply(currentPawn, build, options, mode: mode)));
+      applied?.Invoke(current, Apply(currentPawn, build, options, mode: mode)), swapFailed);
 
     return true;
   }
@@ -346,6 +347,7 @@ public static class LoadoutService
     ITimer timer,
     Logger log,
     Action<CCitadelPlayerController, CCitadelPlayerPawn> apply,
+    Action<CCitadelPlayerController>? swapFailed = null,
     int attempt = 1)
   {
     timer.Once(SwapDelaySeconds.Seconds(), () =>
@@ -369,6 +371,16 @@ public static class LoadoutService
             hero,
             currentPawn.HeroID,
             attempt);
+
+          try
+          {
+            swapFailed?.Invoke(current);
+          }
+          catch (Exception exception)
+          {
+            log.Error(current.ToPlayerRef(), exception, "Swap failure handler threw Hero={Hero}", hero);
+          }
+
           return;
         }
 
@@ -379,7 +391,7 @@ public static class LoadoutService
           currentPawn.HeroID,
           attempt + 1);
         current.SelectHero(hero);
-        AfterSwap(steamId, hero, timer, log, apply, attempt + 1);
+        AfterSwap(steamId, hero, timer, log, apply, swapFailed, attempt + 1);
         return;
       }
 

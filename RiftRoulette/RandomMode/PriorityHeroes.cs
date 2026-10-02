@@ -14,6 +14,17 @@ public static class PriorityHeroes
   public static IReadOnlyList<Heroes> InPool(IReadOnlySet<Heroes> list, IReadOnlyList<Heroes> pool) =>
     pool.Where(list.Contains).ToList();
 
+  // Heroes for a player whose priority hero would not spawn: never a failed hero, an unheld one when possible.
+  public static IReadOnlyList<Heroes> RerollPool(
+    IReadOnlyList<Heroes> pool,
+    IReadOnlySet<Heroes> failed,
+    IReadOnlySet<Heroes> taken)
+  {
+    var working = pool.Where(hero => !failed.Contains(hero)).ToList();
+    var free = working.Where(hero => !taken.Contains(hero)).ToList();
+    return free.Count > 0 ? free : working;
+  }
+
   public static string RefusedLine(string name, string action) =>
     $"{name} is a priority hero: someone gets it every round, so it can't be {action}.";
 }

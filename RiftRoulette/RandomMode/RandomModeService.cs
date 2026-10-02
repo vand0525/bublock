@@ -176,6 +176,9 @@ public static class RandomModeService
 
   private static readonly HashSet<Heroes> PriorityWarned = [];
 
+  // Priority heroes whose swap failed this match (the server could not spawn them); retried next match.
+  private static readonly HashSet<Heroes> FailedPriority = [];
+
   private static IReadOnlyList<Heroes> Priority(HeroBuildCatalog catalog, Logger log)
   {
     foreach (var hero in PriorityHeroes.List.Where(hero => !catalog.Heroes.Contains(hero)))
@@ -184,7 +187,34 @@ public static class RandomModeService
         log.Warn("Priority hero has no builds, skipped Hero={Hero}", hero);
     }
 
-    return PriorityHeroes.InPool(catalog.Heroes);
+    return PriorityHeroes.InPool(catalog.Heroes).Where(hero => !FailedPriority.Contains(hero)).ToList();
+  }
+
+  private static void OnSwapFailed(CCitadelPlayerController player, RandomAssignment failed, ITimer timer, ExecutionMode mode)
+  {
+    var log = Log.WithMode(mode);
+    var steamId = player.PlayerSteamId;
+
+    if (!PriorityHeroes.Contains(failed.Hero)
+        || !Assignments.TryGetValue(steamId, out var live)
+        || live != failed
+        || !MatchService.State.IsRunning)
+      return;
+
+    FailedPriority.Add(failed.Hero);
+    var catalog = HeroBuildCatalog.Default;
+    var taken = Assignments.Where(pair => pair.Key != steamId).Select(pair => pair.Value.Hero).ToHashSet();
+    var pool = PriorityHeroes.RerollPool(Unbanned(catalog.Heroes), FailedPriority, taken);
+
+    if (pool.Count == 0)
+      return;
+
+    var hero = HeroDraw.Draw([steamId], pool, LastHero, Random.Shared)[steamId];
+    var assignment = Assign(steamId, hero, catalog);
+    log.Warn(player.ToPlayerRef(), "Priority hero did not spawn, rerolled Failed={Failed} Hero={Hero}", failed.Hero, hero);
+
+    if (!Start(player, assignment, timer, mode))
+      Lock.MarkPending(steamId);
   }
 
   // When the bans cover the whole pool (a tiny test catalog), they are ignored so the draw still works.
@@ -466,7 +496,7 @@ public static class RandomModeService
     PriorityHeroes.List.Count == 0
       ? "none"
       : string.Join(", ", PriorityHeroes.List.Order().Select(hero =>
-          $"{catalog.DisplayName(hero)} ({(catalog.Heroes.Contains(hero) ? "in pool" : "no builds")})"));
+          $"{catalog.DisplayName(hero)} ({(!catalog.Heroes.Contains(hero) ? "no builds" : FailedPriority.Contains(hero) ? "swap failed, off this match" : "in pool")})"));
 
   private static string HeroList(IEnumerable<Heroes> heroes)
   {
@@ -684,7 +714,8 @@ public static class RandomModeService
 
         if (_buildsAnnounced)
           AnnounceBuild(current, mode);
-      });
+      },
+      current => OnSwapFailed(current, assignment, timer, mode));
   }
 
   private static List<CCitadelPlayerController> Humans() => Participants.Humans();
@@ -703,5 +734,6 @@ public static class RandomModeService
     _benchRound = null;
     Reservations.Reset();
     Bans.Reset();
+    FailedPriority.Clear();
   }
 }

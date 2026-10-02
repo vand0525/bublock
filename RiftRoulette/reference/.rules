@@ -189,7 +189,11 @@ Assume the git repo is rooted at `Bublock/`.
   list fixed in code): each one with stored builds goes into every Random
   draw (`HeroDraw.Draw` `mustInclude`, and `AssignLate` when its holder
   left), and is never reservable or bannable (refused before any souls
-  are spent). Mirror mode never reads the list; its random hero keeps
+  are spent). A priority hero whose swap fails (the server can't spawn
+  it, `LoadoutService.Swap` `swapFailed`) is off the draw for the rest of
+  the match and its player gets a new random hero and build at once
+  (`RandomModeService.OnSwapFailed`, `PriorityHeroes.RerollPool`).
+  Mirror mode never reads the list; its random hero keeps
   rolling across the whole pool. A mark (`/mark <slot>`, `Betting/MarkBook`): 300
   souls while betting is open, a fighter marks an enemy fighter for that
   round (one mark per marker; `/mark` alone lists them by slot). The
@@ -281,7 +285,11 @@ Assume the git repo is rooted at `Bublock/`.
   after a hero pin) pins which of its builds; a pin never goes random
   again until an admin changes or clears it, and pins outlive matches,
   mode changes and map reloads. With only a hero pinned the build is still
-  rolled once and shared. Teams, bench and balance as in Random mode; one
+  rolled once and shared. A rolled hero whose swap fails (the server
+  can't spawn it) is off the rolls for the rest of the match and a new
+  shared hero and build go to everyone at once
+  (`MirrorModeService.OnSwapFailed`); a pinned hero is never rerolled.
+  Teams, bench and balance as in Random mode; one
   `HeroLock` of its own; betting, `/reserve` and `/heroban` stay Random
   only. Duplicate heroes rely on `citadel_enable_duplicate_heroes`.
 - Every player the game sends up top is restrained

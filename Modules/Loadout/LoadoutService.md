@@ -78,7 +78,7 @@ line per loadout (`Loadout applied`, with `PlayerRef`, `Value`, `Cap`,
 `ItemNames`, the planned items in order), and a
 Warning when any item failed or was unknown.
 
-### `Swap(player, hero, build, timer, options, mode, applied)`
+### `Swap(player, hero, build, timer, options, mode, applied, swapFailed)`
 
 - Returns false (Debug line) when the player has no live pawn: never
   `SelectHero` while dead.
@@ -89,11 +89,14 @@ Warning when any item failed or was unknown.
   `HeroID` is not `hero` yet, it calls `SelectHero(hero)` again and waits
   another `SwapDelaySeconds`, up to `SwapAttempts` (3) tries in all
   (Information `Hero did not change, selecting again ... Attempt=`); after
-  the last try it skips with a Warning (`Attempts=`). A `SelectHero` issued
-  in the same frame as another one (for example on a join) can be lost.
-  Exceptions in `Apply` are logged at Error.
+  the last try it skips with a Warning (`Attempts=`) and invokes
+  `swapFailed(player)` (optional; for example the server cannot spawn the
+  hero). A `SelectHero` issued in the same frame as another one (for
+  example on a join) can be lost. Exceptions in `Apply` and in
+  `swapFailed` are logged at Error.
 - The delayed part is the private `AfterSwap(steamId, hero, timer, log,
-  apply, attempt = 1)`, shared with `SwapSnapshot`.
+  apply, swapFailed = null, attempt = 1)`, shared with `SwapSnapshot`
+  (which passes no `swapFailed`).
 
 ### `Capture(pawn, source = "")`
 

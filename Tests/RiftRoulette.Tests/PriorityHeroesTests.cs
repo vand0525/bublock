@@ -21,6 +21,30 @@ public class PriorityHeroesTests
   }
 
   [Fact]
+  public void RerollPool_never_offers_a_failed_hero_and_prefers_unheld_ones()
+  {
+    var pool = new[] { Heroes.RatKing, Heroes.Haze, Heroes.Shiv, Heroes.Kelvin };
+    var failed = new HashSet<Heroes> { Heroes.RatKing };
+
+    Assert.Equal([Heroes.Shiv, Heroes.Kelvin], PriorityHeroes.RerollPool(pool, failed, new HashSet<Heroes> { Heroes.Haze }));
+  }
+
+  [Fact]
+  public void RerollPool_allows_a_held_hero_when_every_other_is_taken()
+  {
+    var pool = new[] { Heroes.RatKing, Heroes.Haze };
+    var failed = new HashSet<Heroes> { Heroes.RatKing };
+
+    Assert.Equal([Heroes.Haze], PriorityHeroes.RerollPool(pool, failed, new HashSet<Heroes> { Heroes.Haze }));
+  }
+
+  [Fact]
+  public void RerollPool_is_empty_when_only_failed_heroes_are_left()
+  {
+    Assert.Empty(PriorityHeroes.RerollPool([Heroes.RatKing], new HashSet<Heroes> { Heroes.RatKing }, new HashSet<Heroes>()));
+  }
+
+  [Fact]
   public void RefusedLine_names_the_hero_and_the_action()
   {
     Assert.Equal(

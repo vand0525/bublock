@@ -48,6 +48,9 @@ public static class MirrorModeService
 
   private static int _version;
 
+  // Rolled heroes whose swap failed this match (the server could not spawn them); retried next match.
+  private static readonly HashSet<Heroes> FailedHeroes = [];
+
   // Pins outlive matches, mode changes and map reloads; only a DLL load or an admin clears them.
   public static MirrorPins Pins { get; private set; } = MirrorPins.None;
 
@@ -132,7 +135,7 @@ public static class MirrorModeService
 
     if (roll || current == null || !MatchesPins(current))
     {
-      current = MirrorPick.Resolve(Pins, catalog.Heroes, hero => catalog.BuildsFor(hero).Count, _lastHero, Random.Shared);
+      current = MirrorPick.Resolve(Pins, Pool(catalog), hero => catalog.BuildsFor(hero).Count, _lastHero, Random.Shared);
 
       if (current == null)
       {
@@ -180,6 +183,31 @@ public static class MirrorModeService
       string.Join(",", itemOrder));
     StatsService.RefreshBoards(mode);
     return swapped;
+  }
+
+  private static IReadOnlyList<Heroes> Pool(HeroBuildCatalog catalog)
+  {
+    var working = catalog.Heroes.Where(hero => !FailedHeroes.Contains(hero)).ToList();
+    return working.Count > 0 ? working : catalog.Heroes;
+  }
+
+  // Every fighter fails at once; the first callback rerolls and bumps _version, so the rest are ignored.
+  private static void OnSwapFailed(MirrorChoice failed, int version, ITimer timer, ExecutionMode mode)
+  {
+    var log = Log.WithMode(mode);
+
+    if (version != _version || _current != failed || !MatchService.State.IsRunning)
+      return;
+
+    if (Pins.Hero == failed.Hero)
+    {
+      log.Warn("Pinned mirror hero did not spawn, kept by the pin Hero={Hero}", failed.Hero);
+      return;
+    }
+
+    FailedHeroes.Add(failed.Hero);
+    log.Warn("Mirror hero did not spawn, rerolled for everyone Failed={Failed}", failed.Hero);
+    ApplyChoice(timer, mode, roll: true);
   }
 
   private static bool MatchesPins(MirrorChoice choice) =>
@@ -459,7 +487,8 @@ public static class MirrorModeService
 
         if (_buildsAnnounced)
           AnnounceBuild(current, mode);
-      });
+      },
+      _ => OnSwapFailed(choice, version, timer, mode));
   }
 
   public static int AnnounceBuilds(ExecutionMode mode = ExecutionMode.Clean)
@@ -542,6 +571,9 @@ public static class MirrorModeService
     if (Pins.Hero is { } hero)
       lines.Add($"{catalog.DisplayName(hero)} builds: {ListBuilds(catalog.BuildsFor(hero))}");
 
+    if (FailedHeroes.Count > 0)
+      lines.Add($"Swap failed, off this match: {string.Join(", ", FailedHeroes.Select(catalog.DisplayName).Order())}");
+
     foreach (var player in Players.GetAll())
     {
       var steamId = player.PlayerSteamId;
@@ -572,5 +604,6 @@ public static class MirrorModeService
     _itemOrder = null;
     _lastHero = null;
     _version++;
+    FailedHeroes.Clear();
   }
 }
