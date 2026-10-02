@@ -57,6 +57,9 @@ rounds, return to draft. See `reference/chat-handoff.md` and
   that player's exact hero, items, abilities and level onto both players
   (`Modules/Loadout` snapshot) and starts the match; both stay locked to it
   (`Lobby/HeroLock`) and are reset to it every intermission.
+- Mirror mode (`/match_mode mirror`, `Mirror/`): every fighter gets the
+  same hero and the same build each intermission, picked once or pinned
+  by an admin (`/mirror_hero`, `/mirror_build`).
 - Players up top (lobby, between rounds, after dying) are silenced and
   blocked from items, shooting and melee until they are moved into the
   rift (`Modules/Restraint`, game modifier `modifier_citadel_silenced`
@@ -98,6 +101,7 @@ they call each other with typed C# (no command/convar messaging):
 | `Modules/Loadout/` (module) | `LoadoutPlugin` | stored top builds, apply build to a pawn |
 | `RandomMode/` | `RandomPlugin` | Random mode: teams, per-round hero + build, pending swaps, joiners, hero guard |
 | `Duel/` | `DuelPlugin` | 1v1 mode: copied build, hero lock, setup souls, queue, winner stays on |
+| `Mirror/` | `MirrorPlugin` | Mirror mode: one shared hero + build per round, admin pins, hero guard |
 | `Modules/Restraint/` (module) | `RestraintPlugin` | silence / no items, shooting or melee until released |
 | `Modules/Queue/` (module) | — (data) | reusable player queue |
 | `Stats/` | `StatsPlugin` | match kills / deaths / assists, stats boards |
@@ -124,14 +128,15 @@ they call each other with typed C# (no command/convar messaging):
 - Random (`RandomPlugin`): player `/reserve [hero]`, `/heroban [hero]`; admin `random_status`, `random_reroll`
 - Duel (`DuelPlugin`): player `/queue`, `/unqueue`; admin `duel_copy`,
   `duel_clear`, `duel_status`, `duel_queue`, `duel_queue_add`,
-  `duel_queue_remove`
+  `  duel_queue_remove`
+- Mirror (`MirrorPlugin`): admin `mirror_hero`, `mirror_build`, `mirror_status`
 - Restraint admin commands (`RestraintPlugin`): `restrain`,
   `restrain_release`, `restrain_list`, `status_add`, `status_remove`
 - Stats (`StatsPlugin`): player `/stats`; admin `stats_board`, `stats_reset`
 - Balance (`BalancePlugin`): admin `balance_status`, `balance_auto`,
   `balance_now`
 - Betting (`BettingPlugin`): players type `sapphire` / `amber` in chat or
-  `/bet <team>`, `/souls`; admin `bet_status`
+  `/bet <team>`, `/mark [slot]`, `/souls`; admin `bet_status`
 - Loadout admin commands (`LoadoutPlugin`): `loadout_give`,
   `loadout_copy`, `loadout_list`, `loadout_info`
 - Hud admin commands (`HudPlugin`): `hud_announce`, `hud_say`
@@ -143,8 +148,8 @@ they call each other with typed C# (no command/convar messaging):
   `mv_tp_team`, `mv_tp_all`, `mv_angle`, `mv_save`, `mv_remove`
 - Hooks: startup convars, player spawn/death, connect/disconnect (Lobby);
   boards next tick after startup and `player_hero_changed` enforcement
-  (Draft, with the 1v1 and Random mode hero locks); `player_respawned` /
-  `player_spawn` pending loadouts (Random, 1v1) and 1v1 setup souls (Duel);
+  (Draft, with the 1v1, Random and Mirror mode hero locks); `player_respawned` /
+  `player_spawn` pending loadouts (Random, 1v1, Mirror) and 1v1 setup souls (Duel);
   `player_death` stats (Stats); `OnClientConnect` admin-seat gate (Lobby);
   `OnGameFrame` restraint upkeep (Restraint)
 
@@ -155,7 +160,8 @@ trooper snapshot, and rift timers (`Rift/RiftService`), GameLoop owns the
 match score and countdown (`GameLoop/MatchService`) and the config
 (`GameLoop/MatchConfig`), Random owns teams / assignments / pending swaps
 (`RandomMode/RandomModeService`), Duel owns the copied build, lock and
-teams, queue and streak (`Duel/DuelService`), Restraint owns the
+teams, queue and streak (`Duel/DuelService`), Mirror owns the pins and
+the shared hero and build (`Mirror/MirrorModeService`), Restraint owns the
 restrained players (`Modules/Restraint`), Round's `WatchSpot` remembers the
 board side, Lobby owns the admin seat (`Lobby/AdminSeat`),
 Stats owns the match ledger

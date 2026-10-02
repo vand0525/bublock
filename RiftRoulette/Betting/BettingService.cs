@@ -20,13 +20,20 @@ public static class BettingService
 
   public static BetBook Book { get; } = new();
 
+  public static MarkBook Marks { get; } = new();
+
   public static bool IsOpen { get; private set; }
 
   public static bool Active => MatchConfig.IsRandom && MatchService.State.IsRunning;
 
+  // A mark bought in an intermission is for the round about to start; one bought in a round's first seconds, for that round.
+  private static int MarkRound =>
+    MatchService.State.Phase == MatchPhase.Intermission ? MatchService.State.Round + 1 : MatchService.State.Round;
+
   public static void Reset(ExecutionMode mode = ExecutionMode.Clean)
   {
     Book.Reset();
+    Marks.Reset();
     IsOpen = false;
     Log.WithMode(mode).Info("Betting reset StartingChips={StartingChips}", BetBook.StartingChips);
     RefreshBoard(mode);
@@ -99,13 +106,68 @@ public static class BettingService
     };
   }
 
-  public static void OnKill(ulong killerId, ExecutionMode mode = ExecutionMode.Clean)
+  public static IReadOnlyList<string> TryMark(CCitadelPlayerController player, string text, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    if (!Active)
+      return ["Marks are only open during a Random mode match."];
+
+    if (!Participants.IsParticipant(player))
+      return ["Spectators can't mark."];
+
+    var steamId = player.PlayerSteamId;
+
+    if (!RandomModeService.TryGetAssignment(steamId, out var assignment))
+      return ["Only this round's fighters can mark - you're sitting out."];
+
+    if (!IsOpen)
+      return ["Marking is closed - it opens again after this round."];
+
+    var targets = MarkTargets(assignment.Team);
+    var input = text.Trim();
+
+    if (input.Length == 0)
+      return MarkMenu(player, targets);
+
+    if (Marks.TryGet(steamId, out var held))
+      return [$"You already marked {held.TargetName} {RoundWord(held.Round)}. One mark per round."];
+
+    if (!int.TryParse(input, out var slot) || targets.FirstOrDefault(candidate => candidate.Slot == slot) is not { } target)
+      return [$"No enemy fighter in slot {input} - type /mark to see them."];
+
+    if (!Book.TrySpend(steamId, MarkBook.Cost))
+    {
+      var riding = Book.TryGetBet(steamId, out _) ? " Your souls are on a bet until the round ends." : "";
+      return [$"A mark costs {BetBoardText.Format(MarkBook.Cost)} souls; you have {BetBoardText.Format(Book.Chips(steamId))}.{riding}"];
+    }
+
+    var round = MarkRound;
+    var when = RoundWord(round);
+    Marks.Place(steamId, target.PlayerSteamId, target.PlayerName, round);
+    PlayerChat.Send(target, $"Someone marked you: if they kill you {when}, they take a quarter of your souls.");
+
+    Log.WithMode(mode).Info(
+      player.ToPlayerRef(),
+      "Mark placed Target={Target} TargetSteamId={TargetSteamId} Round={Round} Chips={Chips}",
+      target.PlayerName,
+      target.PlayerSteamId,
+      round,
+      Book.Chips(steamId));
+    RefreshBoard(mode);
+
+    return [$"Marked {target.PlayerName} for {when} ({BetBoardText.Format(Book.Chips(steamId))} souls left). Kill them {when} to steal a quarter of their souls."];
+  }
+
+  public static void OnKill(ulong killerId, ulong victimId, ExecutionMode mode = ExecutionMode.Clean)
   {
     if (!Active)
       return;
 
     var chips = Book.AwardKill(killerId);
     Log.WithMode(mode).Debug("Kill chips awarded SteamId={SteamId} Chips={Chips}", killerId, chips);
+
+    if (MatchService.State.Phase == MatchPhase.InRound && Marks.TryConsume(killerId, victimId, MatchService.State.Round))
+      PayMark(killerId, victimId, mode);
+
     RefreshBoard(mode);
   }
 
@@ -131,13 +193,17 @@ public static class BettingService
       return 0;
 
     IsOpen = false;
-    return Pay(Book.Settle(winner), winner == null ? "no winner" : RiftRouletteTeams.Name(winner.Value), mode);
+    var settled = Pay(Book.Settle(winner), winner == null ? "no winner" : RiftRouletteTeams.Name(winner.Value), mode);
+    ExpireMarks(matchEnded: false, winner, mode);
+    return settled;
   }
 
   public static int EndMatch(ExecutionMode mode = ExecutionMode.Clean)
   {
     IsOpen = false;
-    return Pay(Book.RefundAll(), "match ended", mode);
+    var settled = Pay(Book.RefundAll(), "match ended", mode);
+    ExpireMarks(matchEnded: true, winner: null, mode);
+    return settled;
   }
 
   public static void RefreshBoard(ExecutionMode mode = ExecutionMode.Clean)
@@ -162,6 +228,9 @@ public static class BettingService
     if (Book.TryGetBet(steamId, out var bet))
       lines.Add($"Your bet: {BetBoardText.Format(bet.Stake)} souls on {RiftRouletteTeams.Name(bet.Team)}.");
 
+    if (Marks.TryGet(steamId, out var mark))
+      lines.Add($"Your mark: {mark.TargetName} ({RoundWord(mark.Round)}).");
+
     lines.Add(IsOpen ? "Betting is open: type sapphire or amber." : "Betting opens between rounds.");
     lines.Add(RandomModeService.DescribeReservation(player));
     return lines;
@@ -169,13 +238,17 @@ public static class BettingService
 
   public static IReadOnlyList<string> Describe()
   {
-    var lines = new List<string> { $"Active={Active} | Open={IsOpen} | Bets={Book.OpenBets} | Staked={Book.Bets.Values.Sum(bet => bet.Stake)}" };
+    var lines = new List<string>
+    {
+      $"Active={Active} | Open={IsOpen} | Bets={Book.OpenBets} | Staked={Book.Bets.Values.Sum(bet => bet.Stake)} | Marks={Marks.Count}"
+    };
 
     foreach (var player in Participants.Humans())
     {
       var steamId = player.PlayerSteamId;
       var bet = Book.TryGetBet(steamId, out var open) ? $"{open.Stake} on {RiftRouletteTeams.Name(open.Team)}" : "-";
-      lines.Add($"Slot={player.Slot} | {player.PlayerName} | Souls={Book.Chips(steamId)} | Bet={bet}");
+      var mark = Marks.TryGet(steamId, out var held) ? $"{held.TargetName} (round {held.Round})" : "-";
+      lines.Add($"Slot={player.Slot} | {player.PlayerName} | Souls={Book.Chips(steamId)} | Bet={bet} | Mark={mark}");
     }
 
     return lines;
@@ -197,8 +270,112 @@ public static class BettingService
       ? $" Or /reserve <hero> for {BetBoardText.Format(HeroReservations.Cost)}."
       : "";
 
-    return $"Bet on the next round: {how} (open until {LingerSeconds}s into the round). You have {chips} souls; a win doubles them.{reserve}";
+    var mark = teams.Length == 1 && Book.Chips(player.PlayerSteamId) >= MarkBook.Cost && !Marks.TryGet(player.PlayerSteamId, out _)
+      ? $" Or /mark an enemy for {BetBoardText.Format(MarkBook.Cost)}."
+      : "";
+
+    return $"Bet on the next round: {how} (open until {LingerSeconds}s into the round). You have {chips} souls; a win doubles them.{reserve}{mark}";
   }
+
+  private static string RoundWord(int round) =>
+    MatchService.State.Phase == MatchPhase.InRound && round == MatchService.State.Round ? "this round" : "next round";
+
+  // Enemy fighters of the marker's team, in slot order.
+  private static List<CCitadelPlayerController> MarkTargets(int markerTeam) =>
+    Participants.Humans()
+      .Where(candidate => RandomModeService.TryGetAssignment(candidate.PlayerSteamId, out var assignment) && assignment.Team != markerTeam)
+      .OrderBy(candidate => candidate.Slot)
+      .ToList();
+
+  private static IReadOnlyList<string> MarkMenu(CCitadelPlayerController player, IReadOnlyList<CCitadelPlayerController> targets)
+  {
+    var steamId = player.PlayerSteamId;
+    var when = RoundWord(MarkRound);
+    var lines = new List<string>
+    {
+      $"Mark an enemy fighter for {BetBoardText.Format(MarkBook.Cost)} souls: /mark <slot>. Kill them {when} to steal a quarter of their souls. " +
+      $"You have {BetBoardText.Format(Book.Chips(steamId))}."
+    };
+
+    if (Marks.TryGet(steamId, out var held))
+      lines.Add($"Your mark: {held.TargetName} ({RoundWord(held.Round)}).");
+
+    if (targets.Count == 0)
+      lines.Add("No enemy fighters right now.");
+
+    lines.AddRange(targets.Select(target => $"{target.Slot} {target.PlayerName} ({BetBoardText.Format(Book.Total(target.PlayerSteamId))} souls)"));
+    return lines;
+  }
+
+  private static void PayMark(ulong killerId, ulong victimId, ExecutionMode mode)
+  {
+    var stolen = Book.Steal(victimId, killerId, MarkBook.StealDivisor);
+    var killer = Find(killerId);
+    var victim = Find(victimId);
+    var victimName = victim?.PlayerName ?? victimId.ToString();
+
+    if (killer != null)
+    {
+      PlayerChat.Send(killer, stolen > 0
+        ? $"You stole {BetBoardText.Format(stolen)} souls from {victimName} (mark)."
+        : $"{victimName} had no souls to steal - your mark is used.");
+    }
+
+    if (victim != null && stolen > 0)
+      PlayerChat.Send(victim, $"{killer?.PlayerName ?? "Your marker"} stole {BetBoardText.Format(stolen)} souls from you - you were marked.");
+
+    Log.WithMode(mode).Info(
+      killer?.ToPlayerRef() ?? new PlayerRef(-1, killerId, "-"),
+      "Mark paid Victim={Victim} VictimSteamId={VictimSteamId} Stolen={Stolen} Chips={Chips} VictimTotal={VictimTotal}",
+      victimName,
+      victimId,
+      stolen,
+      Book.Chips(killerId),
+      Book.Total(victimId));
+  }
+
+  // Marks last one round. Refunded when the round had no result, the target didn't fight, or the match ended.
+  private static void ExpireMarks(bool matchEnded, int? winner, ExecutionMode mode)
+  {
+    var marks = Marks.TakeAll();
+
+    if (marks.Count == 0)
+      return;
+
+    var log = Log.WithMode(mode);
+    var cost = BetBoardText.Format(MarkBook.Cost);
+
+    foreach (var (markerId, mark) in marks)
+    {
+      var targetFought = RandomModeService.TryGetAssignment(mark.TargetId, out _);
+      var refund = matchEnded || winner == null || !targetFought;
+      var line = matchEnded ? $"Match ended - your {cost} souls for the mark are back."
+        : winner == null ? $"No result - your {cost} souls for the mark on {mark.TargetName} are back."
+        : !targetFought ? $"{mark.TargetName} didn't fight - your {cost} souls for the mark are back."
+        : $"Your mark on {mark.TargetName} ran out.";
+
+      if (refund)
+        Book.Refund(markerId, MarkBook.Cost);
+
+      var marker = Find(markerId);
+
+      if (marker != null)
+        PlayerChat.Send(marker, line);
+
+      log.Info(
+        "Mark ended SteamId={SteamId} Marker={Marker} Target={Target} Round={Round} Refunded={Refunded}",
+        markerId,
+        marker?.PlayerName ?? "-",
+        mark.TargetName,
+        mark.Round,
+        refund);
+    }
+
+    RefreshBoard(mode);
+  }
+
+  private static CCitadelPlayerController? Find(ulong steamId) =>
+    Players.GetAll().FirstOrDefault(candidate => candidate.PlayerSteamId == steamId);
 
   private static int Pay(IReadOnlyList<BetSettlement> settled, string reason, ExecutionMode mode)
   {

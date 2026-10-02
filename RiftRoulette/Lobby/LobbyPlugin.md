@@ -28,7 +28,7 @@ lifecycle, server setup, and the lobby commands. Ops live on
 |---|---|---|
 | `/status` | player (in game) | `DescribePlayer` for the caller, sent to them in chat and logged at Information in `Players` |
 | `/commands` | player (in game) | `CommandList.PlayerCommands` for this assembly, one chat line each, then `Full list: dw_help in console` |
-| `/about` | player (in game) | `AboutText.Lines(BettingService.LingerSeconds)`, one chat line each: the mode and how betting works. Not logged |
+| `/about` | player (in game) | `AboutText.Lines(BettingService.LingerSeconds)` (mirror mode: `AboutText.MirrorLines()`), one chat line each: the mode and how betting works. Not logged |
 | `/player_list` | admin | count, then `DescribePlayer` for every player, to the caller's console |
 | `/player_info <slot>` | admin | `DescribePlayer` for one slot; also logged in `Players` |
 | `/player_kick <slot>` | admin | `LobbyService.KickPlayer`; error if the slot is empty |

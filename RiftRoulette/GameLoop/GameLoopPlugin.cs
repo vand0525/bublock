@@ -3,6 +3,7 @@ using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Round;
 using RiftRoulette.SelfTest;
+using RiftRoulette.Stats;
 
 namespace RiftRoulette.GameLoop;
 
@@ -42,7 +43,10 @@ public class GameLoopPlugin : DeadworksPluginBase
     EventCounters.Hit("take_damage");
 
     if (!RestraintService.IsRestrainedPawn(args.Entity))
+    {
+      StatsService.RecordDamage(args);
       return HookResult.Continue;
+    }
 
     EventCounters.Hit("damage_blocked_restrained");
     return HookResult.Stop;
@@ -138,7 +142,7 @@ public class GameLoopPlugin : DeadworksPluginBase
     AdminCommand.Reply(caller, $"[Match] Intermission set to {seconds}s (applies from the next countdown)");
   }
 
-  [Command("match_mode", Description = "Set how heroes are chosen: match_mode <random|draft|duel|1v1>")]
+  [Command("match_mode", Description = "Set how heroes are chosen: match_mode <random|draft|duel|1v1|mirror>")]
   public void CmdMatchMode(CCitadelPlayerController? caller, string heroMode)
   {
     AdminCommand.Authorize(caller, MatchLog, "match_mode");

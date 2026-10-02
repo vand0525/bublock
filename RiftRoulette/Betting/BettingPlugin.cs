@@ -43,6 +43,13 @@ public class BettingPlugin : DeadworksPluginBase
     PlayerChat.Send(player, reply);
   }
 
+  [Command("mark", Description = "Spend 300 souls to mark an enemy fighter: kill them next round to steal a quarter of their souls. mark <slot>; no slot lists them")]
+  public void CmdMark(CCitadelPlayerController player, params string[] slot)
+  {
+    foreach (var line in BettingService.TryMark(player, string.Join(' ', slot)))
+      PlayerChat.Send(player, line);
+  }
+
   [Command("souls", Description = "Show your betting souls and your bet")]
   public void CmdSouls(CCitadelPlayerController player)
   {

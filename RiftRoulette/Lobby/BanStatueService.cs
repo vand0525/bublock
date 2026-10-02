@@ -6,6 +6,7 @@ using DeadworksManaged.Api;
 using RiftRoulette.Draft;
 using RiftRoulette.Duel;
 using RiftRoulette.GameLoop;
+using RiftRoulette.Mirror;
 using RiftRoulette.RandomMode;
 using RiftRoulette.Round;
 using RiftRoulette.Stats;
@@ -176,6 +177,8 @@ public static class BanStatueService
 
     if (MatchService.State.IsRunning && MatchConfig.IsRandom)
       RandomModeService.OnLeave(steamId, timer, mode);
+    else if (MatchService.State.IsRunning && MatchConfig.IsMirror)
+      MirrorModeService.OnLeave(steamId, timer, mode);
 
     StatsService.RefreshBoards(mode);
     AutoStartService.Check(timer, mode, steamId);

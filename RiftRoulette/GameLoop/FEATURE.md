@@ -35,8 +35,8 @@ once 2 humans are back.
 
 ## Configuration
 
-`MatchConfig`: hero mode `random` (default), `draft`, or `duel` (`1v1`),
-and format
+`MatchConfig`: hero mode `random` (default), `draft`, `duel` (`1v1`), or
+`mirror`, and format
 `continuous` (the only one for now). Set with `/match_mode` and
 `/match_format` between matches; `/match_config` shows it. In Random mode,
 `RandomMode/RandomModeService` balances teams at match start and gives
@@ -46,7 +46,11 @@ banner shows each player their hero, build and its soul value. In 1v1 mode,
 re-applies it every intermission; the match only starts once a build is
 copied. The fighters are the first two in the 1v1 queue:
 `OnRoundEnded` sends the loser to the back (`DuelService.RecordResult`)
-and the banners name the winner, streak and next pairing.
+and the banners name the winner, streak and next pairing. In Mirror mode,
+`Mirror/MirrorModeService` gives every fighter the same hero and the same
+build each intermission: one pick, or the admin's pins (`/mirror_hero`,
+`/mirror_build`); teams, bench and balance work like Random mode, with
+the same build banner 3 s in.
 
 ## Rules (playtest)
 
@@ -63,6 +67,8 @@ and the banners name the winner, streak and next pairing.
   unless auto-balance (`Balance/`) swaps players between rounds.
 - 1v1 mode: both players have the same copied hero and build, reset every
   intermission; a menu hero swap kills and restores.
+- Mirror mode: every fighter has the same hero and build, chosen again each
+  intermission unless pinned; a menu hero swap kills and restores.
 - Buying: CleanSlate disables every shop, and `ShopAccess` turns buying
   anywhere on only during 1v1 setup (1v1 mode, no match). Random builds and
   the 1v1 copy are given with `AddItem`, not bought.
@@ -111,7 +117,7 @@ to random / continuous on every DLL load), and `AutoStartService.Enabled`
 - `Rift/RiftService` (phase, next side), `Rift/RiftRoundResult`.
 - `Draft/DraftService.Reset` for `/match_end` and mode changes.
 - `RandomMode/RandomModeService` in Random mode; `Duel/DuelService` in 1v1
-  mode.
+  mode; `Mirror/MirrorModeService` in Mirror mode.
 - `Stats/StatsService` (reset at start, round counts) and
   `Balance/BalanceService` (reset at start, round results).
 - `Modules/Hud` for banners.

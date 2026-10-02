@@ -9,7 +9,8 @@ team moves, and player status.
 
 New connections go to the smaller team (`TeamBalance`), and players
 joining a running Random match are handed to
-`RandomModeService.AddJoiner`.
+`RandomModeService.AddJoiner` (a running Mirror match:
+`MirrorModeService.AddJoiner`).
 
 Every connect and disconnect ends with
 `GameLoop/AutoStartService.Check`, so the 2nd human starts the match and
@@ -164,7 +165,8 @@ redraws boards with `Draft/DraftService.RedrawBoards`.
 - `Modules/Spectate` (stream camera calls), `Rift/RiftService`
   (`IsRunning`, `RoundNumber` for the once-per-round top-down).
 - `Round/WatchSpot` (send players up; top-down camera position), `Modules/Restraint`
-  (`Forget` / `Release`), `Duel/DuelService.Forget`.
+  (`Forget` / `Release`), `Duel/DuelService.Forget`,
+  `Mirror/MirrorModeService.Forget`.
 - `Draft/DraftState` and `Draft/DraftService` (board redraw).
 - `GameLoop/MatchService` / `MatchConfig` and `RandomMode/RandomModeService`
   (joiners), `Stats/StatsService` (board refresh on connect / disconnect),

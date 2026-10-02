@@ -6,6 +6,7 @@ using DeadworksManaged.Api;
 using RiftRoulette.Draft;
 using RiftRoulette.Duel;
 using RiftRoulette.GameLoop;
+using RiftRoulette.Mirror;
 using RiftRoulette.RandomMode;
 using RiftRoulette.Rift;
 using RiftRoulette.Round;
@@ -95,6 +96,7 @@ public static class AdminSeat
     }
 
     RandomModeService.Forget(steamId);
+    MirrorModeService.Forget(steamId);
     DuelService.Forget(steamId);
     RestraintService.Release(player, mode);
     WatchGuard.Forget(steamId);

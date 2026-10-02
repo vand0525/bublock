@@ -38,6 +38,7 @@ deadworks/                 # Cursor workspace root
       Stats/               # match kills / deaths / assists, stats boards
       Balance/             # auto-balance swaps between rounds
       Duel/                # 1v1 mode: copied build, queue, winner stays on
+      Mirror/              # mirror mode: everyone the same hero + build, admin pins
       SelfTest/            # patch-day self-test of every game dependency (dw_selftest_*)
     DevTools/              # discovery / diagnostics
     CleanSlate/            # map cleanup helpers
@@ -121,8 +122,8 @@ Assume the git repo is rooted at `Bublock/`.
   starts rounds through `RoundFlow` and learns each result through the
   `RiftRoundSteps.RoundEnded` step. Players see match state on the HUD
   banner (`Modules/Hud`), not chat spam.
-- `GameLoop/MatchConfig` holds the match settings (hero mode `random` or
-  `draft`, format `continuous`). In Random mode `RandomModeService` gives
+- `GameLoop/MatchConfig` holds the match settings (hero mode `random`,
+  `draft`, `duel` or `mirror`, format `continuous`). In Random mode `RandomModeService` gives
   every player a random hero and one of its stored top builds each
   intermission (through `Modules/Loadout`); draft code stays but its boards
   and pick commands are off. Build data is fetched offline by
@@ -142,7 +143,11 @@ Assume the git repo is rooted at `Bublock/`.
   allows. The hero's level, boons and ability ranks come from
   the cap, never from the items' value.
 - `Stats/StatsService` counts match kills, deaths and assists
-  from `player_death` and draws them on the Sapphire / Amber boards (Random
+  from `player_death` and draws them on the boards. An assist is decided
+  by damage (`Stats/DamageLedger`: an enemy participant who dealt at least
+  20% of the victim's max health since the victim's last spawn, not the
+  killer, recorded from `OnTakeDamage`), never by the event's assister
+  fields (they credit nearby players, including dead fighters up top). It draws them on the Sapphire / Amber boards (Random
   mode). `Balance/BalanceService` decides swaps at the start of each Random
   intermission, before heroes are drawn. New connections join the smaller
   team (`Lobby/TeamBalance`). In Random mode a menu hero change kills the
@@ -164,7 +169,7 @@ Assume the git repo is rooted at `Bublock/`.
   come from chat lines that are exactly `sapphire` / `amber`
   (`BettingPlugin.OnChatMessage`) or `/bet`. Betting messages are chat
   only, never a banner. The leaderboard is `BoardLayout.Back`, the empty
-  side of the watch spot. Souls buy only two things. A hero reservation
+  side of the watch spot. Souls buy only three things. A hero reservation
   (`/reserve <hero>`, `RandomMode/HeroReservations`): 1,000 souls for the
   player's next 3 fighting rounds, a waiting line per hero, and each round
   the first fighter in a hero's line gets it (never two on one hero).
@@ -177,7 +182,14 @@ Assume the git repo is rooted at `Bublock/`.
   never revealed early; at round start everyone gets the chat line
   `Banned this round: <heroes>` (heroes only, never who, never a banner).
   A ban on a reserved hero uses one of the holder's rounds (random hero,
-  private chat line).
+  private chat line). A mark (`/mark <slot>`, `Betting/MarkBook`): 300
+  souls while betting is open, a fighter marks an enemy fighter for that
+  round (one mark per marker; `/mark` alone lists them by slot). The
+  marker's credited kill on the target that round steals a quarter of the
+  target's total (`BetBook.Steal`: free souls first, then off the open
+  bet). The target is told at once that someone marked them, never who
+  (chat only). An unused mark ends at round end; refunded on no result,
+  a target who didn't fight, or match end.
 - 1v1 mode has no team score: the only score is the best-streak
   leaderboard (`Duel/StreakBoard`), shown on both stats boards and in
   `/score`.
@@ -260,6 +272,16 @@ Assume the git repo is rooted at `Bublock/`.
   `/duel_copy <slot>` and locks them to it (`Lobby/HeroLock`, one instance
   per mode), re-applied every intermission. Code that means "the draft is
   off" checks `MatchConfig.UsesDraft`, not `IsRandom`.
+- Hero mode `mirror` (`Mirror/MirrorModeService`): each intermission one
+  hero and one of its stored builds are resolved once (`MirrorPick`) and
+  given to every fighter on both teams; never roll a build per player.
+  `/mirror_hero <hero>` pins the hero and `/mirror_build <slot>` (only
+  after a hero pin) pins which of its builds; a pin never goes random
+  again until an admin changes or clears it, and pins outlive matches,
+  mode changes and map reloads. With only a hero pinned the build is still
+  rolled once and shared. Teams, bench and balance as in Random mode; one
+  `HeroLock` of its own; betting, `/reserve` and `/heroban` stay Random
+  only. Duplicate heroes rely on `citadel_enable_duplicate_heroes`.
 - Every player the game sends up top is restrained
   (`Modules/Restraint`: real modifier `modifier_citadel_silenced` plus
   `Silenced` / `ItemsDisabled` / `ShootingDisabled` / `MeleeDisabled` /

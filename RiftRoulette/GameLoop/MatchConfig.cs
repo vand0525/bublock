@@ -4,7 +4,8 @@ public enum HeroMode
 {
   Random,
   Draft,
-  Duel
+  Duel,
+  Mirror
 }
 
 public enum MatchFormat
@@ -23,6 +24,8 @@ public static class MatchConfig
   public static bool IsRandom => HeroMode == HeroMode.Random;
 
   public static bool IsDuel => HeroMode == HeroMode.Duel;
+
+  public static bool IsMirror => HeroMode == HeroMode.Mirror;
 
   public static bool UsesDraft => HeroMode == HeroMode.Draft;
 

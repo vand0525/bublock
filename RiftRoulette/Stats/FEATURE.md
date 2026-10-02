@@ -16,9 +16,17 @@ still counts for `/stats`.
 | File | Role |
 |---|---|
 | `StatsLedger.cs` | Per-player counts and the kill / assist rules (pure, tested) |
+| `DamageLedger.cs` | Per-life damage totals; an assist needs 20% of the victim's max health dealt (pure, tested) |
 | `StatsBoardText.cs` | Board text: team K/D/A and the 1v1 streak leaderboard (pure, tested) |
 | `StatsService.cs` | Death recording, board refresh, descriptions |
-| `StatsPlugin.cs` | `player_death` hook, `/stats`, `/stats_board`, `/stats_reset` |
+| `StatsPlugin.cs` | `player_death` and `player_spawn` hooks, `/stats`, `/stats_board`, `/stats_reset` |
+
+An assist is decided by damage, not by the game's assist list (which
+credits nearby players, including dead fighters waiting up top): an enemy
+participant who dealt at least 20% of the victim's max health since the
+victim's last spawn, other than the killer. Damage comes from
+`GameLoopPlugin.OnTakeDamage` (hits on restrained players are blocked and
+never counted).
 
 ## Public operations
 
@@ -27,15 +35,17 @@ See `StatsService.md`. Commands catalogued in `reference/user-commands.md`
 
 ## State
 
-`StatsService.Ledger` and round counts (one per DLL load). Reset at
-`/match_start` and by `/stats_reset`.
+`StatsService.Ledger`, `StatsService.Damage` and round counts (one per DLL
+load). Reset at `/match_start` and by `/stats_reset`; damage totals are
+also cleared per victim on spawn and death, and per player on disconnect.
 
 ## Dependencies
 
 - `Modules/WorldText` (boards), `Draft/BoardLayout` (positions).
 - `GameLoop/MatchService` (running check, round counts), `MatchConfig`
   (boards only when the draft is off: Random and 1v1 mode).
-- `RandomMode/RandomModeService.ConsumeEnforcementKill` and
+- `RandomMode/RandomModeService.ConsumeEnforcementKill`,
+  `Mirror/MirrorModeService.ConsumeEnforcementKill` and
   `Duel/DuelService.ConsumeEnforcementKill` (hero swap deaths
   are not counted), `Balance/BalanceService.RecordKill` (kill counts for
   auto-balance), `Duel/DuelService.StreakRows` (1v1 leaderboard; Duel

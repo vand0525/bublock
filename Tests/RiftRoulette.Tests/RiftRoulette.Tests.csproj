@@ -49,6 +49,7 @@
     <Compile Include="..\..\RiftRoulette\RandomMode\BenchRule.cs" Link="RiftRoulette\RandomMode\BenchRule.cs" />
     <Compile Include="..\..\RiftRoulette\RandomMode\HeroReservations.cs" Link="RiftRoulette\RandomMode\HeroReservations.cs" />
     <Compile Include="..\..\RiftRoulette\RandomMode\HeroBans.cs" Link="RiftRoulette\RandomMode\HeroBans.cs" />
+    <Compile Include="..\..\RiftRoulette\Mirror\MirrorPick.cs" Link="RiftRoulette\Mirror\MirrorPick.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\TeamBalance.cs" Link="RiftRoulette\Lobby\TeamBalance.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\AdminSeatRule.cs" Link="RiftRoulette\Lobby\AdminSeatRule.cs" />
     <Compile Include="..\..\RiftRoulette\Lobby\AutoRestartRule.cs" Link="RiftRoulette\Lobby\AutoRestartRule.cs" />
@@ -72,11 +73,13 @@
     <Compile Include="..\..\RiftRoulette\Duel\KothRule.cs" Link="RiftRoulette\Duel\KothRule.cs" />
     <Compile Include="..\..\RiftRoulette\Duel\StreakBoard.cs" Link="RiftRoulette\Duel\StreakBoard.cs" />
     <Compile Include="..\..\RiftRoulette\Stats\StatsLedger.cs" Link="RiftRoulette\Stats\StatsLedger.cs" />
+    <Compile Include="..\..\RiftRoulette\Stats\DamageLedger.cs" Link="RiftRoulette\Stats\DamageLedger.cs" />
     <Compile Include="..\..\RiftRoulette\Stats\StatsBoardText.cs" Link="RiftRoulette\Stats\StatsBoardText.cs" />
     <Compile Include="..\..\RiftRoulette\Balance\BalanceTracker.cs" Link="RiftRoulette\Balance\BalanceTracker.cs" />
     <Compile Include="..\..\RiftRoulette\Balance\BalancePicker.cs" Link="RiftRoulette\Balance\BalancePicker.cs" />
     <Compile Include="..\..\RiftRoulette\Betting\BetBook.cs" Link="RiftRoulette\Betting\BetBook.cs" />
     <Compile Include="..\..\RiftRoulette\Betting\BetBoardText.cs" Link="RiftRoulette\Betting\BetBoardText.cs" />
+    <Compile Include="..\..\RiftRoulette\Betting\MarkBook.cs" Link="RiftRoulette\Betting\MarkBook.cs" />
   </ItemGroup>
 
 </Project>

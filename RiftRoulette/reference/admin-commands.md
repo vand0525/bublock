@@ -649,13 +649,13 @@ matches by hand.
 - **Mode:** Debug
 - **Side effects:** sets the seconds between rounds (5-120, default 5; betting opens here and stays open 10 s into the round); applies from the next countdown; lost on plugin reload
 
-#### /match_mode <random|draft|duel|1v1>
+#### /match_mode <random|draft|duel|1v1|mirror>
 
-- **Invocation:** chat `/match_mode <random|draft|duel|1v1>` | console `dw_match_mode <mode>`
+- **Invocation:** chat `/match_mode <random|draft|duel|1v1|mirror>` | console `dw_match_mode <mode>`
 - **Who:** admin
 - **Calls:** `MatchConfig.TryParseHeroMode`, `MatchService.SetHeroMode` (→ `ShopAccess.Sync`, `DraftService.Reset`; 1v1: `DuelService.EnterSetup` / `Leave`; `ModeBanner`)
 - **Mode:** Debug
-- **Side effects:** sets how heroes are chosen for the next match. `random` (default): each intermission everyone gets a new random hero with one of its top 3 builds, draft pool boards hidden, pick commands off. `draft`: the hero draft with pool boards. `duel` or `1v1`: draft off, free hero switching from the menu, 100,000 souls and level 36 for everyone until `/duel_copy`; leaving 1v1 drops the copied build. Buying anywhere (`citadel_allow_purchasing_anywhere`) is on only in 1v1 setup and off in every other mode (the map shops are disabled by CleanSlate). Resets the lobby (everyone alive back to LobbyHero (Abrams) in the draft area, picks cleared, boards redrawn for the mode). Banner to everyone: `Random mode` / `Random hero and build every round`, `1v1 mode` / `Shop open anywhere - build your hero`, or `Draft mode` / `Pick your heroes`. Replies `Mode set to random. N player(s) returned to the lobby.`
+- **Side effects:** sets how heroes are chosen for the next match. `random` (default): each intermission everyone gets a new random hero with one of its top 3 builds, draft pool boards hidden, pick commands off. `draft`: the hero draft with pool boards. `duel` or `1v1`: draft off, free hero switching from the menu, 100,000 souls and level 36 for everyone until `/duel_copy`; leaving 1v1 drops the copied build. `mirror`: each intermission every fighter gets the same hero and the same build (one pick, or the `/mirror_hero` / `/mirror_build` pins); teams, bench and balance as in Random; no betting. Buying anywhere (`citadel_allow_purchasing_anywhere`) is on only in 1v1 setup and off in every other mode (the map shops are disabled by CleanSlate). Resets the lobby (everyone alive back to LobbyHero (Abrams) in the draft area, picks cleared, boards redrawn for the mode). Banner to everyone: `Random mode` / `Random hero and build every round`, `1v1 mode` / `Shop open anywhere - build your hero`, `Mirror mode` / `Everyone has the same hero and build`, or `Draft mode` / `Pick your heroes`. Replies `Mode set to random. N player(s) returned to the lobby.`
 - **Notes:** refused during a match (`/match_end` first; with auto-start on and 2+ players, `/match_auto off` before `/match_end`) and when the mode is unchanged; error for an unknown mode. Resets to `random` on plugin reload
 
 #### /match_format <continuous>
@@ -696,6 +696,39 @@ trusted). Debug mode; `[Random]` replies.
 - **Mode:** Debug
 - **Side effects:** gives every player a new random hero (never their last one) and build right away, the same as the start of an intermission; dead players are swapped on respawn. Replies `Rerolled: N swapped, M pending`
 - **Notes:** error unless the hero mode is `random` and the match is in an intermission. Runs an auto-balance check first, like every intermission. Keeps this intermission's bench player (the bench only rotates at a new intermission)
+
+### Mirror (`MirrorPlugin`, in RiftRoulette.dll)
+
+Admin (`AdminCommand.Authorize` with the `Mirror` log; server console
+trusted). Debug mode; `[Mirror]` replies. Pins work in any mode and are
+used once `/match_mode mirror` is on. They stay through match end, mode
+changes and map reloads; a plugin reload clears them.
+
+#### /mirror_hero [hero|clear]
+
+- **Invocation:** chat `/mirror_hero <hero>` | console `dw_mirror_hero <hero>`
+- **Who:** admin
+- **Calls:** `MirrorModeService.PinHero` (→ `MirrorPins.PinHero`; in a mirror intermission `ApplyChoice` → `LoadoutService.Swap`)
+- **Mode:** Debug
+- **Side effects:** pins everyone's hero; it never goes random again until changed or cleared. With no build pinned, each intermission still rolls one of that hero's builds and everyone gets that same build. A build pin is kept when the new hero has that slot. During a mirror intermission every fighter is swapped to the pinned hero right away; during a round it applies next intermission. `clear` drops the hero and build pins (both roll again). No argument: shows the pins. Replies e.g. `Mirror hero pinned: Haze. Build: one of its 3 builds each round, the same for everyone (/mirror_build 1-3 to pin). Applied now (6 swapped, 0 pending).`
+- **Notes:** hero names as in `/reserve` (game name or enum name, spaces optional); heroes without stored builds are refused
+
+#### /mirror_build [1|2|3|clear]
+
+- **Invocation:** chat `/mirror_build <slot>` | console `dw_mirror_build <slot>`
+- **Who:** admin
+- **Calls:** `MirrorModeService.PinBuild` (→ `MirrorPins.TryPinSlot`; in a mirror intermission `ApplyChoice`)
+- **Mode:** Debug
+- **Side effects:** pins which of the pinned hero's stored builds (1 to its build count, normally 3) everyone gets; it never goes random again until changed or cleared. Applies right away in a mirror intermission, else next intermission. `clear` drops only the build pin (the build rolls once per intermission, shared). No argument: lists the hero's numbered builds
+- **Notes:** refused until a hero is pinned (`Pin a hero first: /mirror_hero <hero>.`); out-of-range slots list the builds
+
+#### /mirror_status
+
+- **Invocation:** chat `/mirror_status` | console `dw_mirror_status`
+- **Who:** admin
+- **Calls:** `MirrorModeService.Describe`
+- **Mode:** Debug; read-only
+- **Side effects:** a config line (mode, fighters, pending, bench), the pins, the current shared hero and build (`Build N=<name> (<id>)`), the pinned hero's numbered builds, then one line per player: slot, name, team, `fighting` / `SITTING OUT`, `PENDING`
 
 ### Duel (`DuelPlugin`, in RiftRoulette.dll)
 

@@ -16,7 +16,8 @@ Thin host for round betting (`BettingService`).
 | Command | Who | Calls | Reply |
 |---|---|---|---|
 | `/bet <sapphire\|amber>` | players | `BettingService.TryBet` | the bet reply in chat; `Bet on sapphire or amber.` for another word |
-| `/souls` | players | `BettingService.DescribePlayer` | souls, open bet, whether betting is open, hero reservation |
+| `/mark [slot]` | players | `BettingService.TryMark(player, <words joined with spaces>)` (`params string[]`, so a word that is not a slot gets a helpful reply instead of a usage error) | one chat line per reply line: the menu of enemy fighters with no slot, else the mark or a refusal |
+| `/souls` | players | `BettingService.DescribePlayer` | souls, open bet, mark, whether betting is open, hero reservation |
 | `/bet_status` | admin | `BettingService.RefreshBoard` + `Describe` (Debug) | every participant's souls and bet |
 
 ## Deadworks constraints

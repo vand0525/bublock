@@ -30,9 +30,9 @@ server. Never deployed to the server.
   `WatchGuardRule.cs`, `RiftRoulette/Duel/KothRule.cs`,
   `RiftRoulette/GameLoop/MatchState.cs`,
   `MatchConfig.cs`, `AutoStartRule.cs`, `ShopRule.cs`, `RiftRoulette/RandomMode/HeroDraw.cs`, `BenchRule.cs`,
-  `RiftRoulette/Lobby/TeamBalance.cs`, `AdminSeatRule.cs`, `StreamFraming.cs`, `RiftRoulette/Stats/StatsLedger.cs`,
+  `RiftRoulette/Lobby/TeamBalance.cs`, `AdminSeatRule.cs`, `StreamFraming.cs`, `RiftRoulette/Stats/StatsLedger.cs`, `DamageLedger.cs`,
   `StatsBoardText.cs`, `RiftRoulette/Balance/BalanceTracker.cs`,
-  `BalancePicker.cs`, `RiftRoulette/Betting/BetBook.cs`, `BetBoardText.cs`) rather than referencing the plugin DLL: pick
+  `BalancePicker.cs`, `RiftRoulette/Betting/BetBook.cs`, `BetBoardText.cs`, `MarkBook.cs`) rather than referencing the plugin DLL: pick
   bookkeeping, hero pool team lookup, draft board / pool text, team name
   parsing, the `/commands` list filter, the `/about` text, rift sides, the rift outcome
   decision, each side's team starts (each team on its own half) and watch
@@ -43,8 +43,8 @@ server. Never deployed to the server.
   seat rules, the stream camera's once-per-round top-down timing and big-ult list,
   the random hero draw, who sits out (bench rotation) and the fighting teams,
   team placement, kill / death / assist counting and
-  board text, the auto-balance trigger and pick, and betting souls, payouts
-  and board text. Imports `Shared.projitems`,
+  board text, the auto-balance trigger and pick, and betting souls, payouts,
+  steals, marks and board text. Imports `Shared.projitems`,
   `Movement.projitems` because the locations are Movement types, and
   `Queue.projitems` for the bench rotation's `PlayerQueue`.
 

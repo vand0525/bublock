@@ -5,6 +5,7 @@ using DeadworksManaged.Api;
 using RiftRoulette.Draft;
 using RiftRoulette.Duel;
 using RiftRoulette.GameLoop;
+using RiftRoulette.Mirror;
 using RiftRoulette.RandomMode;
 using RiftRoulette.Round;
 using RiftRoulette.Stats;
@@ -66,6 +67,8 @@ public static class LobbyService
 
     if (MatchService.State.IsRunning && MatchConfig.IsRandom)
       RandomModeService.AddJoiner(player, team, timer, mode);
+    else if (MatchService.State.IsRunning && MatchConfig.IsMirror)
+      MirrorModeService.AddJoiner(player, team, timer, mode);
     else if (!MatchService.State.IsRunning && MatchConfig.IsDuel)
       DuelService.GrantSetup(player, timer, mode, announce: true);
 
@@ -83,6 +86,7 @@ public static class LobbyService
     RestraintService.Forget(steamId);
     WatchGuard.Forget(steamId);
     DuelService.Forget(steamId);
+    StatsService.Forget(steamId);
 
     var log = LobbyLog.WithMode(mode);
     log.Info(player.ToPlayerRef(), "Player disconnected");
@@ -95,6 +99,8 @@ public static class LobbyService
 
     if (MatchService.State.IsRunning && MatchConfig.IsRandom)
       RandomModeService.OnLeave(steamId, timer, mode);
+    else if (MatchService.State.IsRunning && MatchConfig.IsMirror)
+      MirrorModeService.OnLeave(steamId, timer, mode);
 
     RemovePawns(player, log);
     player.Remove();

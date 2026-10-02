@@ -56,6 +56,38 @@ public sealed class BetBook
     return true;
   }
 
+  public int Refund(ulong steamId, int amount) =>
+    amount <= 0 ? Chips(steamId) : _chips[steamId] = Chips(steamId) + amount;
+
+  // A share of the total: free souls first, then the rest comes off the open stake.
+  public int Steal(ulong fromId, ulong toId, int divisor)
+  {
+    if (divisor <= 0 || fromId == toId)
+      return 0;
+
+    var amount = Total(fromId) / divisor;
+
+    if (amount <= 0)
+      return 0;
+
+    var chips = Chips(fromId);
+    var fromChips = Math.Min(chips, amount);
+    _chips[fromId] = chips - fromChips;
+
+    if (amount > fromChips && _bets.TryGetValue(fromId, out var bet))
+    {
+      var stake = bet.Stake - (amount - fromChips);
+
+      if (stake > 0)
+        _bets[fromId] = bet with { Stake = stake };
+      else
+        _bets.Remove(fromId);
+    }
+
+    _chips[toId] = Chips(toId) + amount;
+    return amount;
+  }
+
   // All in: the whole balance is staked. A second call only changes the team.
   public BetResult Place(ulong steamId, int team, IReadOnlyCollection<int> allowedTeams)
   {

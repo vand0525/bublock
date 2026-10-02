@@ -208,7 +208,8 @@ column); `new` = no archive equivalent.
 | `/score` | — | GameLoop | `MatchService.DescribeScore` | Match round and score in chat (1v1: best-streak leaderboard) | new |
 | `/stats` | — | Stats | `StatsService.Describe` | Your match K / D / A and both team totals | new |
 | `/bet <sapphire\|amber>` (or type the team name in chat) | — | Betting | `BettingService.TryBet` | Bet all your souls on the next round (own team only while fighting) | new |
-| `/souls` | — | Betting | `BettingService.DescribePlayer` | Your souls, open bet, whether betting is open, your hero reservation | new |
+| `/mark [slot]` | — | Betting | `BettingService.TryMark` | Spend 300 souls to mark an enemy fighter for the round; killing them that round steals a quarter of their souls; no slot lists them (fighters, while betting is open, Random mode match only) | new |
+| `/souls` | — | Betting | `BettingService.DescribePlayer` | Your souls, open bet, mark, whether betting is open, your hero reservation | new |
 | `/reserve [hero]` | — | Random | `RandomModeService.Reserve` | Spend 1,000 souls to play a hero in your next 3 fighting rounds; a waiting line per hero (Random mode match only) | new |
 | `/heroban [hero]` | — | Random | `RandomModeService.Ban` | Spend 1,000 souls to ban a hero from the next draw for both teams; one per team per round, revealed at round start (Random mode match only) | new |
 | `/queue` | — | Duel | `DuelService.JoinQueue` | Join the 1v1 queue (winner stays on), or see your place (1v1 mode only) | new |
@@ -267,12 +268,15 @@ column); `new` = no archive equivalent.
 | `/match_auto <on\|off>` | — | GameLoop | `AutoStartService.SetEnabled` / `Check` | Turn match auto-start (2+ players) / auto-end (under 2) on or off | new |
 | `/match_status` | — | GameLoop | `MatchService.DescribeMatch` | Match phase, round, score, ties, auto-start, intermission, rift phase (1v1: king and streak leaderboard) | new |
 | `/match_intermission <seconds>` | — | GameLoop | `MatchService.SetIntermission` | Seconds between rounds (5-120, default 5) | new |
-| `/match_mode <random\|draft\|duel\|1v1>` | — | GameLoop | `MatchService.SetHeroMode` | Hero mode between matches (default random; `1v1` = duel); lobby reset | new |
+| `/match_mode <random\|draft\|duel\|1v1\|mirror>` | — | GameLoop | `MatchService.SetHeroMode` | Hero mode between matches (default random; `1v1` = duel; mirror = everyone the same hero and build); lobby reset | new |
 | `/match_format <continuous>` | — | GameLoop | `MatchService.SetFormat` | Match format between matches (only continuous for now) | new |
 | `/match_config` | — | GameLoop | `MatchService.DescribeConfig` | Current mode, format, allowed values, intermission | new |
 | `/random_status` | — | RandomMode | `RandomModeService.Describe` | Teams, heroes, builds, pending swaps per player | new |
 | `/bet_status` | — | Betting | `BettingService.Describe` | Every player's souls and open bet; redraws the betting board | new |
 | `/random_reroll` | — | RandomMode | `RandomModeService.PrepareRound` | New random heroes and builds now (Random mode intermission only) | new |
+| `/mirror_hero [hero\|clear]` | — | Mirror | `MirrorModeService.PinHero` | Pin everyone's hero in mirror mode (never random again until changed or cleared); build still rolled once and shared unless pinned | new |
+| `/mirror_build [1\|2\|3\|clear]` | — | Mirror | `MirrorModeService.PinBuild` | Pin which of the pinned hero's stored builds everyone gets | new |
+| `/mirror_status` | — | Mirror | `MirrorModeService.Describe` | Mirror pins, current shared hero and build, fighters | new |
 | `/duel_copy <slot>` | — | Duel | `DuelService.Copy` | Copy a player's exact hero and build for the 1v1 fighters and start (needs 2 queued) | new |
 | `/duel_clear` | — | Duel | `DuelService.ClearSnapshot` | Drop the 1v1 build, back to free setup | new |
 | `/duel_status` | — | Duel | `DuelService.Describe` | 1v1 build, lock, queue, players | new |

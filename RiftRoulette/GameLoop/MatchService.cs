@@ -6,6 +6,7 @@ using RiftRoulette.Betting;
 using RiftRoulette.Draft;
 using RiftRoulette.Duel;
 using RiftRoulette.Lobby;
+using RiftRoulette.Mirror;
 using RiftRoulette.RandomMode;
 using RiftRoulette.Rift;
 using RiftRoulette.Round;
@@ -60,6 +61,8 @@ public static class MatchService
       RandomModeService.BeginMatch(mode);
     else if (MatchConfig.IsDuel)
       DuelService.BeginMatch(mode);
+    else if (MatchConfig.IsMirror)
+      MirrorModeService.BeginMatch(mode);
 
     log.Info("Match started {Config} IntermissionSeconds={IntermissionSeconds}", MatchConfig.Describe(), IntermissionSeconds);
     BublockLog.Master.Info("Match started {Config}", MatchConfig.Describe());
@@ -96,6 +99,10 @@ public static class MatchService
     {
       BettingService.EndMatch(mode);
       RandomModeService.EndMatch(mode);
+    }
+    else if (MatchConfig.IsMirror)
+    {
+      MirrorModeService.EndMatch(mode);
     }
 
     var returned = DraftService.Reset(timer, mode);
@@ -266,6 +273,8 @@ public static class MatchService
       RandomModeService.PrepareRound(timer, mode);
     else if (prepareHeroes && MatchConfig.IsDuel)
       DuelService.PrepareRound(timer, mode);
+    else if (prepareHeroes && MatchConfig.IsMirror)
+      MirrorModeService.PrepareRound(timer, mode);
 
     BettingService.Open(mode);
 
@@ -274,14 +283,14 @@ public static class MatchService
       _finalCountdown = timer.Once((seconds - FinalCountdownSeconds).Seconds(), () => AnnounceFinalCountdown(mode));
     }
 
-    if (prepareHeroes && MatchConfig.IsRandom)
+    if (prepareHeroes && (MatchConfig.IsRandom || MatchConfig.IsMirror))
     {
       var round = State.Round + 1;
 
       if (seconds - FinalCountdownSeconds > BuildBannerDelaySeconds)
         _buildBanner = timer.Once(BuildBannerDelaySeconds.Seconds(), () => AnnounceBuilds(round, mode));
       else
-        RandomModeService.AnnounceBuilds(mode);
+        AnnounceHeroBuilds(mode);
     }
 
     _countdown = timer.Once(seconds.Seconds(), () => StartRound(mode));
@@ -335,6 +344,10 @@ public static class MatchService
       RandomModeService.AnnounceBans(mode);
       MapRefreshService.AddRound(RandomModeService.FighterCount, mode);
     }
+    else if (MatchConfig.IsMirror)
+    {
+      MapRefreshService.AddRound(MirrorModeService.FighterCount, mode);
+    }
   }
 
   private static void CloseBetting(int round, ExecutionMode mode)
@@ -350,6 +363,7 @@ public static class MatchService
     {
       HeroMode.Random => ("Random mode", "Random hero and build every round"),
       HeroMode.Duel => ("1v1 mode", DuelService.SetupDescription),
+      HeroMode.Mirror => ("Mirror mode", "Everyone has the same hero and build"),
       _ => ("Draft mode", "Pick your heroes")
     };
 
@@ -360,7 +374,15 @@ public static class MatchService
     if (State.Phase != MatchPhase.Intermission || State.Round + 1 != round)
       return;
 
-    RandomModeService.AnnounceBuilds(mode);
+    AnnounceHeroBuilds(mode);
+  }
+
+  private static void AnnounceHeroBuilds(ExecutionMode mode)
+  {
+    if (MatchConfig.IsMirror)
+      MirrorModeService.AnnounceBuilds(mode);
+    else
+      RandomModeService.AnnounceBuilds(mode);
   }
 
   private static void AnnounceFinalCountdown(ExecutionMode mode)

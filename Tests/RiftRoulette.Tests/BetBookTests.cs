@@ -145,6 +145,100 @@ public class BetBookTests
   }
 
   [Fact]
+  public void Refund_gives_spent_chips_back_unstaked()
+  {
+    var book = new BetBook();
+    book.AwardKill(1);
+    book.TrySpend(1, 150);
+    book.Place(1, A, Both);
+
+    Assert.Equal(150, book.Refund(1, 150));
+    Assert.Equal(200, book.Total(1));
+    Assert.Equal(150, book.Refund(1, 0));
+    Assert.Equal(150, book.Refund(1, -5));
+  }
+
+  [Fact]
+  public void Steal_takes_a_share_of_free_chips()
+  {
+    var book = new BetBook();
+    book.AwardKill(1);
+    book.AwardKill(1);
+
+    Assert.Equal(75, book.Steal(1, 2, 4));
+    Assert.Equal(225, book.Chips(1));
+    Assert.Equal(175, book.Chips(2));
+  }
+
+  [Fact]
+  public void Steal_takes_free_chips_first_then_the_stake()
+  {
+    var book = new BetBook();
+    book.AwardKill(1);
+    book.Place(1, A, Both);
+    book.AwardAssist(1);
+
+    Assert.Equal(62, book.Steal(1, 2, 4));
+    Assert.Equal(0, book.Chips(1));
+    Assert.True(book.TryGetBet(1, out var bet));
+    Assert.Equal(new Bet(A, 188), bet);
+    Assert.Equal(188, book.Total(1));
+    Assert.Equal(162, book.Chips(2));
+  }
+
+  [Fact]
+  public void Steal_from_an_all_in_player_shrinks_the_stake()
+  {
+    var book = new BetBook();
+    book.AwardKill(1);
+    book.Place(1, S, Both);
+    book.Place(2, A, Both);
+
+    Assert.Equal(50, book.Steal(1, 2, 4));
+    Assert.True(book.TryGetBet(1, out var bet));
+    Assert.Equal(new Bet(S, 150), bet);
+    Assert.Equal(50, book.Chips(2));
+    Assert.True(book.TryGetBet(2, out var thiefBet));
+    Assert.Equal(new Bet(A, 100), thiefBet);
+  }
+
+  [Fact]
+  public void Steal_rounds_down()
+  {
+    var book = new BetBook();
+    book.AwardAssist(1);
+    book.AwardAssist(1);
+    book.AwardAssist(1);
+
+    Assert.Equal(62, book.Steal(1, 2, 4));
+    Assert.Equal(188, book.Chips(1));
+  }
+
+  [Fact]
+  public void Steal_takes_nothing_when_there_is_nothing_to_take()
+  {
+    var book = new BetBook();
+    book.Place(1, A, Both);
+    book.Settle(S);
+
+    Assert.Equal(0, book.Steal(1, 2, 4));
+    Assert.Equal(0, book.Steal(2, 2, 4));
+    Assert.Equal(0, book.Steal(2, 1, 0));
+    Assert.Equal(BetBook.StartingChips, book.Chips(2));
+  }
+
+  [Fact]
+  public void Steal_of_everything_closes_the_bet()
+  {
+    var book = new BetBook();
+    book.Place(1, A, Both);
+
+    Assert.Equal(100, book.Steal(1, 2, 1));
+    Assert.Equal(0, book.Total(1));
+    Assert.Equal(0, book.OpenBets);
+  }
+
+  [Fact]
   public void Reset_gives_everyone_the_starting_chips_again()
   {
     var book = new BetBook();

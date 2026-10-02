@@ -188,7 +188,7 @@ public class LobbyPlugin : DeadworksPluginBase
   [Command("about", Description = "How Rift Roulette and betting work")]
   public void CmdAbout(CCitadelPlayerController player)
   {
-    foreach (var line in AboutText.Lines(BettingService.LingerSeconds))
+    foreach (var line in MatchConfig.IsMirror ? AboutText.MirrorLines() : AboutText.Lines(BettingService.LingerSeconds))
       PlayerChat.Send(player, line);
   }
 

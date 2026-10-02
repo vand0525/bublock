@@ -5,6 +5,7 @@ using RiftRoulette.Betting;
 using RiftRoulette.Duel;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Lobby;
+using RiftRoulette.Mirror;
 using RiftRoulette.RandomMode;
 using RiftRoulette.Round;
 using RiftRoulette.Stats;
@@ -201,6 +202,9 @@ public static class DraftService
       return;
 
     if (RandomModeService.GuardHero(player, pawn, timer))
+      return;
+
+    if (MirrorModeService.GuardHero(player, pawn, timer))
       return;
 
     var expectedHero = DraftState.TryGetPick(player.PlayerSteamId, out var selectedHero)

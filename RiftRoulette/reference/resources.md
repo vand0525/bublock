@@ -570,3 +570,11 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Same session:** all three clients dropped within 15 s with no server error: two `NETWORK_DISCONNECT_DISCONNECT_BY_USER`, one keepalive timeout. The GC had asked for version 6728 since 17:06 UTC while the server ran 6726 (`Engine version check. Forcing true. GC wants: 6728`); most likely the client update closing the game, not the plugin.
 - **Used as:** `Participants.MarkLeaving` at the start of `LobbyService.RemovePlayer`, cleared in `OnClientConnect`; `Participants.Humans()` leaves the leaver out, so the match-end hero resets, send-ups and boards skip them (the HUD banner module still uses `Players.GetAll()`; a banner to the leaver is harmless).
 - **Link / path:** `Bublock/RiftRoulette/Lobby/Participants.cs`, `Bublock/logs/engine/console-crash.log` (pulled by hand)
+
+### 2026-10-02 — Game assists credit nearby players; damage-based assists instead
+
+- **Why hard / useful:** `player_death` `Assister1..5controller` gave dead fighters waiting up top (above the rift, in range) assists and 50 free betting souls each.
+- **Verified fact (decompiled `lib/`):** `CTakeDamageInfo` has `Attacker`, `Inflictor`, `Ability`, `Originator`, `Damage`, `TotalledDamage`, `DamageType`, `DamageFlags`, `CitadelDamageType`. `PlayerHurtEvent` (`player_hurt`) exists with `UseridController`, `AttackerController`, `Health`, `DmgHealth`, `Type` (not verified to fire in Deadlock). `ModifierDamageEventData` reads `CTakeDamageResult` (`m_nDamageDealt`, `m_nHealthLost`, `m_nHealthBefore`, `m_flPreModifiedDamage`) but only inside modifier events.
+- **To confirm in game:** whether `Info.Damage` in `OnTakeDamage` (before the hit) is before or after resistances; compare `Damage=` on `Death recorded` lines in `stats-*.log` with the victim's max health.
+- **Used as:** `Stats/DamageLedger` (20% of the victim's `MaxHealth` dealt since their last spawn), fed by `StatsService.RecordDamage` from `GameLoopPlugin.OnTakeDamage`, capped at the victim's health left.
+- **Link / path:** `Bublock/RiftRoulette/Stats/DamageLedger.cs`, `Bublock/RiftRoulette/Stats/StatsService.cs`

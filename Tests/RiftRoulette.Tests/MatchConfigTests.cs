@@ -11,6 +11,7 @@ public class MatchConfigTests
   [InlineData("duel", HeroMode.Duel)]
   [InlineData("1v1", HeroMode.Duel)]
   [InlineData(" 1V1 ", HeroMode.Duel)]
+  [InlineData("Mirror", HeroMode.Mirror)]
   public void TryParseHeroMode_accepts_names_case_insensitively(string text, HeroMode expected)
   {
     Assert.True(MatchConfig.TryParseHeroMode(text, out var mode));
@@ -40,7 +41,7 @@ public class MatchConfigTests
   [Fact]
   public void Names_and_Describe_are_lowercase()
   {
-    Assert.Equal("random|draft|duel", MatchConfig.Names<HeroMode>());
+    Assert.Equal("random|draft|duel|mirror", MatchConfig.Names<HeroMode>());
     Assert.Equal("Mode=draft | Format=continuous", MatchConfig.Describe(HeroMode.Draft, MatchFormat.Continuous));
   }
 }

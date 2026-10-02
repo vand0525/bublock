@@ -69,7 +69,7 @@ Works at any time, including during a rift round.
 
 1. Adds to `Seated` (refuses if already seated).
 2. Releases the draft pick (`DraftState.Release`) and redraws the boards.
-3. `RandomModeService.Forget`, `DuelService.Forget` (leaves the 1v1
+3. `RandomModeService.Forget`, `MirrorModeService.Forget`, `DuelService.Forget` (leaves the 1v1
    queue), `RestraintService.Release` (a spectator isn't restrained) and
    `WatchGuard.Forget`.
 4. Logs `Admin seat taken, spectating next tick Phase=` and a master

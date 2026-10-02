@@ -7,6 +7,7 @@ using RiftRoulette.Draft;
 using RiftRoulette.Duel;
 using RiftRoulette.GameLoop;
 using RiftRoulette.Lobby;
+using RiftRoulette.Mirror;
 using RiftRoulette.RandomMode;
 
 namespace RiftRoulette.Stats;
@@ -23,9 +24,12 @@ public static class StatsService
 
   public static StatsLedger Ledger { get; } = new();
 
+  public static DamageLedger Damage { get; } = new();
+
   public static void Reset(ExecutionMode mode = ExecutionMode.Clean)
   {
     Ledger.Reset();
+    Damage.Reset();
     _sapphireRounds = MatchService.State.Sapphire;
     _amberRounds = MatchService.State.Amber;
 
@@ -51,24 +55,25 @@ public static class StatsService
     if (victim == null)
       return;
 
-    if (RandomModeService.ConsumeEnforcementKill(victim.PlayerSteamId) || DuelService.ConsumeEnforcementKill(victim.PlayerSteamId))
+    if (RandomModeService.ConsumeEnforcementKill(victim.PlayerSteamId) ||
+        MirrorModeService.ConsumeEnforcementKill(victim.PlayerSteamId) ||
+        DuelService.ConsumeEnforcementKill(victim.PlayerSteamId))
     {
       log.Debug(victim.ToPlayerRef(), "Death skipped, hero swap enforcement");
       return;
     }
 
     var attacker = Human(args.AttackerController);
-    var assisters = new[]
-      {
-        args.Assister1controller,
-        args.Assister2controller,
-        args.Assister3controller,
-        args.Assister4controller,
-        args.Assister5controller
-      }
-      .Select(Human)
+    var maxHealth = args.UseridPawn?.MaxHealth ?? 0;
+    var damage = Damage.DamageTo(victim.PlayerSteamId)
+      .ToDictionary(entry => entry.Key, entry => (int)Math.Round(entry.Value));
+    var connected = Participants.Humans().ToDictionary(player => player.PlayerSteamId);
+    var assisters = Damage.Assisters(victim.PlayerSteamId, attacker?.PlayerSteamId ?? 0, maxHealth)
+      .Select(steamId => connected.GetValueOrDefault(steamId))
       .OfType<CCitadelPlayerController>()
       .ToList();
+
+    Damage.Clear(victim.PlayerSteamId);
 
     var credited = Ledger.RecordDeath(
       ToParticipant(victim),
@@ -78,20 +83,52 @@ public static class StatsService
     if (credited != null)
     {
       BalanceService.RecordKill(credited.Team);
-      BettingService.OnKill(attacker!.PlayerSteamId, mode);
+      BettingService.OnKill(attacker!.PlayerSteamId, victim.PlayerSteamId, mode);
       BettingService.OnAssists(credited.Assisters, mode);
     }
 
     log.Debug(
       victim.ToPlayerRef(),
-      "Death recorded Attacker={Attacker} Assisters={Assisters} CreditedTeam={CreditedTeam} CreditedAssists={CreditedAssists}",
+      "Death recorded Attacker={Attacker} Assisters={Assisters} CreditedTeam={CreditedTeam} CreditedAssists={CreditedAssists} MaxHealth={MaxHealth} Damage={Damage}",
       attacker?.PlayerName ?? "-",
       string.Join(",", assisters.Select(assister => assister.PlayerName)),
       credited != null ? RiftRouletteTeams.Name(credited.Team) : "-",
-      credited?.Assisters.Count ?? 0);
+      credited?.Assisters.Count ?? 0,
+      maxHealth,
+      string.Join(",", damage.Select(entry => $"{NameOf(connected, entry.Key)}:{entry.Value}")));
 
     RefreshBoards(mode);
   }
+
+  // Before the hit lands: the amount is capped at the victim's health left, so overkill never counts.
+  public static void RecordDamage(TakeDamageEvent args)
+  {
+    if (!MatchService.State.IsRunning)
+      return;
+
+    var victimPawn = args.Entity.As<CCitadelPlayerPawn>();
+    var victim = victimPawn?.Controller;
+    var attacker = HeroController(args.Info.Attacker) ?? HeroController(args.Info.Originator);
+
+    if (victimPawn == null || victim == null || attacker == null)
+      return;
+
+    if (!Participants.IsParticipant(victim) || !Participants.IsParticipant(attacker))
+      return;
+
+    var amount = Math.Min(args.Info.Damage, Math.Max(victimPawn.Health, 0));
+    Damage.Record(victim.PlayerSteamId, attacker.PlayerSteamId, amount);
+  }
+
+  public static void OnSpawn(CCitadelPlayerController player) => Damage.Clear(player.PlayerSteamId);
+
+  public static void Forget(ulong steamId) => Damage.Forget(steamId);
+
+  private static CCitadelPlayerController? HeroController(CBaseEntity? entity) =>
+    entity?.As<CCitadelPlayerPawn>()?.Controller;
+
+  private static string NameOf(Dictionary<ulong, CCitadelPlayerController> connected, ulong steamId) =>
+    connected.TryGetValue(steamId, out var player) ? player.PlayerName : steamId.ToString();
 
   public static void RefreshBoards(ExecutionMode mode = ExecutionMode.Clean)
   {

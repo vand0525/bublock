@@ -13,4 +13,11 @@ Unit tests for `RiftRoulette/Betting/BetBook`.
 - A second bet only changes the team (same stake).
 - Settling doubles the winner's stake, takes the loser's, and clears the
   bets; no winner refunds.
+- `Refund` adds unstaked souls (an open stake is untouched); a zero or
+  negative amount adds nothing.
+- `Steal` takes a quarter of the total from unstaked souls first, then off
+  the open stake (team kept); from an all-in player only the stake shrinks
+  and the thief's own bet is untouched; it rounds down; nothing to take,
+  the same player, or a zero divisor take nothing; taking everything closes
+  the bet.
 - `Reset` gives everyone the starting souls and drops open bets.

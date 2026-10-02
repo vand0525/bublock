@@ -16,6 +16,15 @@ public class StatsPlugin : DeadworksPluginBase
     return HookResult.Continue;
   }
 
+  [GameEventHandler("player_spawn")]
+  public HookResult OnPlayerSpawn(PlayerSpawnEvent args)
+  {
+    if (args.UseridController?.As<CCitadelPlayerController>() is { } player)
+      StatsService.OnSpawn(player);
+
+    return HookResult.Continue;
+  }
+
   [Command("stats", Description = "Show your kills, deaths, and assists this match")]
   public void CmdStats(CCitadelPlayerController player)
   {

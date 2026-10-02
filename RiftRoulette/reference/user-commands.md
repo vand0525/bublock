@@ -71,17 +71,17 @@ console) and replies in the caller's chat.
 - **Who:** players, in game (`LobbyPlugin`)
 - **Calls:** `CommandList.PlayerCommands` (reads the `[Command]` attributes in RiftRoulette.dll)
 - **Mode:** Clean; read-only; not logged
-- **Side effects:** one chat line per player command (`/name - Description`, sorted: `/about`, `/bet`, `/commands`, `/heroban`, `/heroes`, `/pick`, `/picks`, `/queue`, `/reserve`, `/score`, `/souls`, `/stats`, `/status`, `/unpick`, `/unqueue`), then `Full list: dw_help in console`
+- **Side effects:** one chat line per player command (`/name - Description`, sorted: `/about`, `/bet`, `/commands`, `/heroban`, `/heroes`, `/mark`, `/pick`, `/picks`, `/queue`, `/reserve`, `/score`, `/souls`, `/stats`, `/status`, `/unpick`, `/unqueue`), then `Full list: dw_help in console`
 - **Notes:** Deadworks' built-in `dw_help` only runs from the game console (there is no chat `/help`) and lists every visible command, admin ones included; `/commands` gives players a chat list of just their commands
 
 ### /about
 
 - **Invocation:** chat `/about` or `!about` | console `dw_about`
 - **Who:** players, in game (`LobbyPlugin`)
-- **Calls:** `AboutText.Lines(BettingService.LingerSeconds)`
+- **Calls:** `AboutText.Lines(BettingService.LingerSeconds)` (mirror mode: `AboutText.MirrorLines()`)
 - **Mode:** Clean; read-only; not logged
-- **Side effects:** seven chat lines to the caller: Rift Roulette gives everyone a random hero with one of its top builds every round; teams stay even and with an odd count one player sits out; betting souls are separate from in-game souls (start 100, 100 per kill, 50 per assist); bet everything on the next round by typing `sapphire` / `amber` or `/bet`, open between rounds until 10 s into the round, a win doubles the stake; fighters bet only on their own team, the player sitting out on either; `/reserve <hero>` (1,000, next 3 rounds) and `/heroban <hero>` (1,000, one round, both teams); `/souls` and `/commands`
-- **Notes:** not named `help` (Deadworks' `dw_help` is the console command list). The numbers come from the betting constants, so the text follows them
+- **Side effects:** seven chat lines to the caller: Rift Roulette gives everyone a random hero with one of its top builds every round; teams stay even and with an odd count one player sits out; betting souls are separate from in-game souls (start 100, 100 per kill, 50 per assist); bet everything on the next round by typing `sapphire` / `amber` or `/bet`, open between rounds until 10 s into the round, a win doubles the stake; fighters bet only on their own team, the player sitting out on either; `/reserve <hero>` (1,000, next 3 rounds), `/heroban <hero>` (1,000, one round, both teams) and `/mark <slot>` (300, kill the marked enemy fighter that round to steal a quarter of their souls); `/souls` and `/commands`
+- **Notes:** not named `help` (Deadworks' `dw_help` is the console command list). The numbers come from the betting constants, so the text follows them. In mirror mode the reply is three lines instead: everyone plays the same hero with the same build, even teams with one player sitting out on an odd count, and `/commands`
 
 ### /score
 
@@ -134,7 +134,16 @@ console) and replies in the caller's chat.
 - **Who:** players, in game (`BettingPlugin`)
 - **Calls:** `BettingService.DescribePlayer`
 - **Mode:** Clean; read-only; not logged
-- **Side effects:** chat lines: `You have N souls.`, your open bet if any, whether betting is open, and your hero reservation (or how to buy one with `/reserve`)
+- **Side effects:** chat lines: `You have N souls.`, your open bet if any, your mark if any (`Your mark: X (next round).`), whether betting is open, and your hero reservation (or how to buy one with `/reserve`)
+
+### /mark [slot]
+
+- **Invocation:** chat `/mark` or `/mark <slot>` (also `!mark`) | console `dw_mark <slot>`. No slot: lists the enemy fighters you can mark
+- **Who:** players fighting the coming (or current) round, in game (`BettingPlugin`); Random mode match only, while betting is open (the intermission until 10 s into the round)
+- **Calls:** `BettingService.TryMark` → `BetBook.TrySpend`, `MarkBook.Place`; on the kill `BettingService.OnKill` → `MarkBook.TryConsume`, `BetBook.Steal`
+- **Mode:** Clean; logged in `betting-*.log`
+- **Side effects:** `/mark` alone: `Mark an enemy fighter for 300 souls: /mark <slot>. Kill them next round to steal a quarter of their souls. You have N.`, then one line per enemy fighter, `3 Theo (420 souls)`. `/mark <slot>` spends 300 souls (not souls riding on a bet) and marks that enemy fighter for the round: `Marked Theo for next round (120 souls left). Kill them next round to steal a quarter of their souls.` The target is told right away, without your name: `Someone marked you: if they kill you next round, they take a quarter of your souls.` If you get the kill on them that round you steal a quarter of their total souls (free souls first, then off their open bet, which shrinks its payout): `You stole 105 souls from Theo (mark).`; they get `Kamilk stole 105 souls from you - you were marked.` The betting board updates
+- **Notes:** one mark per round (`You already marked Theo next round. One mark per round.`); several players may mark the same enemy, each stealing on their own kill. Only enemy fighters can be marked (`No enemy fighter in slot 5 - type /mark to see them.`). A mark pays once and lasts one round: without the kill it ends at round end (`Your mark on Theo ran out.`). The 300 souls come back if the round had no result (tie, cancel), the target didn't fight (left or became a spectator), or the match ended. Refused outside a Random match, for spectators, for the player sitting out, after betting closes, and with fewer than 300 free souls
 
 ### /reserve [hero]
 
