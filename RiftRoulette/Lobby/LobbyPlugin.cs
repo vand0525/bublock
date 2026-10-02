@@ -103,13 +103,8 @@ public class LobbyPlugin : DeadworksPluginBase
 
     if (BanStatueService.TakeArrival(player.PlayerSteamId))
       BanStatueService.Petrify(player, BanStatueService.RejoinKickSeconds, liveBan: false, Timer);
-    else if (AdminSeat.SeatOnJoin(player))
-    {
-      if (args.IsMapChangeReconnect)
-        AdminSeat.Forget(player.PlayerSteamId);
-
-      AdminSeat.Sit(player, Timer);
-    }
+    else if (AdminSeat.JoinMode(player) is var joinMode && joinMode != AdminMode.Play)
+      AdminSeat.Join(player, joinMode, Timer);
     else
       LobbyService.AdmitPlayer(player, Timer);
   }

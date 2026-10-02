@@ -18,8 +18,11 @@ dropping below 2 ends it.
 A reserved 13th connection for admins (`AdminSeat`). The server
 allows 13 connections and shows 12; a non-admin is refused once 12
 participants play. A seated admin is a spectator outside both teams and is
-left out of every player list the game uses (`Participants`). Every admin
-is seated on connect, and `dw_seat_spec` works at any time (also mid-round).
+left out of every player list the game uses (`Participants`). An admin
+rejoins (map change or reconnect) in their last mode: spectating,
+roaming or playing (`AdminSeat.LastMode`); with none they play, and the
+13th connection (12 others playing) never plays. `dw_seat_spec` works at
+any time (also mid-round).
 Sitting moves the admin to the spectator team and calls `MakeObserver` on
 the next tick: `ChangeTeam(1)` alone leaves the hero pawn alive and the
 client drops seconds later.
@@ -47,8 +50,8 @@ fly cam, C). Moving the camera after that park and letting go saves the
 new framing (`StreamFramingStore`, `bublock/streamcam.json`), mirrored to
 the other side. It never moves the camera while the admin moves it, and
 never follows a hero spawned less than 5 s ago.
-Camera calls go through `Modules/Spectate`. A hot reload re-seats every
-connected admin (`AdminSeat.Restore`).
+Camera calls go through `Modules/Spectate`. A hot reload keeps each
+admin's mode, read back from the pawn (`AdminSeat.Restore`).
 
 Admin roaming: manual only (`/seat_roam`). The seated admin becomes an
 invisible Abrams (`modifier_invis`, 3600 s, put back when it runs out
@@ -103,7 +106,7 @@ startup, hot reload, every join and every intermission;
 | `CommandList.cs` | Player command list for `/commands` (reflects `[Command]` attributes) |
 | `AboutText.cs` | Chat lines for `/about`: the mode and betting (pure, tested) |
 | `Participants.cs` | Who plays: connected players minus bots, players whose disconnect is being handled, seated admins and statues |
-| `AdminSeatRule.cs` | Pure seat rules: cap 12, `CanConnect`, `CanStand`, `SeatOnJoin` (every admin; tested) |
+| `AdminSeatRule.cs` | Pure seat rules: cap 12, `CanConnect`, `CanStand`, `AdminMode`, `JoinMode` (last mode, never play as the 13th; tested) |
 | `AdminSeat.cs` | Admin seat service: connect gate, `Sit`, `Stand`, `Forget`, `Restore` (after hot reload), `Describe` |
 | `StreamCam.cs` | Automatic stream camera for seated admins: follow, killer cut, park at the saved framing, save the admin's framing |
 | `StreamFraming.cs` | Pure framing math: pose relative to a watch spot anchor, default, pick per side, JSON (tested) |

@@ -219,15 +219,18 @@ Assume the git repo is rooted at `Bublock/`.
   too fast) on join and every 30 s (`AutoStartService.RemindWaiting`).
 - The server takes 13 connections (12 shown); the 13th is an
   admin-only seat on the spectator side (`Lobby/AdminSeat`, console
-  `dw_seat_spec` / `dw_seat_play`). Admins are seated on every connect.
+  `dw_seat_spec` / `dw_seat_play`). An admin rejoins (map change or
+  reconnect) in their last mode, spectating, roaming or playing
+  (`AdminSeat.LastMode`); with none they play, and the 13th connection
+  (12 others playing) never plays.
   `seat_spec` is `ConsoleOnly` and works any time: `ChangeTeam(1, false)`
   then `MakeObserver()` on the next tick. Never spectate with `ChangeTeam`
   alone (the hero pawn stays and the client drops). Every player list the game uses
   (teams, heroes, rounds, stats, auto-start) comes from
   `Lobby/Participants.Humans()`, which leaves out bots, seated admins and
   a player whose disconnect is being handled (the disconnect hook still
-  lists the leaving controller); never build a new ad-hoc human list. A seated admin defaults to
-  spectating on connect (`AdminSeat.Sit`). Roaming is manual
+  lists the leaving controller); never build a new ad-hoc human list. A seated admin
+  spectates (`AdminSeat.Sit`). Roaming is manual
   (`/seat_roam` / `dw_seat_roam`): Abrams on Amber facing the welcome sign
   (`WatchLayout.WelcomeFront`; back to the watch slot if they fall), not
   restrained, invisible (`modifier_invis`, one 3600 s modifier put back
@@ -340,7 +343,8 @@ Assume the git repo is rooted at `Bublock/`.
   crashed): no camera call on an update where the view moved over 50
   units or 3 degrees (`SpectateRule.HandMoved`). Never use
   `IsValidObserverTarget` (it rejects team 3, Sapphire). A hot reload
-  re-seats every connected admin (`AdminSeat.Restore`).
+  keeps each admin's mode, read back from the pawn (`AdminSeat.Restore`:
+  observer, roam cloak, or playing hero).
   Never follow a hero spawned less than 5 s ago (`StreamCam.FollowGrace`).
 
 ---

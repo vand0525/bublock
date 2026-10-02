@@ -6,11 +6,17 @@ connections (`maxplayers 13`, browser shows 12); only an admin may take the
 (`Participants`), so they get no team, hero, round, stats, or auto-start
 count. Static state, one per DLL load.
 
-A seated admin is in one of two states, switched **only by command** (no
-auto flip on join/leave):
+An admin is playing (a normal participant), spectating or roaming, switched
+**only by command**. Each admin's last mode (`LastMode`) is kept through
+disconnects and map changes, and a rejoin puts them back in it
+(`JoinMode` / `Join`): spectate stays spectate, roam stays roam, play stays
+play. With no last mode an admin joins as a player; as the 13th connection
+(12 others playing) play becomes spectate.
 
-- **Spectating** (observer pawn, stream camera): default after connect /
-  `dw_seat_spec`.
+A seated admin is in one of two states:
+
+- **Spectating** (observer pawn, stream camera): after `dw_seat_spec`, or
+  rejoining after spectating.
 - **Roaming** after `/seat_roam`: Abrams (`RoamHero` = `LobbyService.LobbyHero`)
   on Amber (`RoamTeam`), placed straight in front of the welcome sign facing
   it, not restrained (free to move, abilities and items on), and
@@ -30,6 +36,10 @@ front of the sign. `dw_seat_spec` while roaming switches back to spectating.
 - `Roaming`: seated admins meant to be roaming. `IsRoaming(steamId)`.
 - `CloakGeneration`: per roaming admin, the latest cloak; an older reapply
   timer does nothing.
+- `LastMode`: per admin Steam ID, the last `AdminMode` (`Sit` sets
+  `Spectate`, Roam sets `Roam`, `Stand` sets `Play`, `Restore` reads it from
+  the pawn). Not cleared by `Forget` or `ResetForMap`; a hot reload empties
+  it and `Restore` fills it again.
 - `SpectatorTeam = 1` (the Source convention; to confirm in game).
 - `RoamModifierSeconds = 3600`: the cloak's duration.
 
@@ -38,7 +48,8 @@ front of the sign. `dw_seat_spec` while roaming switches back to spectating.
 | Op | Behavior | Returns |
 |---|---|---|
 | `AllowConnect(steamId, name)` | `AdminSeatRule.CanConnect(isAdmin, playing)`. Refusal logs a Warning (`Connection refused, player slots full`); an admin connecting while 12 play logs an Information line | bool |
-| `SeatOnJoin(player)` | The player is an admin (`AdminSeatRule.SeatOnJoin`): every admin starts spectating on connect | bool |
+| `JoinMode(player)` | `AdminSeatRule.JoinMode` with admin status, the other participants' count and `LastMode` | `AdminMode` |
+| `Join(player, joinMode, timer, mode)` | From `OnClientFullConnect` when `JoinMode` is not `Play`. Logs `Admin joining in last mode Mode=`, `Forget` (stale seat state from before a map change), `Sit`, and for `Roam` also Roam right away (the next-tick `BecomeObserver` then skips a roaming admin) | — |
 | `Sit(player, timer, mode)` | See below. A roaming admin switches to spectating instead (`Admin roam ended`) | reply text |
 | `RoamNow(player, timer, mode)` | `/seat_roam`. Refuses when not seated (`Use dw_seat_spec first`). Already roaming: `PlaceAndCloak` (teleport back in front of the sign, cloak again). Otherwise `Roam`. Allowed while players are connected | reply text |
 | Roam (private) | Adds to `Roaming`, resets the camera state, releases restraint and `WatchGuard`, `SelectHero(Atlas)` then `ChangeTeam(Amber, true)`; logs `Admin roaming` and a master line. 2 s later `PlaceAndCloak(retry: true)` | — |
@@ -46,9 +57,9 @@ front of the sign. `dw_seat_spec` while roaming switches back to spectating.
 | `PlaceAndCloak(steamId, timer, mode, retry)` | Only while roaming. No living hero: with `retry`, Warning `Roaming admin has no hero yet, selecting again`, `SelectHero(Atlas)` and one more try 2 s later; without, Warning `Roaming admin has no hero, not placed`. A living hero below its max health is healed to full first (Information `Roaming admin healed to full Health= MaxHealth=`; the hero spawned back from spectating came in at 1 health on 2026-09-28). The retry call skips an admin already cloaked (the spawn placed them; not pulled back). Otherwise teleports, without restraint, straight in front of the welcome sign facing it (`WatchLayout.WelcomeFront` of the anchor at `WatchSpot.BoardSide`, where the boards are) and `Cloak`s. 2 s later (`FloorCheckSeconds`) checks the fall: a roaming pawn more than 300 units below the anchor (`WatchGuardRule.IsBelow`) gets Warning `Roaming admin fell from the welcome spot, back to the watch slot` and is teleported to `SlotSpots.Watch(anchor, slot)`. Also run by `player_spawn` next tick | — |
 | `Cloak(player, timer, mode)` | Only while roaming with a living hero. `RestraintService.AddModifier(pawn, modifier_invis, 3600)` (Information `Roaming admin cloaked`, or Warning `Roaming admin cloak refused`), bumps `CloakGeneration`, and 3600 s later cloaks again if still the latest | — |
 | `Stand(player, timer, mode)` | Refuses if not seated or 12 already playing (`AdminSeatRule.CanStand`). Otherwise removes the seat and the roam state (and the cloak modifier), resets the stream camera state (`StreamCam.Forget`), and runs `LobbyService.AdmitPlayer` (smaller team, `LobbyHero`, watch spot + restraint, Random mode joiner / 1v1 setup souls, auto-start). `HeroCheckSeconds` (2 s) later logs `Admin hero after leaving the seat TeamNum= Pawn=`, or a Warning `Admin has no hero after leaving the seat` if no hero pawn spawned from the observer | reply text |
-| `Forget(steamId)` | Drops the seat, the roam state and the stream camera state (disconnect; also a map-change reconnect, before `Sit`) | — |
-| `ResetForMap()` | From `OnStartupServer` on every map start: Information `Admin seat reset for the new map Seated= Roaming=`, forgets each seated admin's stream camera state and clears `Seated`, `Roaming` and `CloakGeneration` (pawns died with the old map; admins are seated again on reconnect) | — |
-| `Restore(timer, mode)` | After a hot reload (which empties `Seated` and `Roaming`): every connected `AdminAuth` player goes back into `Seated`. One on a hero pawn (not observing) is roaming again and is re-cloaked next tick in place (not teleported). Logged `Admin seat restored after reload TeamNum= Roaming=`. Mode stays as restored until `/seat_roam` / `dw_seat_spec`. Called from `LobbyPlugin.OnLoad(isReload: true)` | count restored |
+| `Forget(steamId)` | Drops the seat, the roam state and the stream camera state (disconnect; also `Join`, before `Sit`). Keeps `LastMode` | — |
+| `ResetForMap()` | From `OnStartupServer` on every map start: Information `Admin seat reset for the new map Seated= Roaming=`, forgets each seated admin's stream camera state and clears `Seated`, `Roaming` and `CloakGeneration` (pawns died with the old map; admins rejoin in their `LastMode`) | — |
+| `Restore(timer, mode)` | After a hot reload (which empties every static): for every connected `AdminAuth` player, reads the mode from the pawn: observing is `Spectate` (back in `Seated`), a hero carrying `modifier_invis` is `Roam` (back in `Seated` and `Roaming`, re-cloaked next tick in place), any other hero is `Play` (stays a participant). Sets `LastMode`; logs `Admin mode restored after reload Mode= TeamNum=`. Called from `LobbyPlugin.OnLoad(isReload: true)` | count restored |
 | `Describe()` | Playing / cap, seated and roaming counts, `maxplayers` and `sv_visiblemaxplayers`, then per seated player: slot, name, `TeamNum`, pawn present, roaming | lines |
 
 ### Sit
@@ -63,8 +74,8 @@ Works at any time, including during a rift round.
 4. Logs `Admin seat taken, spectating next tick Phase=` and a master
    line.
 5. On the next tick (`BecomeObserver`, outside the connect or command
-   callback): finds the player again by Steam ID (skips, logged, if gone
-   or no longer seated), then `ChangeTeam(SpectatorTeam, false)` and
+   callback): finds the player again by Steam ID (skips, logged, if gone,
+   no longer seated, or roaming), then `ChangeTeam(SpectatorTeam, false)` and
    `MakeObserver()` (removes the hero pawn, clears it from the controller,
    spawns an observer pawn). Starts the stream camera's seat grace
    (`StreamCam.Seated`). Logs `Admin spectating TeamNum= HeroPawn=
@@ -80,7 +91,8 @@ Works at any time, including during a rift round.
 
 - Only Steam IDs accepted by `AdminAuth` can be seated (commands check it).
 - Roaming admins stay in `Seated`; never make a roaming admin a
-  participant. Mode does not flip from participant count.
+  participant. Mode does not flip from participant count, except that the
+  13th connection never rejoins as a player.
 - The cloak is one long modifier put back when it runs out (and on every
   respawn and reload), never re-added every frame. Invisibility may drop
   when the admin attacks, until the next reapply.

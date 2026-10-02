@@ -24,11 +24,35 @@ public class AdminSeatRuleTests
   }
 
   [Theory]
-  [InlineData(true, true)]
-  [InlineData(false, false)]
-  public void SeatOnJoin_seats_every_admin(bool isAdmin, bool expected)
+  [InlineData(AdminMode.Spectate)]
+  [InlineData(AdminMode.Roam)]
+  [InlineData(AdminMode.Play)]
+  public void JoinMode_keeps_the_admins_last_mode(AdminMode last)
   {
-    Assert.Equal(expected, AdminSeatRule.SeatOnJoin(isAdmin));
+    Assert.Equal(last, AdminSeatRule.JoinMode(true, 4, last));
+  }
+
+  [Fact]
+  public void JoinMode_plays_with_no_last_mode()
+  {
+    Assert.Equal(AdminMode.Play, AdminSeatRule.JoinMode(true, 0, null));
+    Assert.Equal(AdminMode.Play, AdminSeatRule.JoinMode(true, 11, null));
+  }
+
+  [Theory]
+  [InlineData(null, AdminMode.Spectate)]
+  [InlineData(AdminMode.Play, AdminMode.Spectate)]
+  [InlineData(AdminMode.Spectate, AdminMode.Spectate)]
+  [InlineData(AdminMode.Roam, AdminMode.Roam)]
+  public void JoinMode_never_plays_as_the_13th_connection(AdminMode? last, AdminMode expected)
+  {
+    Assert.Equal(expected, AdminSeatRule.JoinMode(true, 12, last));
+  }
+
+  [Fact]
+  public void JoinMode_always_plays_for_a_non_admin()
+  {
+    Assert.Equal(AdminMode.Play, AdminSeatRule.JoinMode(false, 12, AdminMode.Spectate));
   }
 
   [Theory]

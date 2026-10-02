@@ -32,7 +32,7 @@ as soon as the admin is seated: no command needed. Camera calls go through
   statue (kicked, left).
 - `Forget(steamId)` resets everything but `Auto` and drops the spawn time
   (stand up, roam, disconnect). A hot reload clears it (static);
-  `AdminSeat.Restore` re-seats the admin. The saved framing is in a file,
+  `AdminSeat.Restore` keeps a spectating admin seated. The saved framing is in a file,
   so it survives.
 
 ## Operations

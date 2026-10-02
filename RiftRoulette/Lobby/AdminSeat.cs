@@ -34,6 +34,9 @@ public static class AdminSeat
 
   private static readonly Dictionary<ulong, int> CloakGeneration = [];
 
+  // Kept through disconnects and map changes (not Forget / ResetForMap): a rejoin restores the mode.
+  private static readonly Dictionary<ulong, AdminMode> LastMode = [];
+
   public static int SeatedCount => Seated.Count;
 
   public static bool IsSeated(ulong steamId) => Seated.Contains(steamId);
@@ -54,13 +57,27 @@ public static class AdminSeat
     return allowed;
   }
 
-  public static bool SeatOnJoin(CCitadelPlayerController player) =>
-    AdminSeatRule.SeatOnJoin(AdminAuth.IsAuthorized(player.PlayerSteamId));
+  public static AdminMode JoinMode(CCitadelPlayerController player) =>
+    AdminSeatRule.JoinMode(
+      AdminAuth.IsAuthorized(player.PlayerSteamId),
+      Participants.Humans().Count(other => other.PlayerSteamId != player.PlayerSteamId),
+      LastMode.TryGetValue(player.PlayerSteamId, out var last) ? last : null);
+
+  public static void Join(CCitadelPlayerController player, AdminMode joinMode, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
+  {
+    Log.WithMode(mode).Info(player.ToPlayerRef(), "Admin joining in last mode Mode={Mode}", joinMode);
+    Forget(player.PlayerSteamId);
+    Sit(player, timer, mode);
+
+    if (joinMode == AdminMode.Roam)
+      Roam(player, timer, mode);
+  }
 
   public static string Sit(CCitadelPlayerController player, ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
     var log = Log.WithMode(mode);
     var steamId = player.PlayerSteamId;
+    LastMode[steamId] = AdminMode.Spectate;
 
     if (Roaming.Contains(steamId))
     {
@@ -98,9 +115,9 @@ public static class AdminSeat
     var log = Log.WithMode(mode);
     var player = Players.GetAll().FirstOrDefault(candidate => candidate.PlayerSteamId == steamId);
 
-    if (player == null || !Seated.Contains(steamId))
+    if (player == null || !Seated.Contains(steamId) || Roaming.Contains(steamId))
     {
-      log.Info("Spectate skipped, player gone or no longer seated SteamId={SteamId}", steamId);
+      log.Info("Spectate skipped, player gone, no longer seated or roaming SteamId={SteamId}", steamId);
       return;
     }
 
@@ -136,6 +153,7 @@ public static class AdminSeat
   private static void Roam(CCitadelPlayerController player, ITimer timer, ExecutionMode mode)
   {
     var steamId = player.PlayerSteamId;
+    LastMode[steamId] = AdminMode.Roam;
     Roaming.Add(steamId);
     CloakGeneration.Remove(steamId);
     StreamCam.Forget(steamId);
@@ -265,6 +283,7 @@ public static class AdminSeat
     if (!AdminSeatRule.CanStand(playing))
       return $"All {AdminSeatRule.PlayerCap} player slots are taken; staying in the admin seat.";
 
+    LastMode[steamId] = AdminMode.Play;
     Seated.Remove(steamId);
     Roaming.Remove(steamId);
     CloakGeneration.Remove(steamId);
@@ -307,7 +326,7 @@ public static class AdminSeat
     StreamCam.Forget(steamId);
   }
 
-  // A map change keeps clients but not their pawns; they rejoin through OnClientFullConnect and are seated fresh.
+  // A map change keeps clients but not their pawns; they rejoin through OnClientFullConnect in their last mode.
   public static void ResetForMap()
   {
     foreach (var steamId in Seated)
@@ -319,8 +338,8 @@ public static class AdminSeat
     CloakGeneration.Clear();
   }
 
-  // Hot reload wipes Seated and Roaming. Every connected admin goes back into the seat; one on a
-  // hero pawn is roaming again (cloak re-applied in place). Mode is manual after that (/seat_roam).
+  // Hot reload wipes every static here. The mode is read back from the pawn: observing is spectate,
+  // a hero carrying the roam cloak is roam (re-cloaked in place), any other hero is play.
   public static int Restore(ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
   {
     var restored = 0;
@@ -329,12 +348,24 @@ public static class AdminSeat
     {
       var steamId = player.PlayerSteamId;
 
-      if (!AdminAuth.IsAuthorized(steamId) || !Seated.Add(steamId))
+      if (!AdminAuth.IsAuthorized(steamId))
         continue;
 
-      var roaming = !SpectateService.IsObserving(player) && player.GetHeroPawn() != null;
+      var pawn = player.GetHeroPawn();
+      var adminMode = SpectateService.IsObserving(player) ? AdminMode.Spectate
+        : pawn?.ModifierProp?.HasModifier(RoamModifier) == true ? AdminMode.Roam
+        : AdminMode.Play;
 
-      if (roaming)
+      LastMode[steamId] = adminMode;
+      Log.WithMode(mode).Info(player.ToPlayerRef(), "Admin mode restored after reload Mode={Mode} TeamNum={TeamNum}", adminMode, player.TeamNum);
+
+      if (adminMode == AdminMode.Play)
+        continue;
+
+      Seated.Add(steamId);
+      restored++;
+
+      if (adminMode == AdminMode.Roam)
       {
         Roaming.Add(steamId);
         timer.NextTick(() =>
@@ -343,9 +374,6 @@ public static class AdminSeat
             Cloak(current, timer, mode);
         });
       }
-
-      restored++;
-      Log.WithMode(mode).Info(player.ToPlayerRef(), "Admin seat restored after reload TeamNum={TeamNum} Roaming={Roaming}", player.TeamNum, roaming);
     }
 
     return restored;
