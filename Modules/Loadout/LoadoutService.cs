@@ -7,7 +7,8 @@ namespace Bublock.Modules.Loadout;
 public sealed record LoadoutOptions(
   int Gold = 0,
   int? Slots = null,
-  int? MaxValue = null);
+  int? MaxValue = null,
+  IReadOnlyList<string>? ItemOrder = null);
 
 public sealed record LoadoutResult(
   int ItemsAdded,
@@ -72,7 +73,7 @@ public static class LoadoutService
     var slots = options.Slots ?? ItemSlots.ForSouls(cap);
     var extra = ItemSlots.ExtraPasses(slots);
     var shop = LoadoutPlanner.Plan(
-      LoadoutPlanner.ItemOrder(build, rng),
+      options.ItemOrder ?? LoadoutPlanner.ItemOrder(build, rng),
       catalog.ComponentsOf,
       catalog.CostOf,
       cap,

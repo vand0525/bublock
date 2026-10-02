@@ -6,11 +6,14 @@ hero state (`LoadoutSnapshot`) and applies it to another pawn. Game-agnostic.
 
 ## Types
 
-- `LoadoutOptions(Gold = 0, Slots = null, MaxValue = null)`. There is no
+- `LoadoutOptions(Gold = 0, Slots = null, MaxValue = null, ItemOrder = null)`. There is no
   level option: the level follows the cap. `MaxValue` null means
   the current `LoadoutService.MaxValue`; `Slots` null means
   `ItemSlots.ForSouls(cap)`. A caller's own value wins (none pass one
-  today).
+  today). `ItemOrder` null means `LoadoutPlanner.ItemOrder(build, rng)`
+  (one random item per optional group, drawn on every `Apply`); a caller
+  that gives several players the same build passes one list drawn once so
+  every plan comes out the same (mirror mode).
 - `LoadoutResult(ItemsAdded, ItemsFailed, Imbued, AbilitiesSet, AbilitiesMissing, Unknown, Value, Cap, ItemsSold, ItemsSkipped, Progression, AbilityPlan)`.
   `Value` is the items' soul cost (at most `Cap`); `Progression` comes from `Cap`.
 - `DefaultMaxValue` = `LoadoutPlanner.DefaultCap` (20,000 souls).
@@ -36,7 +39,7 @@ known-good order:
 1. Plan the items: `cap = options.MaxValue ?? MaxValue`, `slots =
    options.Slots ?? ItemSlots.ForSouls(cap)` (9 below 16,000, 10, 11, then
    12 from 28,000: the slots a real hero has at that net worth), then
-   `LoadoutPlanner.Plan(ItemOrder(build, rng), catalog.ComponentsOf,
+   `LoadoutPlanner.Plan(options.ItemOrder ?? ItemOrder(build, rng), catalog.ComponentsOf,
    catalog.CostOf, cap, slots, build.SellPriorityOf, ItemInfo.Exists,
    fillers, upgradesOf)`: buys in build order within the cap and the slots,
    and once the slots are full sells (by the build's sell priority, else

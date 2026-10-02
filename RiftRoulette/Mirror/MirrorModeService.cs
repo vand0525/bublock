@@ -41,6 +41,9 @@ public static class MirrorModeService
 
   private static MirrorChoice? _current;
 
+  // Optional build groups pick one item at random; drawn once per choice so every fighter shops the same list.
+  private static IReadOnlyList<string>? _itemOrder;
+
   private static Heroes? _lastHero;
 
   private static int _version;
@@ -142,9 +145,11 @@ public static class MirrorModeService
 
       _current = current;
       _lastHero = current.Hero;
+      _itemOrder = null;
     }
 
     var build = BuildOf(current);
+    var itemOrder = _itemOrder ??= LoadoutPlanner.ItemOrder(build, Random.Shared);
     _version++;
     Values.Clear();
     Lock.ClearAllPending();
@@ -163,7 +168,7 @@ public static class MirrorModeService
     }
 
     log.Info(
-      "Round prepared Hero={Hero} Build={Build} BuildId={BuildId} Slot={Slot} Pins={Pins} Fighters={Fighters} Swapped={Swapped} Pending={Pending}",
+      "Round prepared Hero={Hero} Build={Build} BuildId={BuildId} Slot={Slot} Pins={Pins} Fighters={Fighters} Swapped={Swapped} Pending={Pending} ItemOrder={ItemOrder}",
       current.Hero,
       build.Name,
       build.BuildId,
@@ -171,7 +176,8 @@ public static class MirrorModeService
       DescribePins(),
       players.Count,
       swapped,
-      Lock.PendingCount);
+      Lock.PendingCount,
+      string.Join(",", itemOrder));
     StatsService.RefreshBoards(mode);
     return swapped;
   }
@@ -446,7 +452,7 @@ public static class MirrorModeService
       choice.Hero,
       BuildOf(choice),
       timer,
-      RandomModeService.Options,
+      RandomModeService.Options with { ItemOrder = _itemOrder },
       mode,
       (current, result) =>
       {
@@ -568,6 +574,7 @@ public static class MirrorModeService
     _returning = null;
     _benchRound = null;
     _current = null;
+    _itemOrder = null;
     _lastHero = null;
     _version++;
   }

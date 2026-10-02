@@ -8,7 +8,9 @@ teams, so everyone plays the same hero with the same build. An admin can
 pin the hero (`/mirror_hero`) and then which of that hero's builds
 (`/mirror_build`); a pinned hero or build never goes random again until an
 admin changes or clears it. With a hero pinned and no build pinned, the
-build is still rolled once per intermission and shared by everyone.
+build is still rolled once per intermission and shared by everyone. The
+build's optional item picks are drawn once with it too, so every fighter
+ends up with exactly the same items.
 
 Teams, score, the odd-player bench (`RandomMode/BenchRule`) and
 auto-balance work like Random mode. Betting, `/reserve` and `/heroban` are

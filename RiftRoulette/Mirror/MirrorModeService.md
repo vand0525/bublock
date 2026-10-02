@@ -17,6 +17,11 @@ Random mode. Static state; called by `GameLoop/MatchService` only when
   feeds the join budget (`Lobby/MapRefreshService`).
 - `_current` (public `Current`): the round's `MirrorChoice`. `_lastHero`:
   the previous shared hero (an unpinned roll avoids it).
+- `_itemOrder`: the shared build's buy order
+  (`LoadoutPlanner.ItemOrder(build, Random.Shared)`, one random item per
+  optional group), drawn once per choice and passed to every fighter's
+  loadout (`LoadoutOptions.ItemOrder`). Dropped when a new choice is
+  rolled and on match end.
 - `Values`: Steam ID to the soul value of the build given
   (`LoadoutResult.Value`), for the banner.
 - `Lock`: its own `Lobby/HeroLock` (pending, applied, enforcement kills).
@@ -32,7 +37,7 @@ Random mode. Static state; called by `GameLoop/MatchService` only when
 |---|---|---|
 | `BeginMatch(mode)` | Clears match state (pins stay); `TeamBalance.Even` over connected humans' teams | — |
 | `PrepareRound(timer, mode)` | Prunes teams to `Participants.Humans()`, places late joiners on the smaller team, picks the bench on a new intermission (`BenchRule.Next`), fighting teams (`BenchRule.FightingTeams`), `BalanceService.TryBalance`; resets `Fighters` and `DraftState`, then `ApplyChoice(roll: true)` | players swapped now |
-| `ApplyChoice` (private) | Rolls a new `MirrorChoice` when asked, when there is none, or when it no longer matches the pins; else keeps the current one. Then for every connected fighter: `DraftState` pick of the shared hero (so `RoundFlow` moves them in), `LoadoutService.Swap(hero, that one build, RandomModeService.Options)` when alive, else pending. Logs `Round prepared Hero= Build= BuildId= Slot= Pins= Fighters= Swapped= Pending=`; refreshes the stats boards | swapped |
+| `ApplyChoice` (private) | Rolls a new `MirrorChoice` when asked, when there is none, or when it no longer matches the pins; else keeps the current one (and its item order). Draws `_itemOrder` when there is none. Then for every connected fighter: `DraftState` pick of the shared hero (so `RoundFlow` moves them in), `LoadoutService.Swap(hero, that one build, RandomModeService.Options with { ItemOrder = _itemOrder })` when alive, else pending. Logs `Round prepared Hero= Build= BuildId= Slot= Pins= Fighters= Swapped= Pending= ItemOrder=`; refreshes the stats boards | swapped |
 | `PinHero(text, timer, mode)` | Empty: `DescribePins`. `clear`: drops both pins. Else parses the hero (`TryParseHero`, also without spaces; must have stored builds) and `Pins.PinHero` (keeps the slot when the hero has it). Then `AfterPinChange` | reply |
 | `PinBuild(text, timer, mode)` | Refused with no hero pinned. Empty: the pinned hero's numbered builds. `clear`: drops the slot. Else `Pins.TryPinSlot` (1 to the hero's build count). Then `AfterPinChange` | reply |
 | `AfterPinChange` (private) | Not mirror mode: saved. No match: used at match start. In a round: used next intermission. In a mirror intermission: `ApplyChoice(roll: false)` now (same fighters and bench; banners re-show as loadouts land) | reply suffix |
@@ -51,6 +56,9 @@ Random mode. Static state; called by `GameLoop/MatchService` only when
 
 - One `MirrorChoice` per assignment pass; every fighter gets that exact hero
   and `HeroBuild`. A build is never rolled per player.
+- Every fighter's loadout shops the same `_itemOrder` (late joiners,
+  pending spawns and hero-lock restores included), so the items match
+  exactly; the optional-group pick is never drawn per player.
 - A pinned hero is never replaced by a roll (unless it has no stored
   builds, which `PinHero` refuses; logged as a Warning). A pinned slot is
   never rolled.
