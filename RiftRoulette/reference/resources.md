@@ -594,3 +594,10 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Verified fact (in game, client console):** `spec_fly_up` and `spec_fly_down` do not exist in Deadlock (`Unknown command`), so up / down in fly cam is only by looking up or down and moving forward. `getpos_exact` in fly cam prints `setpos_exact x y z;setang_exact pitch yaw roll` in world coordinates (not relative to anything).
 - **Used as:** the three fixed spots in `Lobby/StreamFraming.Spot` (green, center, yellow), copied from the admin's `getpos_exact` output; the angle goes through `SpectateService.Park` unchanged.
 - **Link / path:** `Bublock/RiftRoulette/Lobby/StreamFraming.cs`
+
+### 2026-10-02 — Deadlock item and ability IDs are MurmurHash2 of the class name
+
+- **Why hard / useful:** On a hero's release day the Deadlock API's assets lag the patch (`hero_ratking` was `player_selectable: false` with Infernus's weapon and no signature abilities), so a published build's `ability_order` IDs could not be named and its ability order would be dropped.
+- **Verified fact:** every `id` in `GET /v1/assets/items` (729 of 729 on 2026-10-02) equals MurmurHash2 of its `class_name` with seed `0x31415926`. A new hero's ability class names come from the game's `scripts/heroes.vdata` (`m_mapBoundAbilities`, `ESlot_Signature_1`..`4`) in [GameTracking-Deadlock](https://github.com/SteamTracking/GameTracking-Deadlock/blob/master/game/citadel/pak01_dir/scripts/heroes.vdata), updated within hours of a patch. Rat King (`Heroes.RatKing` = 84, already in Deadworks): `ability_ratking_scrap_grenade`, `ability_ratking_ratnibble`, `ability_ratking_ratarmor`, `ability_ratking_standard_bearer`.
+- **Used as:** `scripts/fetch-builds.py` `ability_id` + `EXTRA_ABILITIES`, `FORCE_HEROES`, and `Modules/Loadout/Data/custom-builds.json` (published build IDs or hand-made builds; see `fetch-builds.py.md`).
+- **Link / path:** `Bublock/scripts/fetch-builds.py`

@@ -1,7 +1,8 @@
 # PriorityHeroes
 
 Pure list of priority heroes for Random mode (a new hero everyone should
-get to play). Fixed in code: change `List` and deploy. Empty by default.
+get to play). Fixed in code: change `List` and deploy. Now: Rat King
+(`Heroes.RatKing`, released 2026-10-02).
 
 A priority hero:
 

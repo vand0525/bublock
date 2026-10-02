@@ -5,7 +5,7 @@ namespace RiftRoulette.RandomMode;
 public static class PriorityHeroes
 {
   // Change by deploying. A hero only takes part once it has stored builds (HeroBuildCatalog.Heroes).
-  public static readonly IReadOnlySet<Heroes> List = new HashSet<Heroes>();
+  public static readonly IReadOnlySet<Heroes> List = new HashSet<Heroes> { Heroes.RatKing };
 
   public static bool Contains(Heroes hero) => List.Contains(hero);
 
