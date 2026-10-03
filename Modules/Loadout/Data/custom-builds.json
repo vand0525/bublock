@@ -1,8 +1,8 @@
 {
  "_format": "Hand-made builds merged by scripts/fetch-builds.py (see fetch-builds.py.md). Key: hero class name. Each build: {\"buildId\": N} for a published build, or name, items or categories, imbues, sellPriority, abilities.",
  "hero_ratking": [
-  {"buildId": 837006},
-  {"buildId": 838214},
-  {"buildId": 838210}
+  {"buildId": 840354},
+  {"buildId": 838416},
+  {"buildId": 839263}
  ]
 }

@@ -25090,297 +25090,44 @@
    "name": "Rat King",
    "builds": [
     {
-     "buildId": 837006,
+     "buildId": 840354,
      "version": 3,
-     "name": "Rift Roulette 1",
+     "name": "RAT KING [ LIGHTBRINGER ]",
      "rank": "custom",
      "matches": 0,
      "wins": 0,
      "favorites": 0,
      "items": [
-      "upgrade_close_range",
-      "upgrade_sprint_booster",
       "upgrade_high_velocity_mag",
+      "upgrade_sprint_booster",
+      "upgrade_clip_size",
       "upgrade_health",
-      "upgrade_magic_reach",
-      "upgrade_pristine_emblem",
+      "upgrade_rapid_rounds",
       "upgrade_blitz_bullets",
-      "upgrade_cardio_calibrator",
-      "upgrade_reinforcing_casings",
-      "upgrade_chonky",
       "upgrade_fleetfoot_boots",
-      "upgrade_debuff_reducer",
-      "upgrade_bulletshredimbue",
-      "upgrade_tech_purge",
+      "upgrade_endurance",
+      "upgrade_close_range",
+      "upgrade_melee_rebuttal",
+      "upgrade_pristine_emblem",
+      "upgrade_reinforcing_casings",
+      "upgrade_cardio_calibrator",
+      "upgrade_chonky",
       "upgrade_berserker",
-      "upgrade_hollow_point_rounds",
+      "upgrade_magic_tempo",
+      "upgrade_bulletshredimbue",
       "upgrade_cooldown_reduction",
-      "upgrade_inhibitor",
-      "upgrade_unstoppable",
-      "upgrade_juggernaut",
-      "upgrade_transcendent_cooldown"
-     ],
-     "categories": [
-      {
-       "name": "#Citadel_HeroBuilds_EarlyGame",
-       "optional": false,
-       "items": [
-        "upgrade_close_range",
-        "upgrade_sprint_booster",
-        "upgrade_high_velocity_mag",
-        "upgrade_health",
-        "upgrade_magic_reach",
-        "upgrade_pristine_emblem"
-       ]
-      },
-      {
-       "name": "#Citadel_HeroBuilds_MidGame",
-       "optional": false,
-       "items": [
-        "upgrade_blitz_bullets",
-        "upgrade_cardio_calibrator",
-        "upgrade_reinforcing_casings",
-        "upgrade_chonky",
-        "upgrade_fleetfoot_boots",
-        "upgrade_debuff_reducer",
-        "upgrade_bulletshredimbue",
-        "upgrade_tech_purge"
-       ]
-      },
-      {
-       "name": "#Citadel_HeroBuilds_LateGame",
-       "optional": false,
-       "items": [
-        "upgrade_berserker",
-        "upgrade_hollow_point_rounds",
-        "upgrade_cooldown_reduction",
-        "upgrade_inhibitor",
-        "upgrade_unstoppable",
-        "upgrade_juggernaut",
-        "upgrade_transcendent_cooldown"
-       ]
-      }
-     ],
-     "imbues": {
-      "upgrade_magic_reach": "ability_ratking_scrap_grenade",
-      "upgrade_bulletshredimbue": "ability_ratking_scrap_grenade"
-     },
-     "sellPriority": {
-      "upgrade_close_range": 98,
-      "upgrade_high_velocity_mag": 98,
-      "upgrade_health": 97,
-      "upgrade_pristine_emblem": 97,
-      "upgrade_blitz_bullets": 97
-     },
-     "abilities": [
-      {
-       "ability": "ability_ratking_scrap_grenade",
-       "kind": "unlock"
-      },
-      {
-       "ability": "ability_ratking_ratnibble",
-       "kind": "unlock"
-      },
-      {
-       "ability": "ability_ratking_ratarmor",
-       "kind": "unlock"
-      },
-      {
-       "ability": "ability_ratking_standard_bearer",
-       "kind": "unlock"
-      },
-      {
-       "ability": "ability_ratking_scrap_grenade",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_scrap_grenade",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_scrap_grenade",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_ratarmor",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_ratarmor",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_standard_bearer",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_standard_bearer",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_ratnibble",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_ratnibble",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_ratarmor",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_standard_bearer",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_ratnibble",
-       "kind": "upgrade"
-      }
-     ]
-    },
-    {
-     "buildId": 838214,
-     "version": 3,
-     "name": "Rift Roulette 2",
-     "rank": "custom",
-     "matches": 0,
-     "wins": 0,
-     "favorites": 0,
-     "items": [
-      "upgrade_pristine_emblem",
-      "upgrade_regenerating_bullet_shield",
-      "upgrade_chonky",
-      "upgrade_rechargingbullets",
-      "upgrade_fleetfoot_boots",
-      "upgrade_tech_purge",
-      "upgrade_berserker",
-      "upgrade_colossus",
-      "upgrade_tech_range",
-      "upgrade_reinforcing_casings",
       "upgrade_siphon_bullets",
-      "upgrade_dps_aura",
-      "upgrade_weighted_shots",
+      "upgrade_juggernaut",
+      "upgrade_colossus",
+      "upgrade_transcendent_cooldown",
+      "upgrade_fervor",
+      "upgrade_counterspell",
+      "upgrade_reduce_debuff_duration",
+      "upgrade_warp_stone",
+      "upgrade_divine_barrier",
+      "upgrade_unstoppable",
       "upgrade_deflecting_armor",
-      "upgrade_unstoppable"
-     ],
-     "categories": [
-      {
-       "name": "1",
-       "optional": false,
-       "items": [
-        "upgrade_pristine_emblem",
-        "upgrade_regenerating_bullet_shield",
-        "upgrade_chonky",
-        "upgrade_rechargingbullets",
-        "upgrade_fleetfoot_boots",
-        "upgrade_tech_purge",
-        "upgrade_berserker",
-        "upgrade_colossus",
-        "upgrade_tech_range",
-        "upgrade_reinforcing_casings",
-        "upgrade_siphon_bullets",
-        "upgrade_dps_aura",
-        "upgrade_weighted_shots",
-        "upgrade_deflecting_armor",
-        "upgrade_unstoppable"
-       ]
-      }
-     ],
-     "imbues": {},
-     "sellPriority": {},
-     "abilities": [
-      {
-       "ability": "ability_ratking_ratarmor",
-       "kind": "unlock"
-      },
-      {
-       "ability": "ability_ratking_scrap_grenade",
-       "kind": "unlock"
-      },
-      {
-       "ability": "ability_ratking_ratnibble",
-       "kind": "unlock"
-      },
-      {
-       "ability": "ability_ratking_standard_bearer",
-       "kind": "unlock"
-      },
-      {
-       "ability": "ability_ratking_ratarmor",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_scrap_grenade",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_scrap_grenade",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_scrap_grenade",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_ratarmor",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_ratnibble",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_ratnibble",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_ratnibble",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_standard_bearer",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_standard_bearer",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_ratarmor",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_standard_bearer",
-       "kind": "upgrade"
-      }
-     ]
-    },
-    {
-     "buildId": 838210,
-     "version": 4,
-     "name": "Rift Roulette 3",
-     "rank": "custom",
-     "matches": 0,
-     "wins": 0,
-     "favorites": 0,
-     "items": [
-      "upgrade_pristine_emblem",
-      "upgrade_extra_charge",
-      "upgrade_magic_reach",
-      "upgrade_weapon_backstabber",
-      "upgrade_arcane_surge",
-      "upgrade_kinetic_sash",
-      "upgrade_magic_storm",
-      "upgrade_return_fire",
-      "upgrade_bulletshredimbue",
-      "upgrade_arcane_extension",
-      "upgrade_imbued_duration_extender",
-      "upgrade_rapid_recharge",
-      "upgrade_discord",
-      "upgrade_cardio_calibrator",
-      "upgrade_tech_purge",
-      "upgrade_deflecting_armor",
+      "upgrade_absorbing_armor",
       "upgrade_diviners_kevlar"
      ],
      "categories": [
@@ -25388,38 +25135,202 @@
        "name": "#Citadel_HeroBuilds_EarlyGame",
        "optional": false,
        "items": [
+        "upgrade_high_velocity_mag",
+        "upgrade_sprint_booster",
+        "upgrade_clip_size",
+        "upgrade_health",
+        "upgrade_rapid_rounds",
+        "upgrade_blitz_bullets",
+        "upgrade_fleetfoot_boots"
+       ]
+      },
+      {
+       "name": "Category 5",
+       "optional": true,
+       "items": [
+        "upgrade_endurance",
+        "upgrade_close_range",
+        "upgrade_melee_rebuttal"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_MidGame",
+       "optional": false,
+       "items": [
         "upgrade_pristine_emblem",
-        "upgrade_extra_charge",
-        "upgrade_magic_reach",
-        "upgrade_weapon_backstabber",
-        "upgrade_arcane_surge",
-        "upgrade_kinetic_sash",
-        "upgrade_magic_storm",
-        "upgrade_return_fire",
-        "upgrade_bulletshredimbue",
-        "upgrade_arcane_extension",
-        "upgrade_imbued_duration_extender",
-        "upgrade_rapid_recharge",
-        "upgrade_discord",
+        "upgrade_reinforcing_casings",
         "upgrade_cardio_calibrator",
-        "upgrade_tech_purge",
+        "upgrade_chonky",
+        "upgrade_berserker",
+        "upgrade_magic_tempo",
+        "upgrade_bulletshredimbue",
+        "upgrade_cooldown_reduction"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_LateGame",
+       "optional": false,
+       "items": [
+        "upgrade_siphon_bullets",
+        "upgrade_juggernaut",
+        "upgrade_colossus",
+        "upgrade_transcendent_cooldown",
+        "upgrade_fervor"
+       ]
+      },
+      {
+       "name": "if u need it",
+       "optional": true,
+       "items": [
+        "upgrade_counterspell",
+        "upgrade_reduce_debuff_duration",
+        "upgrade_warp_stone",
+        "upgrade_divine_barrier",
+        "upgrade_unstoppable",
         "upgrade_deflecting_armor",
+        "upgrade_absorbing_armor",
         "upgrade_diviners_kevlar"
        ]
       }
      ],
      "imbues": {
-      "upgrade_magic_reach": "ability_ratking_scrap_grenade",
-      "upgrade_magic_storm": "ability_ratking_ratarmor",
-      "upgrade_bulletshredimbue": "ability_ratking_scrap_grenade",
-      "upgrade_arcane_extension": "ability_ratking_ratarmor"
+      "upgrade_bulletshredimbue": "ability_ratking_ratnibble"
      },
      "sellPriority": {},
      "abilities": [
       {
+       "ability": "ability_ratking_ratnibble",
+       "kind": "unlock"
+      },
+      {
        "ability": "ability_ratking_ratarmor",
        "kind": "unlock"
       },
+      {
+       "ability": "ability_ratking_scrap_grenade",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_ratking_standard_bearer",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_ratking_ratarmor",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_ratarmor",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_scrap_grenade",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_standard_bearer",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_standard_bearer",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_standard_bearer",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_ratarmor",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_ratnibble",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_ratnibble",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_scrap_grenade",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_scrap_grenade",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_ratnibble",
+       "kind": "upgrade"
+      }
+     ]
+    },
+    {
+     "buildId": 838416,
+     "version": 2,
+     "name": "ABL TWITCH ABLKZ",
+     "rank": "custom",
+     "matches": 0,
+     "wins": 0,
+     "favorites": 0,
+     "items": [
+      "upgrade_close_range",
+      "upgrade_high_velocity_mag",
+      "upgrade_pristine_emblem",
+      "upgrade_regenerating_bullet_shield",
+      "upgrade_clip_size",
+      "upgrade_health",
+      "upgrade_chonky",
+      "upgrade_fleetfoot_boots",
+      "upgrade_sprint_booster",
+      "upgrade_cardio_calibrator",
+      "upgrade_vampire",
+      "upgrade_tech_purge",
+      "upgrade_berserker",
+      "upgrade_reinforcing_casings",
+      "upgrade_juggernaut",
+      "upgrade_siphon_bullets",
+      "upgrade_surging_power",
+      "upgrade_debuff_reducer",
+      "upgrade_unstoppable",
+      "upgrade_critshot"
+     ],
+     "categories": [
+      {
+       "name": "#Citadel_HeroBuilds_EarlyGame",
+       "optional": false,
+       "items": [
+        "upgrade_close_range",
+        "upgrade_high_velocity_mag",
+        "upgrade_pristine_emblem",
+        "upgrade_regenerating_bullet_shield",
+        "upgrade_clip_size",
+        "upgrade_health",
+        "upgrade_chonky",
+        "upgrade_fleetfoot_boots"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_MidGame",
+       "optional": false,
+       "items": [
+        "upgrade_sprint_booster",
+        "upgrade_cardio_calibrator",
+        "upgrade_vampire",
+        "upgrade_tech_purge",
+        "upgrade_berserker",
+        "upgrade_reinforcing_casings",
+        "upgrade_juggernaut",
+        "upgrade_siphon_bullets",
+        "upgrade_surging_power",
+        "upgrade_debuff_reducer",
+        "upgrade_unstoppable",
+        "upgrade_critshot"
+       ]
+      }
+     ],
+     "imbues": {},
+     "sellPriority": {},
+     "abilities": [
       {
        "ability": "ability_ratking_scrap_grenade",
        "kind": "unlock"
@@ -25429,10 +25340,22 @@
        "kind": "unlock"
       },
       {
+       "ability": "ability_ratking_ratarmor",
+       "kind": "unlock"
+      },
+      {
        "ability": "ability_ratking_standard_bearer",
        "kind": "unlock"
       },
       {
+       "ability": "ability_ratking_scrap_grenade",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_scrap_grenade",
+       "kind": "upgrade"
+      },
+      {
        "ability": "ability_ratking_ratarmor",
        "kind": "upgrade"
       },
@@ -25445,27 +25368,11 @@
        "kind": "upgrade"
       },
       {
-       "ability": "ability_ratking_scrap_grenade",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_scrap_grenade",
-       "kind": "upgrade"
-      },
-      {
        "ability": "ability_ratking_standard_bearer",
        "kind": "upgrade"
       },
       {
        "ability": "ability_ratking_standard_bearer",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_standard_bearer",
-       "kind": "upgrade"
-      },
-      {
-       "ability": "ability_ratking_scrap_grenade",
        "kind": "upgrade"
       },
       {
@@ -25474,6 +25381,181 @@
       },
       {
        "ability": "ability_ratking_ratnibble",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_standard_bearer",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_ratnibble",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_scrap_grenade",
+       "kind": "upgrade"
+      }
+     ]
+    },
+    {
+     "buildId": 839263,
+     "version": 30,
+     "name": "THE ONLY BUILD YOU NEED - FRONTLINE KING",
+     "rank": "custom",
+     "matches": 0,
+     "wins": 0,
+     "favorites": 0,
+     "items": [
+      "upgrade_high_velocity_mag",
+      "upgrade_health",
+      "upgrade_active_reload",
+      "upgrade_intensifying_clip",
+      "upgrade_bullet_resist_shredder",
+      "upgrade_cardio_calibrator",
+      "upgrade_chonky",
+      "upgrade_imbued_duration_extender",
+      "upgrade_bulletshredimbue",
+      "upgrade_fleetfoot_boots",
+      "upgrade_siphon_bullets",
+      "upgrade_tech_purge",
+      "upgrade_transcendent_cooldown",
+      "upgrade_berserker",
+      "upgrade_juggernaut",
+      "upgrade_proc_silence",
+      "upgrade_unstoppable",
+      "upgrade_colossus",
+      "upgrade_deflecting_armor",
+      "upgrade_boundless_spirit",
+      "upgrade_fervor",
+      "upgrade_diviners_kevlar",
+      "upgrade_discord",
+      "upgrade_endurance",
+      "upgrade_grit",
+      "upgrade_regenerating_bullet_shield",
+      "upgrade_debuff_reducer",
+      "upgrade_magic_shield",
+      "upgrade_return_fire",
+      "upgrade_spirit_bubble",
+      "upgrade_counterspell",
+      "upgrade_reduce_debuff_duration",
+      "upgrade_reinforcing_casings",
+      "upgrade_weighted_shots",
+      "upgrade_close_quarter_combat",
+      "upgrade_tech_damage_pulse"
+     ],
+     "categories": [
+      {
+       "name": "#Citadel_HeroBuilds_EarlyGame",
+       "optional": false,
+       "items": [
+        "upgrade_high_velocity_mag",
+        "upgrade_health",
+        "upgrade_active_reload",
+        "upgrade_intensifying_clip",
+        "upgrade_bullet_resist_shredder",
+        "upgrade_cardio_calibrator",
+        "upgrade_chonky",
+        "upgrade_imbued_duration_extender",
+        "upgrade_bulletshredimbue",
+        "upgrade_fleetfoot_boots",
+        "upgrade_siphon_bullets",
+        "upgrade_tech_purge",
+        "upgrade_transcendent_cooldown",
+        "upgrade_berserker",
+        "upgrade_juggernaut",
+        "upgrade_proc_silence",
+        "upgrade_unstoppable",
+        "upgrade_colossus",
+        "upgrade_deflecting_armor",
+        "upgrade_boundless_spirit",
+        "upgrade_fervor",
+        "upgrade_diviners_kevlar",
+        "upgrade_discord"
+       ]
+      },
+      {
+       "name": "",
+       "optional": true,
+       "items": [
+        "upgrade_endurance",
+        "upgrade_grit",
+        "upgrade_regenerating_bullet_shield",
+        "upgrade_debuff_reducer",
+        "upgrade_magic_shield",
+        "upgrade_return_fire",
+        "upgrade_spirit_bubble",
+        "upgrade_counterspell",
+        "upgrade_reduce_debuff_duration",
+        "upgrade_reinforcing_casings",
+        "upgrade_weighted_shots",
+        "upgrade_close_quarter_combat",
+        "upgrade_tech_damage_pulse"
+       ]
+      }
+     ],
+     "imbues": {
+      "upgrade_bulletshredimbue": "ability_ratking_scrap_grenade"
+     },
+     "sellPriority": {},
+     "abilities": [
+      {
+       "ability": "ability_ratking_ratnibble",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_ratking_ratnibble",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_scrap_grenade",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_ratking_scrap_grenade",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_ratarmor",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_ratking_scrap_grenade",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_standard_bearer",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_ratking_ratnibble",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_standard_bearer",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_standard_bearer",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_ratarmor",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_ratarmor",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_scrap_grenade",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_ratarmor",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_ratking_standard_bearer",
        "kind": "upgrade"
       },
       {
