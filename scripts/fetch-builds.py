@@ -35,7 +35,7 @@ BANNED_ITEMS = {
 }
 
 # The API's hero assets can lag a patch and still mark a new hero unplayable.
-FORCE_HEROES = {"hero_ratking"}
+FORCE_HEROES = {"hero_ratking", "hero_baba"}
 
 # Signature abilities from the game's heroes.vdata (GameTracking-Deadlock) that
 # the API's item assets do not list yet; their IDs are computed with ability_id().

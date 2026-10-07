@@ -2,6 +2,7 @@
 
 Unit tests for `RiftRoulette/RandomMode/PriorityHeroes`.
 
+- `List` holds exactly Rat King and Baba.
 - `InPool` keeps only listed heroes that are in the pool (have builds), in
   pool order; an empty list gives nothing.
 - `RerollPool` never offers a failed hero, prefers heroes no other fighter

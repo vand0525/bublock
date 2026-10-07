@@ -2,7 +2,9 @@
 
 Pure list of priority heroes for Random mode (a new hero everyone should
 get to play). Fixed in code: change `List` and deploy. Now: Rat King
-(`Heroes.RatKing`, released 2026-10-02).
+(`Heroes.RatKing`, released 2026-10-02) and Baba (`Heroes.Baba`, released
+2026-10-06). With fewer fighters than priority heroes, a random subset of
+them goes out that round (`HeroDraw.Draw`).
 
 A priority hero:
 

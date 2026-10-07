@@ -6,6 +6,14 @@ namespace Bublock.Tests.RiftRoulette;
 public class PriorityHeroesTests
 {
   [Fact]
+  public void List_holds_rat_king_and_baba()
+  {
+    Assert.True(PriorityHeroes.Contains(Heroes.RatKing));
+    Assert.True(PriorityHeroes.Contains(Heroes.Baba));
+    Assert.Equal(2, PriorityHeroes.List.Count);
+  }
+
+  [Fact]
   public void InPool_keeps_listed_heroes_that_have_builds_in_pool_order()
   {
     var list = new HashSet<Heroes> { Heroes.Kelvin, Heroes.Haze, Heroes.Bebop };

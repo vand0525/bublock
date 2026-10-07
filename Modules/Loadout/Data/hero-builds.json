@@ -25565,6 +25565,622 @@
      ]
     }
    ]
+  },
+  {
+   "id": 88,
+   "className": "hero_baba",
+   "name": "Baba",
+   "builds": [
+    {
+     "buildId": 857546,
+     "version": 3,
+     "name": "default / lightbringer edit",
+     "rank": "custom",
+     "matches": 0,
+     "wins": 0,
+     "favorites": 0,
+     "items": [
+      "upgrade_extra_charge",
+      "upgrade_endurance",
+      "upgrade_mystic_regeneration",
+      "upgrade_grit",
+      "upgrade_rapid_rounds",
+      "upgrade_acolytes_glove",
+      "upgrade_resonant_healing",
+      "upgrade_vex_barrier",
+      "upgrade_close_range",
+      "upgrade_melee_rebuttal",
+      "upgrade_suppressor",
+      "upgrade_containment",
+      "upgrade_healing_booster",
+      "upgrade_cardio_calibrator",
+      "upgrade_spirit_snatch",
+      "upgrade_blitz_bullets",
+      "upgrade_magic_vulnerability",
+      "upgrade_rapid_recharge",
+      "upgrade_boundless_spirit",
+      "upgrade_health_stealing_magic",
+      "upgrade_warp_stone",
+      "upgrade_tech_damage_pulse",
+      "upgrade_divine_barrier",
+      "upgrade_arctic_blast",
+      "upgrade_escalating_exposure",
+      "upgrade_reinforcing_casings",
+      "upgrade_cooldown_reduction",
+      "upgrade_discord",
+      "upgrade_tech_overflow",
+      "upgrade_spirit_burn",
+      "upgrade_tech_range",
+      "upgrade_ricochet",
+      "upgrade_auto_cleanse",
+      "upgrade_healbuff",
+      "upgrade_juggernaut",
+      "upgrade_transcendent_cooldown",
+      "upgrade_reduce_debuff_duration",
+      "upgrade_improved_bullet_armor",
+      "upgrade_tech_purge",
+      "upgrade_ability_refresher",
+      "upgrade_deflecting_armor",
+      "upgrade_diviners_kevlar",
+      "upgrade_unstoppable"
+     ],
+     "categories": [
+      {
+       "name": "#Citadel_HeroBuilds_Early",
+       "optional": false,
+       "items": [
+        "upgrade_extra_charge",
+        "upgrade_endurance",
+        "upgrade_mystic_regeneration",
+        "upgrade_grit",
+        "upgrade_rapid_rounds",
+        "upgrade_acolytes_glove",
+        "upgrade_resonant_healing",
+        "upgrade_vex_barrier"
+       ]
+      },
+      {
+       "name": "",
+       "optional": true,
+       "items": [
+        "upgrade_close_range",
+        "upgrade_melee_rebuttal",
+        "upgrade_suppressor",
+        "upgrade_containment"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_Mid",
+       "optional": false,
+       "items": [
+        "upgrade_healing_booster",
+        "upgrade_cardio_calibrator",
+        "upgrade_spirit_snatch",
+        "upgrade_blitz_bullets",
+        "upgrade_magic_vulnerability",
+        "upgrade_rapid_recharge",
+        "upgrade_boundless_spirit",
+        "upgrade_health_stealing_magic"
+       ]
+      },
+      {
+       "name": "maybes",
+       "optional": true,
+       "items": [
+        "upgrade_warp_stone",
+        "upgrade_tech_damage_pulse",
+        "upgrade_divine_barrier",
+        "upgrade_arctic_blast"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_Late",
+       "optional": false,
+       "items": [
+        "upgrade_escalating_exposure",
+        "upgrade_reinforcing_casings",
+        "upgrade_cooldown_reduction",
+        "upgrade_discord",
+        "upgrade_tech_overflow",
+        "upgrade_spirit_burn",
+        "upgrade_tech_range",
+        "upgrade_ricochet"
+       ]
+      },
+      {
+       "name": "",
+       "optional": true,
+       "items": [
+        "upgrade_auto_cleanse",
+        "upgrade_healbuff",
+        "upgrade_juggernaut",
+        "upgrade_transcendent_cooldown"
+       ]
+      },
+      {
+       "name": "",
+       "optional": true,
+       "items": [
+        "upgrade_reduce_debuff_duration",
+        "upgrade_improved_bullet_armor",
+        "upgrade_tech_purge",
+        "upgrade_ability_refresher",
+        "upgrade_deflecting_armor",
+        "upgrade_diviners_kevlar",
+        "upgrade_unstoppable"
+       ]
+      }
+     ],
+     "imbues": {},
+     "sellPriority": {},
+     "abilities": [
+      {
+       "ability": "ability_baba_bubbling_brew",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_baba_hexing_brew",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_baba_bench_run",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_baba_ultimate_2",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_baba_bubbling_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bubbling_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_hexing_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_hexing_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bench_run",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bench_run",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_ultimate_2",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_ultimate_2",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_ultimate_2",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_hexing_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bubbling_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bench_run",
+       "kind": "upgrade"
+      }
+     ]
+    },
+    {
+     "buildId": 858286,
+     "version": 5,
+     "name": "the baba",
+     "rank": "custom",
+     "matches": 0,
+     "wins": 0,
+     "favorites": 0,
+     "items": [
+      "upgrade_mystic_regeneration",
+      "upgrade_extra_charge",
+      "upgrade_acolytes_glove",
+      "upgrade_resonant_healing",
+      "upgrade_health",
+      "upgrade_healbane",
+      "upgrade_chonky",
+      "upgrade_crackshot",
+      "upgrade_cardio_calibrator",
+      "upgrade_warp_stone",
+      "upgrade_spirit_snatch",
+      "upgrade_rapid_recharge",
+      "upgrade_vex_barrier",
+      "upgrade_unstoppable",
+      "upgrade_enchanted_holsters",
+      "upgrade_arctic_blast",
+      "upgrade_auto_cleanse",
+      "upgrade_diviners_kevlar",
+      "upgrade_tech_range",
+      "upgrade_tech_overflow",
+      "upgrade_metal_skin",
+      "upgrade_boundless_spirit",
+      "upgrade_cooldown_reduction",
+      "upgrade_transcendent_cooldown",
+      "upgrade_escalating_exposure",
+      "upgrade_deflecting_armor",
+      "upgrade_discord",
+      "upgrade_magic_shock",
+      "upgrade_absorbing_armor",
+      "upgrade_infuser",
+      "upgrade_imbued_duration_extender"
+     ],
+     "categories": [
+      {
+       "name": "1",
+       "optional": false,
+       "items": [
+        "upgrade_mystic_regeneration",
+        "upgrade_extra_charge",
+        "upgrade_acolytes_glove",
+        "upgrade_resonant_healing",
+        "upgrade_health",
+        "upgrade_healbane",
+        "upgrade_chonky",
+        "upgrade_crackshot"
+       ]
+      },
+      {
+       "name": "",
+       "optional": true,
+       "items": [
+        "upgrade_cardio_calibrator",
+        "upgrade_warp_stone"
+       ]
+      },
+      {
+       "name": "2",
+       "optional": false,
+       "items": [
+        "upgrade_spirit_snatch",
+        "upgrade_rapid_recharge",
+        "upgrade_vex_barrier",
+        "upgrade_unstoppable",
+        "upgrade_enchanted_holsters",
+        "upgrade_arctic_blast",
+        "upgrade_auto_cleanse",
+        "upgrade_diviners_kevlar"
+       ]
+      },
+      {
+       "name": "",
+       "optional": true,
+       "items": [
+        "upgrade_tech_range",
+        "upgrade_tech_overflow",
+        "upgrade_metal_skin"
+       ]
+      },
+      {
+       "name": "3",
+       "optional": false,
+       "items": [
+        "upgrade_boundless_spirit",
+        "upgrade_cooldown_reduction",
+        "upgrade_transcendent_cooldown",
+        "upgrade_escalating_exposure",
+        "upgrade_deflecting_armor",
+        "upgrade_discord",
+        "upgrade_magic_shock",
+        "upgrade_absorbing_armor",
+        "upgrade_infuser",
+        "upgrade_imbued_duration_extender"
+       ]
+      }
+     ],
+     "imbues": {},
+     "sellPriority": {},
+     "abilities": [
+      {
+       "ability": "ability_baba_bubbling_brew",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_baba_hexing_brew",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_baba_bench_run",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_baba_ultimate_2",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_baba_bubbling_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bubbling_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_hexing_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_hexing_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_ultimate_2",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_ultimate_2",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_ultimate_2",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bubbling_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_hexing_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bench_run",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bench_run",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bench_run",
+       "kind": "upgrade"
+      }
+     ]
+    },
+    {
+     "buildId": 858454,
+     "version": 2,
+     "name": "GRANNY WILL THROW HANDS",
+     "rank": "custom",
+     "matches": 0,
+     "wins": 0,
+     "favorites": 0,
+     "items": [
+      "upgrade_lifestrike_gauntlets",
+      "upgrade_acolytes_glove",
+      "upgrade_improved_spirit",
+      "upgrade_sprint_booster",
+      "upgrade_boxing_glove",
+      "upgrade_melee_charge",
+      "upgrade_extra_charge",
+      "upgrade_endurance",
+      "upgrade_improved_stamina",
+      "upgrade_healbane",
+      "upgrade_melee_rebuttal",
+      "upgrade_soaring_spirit",
+      "upgrade_tech_damage_pulse",
+      "upgrade_cloaking_device_active",
+      "upgrade_spirit_snatch",
+      "upgrade_close_quarter_combat",
+      "upgrade_tech_purge",
+      "upgrade_cooldown_reduction",
+      "upgrade_weapon_backstabber",
+      "upgrade_healing_booster",
+      "upgrade_superior_stamina",
+      "upgrade_cold_front",
+      "upgrade_veil_walker",
+      "upgrade_crushing_fists",
+      "upgrade_boundless_spirit",
+      "upgrade_transcendent_cooldown",
+      "upgrade_arctic_blast",
+      "upgrade_colossus",
+      "upgrade_magic_carpet",
+      "upgrade_diviners_kevlar",
+      "upgrade_discord",
+      "upgrade_healbuff",
+      "upgrade_ability_power_shard",
+      "upgrade_phantom_strike",
+      "upgrade_self_bubble",
+      "upgrade_greater_withering_whip",
+      "upgrade_containment",
+      "upgrade_reduce_debuff_duration",
+      "upgrade_counterspell",
+      "upgrade_metal_skin",
+      "upgrade_rupture",
+      "upgrade_glitch",
+      "upgrade_unstoppable",
+      "upgrade_absorbing_armor",
+      "upgrade_juggernaut",
+      "upgrade_spellbreaker",
+      "upgrade_focus_lens",
+      "upgrade_spirit_burn",
+      "upgrade_aoe_root",
+      "upgrade_target_stun",
+      "upgrade_divine_barrier"
+     ],
+     "categories": [
+      {
+       "name": "1° Early",
+       "optional": false,
+       "items": [
+        "upgrade_lifestrike_gauntlets",
+        "upgrade_acolytes_glove",
+        "upgrade_improved_spirit",
+        "upgrade_sprint_booster",
+        "upgrade_boxing_glove",
+        "upgrade_melee_charge"
+       ]
+      },
+      {
+       "name": "Others (1°)",
+       "optional": true,
+       "items": [
+        "upgrade_extra_charge",
+        "upgrade_endurance",
+        "upgrade_improved_stamina",
+        "upgrade_healbane",
+        "upgrade_melee_rebuttal"
+       ]
+      },
+      {
+       "name": "2° Mid",
+       "optional": false,
+       "items": [
+        "upgrade_soaring_spirit",
+        "upgrade_tech_damage_pulse",
+        "upgrade_cloaking_device_active",
+        "upgrade_spirit_snatch",
+        "upgrade_close_quarter_combat",
+        "upgrade_tech_purge",
+        "upgrade_cooldown_reduction"
+       ]
+      },
+      {
+       "name": "Others (2°)",
+       "optional": true,
+       "items": [
+        "upgrade_weapon_backstabber",
+        "upgrade_healing_booster",
+        "upgrade_superior_stamina",
+        "upgrade_cold_front",
+        "upgrade_veil_walker"
+       ]
+      },
+      {
+       "name": "3° Late",
+       "optional": false,
+       "items": [
+        "upgrade_crushing_fists",
+        "upgrade_boundless_spirit",
+        "upgrade_transcendent_cooldown",
+        "upgrade_arctic_blast",
+        "upgrade_colossus"
+       ]
+      },
+      {
+       "name": "Others (3°)",
+       "optional": true,
+       "items": [
+        "upgrade_magic_carpet",
+        "upgrade_diviners_kevlar",
+        "upgrade_discord",
+        "upgrade_healbuff",
+        "upgrade_ability_power_shard",
+        "upgrade_phantom_strike",
+        "upgrade_self_bubble"
+       ]
+      },
+      {
+       "name": "Counter",
+       "optional": true,
+       "items": [
+        "upgrade_greater_withering_whip",
+        "upgrade_containment",
+        "upgrade_reduce_debuff_duration",
+        "upgrade_counterspell",
+        "upgrade_metal_skin",
+        "upgrade_rupture",
+        "upgrade_glitch",
+        "upgrade_unstoppable",
+        "upgrade_absorbing_armor",
+        "upgrade_juggernaut",
+        "upgrade_spellbreaker",
+        "upgrade_focus_lens",
+        "upgrade_spirit_burn",
+        "upgrade_aoe_root",
+        "upgrade_target_stun",
+        "upgrade_divine_barrier"
+       ]
+      }
+     ],
+     "imbues": {
+      "upgrade_ability_power_shard": "ability_baba_bench_run"
+     },
+     "sellPriority": {},
+     "abilities": [
+      {
+       "ability": "ability_baba_bubbling_brew",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_baba_bench_run",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_baba_bench_run",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bench_run",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_hexing_brew",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_baba_bench_run",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_ultimate_2",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_baba_hexing_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_hexing_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_ultimate_2",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_ultimate_2",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_ultimate_2",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bubbling_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bubbling_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_bubbling_brew",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_baba_hexing_brew",
+       "kind": "upgrade"
+      }
+     ]
+    }
+   ]
   }
  ],
  "components": {
