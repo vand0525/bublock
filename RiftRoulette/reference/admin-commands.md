@@ -204,7 +204,7 @@ position, entity index.
 - **Who:** admin
 - **Calls:** `LobbyService.ApplyServerConvars`
 - **Mode:** Debug
-- **Side effects:** re-applies the startup convars and commands (team size 6, max players 13 with 12 shown in the browser (the 13th is the admin seat), KOTH off and warning times 1, override spawn time 1, purchasing anywhere off (`ShopAccess.Disable`), duplicate heroes, `citadel_hero_demo_unlock_flex_slots 1` and every flex slot opened on both teams (`FlexSlots.UnlockAll`), `citadel_voice_all_talk 1`, pause convars from `PauseGuard`). Note `citadel_koth_enabled 0` would close the KOTH gate if run mid-rift
+- **Side effects:** re-applies the startup convars and commands (team size 6, max players 13 with 12 shown in the browser (the 13th is the admin seat), KOTH off and warning times 1, override spawn time 1, purchasing anywhere off (`ShopAccess.Disable`), duplicate heroes, `citadel_hero_demo_unlock_flex_slots 1` and every flex slot opened on both teams (`FlexSlots.UnlockAll`), `citadel_voice_all_talk 1`, `citadel_check_walk_on_skyclip 0` (players can stand on the watch spots), pause convars from `PauseGuard`). Note `citadel_koth_enabled 0` would close the KOTH gate if run mid-rift
 
 #### /lobby_flex
 

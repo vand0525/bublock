@@ -21,6 +21,7 @@ public static class GameDependencies
     new("citadel_player_override_spawn_time", 1, CheckStatus.Warn, "Lobby, set through the console"),
     new("citadel_allow_duplicate_heroes", 1, CheckStatus.Fail, "Lobby"),
     new("citadel_hero_demo_unlock_flex_slots", 1, CheckStatus.Warn, "Lobby; missing after engine 6712 — FlexSlots schema write is the real unlock"),
+    new("citadel_check_walk_on_skyclip", 0, CheckStatus.Fail, "Lobby; watch spots stand on the sky clip (new in 6757)"),
     new("citadel_allow_purchasing_anywhere", null, CheckStatus.Fail, "GameLoop shop"),
     new("citadel_allow_pausing", 0, CheckStatus.Warn, "Lobby pause, 1 after /pause_allow on"),
     new("citadel_allow_pause_in_match", 0, CheckStatus.Warn, "Lobby pause, 1 after /pause_allow on"),

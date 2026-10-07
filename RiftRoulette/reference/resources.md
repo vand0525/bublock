@@ -601,3 +601,10 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Verified fact:** every `id` in `GET /v1/assets/items` (729 of 729 on 2026-10-02) equals MurmurHash2 of its `class_name` with seed `0x31415926`. A new hero's ability class names come from the game's `scripts/heroes.vdata` (`m_mapBoundAbilities`, `ESlot_Signature_1`..`4`) in [GameTracking-Deadlock](https://github.com/SteamTracking/GameTracking-Deadlock/blob/master/game/citadel/pak01_dir/scripts/heroes.vdata), updated within hours of a patch. Rat King (`Heroes.RatKing` = 84, already in Deadworks): `ability_ratking_scrap_grenade`, `ability_ratking_ratnibble`, `ability_ratking_ratarmor`, `ability_ratking_standard_bearer`.
 - **Used as:** `scripts/fetch-builds.py` `ability_id` + `EXTRA_ABILITIES`, `FORCE_HEROES`, and `Modules/Loadout/Data/custom-builds.json` (published build IDs or hand-made builds; see `fetch-builds.py.md`).
 - **Link / path:** `Bublock/scripts/fetch-builds.py`
+
+### 2026-10-07 — Game build 6757 stops players standing on the sky clip
+
+- **Why hard / useful:** after the update every player sent up top dropped back to the same spot below within 2 s, and `WatchGuard` sent them up again in a loop; nothing in our code or Deadworks changed, and the convar list in `cvarlist.md` predates it.
+- **Verified fact:** `citadel_check_walk_on_skyclip true` (gamedll, clientdll, replicated, cheat) first appears in GameTracking's `DumpSource2/convars.txt` at build 6757 (absent in 6753 and earlier). The watch spots stand on the invisible skybox floor at z 1536, which is sky clip. Diffing `convars.txt` between the server's old and new build is the quickest way to find a setting a patch added.
+- **Used as:** `LobbyService.ApplyServerConvars` sets it to 0 (map start, hot reload, `/lobby_setup`); self-test convar check, `patch-day.md` sections 4 and 5.
+- **Link / path:** [convars.txt](https://github.com/SteamTracking/GameTracking-Deadlock/blob/master/DumpSource2/convars.txt), `Bublock/RiftRoulette/Lobby/LobbyService.cs`

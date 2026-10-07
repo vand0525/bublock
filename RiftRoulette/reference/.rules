@@ -306,6 +306,9 @@ Assume the git repo is rooted at `Bublock/`.
   the fixed `draft` spot; call `WatchSpot.SendUp` (teleport + restrain).
   The spot and the boards only move when players are sent back up after a
   round (round end passes `RiftService.NextSide` explicitly).
+  The watch spots stand on the sky clip floor (z 1536), so
+  `citadel_check_walk_on_skyclip` (game build 6757+) must stay 0
+  (`LobbyService.ApplyServerConvars`).
 - Per-slot spots: every teleport up top or into a rift goes to the player's
   own spot, `Round/SlotSpots` (`Watch` / `Fight`) with `player.Slot`: an
   anchor from `RiftRouletteLocations` plus that slot's (forward, right, up)

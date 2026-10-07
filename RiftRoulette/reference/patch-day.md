@@ -93,6 +93,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Random mode never gives some hero / new hero missing | new hero id not in enum or builds | patch-check Heroes HIT; self-test Heroes WARN | update `lib/`, `fetch-builds.py` |
 | Joining fails / players stuck in hero select | `Heroes.Skyrunner` removed or not selectable | patch-check `Skyrunner`; `lobby-*.log` | pick another lobby hero in `LobbyService` |
 | New players never finish joining (players in keep playing) | unknown; seen after hours up | `restart-*.log` `Join never completed` / `Join stuck`; `/restart_status` | automatic map reload with nobody playing, or `/restart_now`; if joins still fail after a reload, restart the server process |
+| Players sent up keep dropping a few seconds later, rescued every 2 s, always back to the same height | the game stops players walking on the sky clip (`citadel_check_walk_on_skyclip`, new in 6757, default on); the watch spots stand on it | self-test Convars `citadel_check_walk_on_skyclip` (expected 0); `watch-*.log` `Rescued` every 2 s with a repeated `Z=` | `LobbyService.ApplyServerConvars` sets it to 0; if renamed, find the new name in `convars.txt` (GameTracking) |
 | Players fall from the watch spot | skybox floor moved or removed | self-test Map floor WARN (compare to baseline); `watch-*.log` rescues | new map dump; move the watch anchors; `check-spots.py` |
 | Players spawn in walls at rift starts | map geometry changed | `/spots_walk sapphire|amber`; `check-spots.py` | new map dump, move anchors / `spots.json` |
 | Players can shoot / cast up top | modifier or state renamed / renumbered | self-test live Restraint FAIL; `restraint` Trace `refused` | new names from the schema DB / enum |
@@ -125,6 +126,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | `citadel_allow_duplicate_heroes` | 1 | `LobbyService` |
 | `citadel_hero_demo_unlock_flex_slots` | 1 (missing after engine 6712; never opened slots alone — `Lobby/FlexSlots` does) | `LobbyService` |
 | `citadel_voice_all_talk` | 1 | `LobbyService` |
+| `citadel_check_walk_on_skyclip` | 0 (new in 6757, cheat, replicated; on drops players off the watch spots) | `LobbyService` |
 | `citadel_allow_purchasing_anywhere` | 0 | `GameLoop/ShopAccess.cs` |
 | `citadel_allow_pausing` | 0 when open, 1 in private mode or after `/pause_allow on` (devonly, replicated) | `Lobby/PauseRule.cs` `ConVars`, set by `PauseGuard.Apply` |
 | `citadel_allow_pause_in_match` | 0 when open, 1 in private mode or after `/pause_allow on` | same |

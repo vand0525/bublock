@@ -37,6 +37,7 @@ public static class LobbyService
     ServerConVars.TrySet("citadel_allow_duplicate_heroes", 1, LobbyLog);
     ServerConVars.TrySet("citadel_hero_demo_unlock_flex_slots", 1, LobbyLog);
     ServerConVars.TrySet("citadel_voice_all_talk", 1, LobbyLog);
+    ServerConVars.TrySet("citadel_check_walk_on_skyclip", 0, LobbyLog);
     FlexSlots.UnlockAll(mode);
     ShopAccess.Disable(mode);
     PauseGuard.FollowAccess(mode);
