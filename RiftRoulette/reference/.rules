@@ -187,8 +187,9 @@ Assume the git repo is rooted at `Bublock/`.
   A ban on a reserved hero uses one of the holder's rounds (random hero,
   private chat line). Priority heroes (`RandomMode/PriorityHeroes`, a
   list fixed in code): each one with stored builds goes into every Random
-  draw (`HeroDraw.Draw` `mustInclude`, and `AssignLate` when its holder
-  left), and is never reservable or bannable (refused before any souls
+  draw with 8 or more fighters (`PriorityHeroes.Guaranteed`; `HeroDraw.Draw`
+  `mustInclude`, and `AssignLate` when its holder left); with fewer
+  fighters it is drawn like any other hero. It is never reservable or bannable (refused before any souls
   are spent). A priority hero whose swap fails (the server can't spawn
   it, `LoadoutService.Swap` `swapFailed`) is off the draw for the rest of
   the match and its player gets a new random hero and build at once

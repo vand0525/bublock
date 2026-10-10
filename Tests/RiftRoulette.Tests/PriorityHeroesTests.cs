@@ -6,11 +6,22 @@ namespace Bublock.Tests.RiftRoulette;
 public class PriorityHeroesTests
 {
   [Fact]
-  public void List_holds_rat_king_and_baba()
+  public void List_holds_rat_king_baba_and_solomon()
   {
     Assert.True(PriorityHeroes.Contains(Heroes.RatKing));
     Assert.True(PriorityHeroes.Contains(Heroes.Baba));
-    Assert.Equal(2, PriorityHeroes.List.Count);
+    Assert.True(PriorityHeroes.Contains(Heroes.Chessmaster));
+    Assert.Equal(3, PriorityHeroes.List.Count);
+  }
+
+  [Theory]
+  [InlineData(2, false)]
+  [InlineData(7, false)]
+  [InlineData(8, true)]
+  [InlineData(12, true)]
+  public void Guaranteed_only_with_eight_or_more_fighters(int fighters, bool expected)
+  {
+    Assert.Equal(expected, PriorityHeroes.Guaranteed(fighters));
   }
 
   [Fact]
@@ -56,10 +67,10 @@ public class PriorityHeroesTests
   public void RefusedLine_names_the_hero_and_the_action()
   {
     Assert.Equal(
-      "Haze is a priority hero: someone gets it every round, so it can't be reserved.",
+      "Haze is a priority hero: with 8 or more fighters someone gets it every round, so it can't be reserved.",
       PriorityHeroes.RefusedLine("Haze", "reserved"));
     Assert.Equal(
-      "Haze is a priority hero: someone gets it every round, so it can't be banned.",
+      "Haze is a priority hero: with 8 or more fighters someone gets it every round, so it can't be banned.",
       PriorityHeroes.RefusedLine("Haze", "banned"));
   }
 }

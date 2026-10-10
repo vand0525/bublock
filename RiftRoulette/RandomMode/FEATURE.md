@@ -48,21 +48,23 @@ A ban bought in an intermission (after the draw) applies to the round after.
 A ban on a reserved hero uses one of the holder's rounds; they get a random
 hero and a private chat line, so bans can counter a reservation.
 
-Priority heroes (`PriorityHeroes`, a list fixed in code, empty by default):
-for example, a new hero everyone wants to try. Each listed hero that has
-stored builds is given to one fighter every round (rotating away from last
-round's holder when possible), and to the bench player who subs in if its
-holder leaves. They can't be reserved or banned (`/reserve` and `/heroban`
-reply `<hero> is a priority hero: someone gets it every round, so it can't
-be reserved/banned.`, not charged). Mirror mode ignores the list: its random
+Priority heroes (`PriorityHeroes`, a list fixed in code; now Rat King, Baba
+and Solomon): for example, a new hero everyone wants to try. In a round with
+8 or more fighters (`PriorityHeroes.MinFighters`), each listed hero that has
+stored builds is given to one fighter (rotating away from last round's
+holder when possible), and to the bench player who subs in if its holder
+leaves. With fewer fighters they are drawn like any other hero. They can't
+be reserved or banned at any count (`/reserve` and `/heroban` reply
+`<hero> is a priority hero: with 8 or more fighters someone gets it every
+round, so it can't be reserved/banned.`, not charged). Mirror mode ignores the list: its random
 hero still rolls across the whole pool.
 
 ## Files
 
 | File | Role |
 |---|---|
-| `HeroDraw.cs` | Unique random heroes, no repeat of last round; reserved (fixed) heroes honored; priority heroes always given out (pure, tested) |
-| `PriorityHeroes.cs` | The priority hero list, which of them are in the pool, the refusal line (pure, tested) |
+| `HeroDraw.cs` | Unique random heroes, no repeat of last round; reserved (fixed) heroes honored; the heroes it is told to include always given out (pure, tested) |
+| `PriorityHeroes.cs` | The priority hero list, the 8-fighter threshold (`Guaranteed`), which of them are in the pool, the refusal line (pure, tested) |
 | `HeroReservations.cs` | Hero reservations: a waiting line per hero, rounds used per fighting round (or burned by a ban), reply text (pure, tested) |
 | `HeroBans.cs` | Hero bans: one pending per team, taken into each draw, reveal text (pure, tested) |
 | `BenchRule.cs` | Who sits out (rotation) and the fighting teams around them (pure, tested) |

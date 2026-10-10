@@ -116,7 +116,7 @@ public static class RandomModeService
     var banned = Bans.Take(MatchService.State.Round);
     var turns = Reservations.Take(fighters.Keys, MatchService.State.Round, banned);
     var reserved = turns.ToDictionary(turn => turn.SteamId, turn => turn.Hero);
-    var priority = Priority(catalog, log);
+    var priority = PriorityHeroes.Guaranteed(fighters.Count) ? Priority(catalog, log) : [];
     var heroes = HeroDraw.Draw(fighters.Keys.ToList(), Unbanned(catalog.Heroes), LastHero, Random.Shared, reserved, priority);
 
     Assignments.Clear();
@@ -315,7 +315,10 @@ public static class RandomModeService
       return;
 
     // An unheld priority hero (its holder left) goes to the late player; no reserved round is used.
-    var unheld = Priority(catalog, Log.WithMode(mode)).Where(hero => !taken.Contains(hero)).ToList();
+    var fighters = Assignments.Keys.Count(id => id != steamId) + 1;
+    var unheld = PriorityHeroes.Guaranteed(fighters)
+      ? Priority(catalog, Log.WithMode(mode)).Where(hero => !taken.Contains(hero)).ToList()
+      : [];
     var turn = unheld.Count > 0 ? null : Reservations.TakeLate(steamId, MatchService.State.Round, taken, Bans.Current);
     var hero = unheld.Count > 0
       ? unheld[Random.Shared.Next(unheld.Count)]

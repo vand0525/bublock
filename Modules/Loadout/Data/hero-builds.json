@@ -25567,6 +25567,563 @@
    ]
   },
   {
+   "id": 85,
+   "className": "hero_chessmaster",
+   "name": "Solomon",
+   "builds": [
+    {
+     "buildId": 868430,
+     "version": 1,
+     "name": "YaBoyCJ Solomon Hybrid Solved V1.0",
+     "rank": "custom",
+     "matches": 0,
+     "wins": 0,
+     "favorites": 5,
+     "items": [
+      "upgrade_pristine_emblem",
+      "upgrade_long_range",
+      "upgrade_sharpshooter",
+      "upgrade_improved_spirit",
+      "upgrade_magic_reach",
+      "upgrade_soaring_spirit",
+      "upgrade_tech_range",
+      "upgrade_improved_stamina",
+      "upgrade_magic_shield",
+      "upgrade_superior_stamina",
+      "upgrade_magic_tempo",
+      "upgrade_cooldown_reduction",
+      "upgrade_magic_shock",
+      "upgrade_boundless_spirit",
+      "upgrade_magic_carpet",
+      "upgrade_aoe_root",
+      "upgrade_transcendent_cooldown",
+      "upgrade_spirit_burn",
+      "upgrade_diviners_kevlar",
+      "upgrade_ability_refresher",
+      "upgrade_tech_overflow",
+      "upgrade_banshee_slugs",
+      "upgrade_escalating_exposure",
+      "upgrade_ultimate_burst",
+      "upgrade_discord",
+      "upgrade_divine_barrier"
+     ],
+     "categories": [
+      {
+       "name": "Early Core",
+       "optional": false,
+       "items": [
+        "upgrade_pristine_emblem",
+        "upgrade_long_range",
+        "upgrade_sharpshooter",
+        "upgrade_improved_spirit",
+        "upgrade_magic_reach",
+        "upgrade_soaring_spirit",
+        "upgrade_tech_range",
+        "upgrade_improved_stamina",
+        "upgrade_magic_shield",
+        "upgrade_superior_stamina"
+       ]
+      },
+      {
+       "name": "Mid Core",
+       "optional": false,
+       "items": [
+        "upgrade_magic_tempo",
+        "upgrade_cooldown_reduction",
+        "upgrade_magic_shock",
+        "upgrade_boundless_spirit"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_LateGame",
+       "optional": true,
+       "items": [
+        "upgrade_magic_carpet",
+        "upgrade_aoe_root",
+        "upgrade_transcendent_cooldown",
+        "upgrade_spirit_burn",
+        "upgrade_diviners_kevlar",
+        "upgrade_ability_refresher"
+       ]
+      },
+      {
+       "name": "Super Late Other Picks",
+       "optional": true,
+       "items": [
+        "upgrade_tech_overflow",
+        "upgrade_banshee_slugs",
+        "upgrade_escalating_exposure",
+        "upgrade_ultimate_burst",
+        "upgrade_discord",
+        "upgrade_divine_barrier"
+       ]
+      }
+     ],
+     "imbues": {
+      "upgrade_magic_reach": "ability_chessmaster_throwbishop",
+      "upgrade_magic_tempo": "ability_chessmaster_queen"
+     },
+     "sellPriority": {},
+     "abilities": [
+      {
+       "ability": "ability_chessmaster_throwbishop",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_chessmaster_knightbuff",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_chessmaster_forkpiece",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_chessmaster_queen",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_chessmaster_throwbishop",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_throwbishop",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_knightbuff",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_queen",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_queen",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_forkpiece",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_forkpiece",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_forkpiece",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_knightbuff",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_knightbuff",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_queen",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_throwbishop",
+       "kind": "upgrade"
+      }
+     ]
+    },
+    {
+     "buildId": 868364,
+     "version": 5,
+     "name": "Glorious Aurafarmer Chesslord Mr. S",
+     "rank": "custom",
+     "matches": 0,
+     "wins": 0,
+     "favorites": 3,
+     "items": [
+      "upgrade_improved_stamina",
+      "upgrade_sprint_booster",
+      "upgrade_arcane_surge",
+      "upgrade_improved_spirit",
+      "upgrade_magic_shield",
+      "upgrade_containment",
+      "upgrade_grit",
+      "upgrade_spirit_bubble",
+      "upgrade_weapon_shielding",
+      "upgrade_magic_reach",
+      "upgrade_magic_tempo",
+      "upgrade_magic_slow",
+      "upgrade_health_stealing_magic",
+      "upgrade_tech_range",
+      "upgrade_soaring_spirit",
+      "upgrade_aoe_root",
+      "upgrade_health_nova",
+      "upgrade_guardian_ward",
+      "upgrade_healbane",
+      "upgrade_rescue_beam",
+      "upgrade_transcendent_cooldown",
+      "upgrade_infuser",
+      "upgrade_boundless_spirit",
+      "upgrade_ultimate_burst",
+      "upgrade_diviners_kevlar",
+      "upgrade_divine_barrier",
+      "upgrade_metal_skin",
+      "upgrade_unstoppable",
+      "upgrade_absorbing_armor",
+      "upgrade_auto_cleanse"
+     ],
+     "categories": [
+      {
+       "name": "#Citadel_HeroBuilds_Early",
+       "optional": false,
+       "items": [
+        "upgrade_improved_stamina",
+        "upgrade_sprint_booster",
+        "upgrade_arcane_surge",
+        "upgrade_improved_spirit",
+        "upgrade_magic_shield",
+        "upgrade_containment"
+       ]
+      },
+      {
+       "name": "Early Options",
+       "optional": false,
+       "items": [
+        "upgrade_grit",
+        "upgrade_spirit_bubble",
+        "upgrade_weapon_shielding"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_Mid",
+       "optional": false,
+       "items": [
+        "upgrade_magic_reach",
+        "upgrade_magic_tempo",
+        "upgrade_magic_slow",
+        "upgrade_health_stealing_magic",
+        "upgrade_tech_range",
+        "upgrade_soaring_spirit",
+        "upgrade_aoe_root"
+       ]
+      },
+      {
+       "name": "Support Options",
+       "optional": false,
+       "items": [
+        "upgrade_health_nova",
+        "upgrade_guardian_ward",
+        "upgrade_healbane",
+        "upgrade_rescue_beam"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_Late",
+       "optional": false,
+       "items": [
+        "upgrade_transcendent_cooldown",
+        "upgrade_infuser",
+        "upgrade_boundless_spirit",
+        "upgrade_ultimate_burst",
+        "upgrade_diviners_kevlar",
+        "upgrade_divine_barrier"
+       ]
+      },
+      {
+       "name": "Tank Options",
+       "optional": false,
+       "items": [
+        "upgrade_metal_skin",
+        "upgrade_unstoppable",
+        "upgrade_absorbing_armor",
+        "upgrade_auto_cleanse"
+       ]
+      }
+     ],
+     "imbues": {
+      "upgrade_magic_reach": "ability_chessmaster_knightbuff",
+      "upgrade_magic_tempo": "ability_chessmaster_forkpiece"
+     },
+     "sellPriority": {},
+     "abilities": [
+      {
+       "ability": "ability_chessmaster_throwbishop",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_chessmaster_throwbishop",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_knightbuff",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_chessmaster_forkpiece",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_chessmaster_forkpiece",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_queen",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_chessmaster_queen",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_queen",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_knightbuff",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_knightbuff",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_throwbishop",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_throwbishop",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_knightbuff",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_queen",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_forkpiece",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_forkpiece",
+       "kind": "upgrade"
+      }
+     ]
+    },
+    {
+     "buildId": 868211,
+     "version": 1,
+     "name": "Checkmate",
+     "rank": "custom",
+     "matches": 0,
+     "wins": 0,
+     "favorites": 1,
+     "items": [
+      "upgrade_high_velocity_mag",
+      "upgrade_improved_spirit",
+      "upgrade_magic_burst",
+      "upgrade_magic_reach",
+      "upgrade_improved_stamina",
+      "upgrade_endurance",
+      "upgrade_grit",
+      "upgrade_healbane",
+      "upgrade_reduce_debuff_duration",
+      "upgrade_counterspell",
+      "upgrade_magic_slow",
+      "upgrade_crackshot",
+      "upgrade_magic_vulnerability",
+      "upgrade_soaring_spirit",
+      "upgrade_tech_defense_shredders",
+      "upgrade_pristine_emblem",
+      "upgrade_spirit_sap",
+      "upgrade_suppressor",
+      "upgrade_tech_purge",
+      "upgrade_improved_bullet_armor",
+      "upgrade_tech_range",
+      "upgrade_magic_shock",
+      "upgrade_cooldown_reduction",
+      "upgrade_spellslinger_headshots",
+      "upgrade_superior_stamina",
+      "upgrade_bulletshredimbue",
+      "upgrade_boundless_spirit",
+      "upgrade_spirit_burn",
+      "upgrade_transcendent_cooldown",
+      "upgrade_aoe_root",
+      "upgrade_escalating_exposure",
+      "upgrade_focus_lens",
+      "upgrade_tech_overflow",
+      "upgrade_mystic_reverb",
+      "upgrade_guardian_ward",
+      "upgrade_divine_barrier",
+      "upgrade_rescue_beam",
+      "upgrade_greater_withering_whip",
+      "upgrade_containment"
+     ],
+     "categories": [
+      {
+       "name": "#Citadel_HeroBuilds_Lane",
+       "optional": false,
+       "items": [
+        "upgrade_high_velocity_mag",
+        "upgrade_improved_spirit",
+        "upgrade_magic_burst",
+        "upgrade_magic_reach",
+        "upgrade_improved_stamina",
+        "upgrade_endurance"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_Lane",
+       "optional": true,
+       "items": [
+        "upgrade_grit"
+       ]
+      },
+      {
+       "name": "youll probably need this",
+       "optional": false,
+       "items": [
+        "upgrade_healbane",
+        "upgrade_reduce_debuff_duration",
+        "upgrade_counterspell"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_EarlyGame",
+       "optional": false,
+       "items": [
+        "upgrade_magic_slow",
+        "upgrade_crackshot",
+        "upgrade_magic_vulnerability",
+        "upgrade_soaring_spirit",
+        "upgrade_tech_defense_shredders",
+        "upgrade_pristine_emblem",
+        "upgrade_spirit_sap",
+        "upgrade_suppressor"
+       ]
+      },
+      {
+       "name": "Survival options",
+       "optional": true,
+       "items": [
+        "upgrade_tech_purge",
+        "upgrade_improved_bullet_armor"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_MidGame",
+       "optional": false,
+       "items": [
+        "upgrade_tech_range",
+        "upgrade_magic_shock",
+        "upgrade_cooldown_reduction",
+        "upgrade_spellslinger_headshots",
+        "upgrade_superior_stamina",
+        "upgrade_bulletshredimbue"
+       ]
+      },
+      {
+       "name": "youll probably need these",
+       "optional": true,
+       "items": [
+        "upgrade_boundless_spirit",
+        "upgrade_spirit_burn",
+        "upgrade_transcendent_cooldown",
+        "upgrade_aoe_root",
+        "upgrade_escalating_exposure",
+        "upgrade_focus_lens",
+        "upgrade_tech_overflow",
+        "upgrade_mystic_reverb"
+       ]
+      },
+      {
+       "name": "Support Items",
+       "optional": true,
+       "items": [
+        "upgrade_guardian_ward",
+        "upgrade_divine_barrier",
+        "upgrade_rescue_beam",
+        "upgrade_greater_withering_whip",
+        "upgrade_containment"
+       ]
+      }
+     ],
+     "imbues": {
+      "upgrade_magic_reach": "ability_chessmaster_throwbishop",
+      "upgrade_bulletshredimbue": "ability_chessmaster_throwbishop"
+     },
+     "sellPriority": {},
+     "abilities": [
+      {
+       "ability": "ability_chessmaster_forkpiece",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_chessmaster_knightbuff",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_chessmaster_knightbuff",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_throwbishop",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_chessmaster_throwbishop",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_queen",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_chessmaster_throwbishop",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_queen",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_queen",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_queen",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_forkpiece",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_knightbuff",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_knightbuff",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_forkpiece",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_forkpiece",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_chessmaster_throwbishop",
+       "kind": "upgrade"
+      }
+     ]
+    }
+   ]
+  },
+  {
    "id": 88,
    "className": "hero_baba",
    "name": "Baba",
