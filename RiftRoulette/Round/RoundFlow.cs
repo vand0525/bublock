@@ -49,19 +49,18 @@ public static class RoundFlow
       return false;
 
     var before = pawn.Health;
+    var abilitiesBefore = AbilityCharges.Describe(pawn);
     pawn.Heal(pawn.GetMaxHealth());
     pawn.ResetAllAbilityCooldowns();
 
-    var charges = pawn.AbilityComponent.Abilities
-      .Where(ability => ability.MaxCharges > 0)
-      .Select(ability => $"{ability.AbilityName}:{ability.RemainingCharges}/{ability.MaxCharges}");
-
-    Log.WithMode(mode).Debug(
+    Log.WithMode(mode).Info(
       player.ToPlayerRef(),
-      "Ready to fight Health={Health} MaxHealth={MaxHealth} Charges={Charges}",
+      "Ready to fight Hero={Hero} Health={Health} MaxHealth={MaxHealth} Before={Before} After={After}",
+      pawn.HeroID,
       before,
       pawn.GetMaxHealth(),
-      string.Join(",", charges));
+      abilitiesBefore,
+      AbilityCharges.Describe(pawn));
     return true;
   }
 

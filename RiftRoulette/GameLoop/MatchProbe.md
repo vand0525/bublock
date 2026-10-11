@@ -21,7 +21,9 @@ Debug mode; a few lines per event, no per-frame work.
   `citadel_allow_purchasing_anywhere` value (should be 0).
 - **One per participant** (with `PlayerRef`): team, hero, alive, position and
   eye angles (`MovementService.Where`), `Half` (Sapphire when y > 0, else
-  Amber), restrained, and which `RestraintService.States` are on.
+  Amber), restrained, which `RestraintService.States` are on, and
+  `Abilities` (`Round/AbilityCharges.Describe`: each signature ability's
+  charges, max and cooldown left).
 - **One per tracked board**: id, position, angle (`WorldTextService.List`).
 
 ## Called from

@@ -298,8 +298,9 @@ Assume the git repo is rooted at `Bublock/`.
   `Silenced` / `ItemsDisabled` / `ShootingDisabled` / `MeleeDisabled` /
   `IgnoredByNpcTargeting` states set every frame) until
   `RoundFlow.MoveTeamsToRift` releases them, heals them to full and
-  refills their abilities (`ResetAllAbilityCooldowns`: charges and
-  cooldowns; a new hero's charges start at 0).
+  resets their abilities (`ResetAllAbilityCooldowns`; it ends cooldowns
+  but adds no charges on the current game build, see
+  `Round/AbilityCharges.md`).
   Restrained players take no damage (`GameLoopPlugin.OnTakeDamage` returns
   `Stop` when `RestraintService.IsRestrainedPawn`), so leftover turrets and
   troopers can't hurt anyone up top. Never use disarm

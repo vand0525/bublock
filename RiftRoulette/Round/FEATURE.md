@@ -9,8 +9,9 @@ lifecycle, Debug for admin) changes only logging. The round reports its
 result to the match loop. Players wait at a watch spot above the rift
 (`WatchSpot`), not the fixed `draft` spot, restrained (`Modules/Restraint`)
 until they are moved into the rift, where each fighter is healed to full
-health and gets every ability ready with full charges
-(`ResetAllAbilityCooldowns`).
+health and has every ability reset (`ResetAllAbilityCooldowns`; cooldowns
+end, but on the current game build no charges are added, see
+`AbilityCharges.md`).
 
 ## Files
 
@@ -24,6 +25,7 @@ health and gets every ability ready with full charges
 | `WatchGuardRule.cs` | "Below the watch spot" line: spot z - 300 (pure) |
 | `WatchGuard.cs` | Every 16 frames sends restrained players who dropped below the line back up (no banner); logs restrained players' console commands |
 | `RoundFlow.cs` | Composer: `RunRound`, `CancelRound`, `MoveTeamsToRift`, `SendPlayersUp`, `Steps` |
+| `AbilityCharges.cs` | Read-only log text of a hero's signature abilities: charges, max, cooldown left |
 | `SlotSpots.cs` + `Data/spots.json` | Per-slot spots: anchor + slot offset (forward, right, up) for the watch spot and the rift starts (embedded table) |
 | `SpotCheck.cs` | List the slot spots; walk an admin through one group and log where the pawn lands |
 | `SpotsPlugin.cs` | `/spots_list`, `/spots_walk` |

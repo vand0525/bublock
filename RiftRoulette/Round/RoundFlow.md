@@ -7,9 +7,10 @@ Static; no state of its own.
 
 ## Logs
 
-`Round` feature log (`round-YYYYMMDD.log`), Debug lines only (team move
-counts, each fighter's health and ability charges at release, dead players
-skipped, players returned), so they appear only in Debug mode. Per-player teleports are in `movement-*.log`; the rift sequence
+`Round` feature log (`round-YYYYMMDD.log`). One Information line per
+fighter at release (`Ready to fight`, every mode); the rest are Debug lines
+(team move counts, dead players skipped, players returned), so they appear
+only in Debug mode. Per-player teleports are in `movement-*.log`; the rift sequence
 is in `rift-*.log`.
 
 ## Operations
@@ -18,7 +19,7 @@ is in `rift-*.log`.
 |---|---|---|
 | `RunRound(timer, mode)` | `RiftService.RunRift(timer, Steps(mode, timer), mode)` | reply line |
 | `CancelRound(timer, mode)` | `RiftService.CancelRift(Steps(mode), timer, mode)` (the timer runs the late trooper sweeps) | reply line |
-| `MoveTeamsToRift(side, mode)` | Participants (`Participants.Humans()`: no bots, no seated admin) with a round hero (`RoundHeroes.Has`; bench players have none and stay up top) on team Sapphire (`TeamNum` 3) → Sapphire start, then those on Amber (2) → Amber start (`RoundLocations.StartsFor(side)`). Each player goes to their own slot spot around the team's start, `SlotSpots.Fight(anchor, player.Slot)` (`MovementService.TeleportTo` per player), so nobody lands on a teammate. Every moved player is first released from restraint (`RestraintService.Release`), and after the teleports every one of them with a live hero is made ready to fight: healed to full (`pawn.Heal(pawn.GetMaxHealth())`) and every ability, item, innate and weapon reset (`pawn.ResetAllAbilityCooldowns()`: cooldowns ended, charges refilled; a new hero's charges start at 0 and the intermission is too short to refill them). Debug `Ready to fight Health= MaxHealth= Charges=` lists each charged ability as `name:remaining/max`; the move line carries `Ready=`. Grouping by `TeamNum` works because Random and Mirror mode set each fighter's team before writing their round hero | — |
+| `MoveTeamsToRift(side, mode)` | Participants (`Participants.Humans()`: no bots, no seated admin) with a round hero (`RoundHeroes.Has`; bench players have none and stay up top) on team Sapphire (`TeamNum` 3) → Sapphire start, then those on Amber (2) → Amber start (`RoundLocations.StartsFor(side)`). Each player goes to their own slot spot around the team's start, `SlotSpots.Fight(anchor, player.Slot)` (`MovementService.TeleportTo` per player), so nobody lands on a teammate. Every moved player is first released from restraint (`RestraintService.Release`), and after the teleports every one of them with a live hero is made ready to fight: healed to full (`pawn.Heal(pawn.GetMaxHealth())`) and every ability, item, innate and weapon reset (`pawn.ResetAllAbilityCooldowns()`: cooldowns ended; meant to refill charges too, but on the current game build Deadworks' charge check reads false for every ability, so no charges are added — see `AbilityCharges.md`). Information `Ready to fight Hero= Health= MaxHealth= Before= After=` carries `AbilityCharges.Describe` from before and after the reset; the move line carries `Ready=`. Grouping by `TeamNum` works because Random and Mirror mode set each fighter's team before writing their round hero | — |
 | `SendPlayersUp(mode)` | Alive participants with a pawn → `WatchSpot.SendUp(player, mode, RiftService.NextSide)` (restrain + teleport above the next rift; no banner); dead ones are restrained, get a Debug line with `PlayerRef`, and are left for Lobby's `player_spawn`. Then `WatchSpot.RefreshBoards(NextSide)`. `NextSide` is explicit because the rift still counts as running here | players moved |
 | `Steps(mode, probeTimer = null)` | `RiftRoundSteps` wrapping the two ops above with the same mode, plus `RoundEnded` → `GameLoop/MatchService.OnRoundEnded(result, mode)` (does nothing when no match is running). With a `probeTimer` (from `RunRound`), each move also schedules a `GameLoop/MatchProbe` snapshot 1 s later (`moved-in` / `sent-up`); `CancelRound` passes none | steps |
 

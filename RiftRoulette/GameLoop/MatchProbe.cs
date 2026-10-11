@@ -67,7 +67,7 @@ public static class MatchProbe
 
     Log.Info(
       player.ToPlayerRef(),
-      "Probe player {Reason} Team={Team} Hero={Hero} Alive={Alive} Position={Position} EyeAngles={EyeAngles} Half={Half} Restrained={Restrained} States={States}",
+      "Probe player {Reason} Team={Team} Hero={Hero} Alive={Alive} Position={Position} EyeAngles={EyeAngles} Half={Half} Restrained={Restrained} States={States} Abilities={Abilities}",
       reason,
       RiftRouletteTeams.Name(player.TeamNum),
       pawn?.HeroID.ToString() ?? "-",
@@ -76,6 +76,7 @@ public static class MatchProbe
       where?.EyeAngles.ToString() ?? "-",
       half,
       RestraintService.IsRestrained(player.PlayerSteamId),
-      states.Length == 0 ? "none" : states);
+      states.Length == 0 ? "none" : states,
+      pawn != null ? AbilityCharges.Describe(pawn) : "-");
   }
 }
