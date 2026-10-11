@@ -21,7 +21,7 @@ public class EmptySignLayoutTests
     var flat = new Vector2(center.X, center.Y) - new Vector2(EmptySignLayout.CameraPosition.X, EmptySignLayout.CameraPosition.Y);
 
     Assert.Equal(EmptySignLayout.Distance, flat.Length(), 1);
-    Assert.True(center.X < -599f);
+    Assert.True(center.X < -(EmptySignLayout.Distance - 1f));
     Assert.Equal(-MathF.Tan(EmptySignLayout.CameraAngle.X * MathF.PI / 180f) * EmptySignLayout.Distance, center.Z, 2);
     Assert.True(center.Z > 0f);
   }

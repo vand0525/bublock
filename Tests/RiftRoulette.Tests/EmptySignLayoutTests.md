@@ -4,7 +4,7 @@ Unit tests for `RiftRoulette/Boards/EmptySignLayout`.
 
 - The camera spot is exactly the captured spectator start (`setpos_exact`
   / `setang_exact`: origin, pitch -0.59375, yaw 179.3125).
-- The sign's center is `Distance` (600) straight ahead along the view yaw
+- The sign's center is `Distance` (400) straight ahead along the view yaw
   (toward -x) and raised by the slight upward pitch.
 - Both boards face the camera (`(0, yaw - 90, 90)`).
 - The viewer's right when looking down -x is +y.
