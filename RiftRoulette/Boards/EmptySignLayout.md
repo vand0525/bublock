@@ -11,7 +11,8 @@ calls; unit tested (`Tests/RiftRoulette.Tests/EmptySignLayoutTests`).
 | `TitleText` | `RIFT ROULETTE` |
 | `JoinAddress` / `JoinText` | `66.94.102.245:27015` / `Join with connect 66.94.102.245:27015` (the public address in `README.md`) |
 | `CameraPosition` / `CameraAngle` | (0, 0, 0) / (-0.59375, 179.3125, 0): where a spectator's camera starts on an empty server (under mid, looking level along -x), captured with `getpos_exact` |
-| `Distance` | 400 units in front of the camera (600 read too far in game) |
+| `Distance` | 300 units in front of the camera (600 and 400 read too far in game) |
+| `SideShift` | 100 units along the viewer's right (negative: left), nudged by eye in game |
 | `FontSize` | 64 px |
 | `TitleScale` / `JoinScale` | 1.2 / 0.45 world units per px (about 77 / 29 units tall) |
 | `LineGap` | 8 units between the center and each line |
@@ -21,15 +22,15 @@ calls; unit tested (`Tests/RiftRoulette.Tests/EmptySignLayoutTests`).
 
 | Operation | Result |
 |---|---|
-| `Center` | `WorldTextPlacement.InFrontOf(CameraPosition, yaw, Distance)`, lowered by `tan(pitch) * Distance` (positive pitch looks down; here it is raised about 4 units) |
+| `Center` | `WorldTextPlacement.InFrontOf(CameraPosition, yaw, Distance)`, lowered by `tan(pitch) * Distance` (positive pitch looks down; here it is raised about 3 units), then moved `SideShift` along `Right` |
 | `Angle` | `WorldTextPlacement.FacingViewer(yaw)`: `(0, yaw - 90, 90)`, the welcome board's convention |
 | `Right(yaw)` | The viewer's right, `(sin yaw, -cos yaw, 0)`: the way world text runs |
 | `Width(text, scale)` | Estimated text width: characters × `CharWidth` × `FontSize` × scale |
-| `Title()` | Dark navy (15, 20, 45) `TitleText` spec, bottom edge `LineGap` above the center |
-| `Join()` | Near-black (30, 30, 30) `JoinText` spec, top edge `LineGap` below the center |
+| `Title()` | Solid green (0, 190, 0) `TitleText` spec, bottom edge `LineGap` above the center |
+| `Join()` | Solid green (0, 190, 0) `JoinText` spec, top edge `LineGap` below the center |
 
-Dark text because the area under mid is bright beige: white washed out
-against it in game.
+Green because the area under mid is bright beige: white washed out and
+dark navy read worse in game.
 
 Each line's position is its bottom-left corner: center minus half its
 width along `Right`, plus its height offset.

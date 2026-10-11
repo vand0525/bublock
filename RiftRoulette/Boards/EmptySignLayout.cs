@@ -13,7 +13,10 @@ public static class EmptySignLayout
   public static readonly Vector3 CameraPosition = Vector3.Zero;
   public static readonly Vector3 CameraAngle = new(-0.59375f, 179.3125f, 0f);
 
-  public const float Distance = 400f;
+  public const float Distance = 300f;
+
+  // Moves the sign along the viewer's right (negative: left), nudged by eye in game.
+  public const float SideShift = 100f;
   public const float FontSize = 64f;
   public const float TitleScale = 1.2f;
   public const float JoinScale = 0.45f;
@@ -22,16 +25,17 @@ public static class EmptySignLayout
   // Text width per character as a share of the font size, estimated from the welcome board (WatchLayout.WelcomeHalfWidth).
   public const float CharWidth = 0.66f;
 
-  // Dark text: the area under mid is bright beige, and white text washed out against it.
-  private static readonly WorldTextColor TitleColor = new(15, 20, 45, 255);
-  private static readonly WorldTextColor JoinColor = new(30, 30, 30, 255);
+  // The area under mid is bright beige: white washed out and dark navy read worse, so solid green.
+  private static readonly WorldTextColor TitleColor = new(0, 190, 0, 255);
+  private static readonly WorldTextColor JoinColor = new(0, 190, 0, 255);
 
   public static Vector3 Angle => WorldTextPlacement.FacingViewer(CameraAngle.Y);
 
   // Positive pitch looks down, so the middle of the view sits lower.
   public static Vector3 Center =>
     WorldTextPlacement.InFrontOf(CameraPosition, CameraAngle.Y, Distance)
-      - new Vector3(0f, 0f, MathF.Tan(CameraAngle.X * MathF.PI / 180f) * Distance);
+      - new Vector3(0f, 0f, MathF.Tan(CameraAngle.X * MathF.PI / 180f) * Distance)
+      + Right(CameraAngle.Y) * SideShift;
 
   public static WorldTextSpec Title() => Line(TitleText, TitleScale, LineGap, TitleColor);
 

@@ -15,15 +15,17 @@ public class EmptySignLayoutTests
   }
 
   [Fact]
-  public void Center_is_straight_ahead_of_the_camera_at_the_distance()
+  public void Center_is_ahead_of_the_camera_at_the_distance_shifted_sideways()
   {
-    var center = EmptySignLayout.Center;
-    var flat = new Vector2(center.X, center.Y) - new Vector2(EmptySignLayout.CameraPosition.X, EmptySignLayout.CameraPosition.Y);
+    var yaw = EmptySignLayout.CameraAngle.Y * MathF.PI / 180f;
+    var forward = new Vector3(MathF.Cos(yaw), MathF.Sin(yaw), 0f);
+    var right = EmptySignLayout.Right(EmptySignLayout.CameraAngle.Y);
+    var offset = EmptySignLayout.Center - EmptySignLayout.CameraPosition;
 
-    Assert.Equal(EmptySignLayout.Distance, flat.Length(), 1);
-    Assert.True(center.X < -(EmptySignLayout.Distance - 1f));
-    Assert.Equal(-MathF.Tan(EmptySignLayout.CameraAngle.X * MathF.PI / 180f) * EmptySignLayout.Distance, center.Z, 2);
-    Assert.True(center.Z > 0f);
+    Assert.Equal(EmptySignLayout.Distance, Vector3.Dot(offset, forward), 1);
+    Assert.Equal(EmptySignLayout.SideShift, Vector3.Dot(offset, right), 1);
+    Assert.Equal(-MathF.Tan(EmptySignLayout.CameraAngle.X * MathF.PI / 180f) * EmptySignLayout.Distance, offset.Z, 2);
+    Assert.True(offset.Z > 0f);
   }
 
   [Fact]
