@@ -46,7 +46,7 @@ lifecycle, server setup, and the lobby commands. Ops live on
 | `/restart_auto <on\|off>` | admin | `AutoRestartService.SetEnabled(Debug)` until the next load; error for another value |
 | `/restart_budget [n]` | admin | No argument: `MapRefreshService.Describe`. A number: `MapRefreshService.SetBudget(n, Debug)` (fighter-rounds before the join budget reload, 0 = off) until the next load; error for a negative or non-number |
 | `/spec_auto <on\|off>` | admin | `StreamCam.SetAuto`: the automatic stream camera on or off (default on; resets that admin's camera state); error for another value |
-| `/spec_status` | admin | `StreamCam.Describe`: auto, seated, observer mode, fly cam, the view angle read; who is on camera, parked side, placed / handled, watch side; the camera spot (position and angle) for the current watch side |
+| `/spec_status` | admin | `StreamCam.Describe`: auto, seated, observer mode, fly cam, the view angle read; who is on camera, watch side; the fixed camera spot (position and angle, not parked at) for the current watch side |
 
 Seat and `spec_*` commands take no player argument. They target the caller, or without a
 caller (server console, or a client console command that arrived without

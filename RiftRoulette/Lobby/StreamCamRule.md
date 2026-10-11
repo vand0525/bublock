@@ -1,8 +1,11 @@
 # StreamCamRule
 
-Pure decision for the stream camera's park step (`StreamCam`, when nobody
-is fighting). No game calls; unit tested
+Pure decision for the stream camera's park step (when nobody is
+fighting). No game calls; unit tested
 (`Tests/RiftRoulette.Tests/StreamCamRuleTests`).
+
+Not called since 2026-10-11: `StreamCam` no longer parks (parks preceded
+every seated admin client crash). Kept for when a safe reset is worked out.
 
 ## Types
 

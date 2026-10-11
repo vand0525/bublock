@@ -313,12 +313,9 @@ back. It keeps the join package under the 512 KB limit.
 While an admin is seated as an observer the stream camera runs by itself
 (no command needed): while a round is fought it follows a fighter
 (in-eye) and cuts to the killer when they die; with nobody fighting
-(between rounds, everyone up top is restrained) it parks at the fixed spot
-for the current rift side (`StreamFraming.Spot`: green, center, yellow,
-captured in fly cam). The server cannot switch you into fly cam, so press
-C between rounds: outside fly cam the park is re-sent every 6 s, so fly
-cam lands on the spot. The camera never moves while you move it; a camera
-you moved after it landed stays until the side changes or a round starts.
+(between rounds, everyone up top is restrained) it leaves your camera
+where it is (automatic parking was removed on 2026-10-11: it preceded
+every client crash). The camera never moves while you move it.
 These commands are optional. They take no player
 argument: they target the caller, else the connected admin (same fallback
 as `dw_seat_spec`). Spectators have no chat, so use the client console
@@ -338,7 +335,7 @@ as `dw_seat_spec`). Spectators have no chat, so use the client console
 - **Who:** admin
 - **Calls:** `StreamCam.Describe`
 - **Mode:** Debug; read-only
-- **Side effects:** three lines: auto, seated, observer, observer mode, fly cam, the view angle read (`ViewAngle=pitch yaw` or `unreadable`); who is on camera, parked side, placed, handled, watch side; the camera spot for the current watch side (`Spot <side>: position x y z, angle pitch yaw roll`)
+- **Side effects:** three lines: auto, seated, observer, observer mode, fly cam, the view angle read (`ViewAngle=pitch yaw` or `unreadable`); who is on camera, watch side; the fixed camera spot (not parked at) for the current watch side (`Spot <side>: position x y z, angle pitch yaw roll`)
 - **Notes:** `ViewAngle` changing while you turn in fly cam confirms the hand-move check can see you
 
 ### Access (`AccessPlugin`, in RiftRoulette.dll)

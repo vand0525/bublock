@@ -1,8 +1,10 @@
 # StreamFraming
 
-The stream camera's fixed spot for each rift side (`StreamCam` parks
-there). Pure data, no game calls; unit tested
-(`Tests/RiftRoulette.Tests/StreamFramingTests`).
+The stream camera's fixed spot for each rift side. Pure data, no game
+calls; unit tested (`Tests/RiftRoulette.Tests/StreamFramingTests`).
+`StreamCam.Describe` shows it in `spec_status`; since 2026-10-11 the
+camera no longer parks there (parks preceded every seated admin client
+crash).
 
 ## Operations
 
@@ -21,5 +23,5 @@ there). Pure data, no game calls; unit tested
 - Absolute world values, captured by the admin in fly cam with
   `getpos_exact` (it prints `setpos_exact` / `setang_exact`). Not relative
   to the watch spot anchor: moving an anchor does not move the camera.
-- The angle is handed unchanged to `SpectateService.Park`, which passes it
-  to the observer teleport.
+- When parked at (not currently), the angle goes unchanged to
+  `SpectateService.Park`, which passes it to the observer teleport.

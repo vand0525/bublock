@@ -366,15 +366,13 @@ Assume the git repo is rooted at `Bublock/`.
 - Stream camera: a seated admin's camera is run by `Lobby/StreamCam`
   (every 2 s and on deaths) through `Modules/Spectate`; no command
   needed. Fighters (unrestrained participants) to watch: follow one, cut
-  to the killer. Nobody fighting (between rounds): park at the fixed spot
-  for `WatchSpot.Side` (`StreamFraming.Spot`: world position and angle per
-  rift side, captured in fly cam with `getpos_exact`; nothing is saved),
-  re-sent every 6 s outside fly cam so pressing C lands on it
-  (`StreamCamRule.ParkStep`). The server's observer mode does not switch
-  the client: every park goes through `SpectateService.Park` (teleport
-  with the angle; the fly cam ignores `SetClientCameraAngles`) and only moves an admin already in fly cam (C;
-  the client refuses `spec_*` commands from the server, so none are
-  sent). Fly cam is `SpectateService.IsFlyCam` (observer `Roaming`, no
+  to the killer. Nobody fighting (between rounds): no camera call, the
+  camera stays where it is. Never park automatically: every seated admin
+  client crash from 2026-09-28 to 2026-10-11 came right after a
+  `SpectateService.Park` (observer mode change, teleport, angle message),
+  none after a follow; `StreamCamRule` and `StreamFraming` (the fixed
+  spot per rift side) stay unused until a safe reset is worked out. The
+  client refuses `spec_*` commands from the server, so none are sent. Fly cam is `SpectateService.IsFlyCam` (observer `Roaming`, no
   target). The view angle is `CBasePlayerPawn.v_angle`
   (`SpectateService.ViewAngle`; the observer pawn has no `EyeAngles`).
   Never move the camera while the admin moves it in fly cam (the client

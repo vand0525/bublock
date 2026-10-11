@@ -51,12 +51,10 @@ Stream camera: while an admin is seated as an observer, `StreamCam` runs
 their camera for streaming with no command needed. It follows a live
 fighter's view (in-eye) and cuts to the killer when the watched player
 dies. When nobody fights (between rounds, everyone up top is restrained)
-it parks at the fixed spot for the current watch spot side
-(`StreamFraming.Spot`, captured in fly cam). The server cannot switch the
-client into fly cam (C), so outside fly cam it re-sends the park every
-6 s and pressing C lands on the spot. It never moves the camera while the
-admin moves it (a camera moved after it landed stays until the side
-changes), and never follows a hero spawned less than 5 s ago.
+it leaves the camera where it is: automatic parking at the fixed spot
+(`StreamFraming.Spot`) was removed on 2026-10-11 because parks preceded
+every seated admin client crash. It never moves the camera while the
+admin moves it, and never follows a hero spawned less than 5 s ago.
 Camera calls go through `Modules/Spectate`. A hot reload keeps each
 admin's mode, read back from the pawn (`AdminSeat.Restore`).
 
@@ -119,9 +117,9 @@ startup, hot reload, every join and every intermission;
 | `Participants.cs` | Who plays: connected players minus bots, players whose disconnect is being handled, seated admins and statues |
 | `AdminSeatRule.cs` | Pure seat rules: cap 12, `CanConnect`, `CanStand`, `AdminMode`, `JoinMode` (last mode, never play as the 13th; tested) |
 | `AdminSeat.cs` | Admin seat service: connect gate, `Sit`, `Stand`, `Forget`, `Restore` (after hot reload), roam follows the watch spot, `Describe` |
-| `StreamCam.cs` | Automatic stream camera for seated admins: follow fighters, killer cut, park at the fixed spot between rounds |
-| `StreamCamRule.cs` | Pure park rule: park, repark or stay (tested) |
-| `StreamFraming.cs` | Fixed camera spot (position and angle) per rift side (tested) |
+| `StreamCam.cs` | Automatic stream camera for seated admins: follow fighters, killer cut; no camera call between rounds |
+| `StreamCamRule.cs` | Pure park rule: park, repark or stay (tested; not called while automatic parking is off) |
+| `StreamFraming.cs` | Fixed camera spot (position and angle) per rift side (tested; shown by `spec_status`, not parked at) |
 | `HeroLock.cs` | Reusable hero lock (applied / pending / enforcement kills, `Enforce`) |
 | `AccessRule.cs` | Pure access rule: ban, private, whitelist, admin; Steam64 ID check (tested) |
 | `AccessList.cs` | `access.json` model: mode + banned / allowed sets + statue modifier, JSON parse and write (tested) |
@@ -155,8 +153,8 @@ Access (admin): `/player_ban <slot>`, `/ban_add`, `/ban_remove`,
 ## State
 
 `AdminSeat` holds the seated Steam IDs; `StreamCam` holds each seated
-admin's camera state (auto flag, followed player, pending killer, parked
-side, placed / handled, last pose) and roaming admins' watch spot side;
+admin's camera state (auto flag, followed player, pending killer, last
+pose) and roaming admins' watch spot side;
 each `HeroLock` instance is owned by
 its mode. `AccessService` caches the last good `access.json` (the file is
 the source of truth and survives reloads and deploys). `BanStatueService`
