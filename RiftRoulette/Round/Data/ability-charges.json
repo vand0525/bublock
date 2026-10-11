@@ -1,0 +1,443 @@
+{
+  "fetchedAt": "2026-10-11T19:15:33Z",
+  "source": "https://github.com/SteamTracking/GameTracking-Deadlock/blob/master/game/citadel/pak01_dir/scripts/abilities.vdata",
+  "commit": "2d87734ca566",
+  "abilities": {
+    "ability_baba_bubbling_brew": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        1
+      ],
+      "conditional": false
+    },
+    "ability_boho_bouncyprojectile": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_bookworm_dragonfire": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_bounce_pad": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_charged_shot": {
+      "base": 1,
+      "tiers": [
+        1,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_doorman_bomb": {
+      "base": 1,
+      "tiers": [
+        1,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_explosive_barrel": {
+      "base": 2,
+      "tiers": [
+        0,
+        1,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_familiar_ability02": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        1
+      ],
+      "conditional": false
+    },
+    "ability_flame_dash": {
+      "base": 0,
+      "tiers": [
+        0,
+        0,
+        2
+      ],
+      "conditional": false
+    },
+    "ability_frank_selfzap": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        1
+      ],
+      "conditional": false
+    },
+    "ability_ice_grenade": {
+      "base": 2,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_incendiary_projectile": {
+      "base": 1,
+      "tiers": [
+        1,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_life_drain": {
+      "base": 0,
+      "tiers": [
+        0,
+        0,
+        3
+      ],
+      "conditional": false
+    },
+    "ability_magician_magicbolt": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_medic_trooper_heal": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_nano_pounce": {
+      "base": 2,
+      "tiers": [
+        0,
+        0,
+        1
+      ],
+      "conditional": false
+    },
+    "ability_nano_pounce_instant": {
+      "base": 0,
+      "tiers": [
+        0,
+        0,
+        1
+      ],
+      "conditional": false
+    },
+    "ability_necro_hauntingskull": {
+      "base": 4,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": true
+    },
+    "ability_necro_killsummon_trigger": {
+      "base": 1,
+      "tiers": [
+        1,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_priest_beartrap": {
+      "base": 2,
+      "tiers": [
+        0,
+        0,
+        1
+      ],
+      "conditional": false
+    },
+    "ability_priest_flashbang": {
+      "base": 0,
+      "tiers": [
+        0,
+        0,
+        1
+      ],
+      "conditional": false
+    },
+    "ability_punkgoat_ult": {
+      "base": 1,
+      "tiers": [
+        0,
+        1,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_ratking_ratnibble": {
+      "base": 1,
+      "tiers": [
+        1,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_scrap_blast": {
+      "base": 2,
+      "tiers": [
+        2,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_skyrunner_magic_beam": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_skyrunner_swingline": {
+      "base": 2,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_smoke_bomb": {
+      "base": 0,
+      "tiers": [
+        0,
+        2,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_trapper_webwall": {
+      "base": 1,
+      "tiers": [
+        1,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_unicorn_luminousstrike": {
+      "base": 1,
+      "tiers": [
+        2,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_viper_debuffdagger": {
+      "base": 2,
+      "tiers": [
+        1,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "citadel_ability_card_toss": {
+      "base": 2,
+      "tiers": [
+        2,
+        0,
+        0
+      ],
+      "conditional": true
+    },
+    "citadel_ability_chrono_time_wall": {
+      "base": 0,
+      "tiers": [
+        0,
+        0,
+        3
+      ],
+      "conditional": false
+    },
+    "citadel_ability_flying_strike": {
+      "base": 0,
+      "tiers": [
+        0,
+        0,
+        2
+      ],
+      "conditional": false
+    },
+    "citadel_ability_hornet_snipe": {
+      "base": 2,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "citadel_ability_kali_spinning_blade": {
+      "base": 2,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "citadel_ability_lash": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        1
+      ],
+      "conditional": false
+    },
+    "citadel_ability_lightning_ball": {
+      "base": 1,
+      "tiers": [
+        1,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "citadel_ability_shieldedsentry": {
+      "base": 1,
+      "tiers": [
+        0,
+        2,
+        0
+      ],
+      "conditional": false
+    },
+    "citadel_ability_shiv_dagger": {
+      "base": 2,
+      "tiers": [
+        0,
+        2,
+        0
+      ],
+      "conditional": false
+    },
+    "citadel_ability_stomp": {
+      "base": 1,
+      "tiers": [
+        1,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "citadel_ability_tengu_urn": {
+      "base": 1,
+      "tiers": [
+        1,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "cosmetic_ability_snowball": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "fathom_scalding_spray": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "gunslinger_rocket_launcher": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "mirage_fire_beetles": {
+      "base": 2,
+      "tiers": [
+        0,
+        1,
+        0
+      ],
+      "conditional": false
+    },
+    "rutger_rocket": {
+      "base": 1,
+      "tiers": [
+        1,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "thumper_ability_1": {
+      "base": 1,
+      "tiers": [
+        1,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "viscous_telepunch": {
+      "base": 1,
+      "tiers": [
+        1,
+        0,
+        0
+      ],
+      "conditional": false
+    }
+  },
+  "items": {
+    "upgrade_extra_charge": 1,
+    "upgrade_rapid_recharge": 2
+  }
+}

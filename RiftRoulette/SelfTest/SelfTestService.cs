@@ -136,7 +136,8 @@ public static class SelfTestService
       ("CCitadelGameRules.m_timeKothGiveUp", RiftGameRules.KothGiveUp),
       ("CCitadelTeam.m_nFlexSlotsUnlocked", FlexSlots.Unlocked),
       ("CBasePlayerPawn.v_angle", SpectateService.ViewAngle),
-      ("CBasePlayerPawn.m_hController", LobbyService.PawnController)
+      ("CBasePlayerPawn.m_hController", LobbyService.PawnController),
+      ("CCitadelBaseAbility.m_iRemainingCharges", ChargeFill.RemainingCharges)
     };
 
     var allFound = true;

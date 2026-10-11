@@ -34,6 +34,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Round\Data\spots.json" LogicalName="RiftRoulette.Round.spots.json" />
+    <EmbeddedResource Include="Round\Data\ability-charges.json" LogicalName="RiftRoulette.Round.ability-charges.json" />
   </ItemGroup>
 
 </Project>

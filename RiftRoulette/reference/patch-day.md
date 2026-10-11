@@ -21,7 +21,7 @@ Tools:
 4. **`scripts/update.sh`**: compile errors here are API renames or removals. Fix them with the decompiled API (`~/.dotnet/tools/ilspycmd lib/DeadworksManaged.Api.dll > /tmp/dwapi.cs`).
 5. **`scripts/test.sh`**.
 6. **`python3 scripts/patch-check.py`** (needs network). Every `HIT` line names the code to fix; section 4 says how.
-7. **Refresh data if the check says so**: `python3 scripts/fetch-builds.py` (items, heroes), map dump + `scripts/check-spots.py` (geometry), `reference/cvarlist.md` (convars). After economy or objective changes (soul income, Walker health or bounty, slot unlocks), `python3 scripts/walker-souls.py` and update `Modules/Loadout/ItemSlots` when a breakpoint moved about 1,000 souls or more.
+7. **Refresh data if the check says so**: `python3 scripts/fetch-builds.py` (items, heroes), `python3 scripts/fetch-charges.py` (ability charges, every patch; then `test.sh`, whose `ChargeTableTests` expectations may need the new numbers), map dump + `scripts/check-spots.py` (geometry), `reference/cvarlist.md` (convars). After economy or objective changes (soul income, Walker health or bounty, slot unlocks), `python3 scripts/walker-souls.py` and update `Modules/Loadout/ItemSlots` when a breakpoint moved about 1,000 souls or more.
 8. **Upload** with `scripts/deploy.sh --confirm` (with approval).
 9. **`dw_selftest_run`**, then compare with the baseline log. Every new FAIL / WARN maps to a row in section 4.
 10. **`dw_selftest_live <slot>`** on yourself, then the smoke list (section 3).
@@ -87,6 +87,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Rift spawns in the wrong place / not detected | rift position moved, or spawner / cash-in renamed | self-test Map `info_koth_spawn_location` WARN; `dw_ent_snapshot` / `dw_ent_diff` around a spawn | update `RiftSide` positions / `RiftService` names |
 | Round never ends on capture | `npc_trooper` renamed or capture no longer spawns troopers | `dw_ent_diff` after a capture | update `RiftService` capture detection |
 | Heroes get no / few items | item class names renamed / removed | self-test Items FAIL; `loadout-*.log` `Unknown=` / `Failed=`; patch-check Items HIT | `fetch-builds.py`, rebuild |
+| Fighters start a round without full charges (or with too many) | charge values, tiers or charge items changed; ability renamed; `m_iRemainingCharges` renamed | `round-*.log` `Ready to fight` `Filled=` / `After=` vs the `moved-in` probe 1 s later; self-test Schema `CCitadelBaseAbility.m_iRemainingCharges` | `fetch-charges.py`, update `ChargeTableTests`, rebuild |
 | Abilities not levelled | ability names changed or upgrade bits changed | `loadout-*.log` Trace `missing ability` | `fetch-builds.py`; check `UpgradeBits` in `/tmp/dwapi.cs` |
 | Loadouts stop at 9 items (`Loadout incomplete` `Failed=` 1-3) | team entity renamed, `m_nFlexSlotsUnlocked` renamed / re-typed, flag count changed, or the slot count changed | `dw_lobby_flex` (each team should show 15); self-test Entities `citadel_team_manager` / Schema `CCitadelTeam.m_nFlexSlotsUnlocked`; `lobby-*.log` `Flex slots not unlocked` | new names from `CCitadelTeam.h` / `EFlexSlotTypes_t` into `Lobby/FlexSlots`; update `LoadoutPlanner.DefaultSlots` |
 | Loadout level or ranks look wrong for the cap | boon / point thresholds or tier costs changed | `loadout-*.log` `Loadout applied` `Level=` `Points=` `Ranks=` vs the hero panel; wiki soul table | update `Modules/Loadout/Progression.cs` and `LoadoutPlanner.UpgradeCosts`, then `ProgressionTests` |
@@ -172,6 +173,7 @@ Map dump counts (build 6698): `info_koth_spawn_location` 2, `info_super_trooper_
 | `CCitadelTeam.m_nFlexSlotsUnlocked` | `EFlexSlotTypes_t` (uint16 flags, 15 = all four flex slots) | `Lobby/FlexSlots.cs` |
 | `CBasePlayerPawn.v_angle` | `QAngle` (read as `Vector3`: pitch, yaw, roll), the observer's view angle | `Modules/Spectate/SpectateService.cs` (`ViewAngle`) |
 | `CBasePlayerPawn.m_hController` | entity handle (uint), an observer pawn's owner controller | `Lobby/LobbyService.cs` (`PawnController`, the leaver's observer sweep) |
+| `CCitadelBaseAbility.m_iRemainingCharges` | int, an ability's charges left (written to fill charges at round start) | `Round/ChargeFill.cs` (`RemainingCharges`), read by `Round/AbilityCharges.cs` |
 | `CGameRules.m_bGamePaused`, `CCitadelGameRules.m_bServerPaused` | bool (API `GameRules.GamePaused` / `ServerPaused`) | `Lobby/PauseGuard.cs` |
 
 ### Net messages

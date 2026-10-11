@@ -11,8 +11,8 @@ Static; no state. Changes nothing on the pawn.
 
 ## Callers
 
-- `RoundFlow.MoveTeamsToRift` (`ReadyToFight`): before and after the
-  ability reset at release.
+- `RoundFlow.MoveTeamsToRift` (`ReadyToFight`): before the ability reset
+  and after `ChargeFill` at release.
 - `GameLoop/MatchProbe`: each player's probe line (`moved-in` is 1 s after
   release).
 
@@ -22,8 +22,9 @@ Static; no state. Changes nothing on the pawn.
   `MaxCharges` comes from a Deadworks native that calls the game's
   `UsesCharges` / `GetMaxCharges` virtuals; on game builds where those
   indices are stale it reads 0 for every ability (seen 2026-10-11), so
-  `max=0` alone does not mean the ability has no charges.
+  `max=0` alone does not mean the ability has no charges; the real max is
+  `ChargeTable.Max`.
 - Wraith's Card Trick, Graves' Haunting Skull and a few others get charges
   only from a resource pool filled by damage (`AbilityChargesConditionally`);
-  no cooldown reset fills them.
+  no cooldown reset fills them (`ChargeFill` writes them directly).
 - Game-thread only.

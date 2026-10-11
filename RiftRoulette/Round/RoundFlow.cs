@@ -52,13 +52,15 @@ public static class RoundFlow
     var abilitiesBefore = AbilityCharges.Describe(pawn);
     pawn.Heal(pawn.GetMaxHealth());
     pawn.ResetAllAbilityCooldowns();
+    var filled = ChargeFill.Fill(pawn);
 
     Log.WithMode(mode).Info(
       player.ToPlayerRef(),
-      "Ready to fight Hero={Hero} Health={Health} MaxHealth={MaxHealth} Before={Before} After={After}",
+      "Ready to fight Hero={Hero} Health={Health} MaxHealth={MaxHealth} Filled={Filled} Before={Before} After={After}",
       pawn.HeroID,
       before,
       pawn.GetMaxHealth(),
+      filled,
       abilitiesBefore,
       AbilityCharges.Describe(pawn));
     return true;

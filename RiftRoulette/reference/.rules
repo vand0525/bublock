@@ -51,6 +51,7 @@ deadworks/                 # Cursor workspace root
     scripts/test.sh        # run local tests
     scripts/pull-logs.sh   # read-only pull: server logs into logs/, access.json into server-data/
     scripts/fetch-builds.py # refresh Modules/Loadout/Data/hero-builds.json (offline)
+    scripts/fetch-charges.py # refresh RiftRoulette/Round/Data/ability-charges.json (offline)
     scripts/walker-souls.py # print loadout item-limit breakpoints from real matches (offline)
     scripts/check-spots.py # check the per-slot spots against the map mesh (offline)
     scripts/patch-baseline.sh # save a known-good snapshot before a game patch
@@ -298,9 +299,11 @@ Assume the git repo is rooted at `Bublock/`.
   `Silenced` / `ItemsDisabled` / `ShootingDisabled` / `MeleeDisabled` /
   `IgnoredByNpcTargeting` states set every frame) until
   `RoundFlow.MoveTeamsToRift` releases them, heals them to full and
-  resets their abilities (`ResetAllAbilityCooldowns`; it ends cooldowns
-  but adds no charges on the current game build, see
-  `Round/AbilityCharges.md`).
+  ends their cooldowns (`ResetAllAbilityCooldowns`, which adds no charges
+  on the current game build) and sets every charged signature ability to
+  full (`Round/ChargeFill`, max from `Round/ChargeTable` built offline by
+  `scripts/fetch-charges.py`; only raised, never lowered). Resource-pool
+  ultimates (Werewolf's wolf form) are never filled.
   Restrained players take no damage (`GameLoopPlugin.OnTakeDamage` returns
   `Stop` when `RestraintService.IsRestrainedPawn`), so leftover turrets and
   troopers can't hurt anyone up top. Never use disarm
