@@ -6,7 +6,7 @@ Draws every board at the watch spot. Static; no state of its own.
 
 | Op | Behavior |
 |---|---|
-| `Redraw(mode)` | `WorldTextService.ClearAll()`, then `board.welcome` ("RIFT ROULETTE", `BoardLayout.Welcome`), `board.hint` right under it (`BoardLayout.Hint(AboutHint)`), `board.note` under the hint (`BoardLayout.Note(WelcomeNoteStore.Text)`, skipped when the note is empty), then the stats boards (`StatsService.RefreshBoards`) and the betting board (`BettingService.RefreshBoard`, Random mode only). Debug log `Boards redrawn Mode=` |
+| `Redraw(mode)` | `WorldTextService.ClearAll()`, then `board.welcome` ("RIFT ROULETTE", `BoardLayout.Welcome`), `board.hint` right under it (`BoardLayout.Hint(AboutHint)`), `board.note` under the hint (`BoardLayout.Note(WelcomeNoteStore.Text)`, skipped when the note is empty), then the stats boards (`StatsService.RefreshBoards`) and the betting board (`BettingService.RefreshBoard`, Random mode only), then the empty-server sign (`EmptySign.Refresh(mode, force: true)`: drawn again if nobody plays). Debug log `Boards redrawn Mode=` |
 
 `AboutHint` (public const): `Type /about to learn how to play and bet`.
 

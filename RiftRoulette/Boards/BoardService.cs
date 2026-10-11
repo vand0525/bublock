@@ -26,6 +26,7 @@ public static class BoardService
 
     StatsService.RefreshBoards(mode);
     BettingService.RefreshBoard(mode);
+    EmptySign.Refresh(mode, force: true);
 
     Log.WithMode(mode).Debug("Boards redrawn Mode={Mode}", MatchConfig.HeroMode);
   }

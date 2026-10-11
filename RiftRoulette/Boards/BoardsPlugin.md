@@ -1,13 +1,15 @@
 # BoardsPlugin
 
 Thin plugin class (Name `Rift Roulette Boards`) for the boards at the
-watch spot. Ops live on `BoardService` and `WelcomeNoteStore`.
+watch spot and the empty-server sign. Ops live on `BoardService`,
+`EmptySign` and `WelcomeNoteStore`.
 
 ## Hooks (Clean mode)
 
 | Hook | Does |
 |---|---|
 | `OnLoad(isReload: true)` | Next tick: `BoardService.Redraw()` (a hot reload skips `OnStartupServer`; clears the old DLL's boards and draws them at the current watch spot) |
+| `OnLoad` (every load) | `Timer.Every(EmptySign.CheckSeconds)` (2 s): `EmptySign.Refresh()` shows the empty-server sign while there are no participants and removes it otherwise |
 | `OnStartupServer` | Next tick: `BoardService.Redraw()` |
 
 ## Admin commands (Debug)

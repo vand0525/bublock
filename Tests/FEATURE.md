@@ -30,7 +30,7 @@ server. Never deployed to the server.
   `WatchGuardRule.cs`,
   `RiftRoulette/GameLoop/MatchState.cs`,
   `MatchConfig.cs`, `AutoStartRule.cs`, `SoulRule.cs`, `RiftRoulette/RandomMode/HeroDraw.cs`, `BenchRule.cs`,
-  `RiftRoulette/Lobby/TeamBalance.cs`, `AdminSeatRule.cs`, `StreamFraming.cs`, `RiftRoulette/Stats/StatsLedger.cs`, `DamageLedger.cs`,
+  `RiftRoulette/Lobby/TeamBalance.cs`, `AdminSeatRule.cs`, `StreamFraming.cs`, `RiftRoulette/Boards/EmptySignLayout.cs` (with `Modules/WorldText` imported), `RiftRoulette/Stats/StatsLedger.cs`, `DamageLedger.cs`,
   `StatsBoardText.cs`, `RiftRoulette/Balance/BalanceTracker.cs`,
   `BalancePicker.cs`, `RiftRoulette/Betting/BetBook.cs`, `BetBoardText.cs`, `MarkBook.cs`) rather than referencing the plugin DLL: round
   hero bookkeeping, team name parsing, the `/commands` list filter, the `/about` text, rift sides, the rift outcome

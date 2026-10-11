@@ -14,6 +14,8 @@ public class BoardsPlugin : DeadworksPluginBase
   {
     if (isReload)
       Timer.NextTick(() => BoardService.Redraw());
+
+    Timer.Every(EmptySign.CheckSeconds.Seconds(), () => EmptySign.Refresh());
   }
 
   public override void OnStartupServer()

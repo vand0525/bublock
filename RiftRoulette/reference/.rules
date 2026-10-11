@@ -32,7 +32,7 @@ deadworks/                 # Cursor workspace root
     RiftRoulette/            # game mode DLL
       Session/             # session lifecycle lines in the master log
       Lobby/ Rift/         # game-specific plugin classes
-      Boards/              # welcome / hint / note boards, redraw of every board (dw_board_*)
+      Boards/              # welcome / hint / note boards, empty-server sign, redraw of every board (dw_board_*)
       Round/               # parity round composer (Rift + Movement ops) + watch spot + round heroes
       GameLoop/            # match loop + MatchConfig (hero mode, format) + auto-start
       RandomMode/          # random hero + build every round
@@ -367,7 +367,11 @@ Assume the git repo is rooted at `Bublock/`.
   (every 2 s and on deaths) through `Modules/Spectate`; no command
   needed. Fighters (unrestrained participants) to watch: follow one, cut
   to the killer. Nobody fighting (between rounds): no camera call, the
-  camera stays where it is. Never park automatically: every seated admin
+  camera stays where it is. With no participants at all, a sign reading
+  `RIFT ROULETTE` / `Join with connect <address>` stands centered in front
+  of the spectator camera's start spot (origin, under mid, looking along
+  -x; `Boards/EmptySign`, layout `EmptySignLayout`), checked every 2 s and
+  after every board redraw. Never park automatically: every seated admin
   client crash from 2026-09-28 to 2026-10-11 came right after a
   `SpectateService.Park` (observer mode change, teleport, angle message),
   none after a follow; `StreamCamRule` and `StreamFraming` (the fixed

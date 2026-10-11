@@ -2,7 +2,9 @@
 
 The world-text boards around the watch spot: the RIFT ROULETTE welcome
 sign, the `/about` hint and the admin note under it, plus the placement
-used by the stats and betting boards.
+used by the stats and betting boards. Also the empty-server sign
+(`RIFT ROULETTE` / `Join with connect 66.94.102.245:27015`) in front of the
+spectator camera's start spot under mid, up only while nobody plays.
 
 ## Files
 
@@ -10,25 +12,32 @@ used by the stats and betting boards.
 |---|---|
 | `BoardLayout.cs` | Where each board sits (welcome, hint, note, side, back), relative to the watch spot, mirrored per lane through `Round/WatchLayout` |
 | `WelcomeNoteStore.cs` | The note under the welcome board, kept in `bublock/welcomenote.txt` |
-| `BoardService.cs` | `Redraw`: clear every board, draw welcome / hint / note, then the stats and betting boards |
-| `BoardsPlugin.cs` | Redraw on load and map start; admin `/board_redraw`, `/board_note` |
+| `BoardService.cs` | `Redraw`: clear every board, draw welcome / hint / note, then the stats and betting boards and the empty-server sign |
+| `EmptySignLayout.cs` | Where the empty-server sign sits: centered in front of the spectator camera's start spot, facing it (tested) |
+| `EmptySign.cs` | Shows the empty-server sign while there are no participants, removes it otherwise |
+| `BoardsPlugin.cs` | Redraw on load and map start; empty-sign check every 2 s; admin `/board_redraw`, `/board_note` |
 
 ## Public operations
 
 - `BoardService.Redraw(mode)`
+- `EmptySign.Refresh(mode, force)`
 - `WelcomeNoteStore.Text`, `WelcomeNoteStore.Set(text, mode)`
 - `BoardLayout.Welcome / Hint / Note / Side / Back(text)`
+- `EmptySignLayout.Title / Join()`
 
 ## State
 
 - `WelcomeNoteStore`: the note (seeded from the file once per load).
-- Board ids: `board.welcome`, `board.hint`, `board.note`; the stats
+- `EmptySign.Shown`: whether the empty-server sign is up.
+- Board ids: `board.welcome`, `board.hint`, `board.note`,
+  `board.empty.title`, `board.empty.join`; the stats
   (`stats.sapphire`, `stats.amber`) and betting boards belong to their
   features.
 
 ## Lifecycle vs commands
 
-- Lifecycle (Clean): `BoardsPlugin` redraws on hot reload and map start;
+- Lifecycle (Clean): `BoardsPlugin` checks the empty-server sign every 2 s
+  (`EmptySign.Refresh`); `BoardsPlugin` redraws on hot reload and map start;
   `Round/WatchSpot.RefreshBoards` redraws when the watch spot changes side;
   `MatchService` redraws after match end and mode change.
 - Admin (Debug): `/board_redraw`, `/board_note`.
