@@ -31,17 +31,17 @@ public static class RoundFlow
 
     var movedSapphire = TeleportToFightSpots(sapphirePlayers, sapphire, mode);
     var movedAmber = TeleportToFightSpots(amberPlayers, amber, mode);
-    var healed = sapphirePlayers.Concat(amberPlayers).Count(player => HealToFull(player, mode));
+    var ready = sapphirePlayers.Concat(amberPlayers).Count(player => ReadyToFight(player, mode));
 
     Log.WithMode(mode).Debug(
-      "Teams moved to rift starts Side={Side} Sapphire={Sapphire} Amber={Amber} Healed={Healed}",
+      "Teams moved to rift starts Side={Side} Sapphire={Sapphire} Amber={Amber} Ready={Ready}",
       RiftSides.Name(side),
       movedSapphire,
       movedAmber,
-      healed);
+      ready);
   }
 
-  private static bool HealToFull(CCitadelPlayerController player, ExecutionMode mode)
+  private static bool ReadyToFight(CCitadelPlayerController player, ExecutionMode mode)
   {
     var pawn = player.GetHeroPawn();
 
@@ -50,8 +50,18 @@ public static class RoundFlow
 
     var before = pawn.Health;
     pawn.Heal(pawn.GetMaxHealth());
+    pawn.ResetAllAbilityCooldowns();
 
-    Log.WithMode(mode).Debug(player.ToPlayerRef(), "Healed to full Health={Health} MaxHealth={MaxHealth}", before, pawn.GetMaxHealth());
+    var charges = pawn.AbilityComponent.Abilities
+      .Where(ability => ability.MaxCharges > 0)
+      .Select(ability => $"{ability.AbilityName}:{ability.RemainingCharges}/{ability.MaxCharges}");
+
+    Log.WithMode(mode).Debug(
+      player.ToPlayerRef(),
+      "Ready to fight Health={Health} MaxHealth={MaxHealth} Charges={Charges}",
+      before,
+      pawn.GetMaxHealth(),
+      string.Join(",", charges));
     return true;
   }
 

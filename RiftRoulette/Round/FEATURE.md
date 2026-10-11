@@ -9,7 +9,8 @@ lifecycle, Debug for admin) changes only logging. The round reports its
 result to the match loop. Players wait at a watch spot above the rift
 (`WatchSpot`), not the fixed `draft` spot, restrained (`Modules/Restraint`)
 until they are moved into the rift, where each fighter is healed to full
-health.
+health and gets every ability ready with full charges
+(`ResetAllAbilityCooldowns`).
 
 ## Files
 
@@ -60,7 +61,7 @@ GameLoop/MatchService ─────────────┐
                                    ├─> RoundFlow.RunRound / CancelRound
 /rift_start, /rift_cancel (Debug) ─┘
       └─> RiftService.RunRift / CancelRift (order, gamerules, watch, cleanup)
-            └─ steps ─> RoundFlow.MoveTeamsToRift  (RoundHeroes entry + TeamNum; release restraint; MovementService; heal to full)
+            └─ steps ─> RoundFlow.MoveTeamsToRift  (RoundHeroes entry + TeamNum; release restraint; MovementService; heal to full; refill abilities)
                      ├> RoundFlow.SendPlayersUp (WatchSpot.SendUp above NextSide, boards follow)
                      └> MatchService.OnRoundEnded (score + banner; no-op outside a match)
 ```

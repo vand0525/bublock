@@ -608,3 +608,10 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Verified fact:** `citadel_check_walk_on_skyclip true` (gamedll, clientdll, replicated, cheat) first appears in GameTracking's `DumpSource2/convars.txt` at build 6757 (absent in 6753 and earlier). The watch spots stand on the invisible skybox floor at z 1536, which is sky clip. Diffing `convars.txt` between the server's old and new build is the quickest way to find a setting a patch added.
 - **Used as:** `LobbyService.ApplyServerConvars` sets it to 0 (map start, hot reload, `/lobby_setup`); self-test convar check, `patch-day.md` sections 4 and 5.
 - **Link / path:** [convars.txt](https://github.com/SteamTracking/GameTracking-Deadlock/blob/master/DumpSource2/convars.txt), `Bublock/RiftRoulette/Lobby/LobbyService.cs`
+
+### 2026-10-11 — A new hero's charged abilities start empty; ResetAllAbilityCooldowns refills them
+
+- **Why hard / useful:** fighters with multi-charge abilities entered every rift with no charges. Each intermission gives them a new hero (`SelectHero`) and sets ranks through `UpgradeBits`; the new abilities' charges start at 0 and refill on their own timer, longer than the 5 s intermission.
+- **Verified fact:** Deadworks (v0.5.4+) has `CCitadelPlayerPawn.ResetAllAbilityCooldowns()` (every ability, item, innate and weapon: cooldown ended, charges refilled, like Refresher; upgrades, imbues and stacks untouched), `ResetAbilityCooldown(EAbilitySlot)` for one slot, and `CCitadelBaseAbility.ResetCooldown()`. `CCitadelBaseAbility.MaxCharges` (0 = no charges, includes upgrades and items) and `RemainingCharges` read the charges.
+- **Used as:** `RoundFlow.MoveTeamsToRift` (`ReadyToFight`) resets every fighter at release, after the heal; Debug `Ready to fight ... Charges=` in `round-*.log`.
+- **Link / path:** `lib/DeadworksManaged.Api.xml`, `Bublock/RiftRoulette/Round/RoundFlow.cs`
