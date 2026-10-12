@@ -23,8 +23,8 @@ Pure math, no game calls; unit tested
 | `Angle` | `WorldTextPlacement.FacingViewer(yaw)`: `(0, yaw - 90, 90)`, the welcome board's convention |
 | `Right(yaw)` | The viewer's right, `(sin yaw, -cos yaw, 0)`: the way world text runs |
 | `Width(text, scale)` | Estimated text width: characters × `CharWidth` × `FontSize` × scale |
-| `Title(settings)` | `TitleText` in `TitleColor` at `TitleScale`, bottom edge `Gap` above the center |
-| `Join(settings)` | `JoinText` in `JoinColor` at `JoinScale`, top edge `Gap` below the center |
+| `Title(settings)` | `TitleText` in `TitleColor` at `TitleScale`, bottom edge `Gap` above the center, then moved `TitleRight` along `Right` and `TitleUp` up |
+| `Join(settings)` | `JoinText` in `JoinColor` at `JoinScale`, top edge `Gap` below the center, then moved `JoinRight` along `Right` and `JoinUp` up |
 
 Each line's position is its bottom-left corner: center minus half its
 estimated width along `Right`, plus its height offset.

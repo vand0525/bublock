@@ -251,6 +251,7 @@ column); `new` = no archive equivalent.
 | `/sign_distance <units>` | — | Boards | `EmptySign.Change` | Empty-server sign: distance in front of the camera | new |
 | `/sign_shift <units>` | — | Boards | `EmptySign.Change` | Empty-server sign: shift right (negative: left) | new |
 | `/sign_height <units>` | — | Boards | `EmptySign.Change` | Empty-server sign: shift up (negative: down) | new |
+| `/sign_offset <title\|join> <right> <up>` | — | Boards | `EmptySign.Change` | Empty-server sign: move one line on its own | new |
 | `/sign_size <title> [join]` | — | Boards | `EmptySign.Change` | Empty-server sign: text sizes | new |
 | `/sign_gap <units>` | — | Boards | `EmptySign.Change` | Empty-server sign: gap between the lines | new |
 | `/sign_color <title\|join\|both> <r> <g> <b>` | — | Boards | `EmptySign.Change` | Empty-server sign: line colors | new |

@@ -25,6 +25,7 @@ watch spot and the empty-server sign. Ops live on `BoardService`,
 | `/sign_distance <units>` | `EmptySign.Change`: `Distance` |
 | `/sign_shift <units>` | `EmptySign.Change`: `Shift` (negative: left) |
 | `/sign_height <units>` | `EmptySign.Change`: `Height` (negative: down) |
+| `/sign_offset <title\|join> <right> <up>` | `EmptySign.Change`: `TitleRight` / `TitleUp` or `JoinRight` / `JoinUp` (that line only, on top of the whole sign's position) |
 | `/sign_size <title> [join]` | `EmptySign.Change`: `TitleScale`, and `JoinScale` when given |
 | `/sign_gap <units>` | `EmptySign.Change`: `Gap` |
 | `/sign_color <title\|join\|both> <r> <g> <b>` | `EmptySign.Change`: `TitleColor` / `JoinColor` / both |

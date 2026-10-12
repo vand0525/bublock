@@ -14,7 +14,7 @@ spectator camera's start spot under mid, up only while nobody plays.
 | `WelcomeNoteStore.cs` | The note under the welcome board, kept in `bublock/welcomenote.txt` |
 | `BoardService.cs` | `Redraw`: clear every board, draw welcome / hint / note, then the stats and betting boards and the empty-server sign |
 | `EmptySignLayout.cs` | Where the empty-server sign sits: centered in front of the spectator camera's start spot, facing it (tested) |
-| `EmptySignSettings.cs` | The sign's adjustable look: distance, shift, height, sizes, gap, colors, text; range checks and JSON (tested) |
+| `EmptySignSettings.cs` | The sign's adjustable look: distance, shift, height, per-line offsets, sizes, gap, colors, text; range checks and JSON (tested) |
 | `EmptySignStore.cs` | Saves those settings in `bublock/emptysign.json` |
 | `EmptySign.cs` | Shows the empty-server sign while there are no participants (or the admin preview is on), removes it otherwise; applies setting changes |
 | `BoardsPlugin.cs` | Redraw on load and map start; empty-sign check every 2 s; admin `/board_redraw`, `/board_note`, `/sign_*` |
@@ -49,7 +49,7 @@ spectator camera's start spot under mid, up only while nobody plays.
   `MatchService` redraws after match end and mode change.
 - Admin (Debug): `/board_redraw`, `/board_note`; the empty-server sign's
   `/sign_status`, `/sign_distance`, `/sign_shift`, `/sign_height`,
-  `/sign_size`, `/sign_gap`, `/sign_color`, `/sign_text`,
+  `/sign_offset`, `/sign_size`, `/sign_gap`, `/sign_color`, `/sign_text`,
   `/sign_preview`, `/sign_reset` (every change saved to
   `bublock/emptysign.json` and redrawn at once if the sign is up).
 

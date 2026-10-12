@@ -34,6 +34,12 @@ public sealed record EmptySignSettings
   // Up from the middle of the view; negative is down.
   [JsonPropertyName("height")] public float Height { get; init; }
 
+  // Per line, on top of the whole sign's position: right (negative: left) and up (negative: down).
+  [JsonPropertyName("titleRight")] public float TitleRight { get; init; }
+  [JsonPropertyName("titleUp")] public float TitleUp { get; init; }
+  [JsonPropertyName("joinRight")] public float JoinRight { get; init; }
+  [JsonPropertyName("joinUp")] public float JoinUp { get; init; }
+
   [JsonPropertyName("titleScale")] public float TitleScale { get; init; } = 1.2f;
   [JsonPropertyName("joinScale")] public float JoinScale { get; init; } = 0.45f;
   [JsonPropertyName("gap")] public float Gap { get; init; } = 8f;
@@ -50,8 +56,8 @@ public sealed record EmptySignSettings
     if (Distance is < MinDistance or > MaxDistance)
       return $"Distance must be {MinDistance}-{MaxDistance} units.";
 
-    if (Math.Abs(Shift) > MaxOffset || Math.Abs(Height) > MaxOffset)
-      return $"Shift and height must be within -{MaxOffset} to {MaxOffset} units.";
+    if (new[] { Shift, Height, TitleRight, TitleUp, JoinRight, JoinUp }.Any(offset => Math.Abs(offset) > MaxOffset))
+      return $"Shift, height and line offsets must be within -{MaxOffset} to {MaxOffset} units.";
 
     if (TitleScale is < MinScale or > MaxScale || JoinScale is < MinScale or > MaxScale)
       return $"Sizes must be {MinScale}-{MaxScale} world units per pixel.";
@@ -69,7 +75,8 @@ public sealed record EmptySignSettings
   }
 
   public string Describe() =>
-    $"Distance={Distance} Shift={Shift} Height={Height} | TitleSize={TitleScale} JoinSize={JoinScale} Gap={Gap} | " +
+    $"Distance={Distance} Shift={Shift} Height={Height} | TitleOffset={TitleRight} {TitleUp} JoinOffset={JoinRight} {JoinUp} | " +
+    $"TitleSize={TitleScale} JoinSize={JoinScale} Gap={Gap} | " +
     $"TitleColor={TitleColor} JoinColor={JoinColor} | Title=\"{TitleText}\" Join=\"{JoinText}\"";
 
   public string ToJson() => JsonSerializer.Serialize(this, Json);

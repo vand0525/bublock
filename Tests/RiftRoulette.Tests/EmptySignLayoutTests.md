@@ -12,4 +12,5 @@ Unit tests for `RiftRoulette/Boards/EmptySignLayout`.
   estimated width along the viewer's right lands on the center.
 - The title's bottom is `Gap` above the center and the join line's top
   `Gap` below it.
+- A line's offset (right, up) moves only that line, by exactly that much.
 - The lines carry the settings' text, size and color.

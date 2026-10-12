@@ -67,6 +67,25 @@ public class EmptySignLayoutTests
   }
 
   [Fact]
+  public void Line_offsets_move_only_their_own_line()
+  {
+    var moved = Settings with { TitleRight = -60f, TitleUp = 25f };
+    var right = EmptySignLayout.Right(EmptySignLayout.CameraAngle.Y);
+    var titleMove = EmptySignLayout.Title(moved).Position - EmptySignLayout.Title(Settings).Position;
+
+    Assert.Equal(-60f, Vector3.Dot(titleMove, right), 2);
+    Assert.Equal(25f, titleMove.Z, 2);
+    Assert.Equal(EmptySignLayout.Join(Settings).Position, EmptySignLayout.Join(moved).Position);
+
+    var joinMoved = Settings with { JoinRight = 30f, JoinUp = -10f };
+    var joinMove = EmptySignLayout.Join(joinMoved).Position - EmptySignLayout.Join(Settings).Position;
+
+    Assert.Equal(30f, Vector3.Dot(joinMove, right), 2);
+    Assert.Equal(-10f, joinMove.Z, 2);
+    Assert.Equal(EmptySignLayout.Title(Settings).Position, EmptySignLayout.Title(joinMoved).Position);
+  }
+
+  [Fact]
   public void Lines_carry_the_settings_text_size_and_color()
   {
     var settings = Settings with { TitleText = "HELLO", TitleScale = 2f, JoinColor = new SignColor(1, 2, 3) };

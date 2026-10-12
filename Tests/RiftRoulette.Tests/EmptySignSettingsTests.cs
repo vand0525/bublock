@@ -13,6 +13,7 @@ public class EmptySignSettingsTests
     Assert.Equal(300f, settings.Distance);
     Assert.Equal(100f, settings.Shift);
     Assert.Equal(0f, settings.Height);
+    Assert.Equal((0f, 0f, 0f, 0f), (settings.TitleRight, settings.TitleUp, settings.JoinRight, settings.JoinUp));
     Assert.Equal(1.2f, settings.TitleScale);
     Assert.Equal(0.45f, settings.JoinScale);
     Assert.Equal(8f, settings.Gap);
@@ -36,6 +37,8 @@ public class EmptySignSettingsTests
 
     Assert.NotNull((settings with { Shift = -4000f }).Problem());
     Assert.NotNull((settings with { Height = 4000f }).Problem());
+    Assert.NotNull((settings with { TitleRight = 3001f }).Problem());
+    Assert.NotNull((settings with { JoinUp = -3001f }).Problem());
     Assert.NotNull((settings with { TitleScale = 0f }).Problem());
     Assert.NotNull((settings with { JoinScale = 11f }).Problem());
     Assert.NotNull((settings with { Gap = -1f }).Problem());
@@ -53,6 +56,8 @@ public class EmptySignSettingsTests
       Distance = 450f,
       Shift = -50f,
       Height = 12.5f,
+      TitleRight = -40f,
+      JoinUp = 7f,
       TitleColor = new SignColor(10, 20, 30),
       JoinText = "Join us"
     };

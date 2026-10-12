@@ -475,6 +475,7 @@ and saves nothing.
 | `/sign_distance <units>` / `dw_sign_distance <units>` | Units in front of the camera (50-3000; default 300) |
 | `/sign_shift <units>` / `dw_sign_shift <units>` | Units to the camera's right, negative to the left (±3000; default 100) |
 | `/sign_height <units>` / `dw_sign_height <units>` | Units up from the middle of the view, negative down (±3000; default 0) |
+| `/sign_offset <title\|join> <right> <up>` / `dw_sign_offset ...` | Moves one line on its own, on top of the whole sign's position: right (negative: left) and up (negative: down), ±3000 each (default 0 0). Sets the offset, not a nudge: `0 0` puts the line back |
 | `/sign_size <title> [join]` / `dw_sign_size <title> [join]` | Text size in world units per pixel (0.05-10; defaults 1.2 and 0.45); no join size keeps it |
 | `/sign_gap <units>` / `dw_sign_gap <units>` | Units between the middle and each line (0-500; default 8) |
 | `/sign_color <title\|join\|both> <r> <g> <b>` / `dw_sign_color ...` | Line color, 0-255 each (default 0 190 0 for both) |

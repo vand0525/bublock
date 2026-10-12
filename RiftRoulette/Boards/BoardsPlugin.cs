@@ -65,6 +65,15 @@ public class BoardsPlugin : DeadworksPluginBase
   public void CmdSignHeight(CCitadelPlayerController? caller, float units) =>
     ChangeSign(caller, "sign_height", settings => settings with { Height = units });
 
+  [Command("sign_offset", Description = "Empty-server sign: move one line on its own: sign_offset <title|join> <right> <up> (negative: left / down)")]
+  public void CmdSignOffset(CCitadelPlayerController? caller, string line, float right, float up) =>
+    ChangeSign(caller, "sign_offset", settings => SignLine(line) switch
+    {
+      "title" => settings with { TitleRight = right, TitleUp = up },
+      "join" => settings with { JoinRight = right, JoinUp = up },
+      _ => throw new CommandException("Usage: sign_offset <title|join> <right> <up>")
+    });
+
   [Command("sign_size", Description = "Empty-server sign: text size in world units per pixel: sign_size <title> [join]")]
   public void CmdSignSize(CCitadelPlayerController? caller, float title, float join = -1f) =>
     ChangeSign(caller, "sign_size", settings => settings with { TitleScale = title, JoinScale = join < 0f ? settings.JoinScale : join });

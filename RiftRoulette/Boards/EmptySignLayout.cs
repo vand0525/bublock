@@ -26,10 +26,10 @@ public static class EmptySignLayout
       + new Vector3(0f, 0f, settings.Height);
 
   public static WorldTextSpec Title(EmptySignSettings settings) =>
-    Line(settings, settings.TitleText, settings.TitleScale, settings.Gap, settings.TitleColor);
+    Line(settings, settings.TitleText, settings.TitleScale, settings.Gap, settings.TitleColor, settings.TitleRight, settings.TitleUp);
 
   public static WorldTextSpec Join(EmptySignSettings settings) =>
-    Line(settings, settings.JoinText, settings.JoinScale, -settings.Gap - FontSize * settings.JoinScale, settings.JoinColor);
+    Line(settings, settings.JoinText, settings.JoinScale, -settings.Gap - FontSize * settings.JoinScale, settings.JoinColor, settings.JoinRight, settings.JoinUp);
 
   public static float Width(string text, float scale) => text.Length * CharWidth * FontSize * scale;
 
@@ -41,9 +41,11 @@ public static class EmptySignLayout
   }
 
   // A board's position is its text's bottom-left corner.
-  private static WorldTextSpec Line(EmptySignSettings settings, string text, float scale, float bottom, SignColor color)
+  private static WorldTextSpec Line(EmptySignSettings settings, string text, float scale, float bottom, SignColor color, float right, float up)
   {
-    var position = Center(settings) - Right(CameraAngle.Y) * (Width(text, scale) / 2f) + new Vector3(0f, 0f, bottom);
+    var position = Center(settings)
+      + Right(CameraAngle.Y) * (right - Width(text, scale) / 2f)
+      + new Vector3(0f, 0f, bottom + up);
     return new(text, position, Angle, color.ToWorldText(), scale, FontSize);
   }
 }
