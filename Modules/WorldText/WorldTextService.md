@@ -25,6 +25,7 @@ feature log (`worldtext-YYYYMMDD.log`, prefix `[<Dll>.WorldText]`) via
 | `Update(id, text, mode)` | `SetMessage(text)` on a live board and stores the new text | `false` if no live board with that id |
 | `Remove(id, mode)` | Removes one tracked board | `false` if no live board with that id |
 | `ClearAll(mode)` | Removes **every** `point_worldtext` on the map (tracked or not) and empties the registry | count removed |
+| `IsLive(id)` | Whether a tracked board with that id still exists (a dead entry is dropped) | `bool` |
 | `List()` | Live tracked boards as `BoardInfo(Id, Position, Text, Angle)`, sorted by id | list |
 
 ## Dangerous constraints

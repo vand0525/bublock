@@ -109,6 +109,8 @@ public static class WorldTextService
     return removed;
   }
 
+  public static bool IsLive(string id) => TryGetLive(id, out _);
+
   public static IReadOnlyList<BoardInfo> List()
   {
     PruneDead();

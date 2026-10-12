@@ -18,31 +18,49 @@ public static class EmptySign
   // Shows the sign even with players on, so an admin can adjust it; cleared by a reload.
   public static bool Preview { get; private set; }
 
-  // force: BoardService.Redraw has just cleared every board, so the sign is gone whatever Shown says.
+  // Judged from the boards that exist, not from Shown: a map change destroys them while the static stays set.
+  // force: BoardService.Redraw has just cleared every board, so draw again even if they look live.
   public static void Refresh(ExecutionMode mode = ExecutionMode.Clean, bool force = false)
   {
-    var humans = Participants.Humans().Count;
-    var show = humans == 0 || Preview;
-
-    if (show == Shown && !force)
-      return;
-
-    var log = Log.WithMode(mode);
-
-    if (show)
-      Draw(mode);
-    else if (Shown && !force)
+    try
     {
-      WorldTextService.Remove(TitleId, mode);
-      WorldTextService.Remove(JoinId, mode);
+      var humans = Participants.Humans().Count;
+      var show = humans == 0 || Preview;
+      var titleLive = WorldTextService.IsLive(TitleId);
+      var joinLive = WorldTextService.IsLive(JoinId);
+
+      if (!force && (show ? titleLive && joinLive : !titleLive && !joinLive))
+      {
+        Shown = show;
+        return;
+      }
+
+      var log = Log.WithMode(mode);
+
+      if (show)
+        Draw(mode);
+      else
+      {
+        if (titleLive)
+          WorldTextService.Remove(TitleId, mode);
+
+        if (joinLive)
+          WorldTextService.Remove(JoinId, mode);
+      }
+
+      if (show != Shown)
+        log.Info(show ? "Empty sign shown Humans={Humans} Preview={Preview}" : "Empty sign removed Humans={Humans}", humans, Preview);
+      else if (force)
+        log.Debug("Empty sign redrawn Shown={Shown} Humans={Humans}", show, humans);
+      else
+        log.Info("Empty sign repaired Shown={Shown} Humans={Humans} TitleLive={TitleLive} JoinLive={JoinLive}", show, humans, titleLive, joinLive);
+
+      Shown = show;
     }
-
-    if (show != Shown)
-      log.Info(show ? "Empty sign shown Humans={Humans} Preview={Preview}" : "Empty sign removed Humans={Humans}", humans, Preview);
-    else
-      log.Debug("Empty sign redrawn Shown={Shown} Humans={Humans}", show, humans);
-
-    Shown = show;
+    catch (Exception exception)
+    {
+      Log.Error(exception, "Empty sign refresh failed Force={Force}", force);
+    }
   }
 
   // Validates, saves and redraws the sign if it is up. Returns the problem when a value is out of range.

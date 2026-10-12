@@ -12,6 +12,7 @@ update, remove, list, and clear by string id. No Rift Roulette dependency.
 | `WorldTextService.Create(id, spec, mode)` | `WorldTextService.md` |
 | `WorldTextService.Update(id, text, mode)` | `WorldTextService.md` |
 | `WorldTextService.Remove(id, mode)` | `WorldTextService.md` |
+| `WorldTextService.IsLive(id)` | `WorldTextService.md` |
 | `WorldTextService.ClearAll(mode)` | `WorldTextService.md` |
 | `WorldTextService.List()` | `WorldTextService.md` |
 | `WorldTextPlacement.InFrontOf` / `FacingViewer` | `WorldTextPlacement.md` |
