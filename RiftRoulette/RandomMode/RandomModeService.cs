@@ -116,8 +116,7 @@ public static class RandomModeService
     var banned = Bans.Take(MatchService.State.Round);
     var turns = Reservations.Take(fighters.Keys, MatchService.State.Round, banned);
     var reserved = turns.ToDictionary(turn => turn.SteamId, turn => turn.Hero);
-    var priority = PriorityHeroes.Guaranteed(fighters.Count) ? Priority(catalog, log) : [];
-    var heroes = HeroDraw.Draw(fighters.Keys.ToList(), Unbanned(catalog.Heroes), LastHero, Random.Shared, reserved, priority);
+    var heroes = HeroDraw.Draw(fighters.Keys.ToList(), Unbanned(catalog.Heroes), LastHero, Random.Shared, reserved);
 
     Assignments.Clear();
     Values.Clear();
@@ -172,49 +171,6 @@ public static class RandomModeService
 
     PlayerChat.Send(player, HeroReservations.BurnedLine(HeroBuildCatalog.Default.DisplayName(turn.Hero), turn.Use));
     log.Info(player.ToPlayerRef(), "Reserved hero banned, round used Hero={Hero} Use={Use} Of={Of}", turn.Hero, turn.Use, HeroReservations.Rounds);
-  }
-
-  private static readonly HashSet<Heroes> PriorityWarned = [];
-
-  // Priority heroes whose swap failed this match (the server could not spawn them); retried next match.
-  private static readonly HashSet<Heroes> FailedPriority = [];
-
-  private static IReadOnlyList<Heroes> Priority(HeroBuildCatalog catalog, Logger log)
-  {
-    foreach (var hero in PriorityHeroes.List.Where(hero => !catalog.Heroes.Contains(hero)))
-    {
-      if (PriorityWarned.Add(hero))
-        log.Warn("Priority hero has no builds, skipped Hero={Hero}", hero);
-    }
-
-    return PriorityHeroes.InPool(catalog.Heroes).Where(hero => !FailedPriority.Contains(hero)).ToList();
-  }
-
-  private static void OnSwapFailed(CCitadelPlayerController player, RandomAssignment failed, ITimer timer, ExecutionMode mode)
-  {
-    var log = Log.WithMode(mode);
-    var steamId = player.PlayerSteamId;
-
-    if (!PriorityHeroes.Contains(failed.Hero)
-        || !Assignments.TryGetValue(steamId, out var live)
-        || live != failed
-        || !MatchService.State.IsRunning)
-      return;
-
-    FailedPriority.Add(failed.Hero);
-    var catalog = HeroBuildCatalog.Default;
-    var taken = Assignments.Where(pair => pair.Key != steamId).Select(pair => pair.Value.Hero).ToHashSet();
-    var pool = PriorityHeroes.RerollPool(Unbanned(catalog.Heroes), FailedPriority, taken);
-
-    if (pool.Count == 0)
-      return;
-
-    var hero = HeroDraw.Draw([steamId], pool, LastHero, Random.Shared)[steamId];
-    var assignment = Assign(steamId, hero, catalog);
-    log.Warn(player.ToPlayerRef(), "Priority hero did not spawn, rerolled Failed={Failed} Hero={Hero}", failed.Hero, hero);
-
-    if (!Start(player, assignment, timer, mode))
-      Lock.MarkPending(steamId);
   }
 
   // When the bans cover the whole pool (a tiny test catalog), they are ignored so the draw still works.
@@ -314,15 +270,8 @@ public static class RandomModeService
     if (pool.Count == 0)
       return;
 
-    // An unheld priority hero (its holder left) goes to the late player; no reserved round is used.
-    var fighters = Assignments.Keys.Count(id => id != steamId) + 1;
-    var unheld = PriorityHeroes.Guaranteed(fighters)
-      ? Priority(catalog, Log.WithMode(mode)).Where(hero => !taken.Contains(hero)).ToList()
-      : [];
-    var turn = unheld.Count > 0 ? null : Reservations.TakeLate(steamId, MatchService.State.Round, taken, Bans.Current);
-    var hero = unheld.Count > 0
-      ? unheld[Random.Shared.Next(unheld.Count)]
-      : turn?.Hero ?? HeroDraw.Draw([steamId], pool, LastHero, Random.Shared)[steamId];
+    var turn = Reservations.TakeLate(steamId, MatchService.State.Round, taken, Bans.Current);
+    var hero = turn?.Hero ?? HeroDraw.Draw([steamId], pool, LastHero, Random.Shared)[steamId];
     Assign(steamId, hero, catalog);
 
     if (turn != null)
@@ -469,8 +418,7 @@ public static class RandomModeService
       $"{MatchConfig.Describe()} | Assigned={Assignments.Count} | Pending={Lock.PendingCount} | Teams={Teams.Count} | " +
       $"Bench={(_benched is { } benched ? Find(benched)?.PlayerName ?? benched.ToString() : "none")}",
       $"Bans: this round={HeroList(Bans.Current)} | pending " +
-      $"Sapphire={PendingBan(RiftRouletteTeams.Sapphire)} Amber={PendingBan(RiftRouletteTeams.Amber)}",
-      $"Priority={DescribePriority(catalog)}"
+      $"Sapphire={PendingBan(RiftRouletteTeams.Sapphire)} Amber={PendingBan(RiftRouletteTeams.Amber)}"
     };
 
     foreach (var player in Players.GetAll())
@@ -494,12 +442,6 @@ public static class RandomModeService
 
     return lines;
   }
-
-  private static string DescribePriority(HeroBuildCatalog catalog) =>
-    PriorityHeroes.List.Count == 0
-      ? "none"
-      : string.Join(", ", PriorityHeroes.List.Order().Select(hero =>
-          $"{catalog.DisplayName(hero)} ({(!catalog.Heroes.Contains(hero) ? "no builds" : FailedPriority.Contains(hero) ? "swap failed, off this match" : "in pool")})"));
 
   private static string HeroList(IEnumerable<Heroes> heroes)
   {
@@ -530,9 +472,6 @@ public static class RandomModeService
 
     if (!TryParseReservable(catalog, text, out var hero))
       return $"No hero called '{text}'. Use the hero's name, for example /reserve haze.";
-
-    if (PriorityHeroes.Contains(hero))
-      return PriorityHeroes.RefusedLine(catalog.DisplayName(hero), "reserved");
 
     if (Reservations.Position(steamId) != null)
       return $"You already have a reservation. {DescribeReservation(player)}";
@@ -605,9 +544,6 @@ public static class RandomModeService
 
     if (!TryParseReservable(catalog, text, out var hero))
       return $"No hero called '{text}'. Use the hero's name, for example /heroban haze.";
-
-    if (PriorityHeroes.Contains(hero))
-      return PriorityHeroes.RefusedLine(catalog.DisplayName(hero), "banned");
 
     if (Bans.TryGetPending(team, out var pending, out var by))
       return $"Your team already banned {catalog.DisplayName(pending)} ({PlayerName(by)}). One ban per team per round.";
@@ -717,8 +653,7 @@ public static class RandomModeService
 
         if (_buildsAnnounced)
           AnnounceBuild(current, mode);
-      },
-      current => OnSwapFailed(current, assignment, timer, mode));
+      });
   }
 
   private static List<CCitadelPlayerController> Humans() => Participants.Humans();
@@ -737,6 +672,5 @@ public static class RandomModeService
     _benchRound = null;
     Reservations.Reset();
     Bans.Reset();
-    FailedPriority.Clear();
   }
 }
