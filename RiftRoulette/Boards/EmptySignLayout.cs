@@ -5,41 +5,31 @@ namespace RiftRoulette.Boards;
 
 public static class EmptySignLayout
 {
-  public const string TitleText = "RIFT ROULETTE";
   public const string JoinAddress = "66.94.102.245:27015";
-  public const string JoinText = "Join with connect " + JoinAddress;
 
   // Where a spectator's camera starts on an empty server, captured with getpos_exact.
   public static readonly Vector3 CameraPosition = Vector3.Zero;
   public static readonly Vector3 CameraAngle = new(-0.59375f, 179.3125f, 0f);
 
-  public const float Distance = 300f;
-
-  // Moves the sign along the viewer's right (negative: left), nudged by eye in game.
-  public const float SideShift = 100f;
   public const float FontSize = 64f;
-  public const float TitleScale = 1.2f;
-  public const float JoinScale = 0.45f;
-  public const float LineGap = 8f;
 
   // Text width per character as a share of the font size, estimated from the welcome board (WatchLayout.WelcomeHalfWidth).
   public const float CharWidth = 0.66f;
 
-  // The area under mid is bright beige: white washed out and dark navy read worse, so solid green.
-  private static readonly WorldTextColor TitleColor = new(0, 190, 0, 255);
-  private static readonly WorldTextColor JoinColor = new(0, 190, 0, 255);
-
   public static Vector3 Angle => WorldTextPlacement.FacingViewer(CameraAngle.Y);
 
   // Positive pitch looks down, so the middle of the view sits lower.
-  public static Vector3 Center =>
-    WorldTextPlacement.InFrontOf(CameraPosition, CameraAngle.Y, Distance)
-      - new Vector3(0f, 0f, MathF.Tan(CameraAngle.X * MathF.PI / 180f) * Distance)
-      + Right(CameraAngle.Y) * SideShift;
+  public static Vector3 Center(EmptySignSettings settings) =>
+    WorldTextPlacement.InFrontOf(CameraPosition, CameraAngle.Y, settings.Distance)
+      - new Vector3(0f, 0f, MathF.Tan(CameraAngle.X * MathF.PI / 180f) * settings.Distance)
+      + Right(CameraAngle.Y) * settings.Shift
+      + new Vector3(0f, 0f, settings.Height);
 
-  public static WorldTextSpec Title() => Line(TitleText, TitleScale, LineGap, TitleColor);
+  public static WorldTextSpec Title(EmptySignSettings settings) =>
+    Line(settings, settings.TitleText, settings.TitleScale, settings.Gap, settings.TitleColor);
 
-  public static WorldTextSpec Join() => Line(JoinText, JoinScale, -LineGap - FontSize * JoinScale, JoinColor);
+  public static WorldTextSpec Join(EmptySignSettings settings) =>
+    Line(settings, settings.JoinText, settings.JoinScale, -settings.Gap - FontSize * settings.JoinScale, settings.JoinColor);
 
   public static float Width(string text, float scale) => text.Length * CharWidth * FontSize * scale;
 
@@ -51,9 +41,9 @@ public static class EmptySignLayout
   }
 
   // A board's position is its text's bottom-left corner.
-  private static WorldTextSpec Line(string text, float scale, float bottom, WorldTextColor color)
+  private static WorldTextSpec Line(EmptySignSettings settings, string text, float scale, float bottom, SignColor color)
   {
-    var position = Center - Right(CameraAngle.Y) * (Width(text, scale) / 2f) + new Vector3(0f, 0f, bottom);
-    return new(text, position, Angle, color, scale, FontSize);
+    var position = Center(settings) - Right(CameraAngle.Y) * (Width(text, scale) / 2f) + new Vector3(0f, 0f, bottom);
+    return new(text, position, Angle, color.ToWorldText(), scale, FontSize);
   }
 }

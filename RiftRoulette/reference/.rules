@@ -371,7 +371,9 @@ Assume the git repo is rooted at `Bublock/`.
   `RIFT ROULETTE` / `Join with connect <address>` stands centered in front
   of the spectator camera's start spot (origin, under mid, looking along
   -x; `Boards/EmptySign`, layout `EmptySignLayout`), checked every 2 s and
-  after every board redraw. Never park automatically: every seated admin
+  after every board redraw. Its position, sizes, colors and text are
+  admin-adjustable (`/sign_*`) and saved in `bublock/emptysign.json`
+  (`EmptySignSettings`, range checked). Never park automatically: every seated admin
   client crash from 2026-09-28 to 2026-10-11 came right after a
   `SpectateService.Park` (observer mode change, teleport, angle message),
   none after a follow; `StreamCamRule` and `StreamFraming` (the fixed

@@ -247,6 +247,16 @@ column); `new` = no archive equivalent.
 | `/selftest_live <slot>` | — | SelfTest | `SelfTestService.Live` | Teleport, restraint, banner and loadout check on one player | new |
 | `/board_redraw` | — | Boards | `BoardService.Redraw` | Redraw every board (welcome, hint, note, stats, betting) at the watch spot | new |
 | `/board_note [text]` | — | Boards | `WelcomeNoteStore.Set` + `BoardService.Redraw` | Set or clear the saved note under the welcome board | new |
+| `/sign_status` | — | Boards | `EmptySignStore.Current` | Empty-server sign: whether it is up, preview, every setting | new |
+| `/sign_distance <units>` | — | Boards | `EmptySign.Change` | Empty-server sign: distance in front of the camera | new |
+| `/sign_shift <units>` | — | Boards | `EmptySign.Change` | Empty-server sign: shift right (negative: left) | new |
+| `/sign_height <units>` | — | Boards | `EmptySign.Change` | Empty-server sign: shift up (negative: down) | new |
+| `/sign_size <title> [join]` | — | Boards | `EmptySign.Change` | Empty-server sign: text sizes | new |
+| `/sign_gap <units>` | — | Boards | `EmptySign.Change` | Empty-server sign: gap between the lines | new |
+| `/sign_color <title\|join\|both> <r> <g> <b>` | — | Boards | `EmptySign.Change` | Empty-server sign: line colors | new |
+| `/sign_text <title\|join> [text]` | — | Boards | `EmptySign.Change` | Empty-server sign: line text (none restores the default) | new |
+| `/sign_preview <on\|off>` | — | Boards | `EmptySign.SetPreview` | Empty-server sign: show it even with players on | new |
+| `/sign_reset` | — | Boards | `EmptySign.Change` | Empty-server sign: every default | new |
 | `/rift_start` | `/koth` | Rift | `RunRift` | Run the known-good rift sequence | archive |
 | `/rift_status` | — | Rift | `DescribeRift` | Next side, phase (idle / waiting for spawn / live / ending), last outcome | new |
 | `/rift_next <green\|yellow\|center>` | — | Rift | `SetNextSide`, `WatchSpot.MoveAllUp` | Force the next side; players and boards move above it | new |

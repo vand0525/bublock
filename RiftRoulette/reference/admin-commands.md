@@ -453,6 +453,35 @@ map start and hot reload, and move with the watch spot.
 - **Side effects:** sets the note under the welcome board, below the fixed `/about` hint line (`board.note`; words joined with spaces, `\n` is a line break) and saves it to `bublock/welcomenote.txt` on the server, then redraws the boards; no text clears the note. Replies `[Boards] Note set: <preview>` or `[Boards] Note cleared`
 - **Notes:** the note survives redraws, uploads and restarts; edits to `board.welcome` made with `/wt_update` do not
 
+#### Empty-server sign (`/sign_*`)
+
+While no players are on (seated admins and ban statues don't count), two
+boards stand in front of the spectator camera's start spot under mid
+(`RIFT ROULETTE` / `Join with connect 66.94.102.245:27015` by default).
+These commands adjust it. Every change is range checked, saved to
+`bublock/emptysign.json` on the server (survives uploads, map changes and
+restarts) and redrawn at once if the sign is up. Spectators have no chat,
+so use the console (`dw_sign_*`). Each change replies `[Boards] Sign saved`
+and the full settings line; an out-of-range value replies the allowed range
+and saves nothing.
+
+- **Who:** admin (all)
+- **Calls:** `EmptySign.Change` (`EmptySignSettings`, `EmptySignStore`), `EmptySign.SetPreview`
+- **Mode:** Debug (all)
+
+| Invocation | Side effects |
+|---|---|
+| `/sign_status` / `dw_sign_status` | Read-only: whether it is up, preview, and every setting |
+| `/sign_distance <units>` / `dw_sign_distance <units>` | Units in front of the camera (50-3000; default 300) |
+| `/sign_shift <units>` / `dw_sign_shift <units>` | Units to the camera's right, negative to the left (±3000; default 100) |
+| `/sign_height <units>` / `dw_sign_height <units>` | Units up from the middle of the view, negative down (±3000; default 0) |
+| `/sign_size <title> [join]` / `dw_sign_size <title> [join]` | Text size in world units per pixel (0.05-10; defaults 1.2 and 0.45); no join size keeps it |
+| `/sign_gap <units>` / `dw_sign_gap <units>` | Units between the middle and each line (0-500; default 8) |
+| `/sign_color <title\|join\|both> <r> <g> <b>` / `dw_sign_color ...` | Line color, 0-255 each (default 0 190 0 for both) |
+| `/sign_text <title\|join> [text]` / `dw_sign_text ...` | Line text (words joined with spaces, at most 120 characters); no text restores the default |
+| `/sign_preview <on\|off>` / `dw_sign_preview <on\|off>` | Shows the sign even with players on, to adjust it; not saved, a reload turns it off |
+| `/sign_reset` / `dw_sign_reset` | Restores every default position, size, color and text |
+
 ### Rift (`RiftPlugin`, in RiftRoulette.dll)
 
 All: admin (`AdminCommand.Authorize`; server console trusted; rejected
