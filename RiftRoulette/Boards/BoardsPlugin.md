@@ -10,7 +10,7 @@ watch spot and the empty-server sign. Ops live on `BoardService`,
 |---|---|
 | `OnLoad(isReload: true)` | Next tick: `BoardService.Redraw()` (a hot reload skips `OnStartupServer`; clears the old DLL's boards and draws them at the current watch spot) |
 | `OnLoad` (every load) | `Timer.Every(EmptySign.CheckSeconds)` (2 s): `EmptySign.Refresh()` shows the empty-server sign while there are no participants and removes it otherwise |
-| `OnStartupServer` | Next tick: `BoardService.Redraw()` |
+| `OnStartupServer` | Next tick: `BoardService.Redraw()`; then `BoardService.RedrawAfterMapStart` at each of `MapStartRedrawSeconds` (3 s, 10 s), because boards drawn on that first tick did not show |
 
 ## Admin commands (Debug)
 

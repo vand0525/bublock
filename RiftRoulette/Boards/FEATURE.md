@@ -17,7 +17,7 @@ spectator camera's start spot under mid, up only while nobody plays.
 | `EmptySignSettings.cs` | The sign's adjustable look: distance, shift, height, per-line offsets, sizes, gap, colors, text; range checks and JSON (tested) |
 | `EmptySignStore.cs` | Saves those settings in `bublock/emptysign.json` |
 | `EmptySign.cs` | Shows the empty-server sign while there are no participants (or the admin preview is on), removes it otherwise; applies setting changes |
-| `BoardsPlugin.cs` | Redraw on load and map start; empty-sign check every 2 s; admin `/board_redraw`, `/board_note`, `/sign_*` |
+| `BoardsPlugin.cs` | Redraw on load and map start (next tick, then again at 3 s and 10 s); empty-sign check every 2 s; admin `/board_redraw`, `/board_note`, `/sign_*` |
 
 ## Public operations
 

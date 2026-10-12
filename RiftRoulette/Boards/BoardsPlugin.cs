@@ -21,6 +21,9 @@ public class BoardsPlugin : DeadworksPluginBase
   public override void OnStartupServer()
   {
     Timer.NextTick(() => BoardService.Redraw());
+
+    foreach (var seconds in BoardService.MapStartRedrawSeconds)
+      Timer.Once(seconds.Seconds(), () => BoardService.RedrawAfterMapStart(seconds));
   }
 
   [Command("board_redraw", Description = "Redraw every board at the watch spot")]
