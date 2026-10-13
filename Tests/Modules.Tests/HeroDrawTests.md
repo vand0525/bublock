@@ -1,6 +1,6 @@
 # HeroDrawTests
 
-Unit tests for `RandomMode/HeroDraw` (pure, seeded `Random`).
+Unit tests for `Modules/RandomHeroes/HeroDraw` (pure, seeded `Random`).
 
 - Every player gets a hero from the pool, and no two players share one
   (checked over 50 seeds).

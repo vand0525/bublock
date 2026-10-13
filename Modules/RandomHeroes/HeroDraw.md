@@ -1,17 +1,19 @@
 # HeroDraw
 
-Pure random hero draw for Random mode. This is the single place to replace
-when heroes later come from a real match ID.
+Pure random hero draw (namespace `Bublock.Modules.RandomHeroes`). Game
+agnostic: it knows Steam IDs and `Heroes`, nothing about teams or modes.
+Rift Roulette's Random mode calls it each intermission; it is the single
+place to replace when heroes later come from a real match ID.
 
 ## Operations
 
 `Draw(players, pool, previous, rng, fixedHeroes = null)` returns Steam ID to hero:
 
-- `fixedHeroes` (hero reservations, `HeroReservations.Take`): each listed
-  player who is in `players` gets that hero, with no repeat check. Their
-  heroes leave the pool for everyone else (unless that would empty it).
-  Players not in `players` are ignored. Null or empty: the draw below runs
-  unchanged over every player.
+- `fixedHeroes` (Rift Roulette: hero reservations, `HeroReservations.Take`):
+  each listed player who is in `players` gets that hero, with no repeat
+  check. Their heroes leave the pool for everyone else (unless that would
+  empty it). Players not in `players` are ignored. Null or empty: the draw
+  below runs unchanged over every player.
 - Shuffles the pool and the players, then gives each remaining player the first
   remaining hero that is not the one they had last round (`previous`).
   Heroes are unique while the pool lasts.
@@ -27,5 +29,6 @@ when heroes later come from a real match ID.
 ## Invariants
 
 - Deterministic for a given `Random` seed (unit tested with seeds).
+- No state; the caller owns `previous` and the pool (bans, failed swaps).
 - The real pool (`HeroBuildCatalog.Default.Heroes`, 38 heroes) is far larger
   than a lobby (12), so live draws are unique and never repeat.

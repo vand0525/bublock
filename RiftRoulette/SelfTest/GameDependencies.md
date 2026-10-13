@@ -26,7 +26,8 @@ by `SelfTestTests`.
   `item_crate_spawn`, the two shop triggers, `info_koth_spawn_location`).
 - `CleanedEntities`: what CleanSlate removes; should be 0 on the map.
 - `Events`: counter names `EventCounters` tracks. `take_damage` guards the up-top damage block
-  (`GameLoop/GameLoopPlugin.OnTakeDamage`); zero after a fight means the
+  (`Modules/Restraint/RestraintPlugin.OnTakeDamage`, counted in
+  `GameLoop/GameLoopPlugin.OnTakeDamage`); zero after a fight means the
   hook stopped firing and waiting players can be hurt again.
 - `RiftPointName` = `info_koth_spawn_location`, `RiftPointTolerance` = 100
   units (a map rift point must be this close to `RiftSides.Position`).

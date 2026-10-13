@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modules.Tests", "Tests\Modu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RiftRoulette.Tests", "Tests\RiftRoulette.Tests\RiftRoulette.Tests.csproj", "{53AF7042-DE7C-4B7F-9B5A-BBD3AA5D4C34}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrystalCrackers", "CrystalCrackers\CrystalCrackers.csproj", "{F704754E-E39F-4983-A91B-9F7CA14D3825}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,18 @@ Global
 		{53AF7042-DE7C-4B7F-9B5A-BBD3AA5D4C34}.Release|x64.Build.0 = Release|Any CPU
 		{53AF7042-DE7C-4B7F-9B5A-BBD3AA5D4C34}.Release|x86.ActiveCfg = Release|Any CPU
 		{53AF7042-DE7C-4B7F-9B5A-BBD3AA5D4C34}.Release|x86.Build.0 = Release|Any CPU
+		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Debug|x64.Build.0 = Debug|Any CPU
+		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Debug|x86.Build.0 = Debug|Any CPU
+		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Release|x64.ActiveCfg = Release|Any CPU
+		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Release|x64.Build.0 = Release|Any CPU
+		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Release|x86.ActiveCfg = Release|Any CPU
+		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

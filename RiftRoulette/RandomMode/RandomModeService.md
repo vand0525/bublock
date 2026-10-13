@@ -89,7 +89,7 @@ turn (the bench). Static state; called by `GameLoop/MatchService` only when
    each reserved hero, the first fighter in its line; on a banned hero that
    fighter uses one round without getting it (`Reservations.Burned`). A
    reroll in the same intermission reuses both results without counting
-   again. Then `HeroDraw.Draw(fighters, unbanned heroes, LastHero,
+   again. Then `HeroDraw.Draw` (`Modules/RandomHeroes`) `(fighters, unbanned heroes, LastHero,
    fixedHeroes)`: reserved fighters get their hero, and everyone else is
    drawn randomly from the rest, never a banned hero (unless the bans cover
    the whole pool, then they are ignored). The bench player

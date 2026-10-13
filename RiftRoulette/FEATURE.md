@@ -62,6 +62,7 @@ back up. See `reference/chat-handoff.md` and
   blocked from items, shooting and melee until they are moved into the
   rift (`Modules/Restraint`, game modifier `modifier_citadel_silenced`
   plus modifier states set every frame; no disarm, so they can reload).
+  They take no damage (`RestraintPlugin.OnTakeDamage`).
 - The waiting spot sits above the rift being fought, or the next one
   between rounds (`Round/WatchSpot`); it only changes when players are
   sent back up after a round, and the boards move with it.
@@ -98,8 +99,9 @@ they call each other with typed C# (no command/convar messaging):
 | `Modules/Loadout/` (module) | `LoadoutPlugin` | stored top builds, apply build to a pawn |
 | `RandomMode/` | `RandomPlugin` | Random mode: teams, per-round hero + build, pending swaps, joiners, hero guard |
 | `Mirror/` | `MirrorPlugin` | Mirror mode: one shared hero + build per round, admin pins, hero guard |
-| `Modules/Restraint/` (module) | `RestraintPlugin` | silence / no items, shooting or melee until released |
+| `Modules/Restraint/` (module) | `RestraintPlugin` | silence / no items, shooting or melee until released; no damage taken while restrained |
 | `Modules/Queue/` (module) | — (data) | reusable player queue |
+| `Modules/RandomHeroes/` (module) | — (data) | random hero draw (`HeroDraw`) |
 | `Stats/` | `StatsPlugin` | match kills / deaths / assists, stats boards |
 | `Balance/` | `BalancePlugin` | auto-balance trigger and swaps |
 | `Betting/` | `BettingPlugin` | round betting with kill souls, betting board (Random mode) |
@@ -173,7 +175,7 @@ GameLoop/MatchService ─────────────┐
                      └> MatchService.OnRoundEnded (score, HudService banner)
                           └─> next intermission: RandomModeService.PrepareRound
                                 (BenchRule: odd count sits one out → BalanceService.TryBalance →
-                                 HeroDraw → LoadoutService.Swap per fighter)
+                                 Modules/RandomHeroes HeroDraw → LoadoutService.Swap per fighter)
 player_death ─> StatsService.RecordDeath ─> BalanceService.RecordKill, stats boards
 spawn ─> WatchSpot.SendUp (restrained, above the rift being fought)
 connect ─> LobbyService.AdmitPlayer (smaller team, WatchSpot.SendUp) ─> RandomModeService.AddJoiner

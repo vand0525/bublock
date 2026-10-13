@@ -52,7 +52,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | Movement (`Modules/Movement`) | Named locations, teleports, camera angle | `Teleport`, `CCitadelUserMsg_SetClientCameraAngles` | `dw_mv_tp`, `dw_mv_angle` |
 | Hud (`Modules/Hud`) | Banners | `HudAnnounce` | `dw_hud_announce` |
 | Loadout (`Modules/Loadout`) | Give a stored build, copy a hero | `AddItem`, `ImbueItem`, `ItemInfo`, `FindAbilityByName`, `UpgradeBits`, `ResetHero`, `Level`, currencies | `dw_loadout_give <slot> <hero>` |
-| Restraint (`Modules/Restraint`) | Silence / no items / no shooting / no melee up top; NPCs ignore restrained players and they take no damage | `modifier_citadel_silenced`, `EModifierState` values, `OnGameFrame`, `OnTakeDamage` (GameLoop, `HookResult.Stop`) | `dw_restrain <slot>`, `dw_restrain_list`; self-test counter `damage_blocked_restrained` |
+| Restraint (`Modules/Restraint`) | Silence / no items / no shooting / no melee up top; NPCs ignore restrained players and they take no damage | `modifier_citadel_silenced`, `EModifierState` values, `OnGameFrame`, `OnTakeDamage` (`RestraintPlugin`, `HookResult.Stop`) | `dw_restrain <slot>`, `dw_restrain_list`; self-test counter `damage_blocked_restrained` |
 | Queue (`Modules/Queue`) | Player queue (bench rotation) | none | `/random_status` `Bench=` with an odd player count |
 | CleanSlate (`CleanSlate.dll`) | Removes bosses / shops / powerups, disables shop triggers, spawn convars | designer names in `CleanSlateService`, spawn convars | `dw_cleanup_run` |
 | DevTools (`DevTools.dll`) | Entity inspection, log path | `Entities.All`, `ByDesignerName`, `SubclassVData` | `dw_ent_find koth` |

@@ -628,3 +628,11 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Not known:** which part of `SpectateService.Park` crashes the client (server `SetObserverMode(Roaming)`, the observer teleport, or the `SetClientCameraAngles` message, which the fly cam ignores anyway; the fly cam's aim comes from the teleport's angles).
 - **Used as:** `StreamCam` no longer parks; with nobody fighting it makes no camera call. Follows are unchanged.
 - **Link / path:** `Bublock/RiftRoulette/Lobby/StreamCam.cs`, `Bublock/Modules/Spectate/SpectateService.cs`, `lobby-*.log` (`Stream camera Reason=`, `Player disconnected`)
+
+### 2026-10-13 — `npc_boss_tier2` is the Walker; the mid-boss is not a map entity
+
+- **Why hard / useful:** the classnames read like tiers of one boss, so "tier 2" is easy to mistake for the mid-boss. Deleting or keeping the wrong one breaks a mode.
+- **Verified fact (map dump, `dl_midtown`):** the six `npc_boss_tier2` are the lane Walkers, all at z 384 on the lanes (`*_t2_boss_<lane>`, subclasses `npc_boss_tier2` / `npc_boss_tier2_weak` and `alt_` variants). The two `npc_boss_tier3` at (0, ±8040, 632) are the Patrons. The mid-boss has no entity at load: the game spawns it from an `info_neutral_trooper_camp` with subclass `neutral_camp_midboss` at about (0, 0, -768), inside `trigger_midboss_shield` (72, 0, -704); `citadel_base_prop_midboss_indicator` props sit at (±2440, 0, 632).
+- **Not known:** the classname of the spawned mid-boss entity.
+- **Used as:** CleanSlate removes Walkers for every mode; Crystal Crackers will spawn its own mid-boss (`reference/crystal-crackers.md`).
+- **Link / path:** `Bublock/RiftRoulette/reference/maps/dl_midtown/entities.json`

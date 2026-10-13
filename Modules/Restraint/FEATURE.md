@@ -5,9 +5,8 @@
 Reusable, game-agnostic "can't fight" state: silence, item block, shooting
 block and a melee block that stay on a player until released, through death
 and hero swaps. Reloading still works (no disarm). Restrained players are
-also ignored by NPC targeting, and `IsRestrainedPawn` lets the consumer's
-damage hook make them take no damage (Rift Roulette blocks all damage to
-players waiting up top).
+also ignored by NPC targeting and take no damage (`RestraintPlugin`
+stops every hit on a restrained pawn, `IsRestrainedPawn`).
 Uses the game's real silence modifier so its status icon shows.
 
 ## Public operations
@@ -30,7 +29,7 @@ Uses the game's real silence modifier so its status icon shows.
 | File | Role |
 |---|---|
 | `RestraintService.cs` | Restrain / release / per-frame upkeep |
-| `RestraintPlugin.cs` | `OnGameFrame` hook, `/restrain*` and `/status_*` admin commands |
+| `RestraintPlugin.cs` | `OnGameFrame` and `OnTakeDamage` hooks, `/restrain*` and `/status_*` admin commands |
 | `Restraint.projitems` | Service (no commands) |
 | `RestraintCommands.projitems` | Plugin class |
 

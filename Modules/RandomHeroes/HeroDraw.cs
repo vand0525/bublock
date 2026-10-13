@@ -1,6 +1,6 @@
 using DeadworksManaged.Api;
 
-namespace RiftRoulette.RandomMode;
+namespace Bublock.Modules.RandomHeroes;
 
 public static class HeroDraw
 {

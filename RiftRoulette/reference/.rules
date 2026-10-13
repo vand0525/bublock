@@ -26,9 +26,10 @@ deadworks/                 # Cursor workspace root
       Movement/            # named locations, teleports (dw_mv_*)
       Hud/                 # on-screen announcement banners (dw_hud_*)
       Loadout/             # stored hero builds, give a loadout (dw_loadout_*)
-      Restraint/           # silence / disarm / no melee until released (dw_restrain*)
+      Restraint/           # silence / disarm / no melee until released, no damage taken (dw_restrain*)
       Queue/               # reusable player join queue (no commands)
       Spectate/            # spectator camera: follow a player, park a free camera (no commands)
+      RandomHeroes/        # random hero draw, HeroDraw (no commands)
     RiftRoulette/            # game mode DLL
       Session/             # session lifecycle lines in the master log
       Lobby/ Rift/         # game-specific plugin classes
@@ -40,8 +41,9 @@ deadworks/                 # Cursor workspace root
       Balance/             # auto-balance swaps between rounds
       Mirror/              # mirror mode: everyone the same hero + build, admin pins
       SelfTest/            # patch-day self-test of every game dependency (dw_selftest_*)
+    CrystalCrackers/       # second game mode DLL (skeleton, never deployed with RiftRoulette)
     DevTools/              # discovery / diagnostics
-    CleanSlate/            # map cleanup helpers
+    CleanSlate/            # map cleanup helpers (mode-agnostic)
     Tests/                 # local xUnit tests (never deployed)
     logs/                  # Cursor pull root (<Dll>/ subfolders)
     server-data/           # pulled access.json (bans / whitelist), git-ignored
@@ -70,6 +72,17 @@ deadworks/                 # Cursor workspace root
   `plugins/*.dll` as a plugin, and only discovers commands inside the loaded DLL).
 - `Modules/` MUST NOT depend on Rift Roulette. Game-specific constants and
   logic live under `RiftRoulette/`.
+- Game modes are separate DLLs sharing the modules as source
+  (`RiftRoulette.dll`; `CrystalCrackers.dll`, a skeleton, see
+  `reference/crystal-crackers.md`). Only one mode DLL is ever on the
+  server: both register the module commands. `deploy.sh` uploads Rift
+  Roulette only. CleanSlate never knows the mode: it removes what no mode
+  wants (lane guardians, Walkers `npc_boss_tier2`, barracks bosses, shops,
+  urn) and keeps the vanilla mid-boss scheduler off. The mid-boss is not a
+  map entity (an `info_neutral_trooper_camp`, subclass
+  `neutral_camp_midboss`, spawns it); a mode that wants one spawns it
+  itself. Anything one mode keeps and another removes belongs to the mode
+  DLL, never a mode flag in CleanSlate.
 
 ---
 
@@ -294,9 +307,11 @@ Assume the git repo is rooted at `Bublock/`.
   full (`Round/ChargeFill`, max from `Round/ChargeTable` built offline by
   `scripts/fetch-charges.py`; only raised, never lowered). Resource-pool
   ultimates (Werewolf's wolf form) are never filled.
-  Restrained players take no damage (`GameLoopPlugin.OnTakeDamage` returns
-  `Stop` when `RestraintService.IsRestrainedPawn`), so leftover turrets and
-  troopers can't hurt anyone up top. Never use disarm
+  Restrained players take no damage (`Modules/Restraint/RestraintPlugin.OnTakeDamage`
+  returns `Stop` when `RestraintService.IsRestrainedPawn`, in every DLL that
+  imports Restraint's commands), so leftover turrets and troopers can't hurt
+  anyone up top; `GameLoopPlugin.OnTakeDamage` only keeps those hits out of
+  the assist totals. Never use disarm
   (`modifier_citadel_disarmed` / `Disarmed`): it also blocks reloading.
 - "Up top" is `Round/WatchSpot`, above the rift being fought
   (running) or the next one (idle), per `WatchSpotRule`. Never teleport to

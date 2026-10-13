@@ -7,6 +7,11 @@ Name `Restraint`; log feature `Restraint` (`restraint-YYYYMMDD.log`).
 
 - `OnGameFrame(simulating, ...)`: calls `RestraintService.Sustain()` on
   simulating frames only.
+- `OnTakeDamage(args)`: returns `HookResult.Stop` when the victim is a
+  restrained player (`RestraintService.IsRestrainedPawn`), so leftover
+  turrets, troopers or anything else can't hurt them; otherwise `Continue`.
+  No log line (runs on every hit). Every DLL that imports
+  `RestraintCommands.projitems` gets the block without its own hook.
 
 ## Commands (all admin, `AdminCommand.Authorize`, Debug mode)
 

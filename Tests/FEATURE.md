@@ -11,14 +11,14 @@ server. Never deployed to the server.
   `Shared.projitems`). Tests run against temp folders with a fake clock.
 - `Modules.Tests/` — xUnit tests for the pure helpers in `Bublock/Modules`
   (imports `Shared.projitems`, `WorldText.projitems`,
-  `Movement.projitems`, `Hud.projitems`, `Queue.projitems`, `Spectate.projitems`, and `Loadout.projitems`, which
+  `Movement.projitems`, `Hud.projitems`, `Queue.projitems`, `RandomHeroes.projitems`, `Spectate.projitems`, and `Loadout.projitems`, which
   also embeds `hero-builds.json` in the test assembly; references
   `Google.Protobuf` because `MovementService` sends a camera message):
   WorldText placement math and text formatting, the Movement
   `LocationRegistry`, the Hud banner text parser, the Loadout planner
   (budgeted shopping: 12 slots, components, selling, optional groups,
   banned items, ability bits), the build catalog (inline sample plus the
-  committed data, sell priorities, baseline value), the `PlayerQueue` join queue, and the spectate choice
+  committed data, sell priorities, baseline value), the `PlayerQueue` join queue, the random hero draw (`HeroDraw`), and the spectate choice
   (keep, killer, any, park) and straight-down angle. Service ops that touch entities or players are
   not tested here.
 - `RiftRoulette.Tests/` — xUnit tests for pure Rift Roulette pieces, included
@@ -29,7 +29,7 @@ server. Never deployed to the server.
   `RiftRoulette/Round/RoundLocations.cs`, `WatchSpotRule.cs`, `WatchLayout.cs`,
   `WatchGuardRule.cs`,
   `RiftRoulette/GameLoop/MatchState.cs`,
-  `MatchConfig.cs`, `AutoStartRule.cs`, `SoulRule.cs`, `RiftRoulette/RandomMode/HeroDraw.cs`, `BenchRule.cs`,
+  `MatchConfig.cs`, `AutoStartRule.cs`, `SoulRule.cs`, `RiftRoulette/RandomMode/BenchRule.cs`,
   `RiftRoulette/Lobby/TeamBalance.cs`, `AdminSeatRule.cs`, `StreamFraming.cs`, `RiftRoulette/Boards/EmptySignLayout.cs`, `EmptySignSettings.cs` (with `Modules/WorldText` imported), `RiftRoulette/Stats/StatsLedger.cs`, `DamageLedger.cs`,
   `StatsBoardText.cs`, `RiftRoulette/Balance/BalanceTracker.cs`,
   `BalancePicker.cs`, `RiftRoulette/Betting/BetBook.cs`, `BetBoardText.cs`, `MarkBook.cs`) rather than referencing the plugin DLL: round
@@ -39,7 +39,7 @@ server. Never deployed to the server.
   watch view angles, the below-the-watch-spot line, match scoring, match
   config parsing, which currency gains are blocked, the match auto-start decision, the admin
   seat rules, the stream camera's fixed spots and park rule,
-  the random hero draw, who sits out (bench rotation) and the fighting teams,
+  who sits out (bench rotation) and the fighting teams,
   team placement, kill / death / assist counting and
   board text, the auto-balance trigger and pick, and betting souls, payouts,
   steals, marks and board text. Imports `Shared.projitems`,

@@ -78,9 +78,10 @@ Bublock/
     Movement/              Movement.projitems: MovementService + MovementPlugin (dw_mv_*)
     Hud/                   Hud.projitems: HudService + HudPlugin (dw_hud_announce)
     Loadout/               Loadout.projitems: embedded top builds + LoadoutService + LoadoutPlugin (dw_loadout_*, Stage 13b)
-    Restraint/             Restraint.projitems: RestraintService + RestraintPlugin (silence / no items, shooting or melee, dw_restrain*, Stage 13h)
+    Restraint/             Restraint.projitems: RestraintService + RestraintPlugin (silence / no items, shooting or melee, no damage taken, dw_restrain*, Stage 13h)
     Queue/                 Queue.projitems: PlayerQueue (reusable join queue, Stage 13j)
-  RiftRoulette/              RiftRoulette.dll = Shared + WorldText + Movement + Hud + Loadout + Restraint + Queue + game plugin classes
+    RandomHeroes/          RandomHeroes.projitems: HeroDraw (random hero draw, no commands)
+  RiftRoulette/              RiftRoulette.dll = Shared + WorldText + Movement + Hud + Loadout + Restraint + Queue + Spectate + RandomHeroes + game plugin classes
     Lobby/                 LobbyPlugin (connect/disconnect, teams, kick, progression; admin seat + Participants 13f; HeroLock 13g; hero enforcement LobbyHeroes)
     Boards/                BoardsPlugin + BoardService (welcome / hint / note boards, redraw of every board)
     Rift/                  RiftPlugin (spawn / park / watch / cleanup / alternation)
@@ -90,8 +91,9 @@ Bublock/
     Stats/                 StatsPlugin + StatsService (match kills / deaths / assists, stats boards, Stage 13c)
     Balance/               BalancePlugin + BalanceService (auto-balance swaps, Stage 13c)
     Mirror/                MirrorPlugin + MirrorModeService (everyone the same hero + build)
+  CrystalCrackers/         CrystalCrackers.dll = Shared + the same modules; second mode, skeleton, not deployed (reference/crystal-crackers.md)
   DevTools/                DevTools.dll (consumes Shared)
-  CleanSlate/              CleanSlate.dll (consumes Shared)
+  CleanSlate/              CleanSlate.dll (consumes Shared; mode-agnostic)
 ```
 
 ```mermaid
@@ -130,6 +132,7 @@ Why this shape (verified in Deadworks loader source; see Discoveries in
 | Multi-plugin | Active work under `Bublock/`; `archive/` is frozen oracle |
 | Plugin granularity | Many small plugin classes per DLL (one per feature); each hosts only its hooks and commands |
 | Reusable modules | `Bublock/Modules/<Name>/` with `<Name>.projitems`; no Rift Roulette dependencies; service files separate from plugin/commands file |
+| Game modes | Separate mode DLLs (`RiftRoulette.dll`, `CrystalCrackers.dll`) share modules as source; only one mode DLL is deployed at a time (their module commands collide). `CleanSlate.dll` never knows the mode: it removes what no mode wants (Walkers included) and keeps the vanilla mid-boss scheduler off; anything one mode keeps and another removes belongs to the mode DLL |
 | Shared code | `Bublock/Shared/Shared.projitems` (Auth, Cheats, ExecutionMode, Logging) compiled into every Bublock DLL |
 | Services | Plain C# classes; stateless or static within the assembly; created lazily; never depend on plugin-class load order |
 | Timers | `Timer` is a per-plugin instance property; services receive `ITimer` from the calling plugin class |
@@ -588,3 +591,4 @@ Rows before the 2026-09-27 rebrand row use the old name (Rift Rumble,
 | 2026-10-11 | empty sign survives map changes (fix) | After `/restart_now` the sign stayed gone until the admin played and spectated again: `EmptySign.Shown` is static and survived the map change while its boards did not, so the 2 s check saw nothing to do. `Refresh` now compares against the boards that exist (new `WorldTextService.IsLive`), redraws missing ones (Information `Empty sign repaired`), and logs an Error instead of throwing. Next: `/restart_now` with nobody playing; the sign is back within 2 s. |
 | 2026-10-11 | boards redrawn after map start (fix) | The `IsLive` fix was not enough: after `/restart_now` the sign was still invisible and no repair ran. The redraw on the first tick after `OnStartupServer` draws boards that do not show, while their handles still look valid. `BoardsPlugin.OnStartupServer` now also redraws every board 3 s and 10 s after the map start (`BoardService.MapStartRedrawSeconds`, Information `Boards redrawn after map start Pass= TrackedLive= WorldTextFound=`). Next: `/restart_now`; the sign is up within 3 s, and the log's `WorldTextFound` shows whether the first-tick boards still existed. |
 | 2026-10-12 | priority heroes removed (code) | Rat King, Baba and Solomon are ordinary pool heroes. Deleted `RandomMode/PriorityHeroes`: no guaranteed draw at 8 fighters, `/reserve` and `/heroban` accept them, a failed swap is no longer rerolled, and `/random_status` drops the `Priority=` line. `HeroDraw.Draw` no longer takes `mustInclude`. Mirror mode unchanged. |
+| 2026-10-12 | module mode seams (code) | Shared code made safe for a second mode DLL. `Modules/Restraint/RestraintPlugin.OnTakeDamage` now stops every hit on a restrained pawn (was `GameLoopPlugin`, which still counts `damage_blocked_restrained` and keeps those hits out of the assist totals). CleanSlate is unchanged: the six `npc_boss_tier2` on `dl_midtown` are the lane Walkers (z 384), not the mid-boss, so it keeps removing them for every mode; the mid-boss is spawned at runtime by `info_neutral_trooper_camp` (`neutral_camp_midboss`, about (0, 0, -768)) and the scheduler stays off. `HeroDraw` moved to `Modules/RandomHeroes` (namespace `Bublock.Modules.RandomHeroes`; `HeroDrawTests` now in `Modules.Tests`). New `CrystalCrackers/` skeleton DLL (Shared + every module, one plugin logging `Module host started`), in the solution, not deployed. Mode note `reference/crystal-crackers.md`. Tests: Shared 23, Modules 169, RiftRoulette 407. Next: the boss probe in `crystal-crackers.md`. |

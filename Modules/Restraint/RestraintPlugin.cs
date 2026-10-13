@@ -15,6 +15,9 @@ public class RestraintPlugin : DeadworksPluginBase
       RestraintService.Sustain();
   }
 
+  public override HookResult OnTakeDamage(TakeDamageEvent args) =>
+    RestraintService.IsRestrainedPawn(args.Entity) ? HookResult.Stop : HookResult.Continue;
+
   [Command("restrain", Description = "Silence, disarm and block melee for a player until released: restrain <slot>")]
   public void CmdRestrain(CCitadelPlayerController? caller, int slot)
   {

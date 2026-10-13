@@ -2,6 +2,7 @@ using System.Globalization;
 using Bublock.Modules.Hud;
 using Bublock.Modules.Loadout;
 using Bublock.Modules.Queue;
+using Bublock.Modules.RandomHeroes;
 using Bublock.Shared;
 using DeadworksManaged.Api;
 using RiftRoulette.Balance;

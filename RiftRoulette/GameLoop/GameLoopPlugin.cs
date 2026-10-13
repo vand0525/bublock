@@ -38,18 +38,17 @@ public class GameLoopPlugin : DeadworksPluginBase
     return HookResult.Continue;
   }
 
+  // RestraintPlugin blocks the hit itself; this only keeps blocked hits out of the assist totals.
   public override HookResult OnTakeDamage(TakeDamageEvent args)
   {
     EventCounters.Hit("take_damage");
 
-    if (!RestraintService.IsRestrainedPawn(args.Entity))
-    {
+    if (RestraintService.IsRestrainedPawn(args.Entity))
+      EventCounters.Hit("damage_blocked_restrained");
+    else
       StatsService.RecordDamage(args);
-      return HookResult.Continue;
-    }
 
-    EventCounters.Hit("damage_blocked_restrained");
-    return HookResult.Stop;
+    return HookResult.Continue;
   }
 
   public override HookResult OnModifyCurrency(ModifyCurrencyEvent args)

@@ -1,7 +1,7 @@
+using Bublock.Modules.RandomHeroes;
 using DeadworksManaged.Api;
-using RiftRoulette.RandomMode;
 
-namespace Bublock.Tests.RiftRoulette;
+namespace Bublock.Tests.Modules;
 
 public class HeroDrawTests
 {

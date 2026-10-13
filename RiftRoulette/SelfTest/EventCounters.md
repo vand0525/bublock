@@ -18,7 +18,7 @@ whether a hook still fires after a game update.
 | `game_frame` | `GameLoop/GameLoopPlugin.OnGameFrame` |
 | `modify_currency`, `soul_blocked_<Source>`, `ability_blocked_<Currency>_<Source>` | `GameLoop/GameLoopPlugin.OnModifyCurrency` (every call; each blocked gold or ability-point / unlock gain by `ECurrencySource`, not in `GameDependencies.Events`) |
 | `pause_blocked_command`, `pause_blocked_message`, `pause_auto_unpause` | `Lobby/PauseGuard` (each blocked pause request by path, each automatic unpause attempt; not in `GameDependencies.Events`) |
-| `take_damage`, `damage_blocked_restrained` | `GameLoop/GameLoopPlugin.OnTakeDamage` (every hit; each hit blocked because the victim is restrained up top, not in `GameDependencies.Events`) |
+| `take_damage`, `damage_blocked_restrained` | `GameLoop/GameLoopPlugin.OnTakeDamage` (every hit that reaches it; each hit on a restrained player up top, which `Modules/Restraint/RestraintPlugin.OnTakeDamage` stops, not in `GameDependencies.Events`) |
 
 ## Invariants
 
