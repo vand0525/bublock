@@ -152,4 +152,14 @@ public class MidBossRuleTests
   [InlineData(500, 0.1f)]
   public void ScaleForFighters_is_twelve_over_fighters_clamped(int fighters, float expected) =>
     Assert.Equal(expected, MidBossRule.ScaleForFighters(fighters), 3);
+
+  [Theory]
+  [InlineData(0, 0, 1, 0, 2)]
+  [InlineData(2, 0, 3, 0, 2)]
+  [InlineData(0, 0, 0, 1, 3)]
+  [InlineData(1, 1, 2, 2, 2)]
+  [InlineData(3, 0, 0, 0, 0)]
+  [InlineData(1, 1, 1, 1, 0)]
+  public void CrystalTeam_is_the_team_whose_count_rose(int amberBefore, int sapphireBefore, int amberNow, int sapphireNow, int expected) =>
+    Assert.Equal(expected, MidBossRule.CrystalTeam((amberBefore, sapphireBefore), (amberNow, sapphireNow)));
 }

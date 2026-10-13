@@ -44,6 +44,7 @@ deadworks/                 # Cursor workspace root
       Mirror/              # mirror mode: everyone the same hero + build, admin pins
       SelfTest/            # patch-day self-test of every game dependency (dw_selftest_*)
     CrystalCrackers/       # second game mode DLL (in development, always private; the deployed mode for now)
+      Pit/                 # admin-driven attack / defense pit round (dw_pit_*)
     DevTools/              # discovery / diagnostics
     CleanSlate/            # map cleanup helpers (mode-agnostic)
     Tests/                 # local xUnit tests (never deployed)
@@ -98,6 +99,23 @@ deadworks/                 # Cursor workspace root
   on 2026-10-13. A mode makes the boss killable (`MidBossService.Ready`:
   resistance modifier removed, max from real-match souls, 51% health,
   damage scaled 12 / fighters) and never kills it by code; players do.
+- Crystal Crackers pit round (`CrystalCrackers/Pit/PitRoundService`,
+  admin-driven: `/pit_start`): attack / defense. The pit team (alternates,
+  Amber first) starts on its own end of the pit floor, the other team in
+  mid lane on its own side (Rift Roulette's mid spawns); everyone waits
+  restrained at `pit_watch` for the 3 s countdown, then a fresh boss
+  (`Ready(cap, fighters)`). The boss kill opens a crystal window (20 s);
+  the crystal team wins, else the killer's team; the time limit (300 s)
+  and `/pit_end` have no winner. A fighter who dies is out for the round
+  (up top, restrained) unless it was a rebirth: never block or undo the
+  vanilla rejuvenator (`modifier_citadel_rebirth_credit`); a fighter with
+  the credit at death, or seen holding it this round, stays in. A hero
+  swap fires `player_spawn` without a death; only a recorded death puts a
+  fighter out. Round end removes bosses and crystals (never a kill) and
+  clears the rebirth credit and rejuv buff from everyone, so nothing
+  carries over. Crystal Crackers sets `citadel_check_walk_on_skyclip 0`
+  itself. Pit spots: `Pit/Data/spots.json`, checked with
+  `scripts/check-spots.py --mode crystal`.
 
 ---
 
@@ -365,7 +383,8 @@ Assume the git repo is rooted at `Bublock/`.
   Only `GameLoop/ShopAccess` sets `citadel_allow_purchasing_anywhere`
   (to 0). Items reach players with `AddItem`.
 - Souls: while a match runs every earned soul gain is blocked
-  (`GameLoop/SoulRule`, applied in `GameLoopPlugin.OnModifyCurrency`);
+  (`Modules/Loadout/SoulRule`, applied in `GameLoopPlugin.OnModifyCurrency`;
+  Crystal Crackers applies it while a pit round runs);
   power comes only from the round's build. `ECheats`, `EStartingAmount`
   and `EItemSale` pass so loadouts still set gold.
 - Rift troopers: round end and cancel remove every `npc_trooper` (lane

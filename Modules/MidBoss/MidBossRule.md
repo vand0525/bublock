@@ -18,6 +18,9 @@ unit tested (`Tests/Modules.Tests/MidBossRuleTests`).
 | `DefaultScale` / `MinScale` / `MaxScale` | 1 / 0.1 / 10 | Damage scale range |
 | `MaxHealthLimit` | 1,000,000 | Largest health a command accepts |
 | `ResistanceModifier` | `npc_super_neutral/midboss_modifier_damage_resistance` | The damage threshold that zeroes hits before `OnTakeDamage` |
+| `RebirthModifier` | `citadel_item_pickup_rejuv/modifier_citadel_rebirth_credit` | On a player who took the crystal: the game brings them back once after a death |
+| `RejuvEffectsModifier` | `ability_item_pickup_effects/rejuv_effects` | The crystal's buff on that player |
+| `AmberTeam` / `SapphireTeam` | 2 / 3 | Teams of `GameRules.AmberRejuvCount` / `SapphireRejuvCount` |
 | `StartingHealth` / `HealthPerMinute` | 13,000 / 195 | `npc_units.vdata`: a boss spawned at game minute m gets 13,000 + 195 × m (m rounded; proven in game) |
 | `ReadyPercent` | 51 | Ready health, just above the 50% scream |
 | `BaselineFighters` | 12 | Fighters that hit at 1× (6v6) |
@@ -36,6 +39,7 @@ unit tested (`Tests/Modules.Tests/MidBossRuleTests`).
 | `HealthAtPercent(max, percent)` | `max * percent / 100` rounded, percent clamped 0–100, never below 1 |
 | `IsValidHealth(health)` | 1 to `MaxHealthLimit` |
 | `IsValidSouls(souls)` | 0 to `MaxSouls` |
+| `CrystalTeam(before, now)` | 2 when Amber's rejuv count rose, else 3 when Sapphire's rose, else 0 |
 | `MinuteForSouls(souls)` | Linear between `MinuteBySouls` points; 0 at or below 0 souls; past 45,000 the last segment's slope continues (about 0.7 min per 1,000 souls) |
 | `HealthAtMinute(minute)` | 13,000 + 195 × minute rounded (half away from zero), negative minutes as 0, capped at `MaxHealthLimit` |
 | `HealthForSouls(souls)` | `HealthAtMinute(MinuteForSouls(souls))`: the max health the game gives a boss spawned when a real lobby averages that many souls |

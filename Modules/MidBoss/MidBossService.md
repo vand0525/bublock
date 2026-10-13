@@ -24,7 +24,11 @@ spawns, kills, crystal drops / removals and count changes also go to master.
 | `ObserveDeleted(entity)` | Untracks; a crystal logs `PickedUp` (`m_bPickedUp`, `unknown` if the field is missing) |
 | `ObserveKilled(EntityKilledEvent)` | On a boss: master `Mid-boss killed` with attacker (player name when a hero), team, inflictor, damage bits |
 | `ObserveRespawnPending(spawnTime)` / `ObserveRespawned()` | Feature log lines with the game clock |
-| `WatchCounts()` | Master line when `GameRules.MidbossKillCount` / `AmberRejuvCount` / `SapphireRejuvCount` change |
+| `WatchCounts()` | Master line when `GameRules.MidbossKillCount` / `AmberRejuvCount` / `SapphireRejuvCount` change; raises `CrystalTaken(team)` when a team's rejuv count rose (`MidBossRule.CrystalTeam`) |
+| `BossKilled` / `CrystalTaken` (events, `Action<int team>`) | `BossKilled` from `ObserveKilled` with the attacker's team (0 when none); `CrystalTaken` on every count rise (it steps several times per crystal). A throwing handler is logged and skipped |
+| `ClearRejuv(pawn)` | Removes `RebirthModifier` and `RejuvEffectsModifier`; returns how many were removed |
+| `HasRebirth(pawn)` | The pawn holds the rebirth credit |
+| `RemoveBosses()` / `RemoveCrystals()` | `Remove()` every tracked boss / crystal (no death, no crystal drop); never throws; returns the count |
 | `IsBoss(entity)` | Tracked handle or `MidBossRule.IsBoss` |
 | `ScaleHit(TakeDamageEvent)` | For a boss: `Info.Damage *= DamageScale`, counts the hit, logs the first hit after each scale change. Always `Continue` |
 | `SetDamageScale(scale, mode)` | Clamps, resets the hit counters | applied scale |

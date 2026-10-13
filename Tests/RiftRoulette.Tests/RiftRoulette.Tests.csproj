@@ -67,7 +67,6 @@
     <EmbeddedResource Include="..\..\RiftRoulette\Round\Data\spots.json" LogicalName="RiftRoulette.Round.spots.json" Link="RiftRoulette\Round\Data\spots.json" />
     <Compile Include="..\..\RiftRoulette\Round\ChargeTable.cs" Link="RiftRoulette\Round\ChargeTable.cs" />
     <EmbeddedResource Include="..\..\RiftRoulette\Round\Data\ability-charges.json" LogicalName="RiftRoulette.Round.ability-charges.json" Link="RiftRoulette\Round\Data\ability-charges.json" />
-    <Compile Include="..\..\RiftRoulette\GameLoop\SoulRule.cs" Link="RiftRoulette\GameLoop\SoulRule.cs" />
     <Compile Include="..\..\RiftRoulette\SelfTest\SelfTestResult.cs" Link="RiftRoulette\SelfTest\SelfTestResult.cs" />
     <Compile Include="..\..\RiftRoulette\SelfTest\GameDependencies.cs" Link="RiftRoulette\SelfTest\GameDependencies.cs" />
     <Compile Include="..\..\RiftRoulette\SelfTest\EventCounters.cs" Link="RiftRoulette\SelfTest\EventCounters.cs" />

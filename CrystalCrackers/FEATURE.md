@@ -9,10 +9,13 @@ pit for the boss and its crystals. Mode rules and open questions:
 
 ## Current state
 
-In development, no gameplay yet. The server runs it in place of Rift
-Roulette during development (`scripts/deploy.sh`), always private.
+In development. The server runs it in place of Rift Roulette during
+development (`scripts/deploy.sh`), always private.
 
 - `CrystalCrackersPlugin` logs that the module host started.
+- `Pit/`: the first playable round, started by an admin (`/pit_start`):
+  attack / defense around the mid-boss pit, crystal window, out on
+  death unless reborn. See `Pit/FEATURE.md`.
 - `AccessPlugin` + `AccessGate`: only admins and the `access.json` allowed
   list may join, whatever the file's mode; banned players are refused.
   Players without access are kicked 2 s after a load.
@@ -32,6 +35,7 @@ adds the `/midboss_*` probe commands and logs the boss and crystal
 | `CrystalCrackersPlugin.cs` | Module host: load, startup, unload master lines |
 | `AccessGate.cs` | Always-private verdict, connect gate, kick without access |
 | `AccessPlugin.cs` | Connect hook, load kick pass, `/access_mode`, `/ban_*`, `/allow_*` |
+| `Pit/` | Pit round: locations, spots, rule, service, plugin (`/pit_*`) |
 
 ## Public operations
 
@@ -45,16 +49,20 @@ None of its own; `AccessStore` caches `access.json` per load.
 
 - Lifecycle: `OnLoad`, `OnStartupServer`, `OnUnload` master lines;
   `OnClientConnect` gate; load kick pass.
-- Admin commands: access lists (`AccessPlugin`), plus the imported module
-  commands (`/wt_*`, `/mv_*`, `/hud_*`, `/loadout_*`, `/restrain*`,
-  `/status_*`, `/midboss_*`).
+- Admin commands: access lists (`AccessPlugin`), the pit round
+  (`/pit_*`, `Pit/PitRoundPlugin`), plus the imported module commands
+  (`/wt_*`, `/mv_*`, `/hud_*`, `/loadout_*`, `/restrain*`, `/status_*`,
+  `/midboss_*`).
+- The soul rule (`Modules/Loadout/SoulRule`) blocks earned souls while a
+  pit round runs; `citadel_check_walk_on_skyclip` is set to 0 by
+  `PitRoundPlugin` (watch spots on the sky clip).
 
 ## Not here yet
 
-Everything Rift Roulette's Lobby did for the server: team size, the 13th
-admin seat, flex slots, pause guard, auto restart, buying off, soul rule,
-hero enforcement. Added as the mode needs them. CleanSlate still clears
-the map.
+Everything else Rift Roulette's Lobby did for the server: team size, the
+13th admin seat, flex slots, pause guard, auto restart, buying off, hero
+enforcement, auto-start and the match loop. Planned as a lobby extraction
+into `Modules/`. CleanSlate still clears the map.
 
 ## Deploy
 

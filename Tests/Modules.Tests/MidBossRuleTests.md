@@ -24,3 +24,6 @@ Unit tests for `Modules/MidBoss/MidBossRule` (pure).
   20,605.
 - `ScaleForFighters`: 12 over fighters (12 is 1×, 6 is 2×, 2 is 6×, 24 is
   0.5×), clamped to 10× (1 or 0 fighters) and 0.1× (500).
+- `CrystalTeam`: Amber (2) when Amber's count rose, Sapphire (3) when only
+  Sapphire's did, Amber first when both rose; 0 when neither rose (a reset
+  to 0 is not a take).

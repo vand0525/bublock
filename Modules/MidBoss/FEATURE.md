@@ -39,6 +39,7 @@ by code; players kill it.
 | `MidBossService.Spawn / Schedule` | `MidBossService.md` |
 | `MidBossService.SetHealth / SetMaxHealth / SetPercent / RemoveModifier / Remove` | `MidBossService.md` |
 | `MidBossService.Ready / Recheck / CountFighters` | `MidBossService.md` |
+| `MidBossService.BossKilled / CrystalTaken` events, `ClearRejuv / HasRebirth / RemoveBosses / RemoveCrystals` | `MidBossService.md` |
 | `MidBossService.Describe / Report` | `MidBossService.md` |
 | `MidBossRule` constants and math | `MidBossRule.md` |
 
@@ -67,4 +68,7 @@ and its hit totals, and the last seen kill / crystal counts.
 
 ## Consumers
 
-- `CrystalCrackers.dll` imports both projitems.
+- `CrystalCrackers.dll` imports both projitems. Its pit round
+  (`CrystalCrackers/Pit`) calls `Ready`, `RemoveBosses`, `RemoveCrystals`,
+  `ClearRejuv` and `HasRebirth`, and listens to `BossKilled` /
+  `CrystalTaken`.

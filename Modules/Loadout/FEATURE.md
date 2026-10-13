@@ -49,6 +49,7 @@ left at 0. Copies (`ApplySnapshot`) stay exact.
 | `ItemSlots.ForSouls` / `ExtraPasses` / `Describe` | `ItemSlots.md` |
 | `LoadoutService.Apply` / `Swap` / `Capture` / `ApplySnapshot` / `SwapSnapshot` / `MaxValue` / `SetMaxValue` | `LoadoutService.md` |
 | `LoadoutSnapshot`, `SnapshotAbility`, `SnapshotItem`, `SnapshotResult` | `LoadoutSnapshot.md` |
+| `SoulRule.ShouldBlock` (earned souls and ability gains blocked while a match or round runs) | `SoulRule.md` |
 
 ## State
 
@@ -72,6 +73,7 @@ and `LoadoutService.MaxValue` (the current cap, reset on every load).
 | `LoadoutPlanner.cs` | Budgeted item shopping (buy, sell, skip, fill, upgrade) and ability bit planning, including the budgeted ability prefix (pure) |
 | `Progression.cs` | Deadlock level table: boons, unlocks and ability points per soul count (pure) |
 | `ItemSlots.cs` | Item limit per soul value, from when Walkers fall in real matches (pure) |
+| `SoulRule.cs` | Which currency gains are blocked while builds set power (pure; moved from Rift Roulette `GameLoop/` 2026-10-13) |
 | `LoadoutSnapshot.cs` | Exact hero-state records for copying |
 | `LoadoutService.cs` | Apply a build to a pawn; swap hero, then apply; capture / apply / swap a snapshot |
 | `LoadoutPlugin.cs` | `/loadout_give`, `/loadout_show`, `/loadout_copy`, `/loadout_list`, `/loadout_info`, `/loadout_cap` |

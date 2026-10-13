@@ -1,6 +1,6 @@
 using DeadworksManaged.Api;
 
-namespace RiftRoulette.GameLoop;
+namespace Bublock.Modules.Loadout;
 
 public static class SoulRule
 {

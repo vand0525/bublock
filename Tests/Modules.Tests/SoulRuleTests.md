@@ -1,6 +1,6 @@
 # SoulRuleTests
 
-Unit tests for `RiftRoulette/GameLoop/SoulRule`.
+Unit tests for `Modules/Loadout/SoulRule`.
 
 - During a match, gold from kills, assists, trooper orbs, team bonus and
   comeback bounties is blocked.

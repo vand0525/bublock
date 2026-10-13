@@ -328,6 +328,10 @@ Game-agnostic: no Rift Roulette names in arguments (teams are team numbers).
 | `/midboss_modifier_remove <name>` | — | MidBoss | `MidBossService.RemoveModifier` | Remove a modifier from every boss | new |
 | `/midboss_ready <souls> [fighters]` | — | MidBoss | `MidBossService.Ready` | Fresh killable boss: no resistance, max from real-match souls, 51% health, damage scaled by fighters | new |
 | `/midboss_remove` | — | MidBoss | `MidBossService.Remove` | Remove every boss without a death | new |
+| `/pit_start [amber\|sapphire]` | — | Pit (Crystal Crackers only) | `PitRoundService.Start` | Start a pit round: heroes and builds, countdown, boss; the named team holds the pit (default alternates, Amber first) | new |
+| `/pit_end` | — | Pit | `PitRoundService.End` | End the round with no winner, clean up, everyone up top | new |
+| `/pit_status` | — | Pit | `PitRoundService.Describe` | Phase, round, score, time left, who is in or out, the boss | new |
+| `/pit_timing [window] [limit]` | — | Pit | `PitRoundService.SetTiming` | Show or set the crystal window (5-120 s) and time limit (30-1800 s) | new |
 
 ### 4.4 Admin commands — tool plugins
 

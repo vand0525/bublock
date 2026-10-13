@@ -1,9 +1,10 @@
 # Crystal Crackers (mode note)
 
 Status: in development (`Bublock/CrystalCrackers/`), the mode DLL
-`deploy.sh` uploads for now (Rift Roulette parked). No gameplay code yet;
-the server is always private (`AccessGate`: admins and the `allowed` list
-only).
+`deploy.sh` uploads for now (Rift Roulette parked). The first playable
+round is admin-driven (`/pit_start`, `CrystalCrackers/Pit/`); no lobby or
+match loop yet. The server is always private (`AccessGate`: admins and
+the `allowed` list only).
 This file records the mode as requested, how it fits next to Rift
 Roulette, what is reusable today, and what must be found in game before
 building. Same role as `endless-mode.md`.
@@ -77,14 +78,39 @@ Still inside Rift Roulette (copy or extract in a later stage): the lobby
 bench rule, stats and assists, betting. The rift round composer
 (`RoundFlow` to `RiftService`) is not reused.
 
-## Round shape
+## Round shape (pit round, built 2026-10-13)
 
-Same intermission as Rift Roulette: random hero and one stored build,
-even teams, bench on an odd count, everyone restrained up top. Then a new
-round driver in the Crystal Crackers DLL releases fighters into the pit.
-The pit shield trigger (`trigger_midboss_shield`) sits at about
-(72, 0, -704); today's center spots are lane height (z 384), so the pit
-needs new per-slot anchors (and `scripts/check-spots.py`).
+Attack / defense. Admin-driven for now (`/pit_start [amber|sapphire]`,
+`PitRoundService`):
+
+1. **Countdown (3 s).** Every non-bot on Amber or Sapphire fights (uneven
+   teams allowed, no bench yet). Unique random heroes, one stored build
+   each at the loadout cap, everyone restrained above the pit
+   (`pit_watch`, Rift Roulette's `watch_center` spot). Banner `Round N` /
+   `<Team> starts in the pit`.
+2. **Live.** A fresh boss (`MidBossService.Ready(cap, fighters)`). The pit
+   team starts on its own flat end of the pit floor (`pit_sapphire` /
+   `pit_amber`, z -768, y ±500); the other team starts in mid lane on its
+   own side (`lane_sapphire` / `lane_amber`, Rift Roulette's mid spawns
+   at y ±2000). The pit team alternates each round, Amber first. Banners
+   `Kill the mid-boss` (pit) / `Steal the crystal` (lane). Time limit 300 s.
+3. **Boss down.** On the kill, a 20 s crystal window.
+4. **End.** The team that took the crystal wins (the game's rejuv count
+   rising, or a fighter seen holding the rebirth credit); else the boss
+   killer's team. Time limit or `/pit_end`: no winner. Bosses and crystals
+   removed, rebirth credit and rejuv buff cleared from everyone, all up
+   top restrained.
+
+**Deaths.** A fighter who dies is out for the round (sent up,
+restrained), unless the crystal's rebirth brings them back: a death with
+`modifier_citadel_rebirth_credit` on the pawn, or after the player was
+seen holding it, is a rebirth, and the player stays in (teleported back
+to their start only when the game respawns them more than 3000 from the
+pit). The vanilla rejuvenator is never blocked. Where a reborn player
+respawns is still unknown; the log records it.
+
+Earned souls are blocked while the round runs (`Modules/Loadout/SoulRule`).
+Timing: `/pit_timing [window] [limit]`.
 
 ## Scoring (once the events exist)
 
@@ -156,6 +182,10 @@ results"); full run in `probes/2026-10-13-midboss.md`.
   the pit (team 4) and falls to the floor; the boss entity goes 1.4 s
   later. The killer's team count rose 1, 2, 3 over 6 s, the crystal was
   removed with `m_bPickedUp` set, and the count reset after about 180 s.
+- **Crystal pickup (logged).** Players punch the crystal
+  (`citadel_item_pickup_rejuv/modifier_item_punchable_rejuv`); the taker
+  gets `citadel_item_pickup_rejuv/modifier_citadel_rebirth_credit` (the
+  vanilla die-and-come-back) and `ability_item_pickup_effects/rejuv_effects`.
 
 ## Still unknown
 
@@ -168,14 +198,19 @@ results"); full run in `probes/2026-10-13-midboss.md`.
 - Whether the scheduler is blocked by `citadel_npc_spawn_enabled 0` or by
   the clock being past the initial spawn (only matters if the direct
   route ever breaks).
+- Where a rebirth respawns the player, and whether the rebirth credit is
+  still on the pawn when `player_death` fires (the pit round covers both
+  orders; `pit-*.log` `Fighter died` / `Reborn fighter kept in`).
 
 ## Proposed build order
 
-1. Boss probe with `Modules/MidBoss` (first run done 2026-10-13); test
-   `/midboss_ready` and the scream on a ready boss.
-2. Lobby and match loop for the Crystal Crackers DLL (copy or extract from
-   Rift Roulette), then a real mode switch (today it is a deploy.sh edit).
-3. Pit round driver: release into the pit, round end on boss kill or time.
-4. Boss control per round: spawn directly, remove the resistance, write
-   max then health, damage scale by headcount.
-5. Scoring: kills, boss kill, crystals, reduced points for revived kills.
+1. Boss probe with `Modules/MidBoss` (done 2026-10-13, `/midboss_ready`
+   tested in game).
+2. Pit round driver, admin-driven (done 2026-10-13, `CrystalCrackers/Pit`):
+   attack / defense, boss per round, crystal window, out on death unless
+   reborn. Next: test in game.
+3. Lobby extraction: move Rift Roulette's mode-agnostic lobby parts
+   (auto-start, intermission loop, team balance and bench, admin seat,
+   hero enforcement) into `Modules/`, then a match loop for the pit round
+   and a real mode switch (today it is a deploy.sh edit).
+4. Scoring: kills, boss kill, crystals, reduced points for revived kills.

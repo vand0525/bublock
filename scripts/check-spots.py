@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Check every per-slot spot (RiftRoulette/Round/Data/spots.json) against the
+"""Check every per-slot spot (RiftRoulette/Round/Data/spots.json, or
+CrystalCrackers/Pit/Data/spots.json with --mode crystal) against the
 dl_midtown world mesh.
 
 For each spot: a floor within FLOOR_DROP units below, no geometry inside a
@@ -11,6 +12,7 @@ Needs RiftRoulette/reference/maps/dl_midtown/world.bin.gz (not in git; see
 resources.md "dl_midtown map dump" for the refresh steps).
 """
 
+import argparse
 import gzip
 import json
 import math
@@ -48,9 +50,23 @@ GROUPS = [
     ("fight", "center_amber", True),
 ]
 
+# Crystal Crackers: the watch spot above the pit (sky floor), each team's end of the pit floor,
+# and each team's mid-lane start.
+CRYSTAL = (
+    ROOT / "CrystalCrackers/Pit/Data/spots.json",
+    ROOT / "CrystalCrackers/Pit/PitLocations.cs",
+    [
+        ("watch", "pit_watch", False),
+        ("pit", "pit_sapphire", True),
+        ("pit", "pit_amber", True),
+        ("lane", "lane_sapphire", True),
+        ("lane", "lane_amber", True),
+    ],
+)
 
-def parse_anchors():
-    text = LOCATIONS.read_text()
+
+def parse_anchors(locations=LOCATIONS):
+    text = locations.read_text()
     pattern = re.compile(
         r'new\(\s*"(\w+)",\s*new Vector3\(([^)]*)\),\s*new Vector3\(([^)]*)\)\s*\)',
         re.S,
@@ -223,12 +239,18 @@ def check_spot(mesh, anchor_pos, spot):
 
 
 def main():
-    anchors = parse_anchors()
-    offsets = json.loads(SPOTS.read_text())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mode", choices=["rift", "crystal"], default="rift",
+                        help="rift: Rift Roulette spots (default); crystal: Crystal Crackers pit spots")
+    args = parser.parse_args()
+
+    spots, locations, groups = (SPOTS, LOCATIONS, GROUPS) if args.mode == "rift" else CRYSTAL
+    anchors = parse_anchors(locations)
+    offsets = json.loads(spots.read_text())
     mesh = Mesh()
     failures = 0
 
-    for table, anchor_name, needs_floor in GROUPS:
+    for table, anchor_name, needs_floor in groups:
         anchor = anchors[anchor_name]
         floor_note = "" if needs_floor else " (skybox floor, not in the mesh)"
         print(f"\n{anchor_name} ({table}) anchor={tuple(round(v) for v in anchor[0])} yaw={anchor[1][1]}{floor_note}")

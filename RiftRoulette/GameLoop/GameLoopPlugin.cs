@@ -1,3 +1,4 @@
+using Bublock.Modules.Loadout;
 using Bublock.Modules.Restraint;
 using Bublock.Shared;
 using DeadworksManaged.Api;

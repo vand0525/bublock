@@ -1181,3 +1181,40 @@ none is.
 - **Calls:** `MidBossService.Remove`
 - **Mode:** Debug
 - **Side effects:** removes every boss at the end of the frame with no death (no kill credit, no crystal)
+
+### Pit round (Crystal Crackers only, `CrystalCrackers/Pit/PitRoundPlugin`)
+
+Logs go to `pit-*.log`; round start, live, boss down, crystal and end
+lines also to the master log.
+
+#### /pit_start [amber|sapphire]
+
+- **Invocation:** chat `/pit_start` or `/pit_start sapphire` | console `dw_pit_start [amber|sapphire]`
+- **Who:** admin
+- **Calls:** `PitRoundService.Start`; 3 s later `GoLive` (`MidBossService.Ready`, `Recheck` 1 s later)
+- **Mode:** Debug
+- **Side effects:** refused while a round runs or with nobody on Amber / Sapphire. Every non-bot on team 2 or 3 fights; the named team starts in the pit (left out, the pit team alternates, Amber first) and the other in mid lane on its own side. Each gets a unique random hero (not last round's) and a random stored build at the loadout cap, restrained up top (dead players get theirs on respawn); banner `Round N` / `<Team> starts in the pit`, then each player's hero and build. After 3 s: a fresh boss sized for the cap and fighter count, everyone released at their own start spot, healed, cooldowns ended; banners `Kill the mid-boss` (pit team) / `Steal the crystal` (lane team); the time limit starts. Earned souls are blocked until the round ends. A boss kill starts the crystal window; the window's end, the time limit or `/pit_end` ends the round. A fighter who dies is out (sent up, restrained) unless the crystal's rebirth brings them back
+
+#### /pit_end
+
+- **Invocation:** chat `/pit_end` | console `dw_pit_end`
+- **Who:** admin
+- **Calls:** `PitRoundService.End(Admin)`
+- **Mode:** Debug
+- **Side effects:** refused with no round. Ends the round with no winner (score unchanged): removes every boss and crystal (no death), clears the rebirth credit and rejuv buff from everyone, sends living team players up top restrained (the dead go up on respawn); banner `Round N: no winner` / `Round ended by an admin | score`. A round that ends by itself does the same, with a winner when the crystal window finished
+
+#### /pit_status
+
+- **Invocation:** chat `/pit_status` | console `dw_pit_status`
+- **Who:** admin
+- **Calls:** `PitRoundService.Describe`
+- **Mode:** Debug (read-only)
+- **Side effects:** none; replies phase, round, pit team, score, time left in the phase, timing, cap, killer and crystal team, in / out counts per team, one line per player (hero, build, in / out / waiting for respawn, rebirth credit) and the boss line
+
+#### /pit_timing [window] [limit]
+
+- **Invocation:** chat `/pit_timing`, `/pit_timing 30` or `/pit_timing 20 600` | console `dw_pit_timing [window] [limit]`
+- **Who:** admin
+- **Calls:** `PitRoundService.SetTiming`
+- **Mode:** Debug
+- **Side effects:** no arguments: shows them. Sets the crystal window (5-120 s, default 20) and the time limit (30-1800 s, default 300), in memory until the next load; a running timer keeps its length

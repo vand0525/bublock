@@ -7,6 +7,10 @@ playtest). While a match runs, a player's power comes only from the round's
 build: its items, and the level and ability ranks the loadout cap buys
 (`Modules/Loadout/Progression`, `LoadoutPlanner.AbilityPrefix`).
 
+Lives in `Modules/Loadout` so every mode DLL that hands out budgeted
+builds shares it: Rift Roulette passes `MatchService.State.IsRunning`,
+Crystal Crackers passes "a pit round is past Prep" (`PitRoundService`).
+
 ## Operations
 
 | Op | Returns |
@@ -28,5 +32,6 @@ and set both wallets with `SetCurrency`.
   match, so the ranks stay the build's prefix.
 - `SetCurrency` does not pass through this hook.
 - With no match running (lobby) nothing is blocked.
-- No game calls; linked into `RiftRoulette.Tests` (`SoulRuleTests`).
-  `GameLoopPlugin.OnModifyCurrency` applies it.
+- No game calls; tested in `Modules.Tests` (`SoulRuleTests`). Rift
+  Roulette's `GameLoopPlugin.OnModifyCurrency` and Crystal Crackers'
+  `PitRoundPlugin.OnModifyCurrency` apply it.

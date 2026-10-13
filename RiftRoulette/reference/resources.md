@@ -670,3 +670,18 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **API notes:** `/v1/matches/metadata` returns `mid_boss` (`team_killed`, `team_claimed`, `destroyed_time_s`) only with `include_mid_boss=true`; `include_objectives` does not include it. Player `stats` snapshots carry `net_worth` every 180 s.
 - **Used as:** `MidBossRule.MinuteBySouls` and `HealthForSouls` (`/midboss_ready`).
 - **Link / path:** `scripts/midboss-health.py`, `Modules/MidBoss/MidBossRule.md`
+
+### 2026-10-13 — Mid-boss crystal pickup: punch, rebirth credit, rejuv buff
+
+- **Why hard / useful:** the crystal is not picked up by walking over it, and the "die and come back" is a modifier on the taker, so a mode can see who holds it and must not undo it.
+- **Verified fact (DevTools `modifiers-20261013.log`, in game):** players punch the crystal (`citadel_item_pickup_rejuv/modifier_item_punchable_rejuv` on it); the taker gets `citadel_item_pickup_rejuv/modifier_citadel_rebirth_credit` and `ability_item_pickup_effects/rejuv_effects`. The team's `GameRules` rejuv count steps 1, 2, 3 per crystal and resets after about 180 s.
+- **Not known:** whether the credit is still on the pawn when `player_death` fires, and where a rebirth respawns the player.
+- **Used as:** `MidBossRule.RebirthModifier` / `RejuvEffectsModifier`, `MidBossService.HasRebirth` / `ClearRejuv`; the pit round keeps a fighter with the credit in, names the crystal team from it, and clears both at round end (`CrystalCrackers/Pit/PitRoundService.md`).
+- **Link / path:** `logs/DevTools/modifiers-20261013.log`, `reference/probes/2026-10-13-midboss.md`
+
+### 2026-10-13 — Mid-boss pit geometry (world mesh)
+
+- **Why hard / useful:** per-slot spots in the pit need the floor height and walls; the pit is not flat.
+- **Verified fact (rays through `reference/maps/dl_midtown/world.bin.gz`):** pit floor z -768, about x -300 to 300 and y -600 to 600, ringed by a step at -640; the boss stands at z -759 in the middle. A raised block sits at (-50..50, ±400). The flat team ends are y ±450 to ±600, with a ramp up one side of each; the pit is rotationally symmetric (180° around the origin). The back wall at the ends is near y ±628, so 13 spots per end fit only about 65-80 apart.
+- **Used as:** `CrystalCrackers/Pit/PitLocations` (`pit_sapphire` (60, 500, -768), `pit_amber` (-60, -500, -768)) and `Pit/Data/spots.json`, checked by `scripts/check-spots.py --mode crystal`.
+- **Link / path:** `scripts/check-spots.py`, `CrystalCrackers/Pit/PitSpots.md`

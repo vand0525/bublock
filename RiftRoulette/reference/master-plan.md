@@ -94,6 +94,7 @@ Bublock/
     Balance/               BalancePlugin + BalanceService (auto-balance swaps, Stage 13c)
     Mirror/                MirrorPlugin + MirrorModeService (everyone the same hero + build)
   CrystalCrackers/         CrystalCrackers.dll = Shared + the same modules + MidBoss + AccessPlugin (always private); second mode, in development, the deployed mode for now (reference/crystal-crackers.md)
+    Pit/                   PitRoundPlugin + PitRoundService (admin-driven attack / defense pit round, dw_pit_*)
   DevTools/                DevTools.dll (consumes Shared)
   CleanSlate/              CleanSlate.dll (consumes Shared; mode-agnostic)
 ```
@@ -456,6 +457,35 @@ commands (including obvious supporting commands), colocated docs, a
 - **Verify:** `dw_selftest_run` before the patch (keep the log); after it, follow `patch-day.md`.
 - **Done when:** the baseline self-test log is saved from the live server
 
+### Crystal Crackers stages
+
+Mode note: `reference/crystal-crackers.md`. Same one-stage-at-a-time rule.
+
+#### CC1 — Pit round, admin-driven
+
+- [ ] Code, tests, docs and spot check done (2026-10-13); awaiting upload approval and an in-game round
+
+- **Goal:** a playable attack / defense round around the mid-boss pit, started by an admin.
+- **Outputs:**
+  - `CrystalCrackers/Pit/`: `PitLocations` (pit, lane and watch anchors), `Data/spots.json` + `PitSpots` (13 spots each), `PitRoundRule` (pure), `PitRoundService` (countdown, live, boss down, end), `PitRoundPlugin` (`/pit_start`, `/pit_end`, `/pit_status`, `/pit_timing`).
+  - `Modules/MidBoss`: `BossKilled` / `CrystalTaken` events, rebirth and rejuv modifier names, `HasRebirth`, `ClearRejuv`, `RemoveBosses`, `RemoveCrystals`.
+  - `SoulRule` moved to `Modules/Loadout` (both modes).
+  - `scripts/check-spots.py --mode crystal`; `Tests/CrystalCrackers.Tests`.
+- **Verify:** with 2+ players, `/pit_start`; the pit team lands in the pit, the lane team in mid lane; the boss dies, the crystal is punched, the window ends and the winner banner is right; a death without the crystal goes up top, a death with it comes back (`pit-*.log` `Reborn fighter kept in` shows where).
+- **Done when:** an in-game round confirms the list above
+
+#### CC2 — Lobby extraction
+
+- [ ] Not started
+
+- **Goal:** move Rift Roulette's mode-agnostic lobby parts (auto-start, intermission loop, team balance and bench, admin seat, hero enforcement on menu changes) into `Modules/`, so Crystal Crackers runs pit rounds in a match loop without admin commands.
+
+#### CC3 — Scoring
+
+- [ ] Not started
+
+- **Goal:** kills, the boss kill and crystals score; a kill on a player the crystal revives is worth less; boards.
+
 ---
 
 ## Backlog (deferred ideas)
@@ -598,3 +628,4 @@ Rows before the 2026-09-27 rebrand row use the old name (Rift Rumble,
 | 2026-10-13 | MidBoss module probe (code) | New `Modules/MidBoss`, imported only by Crystal Crackers. Research: the boss is `npc_super_neutral` (`CNPC_MidBoss`; 13,000 health + 195 per minute alive, resistance 35 + 5 per game minute, scream at 50%), the crystal `citadel_item_pickup_rejuv`, events `entity_killed`, `midboss_respawn_pending`, `midboss_respawned` (`resources.md`). `MidBossRule` (names, camp spot (0, 0, -768), scale and health math), `MidBossService` (tracking by entity handle, direct spawn with keyvalues, scheduler convar, health / max / percent, damage scale in `OnTakeDamage`, modifier remove, kill with `ForceDeath`, remove, status), `MidBossPlugin` (watchers log boss and crystal spawns / deletes, kills, respawn events and kill / crystal count changes; ten `/midboss_*` admin commands). No round logic, no automatic spawn. Tests: Shared 23, Modules 218 (`MidBossRuleTests`), RiftRoulette 390. Next: deploy on the user's go, then the probe order in `crystal-crackers.md` (status, schedule, spawn with the rollback stamp ready, percent, damage scale, modifier remove, kill). |
 | 2026-10-13 | MidBoss probe, first run (in game) | Deployed `20261013T201650Z`. Direct spawn works with no crash (full boss: pit rule, kill credit, crystal, `midboss_respawned`); the scheduler route did nothing with `citadel_npc_spawn_enabled 0`. Starting health is 13,000 + 195 × game minutes. `Health` and `m_iMaxHealth` writes hold (max doesn't clamp health; a new boss resets it). The resistance modifier `npc_super_neutral/midboss_modifier_damage_resistance` zeroes hits before `OnTakeDamage`; removing it works, after which the damage scale applies (×5). No scream from written health. `/midboss_kill` did nothing (to fix). Kill by shooting: crystal spawned, Amber's count rose 1-3, picked up, reset after about 180 s. Record: `reference/probes/2026-10-13-midboss.md`; `resources.md`, `crystal-crackers.md` updated. Next: fix `/midboss_kill` and the `AmberRejuv=Amber=` log label, retest the scream. |
 | 2026-10-13 | MidBoss `/midboss_ready` (code) | `/midboss_kill` removed (a mode never kills the boss; players do). New `/midboss_ready <souls> [fighters]` (`MidBossService.Ready`, `Recheck` 1 s later): replaces the boss with a fresh one at the camp, removes the resistance modifier, writes max = `MidBossRule.HealthForSouls` (the game's 13,000 + 195 × minute at the minute a real ranked lobby averages those souls, from the new `scripts/midboss-health.py`, 1,000 matches: 20,000 souls is minute 21.1, 17,095), health 51%, damage scale 12 / fighters (counted from teams 2 and 3 when not given). `AmberRejuv=` log label fixed. Tests added (`MidBossRuleTests`). Docs: MidBoss docs, `admin-commands.md`, `behavior-inventory.md`, `crystal-crackers.md`, `resources.md`, `patch-day.md`, `.rules` + mirror. Next: deploy on the user's go, then `/midboss_ready` in game (resistance gone after 1 s, fair kill time, scream). |
+| 2026-10-13 | Crystal Crackers pit round (code, stage CC1) | First playable round, admin-driven, attack / defense. `/pit_start [amber\|sapphire]`: every non-bot on a team gets a unique random hero and stored build at the cap, waits restrained above the pit (`pit_watch`) for 3 s, then a fresh boss (`MidBossService.Ready(cap, fighters)`); the pit team (alternates, Amber first) starts on its flat end of the pit floor (`pit_sapphire` / `pit_amber`, z -768), the other team in mid lane on its side (`lane_*`, Rift Roulette's mid spawns). Boss kill opens a 20 s crystal window; the crystal team wins (rejuv count rising or a fighter holding `modifier_citadel_rebirth_credit`), else the killer's team; 300 s limit or `/pit_end` has no winner. A dead fighter is out (up top, restrained) unless the death was a rebirth (credit at death or seen holding it), which stays in. End removes bosses and crystals and clears rebirth / rejuv buff. Earned souls blocked while a round runs (`SoulRule` moved to `Modules/Loadout`). `/pit_status`, `/pit_timing`. `citadel_check_walk_on_skyclip 0` set by Crystal Crackers too. Pit spots from the world mesh; `check-spots.py --mode crystal` passes all 65. Tests: Shared 23, Modules 268, RiftRoulette 372, CrystalCrackers 57. Next: upload on the user's go, then a round in game (where reborn players respawn, whether the credit is on the pawn at death). |

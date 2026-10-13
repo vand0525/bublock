@@ -24,6 +24,13 @@ public static class MidBossRule
 
   public const string ResistanceModifier = "npc_super_neutral/midboss_modifier_damage_resistance";
 
+  // Given to whoever takes the crystal: the credit brings them back once after a death.
+  public const string RebirthModifier = "citadel_item_pickup_rejuv/modifier_citadel_rebirth_credit";
+  public const string RejuvEffectsModifier = "ability_item_pickup_effects/rejuv_effects";
+
+  public const int AmberTeam = 2;
+  public const int SapphireTeam = 3;
+
   // npc_units.vdata npc_super_neutral: a boss spawned at game minute m gets 13,000 + 195 * m (m rounded).
   public const int StartingHealth = 13000;
   public const int HealthPerMinute = 195;
@@ -68,6 +75,12 @@ public static class MidBossRule
   public static bool IsValidHealth(int health) => health >= 1 && health <= MaxHealthLimit;
 
   public static bool IsValidSouls(int souls) => souls >= 0 && souls <= MaxSouls;
+
+  // The team whose rejuv count went up between two reads, Amber first; 0 when neither did.
+  public static int CrystalTeam((int Amber, int Sapphire) before, (int Amber, int Sapphire) now) =>
+    now.Amber > before.Amber ? AmberTeam
+    : now.Sapphire > before.Sapphire ? SapphireTeam
+    : 0;
 
   // Linear between table points; past the last point the last segment's slope continues.
   public static float MinuteForSouls(int souls)

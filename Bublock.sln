@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RiftRoulette.Tests", "Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrystalCrackers", "CrystalCrackers\CrystalCrackers.csproj", "{F704754E-E39F-4983-A91B-9F7CA14D3825}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrystalCrackers.Tests", "Tests\CrystalCrackers.Tests\CrystalCrackers.Tests.csproj", "{07E06A20-E83D-47A9-AAEC-818839007153}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -113,6 +115,18 @@ Global
 		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Release|x64.Build.0 = Release|Any CPU
 		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Release|x86.ActiveCfg = Release|Any CPU
 		{F704754E-E39F-4983-A91B-9F7CA14D3825}.Release|x86.Build.0 = Release|Any CPU
+		{07E06A20-E83D-47A9-AAEC-818839007153}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07E06A20-E83D-47A9-AAEC-818839007153}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07E06A20-E83D-47A9-AAEC-818839007153}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{07E06A20-E83D-47A9-AAEC-818839007153}.Debug|x64.Build.0 = Debug|Any CPU
+		{07E06A20-E83D-47A9-AAEC-818839007153}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{07E06A20-E83D-47A9-AAEC-818839007153}.Debug|x86.Build.0 = Debug|Any CPU
+		{07E06A20-E83D-47A9-AAEC-818839007153}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07E06A20-E83D-47A9-AAEC-818839007153}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07E06A20-E83D-47A9-AAEC-818839007153}.Release|x64.ActiveCfg = Release|Any CPU
+		{07E06A20-E83D-47A9-AAEC-818839007153}.Release|x64.Build.0 = Release|Any CPU
+		{07E06A20-E83D-47A9-AAEC-818839007153}.Release|x86.ActiveCfg = Release|Any CPU
+		{07E06A20-E83D-47A9-AAEC-818839007153}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -121,5 +135,6 @@ Global
 		{C2D0E8D7-F2CA-4688-87E8-6190CC10B82A} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{84DD3230-F5E2-4D48-BACF-677BB071A4A9} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{53AF7042-DE7C-4B7F-9B5A-BBD3AA5D4C34} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{07E06A20-E83D-47A9-AAEC-818839007153} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

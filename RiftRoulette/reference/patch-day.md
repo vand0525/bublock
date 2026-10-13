@@ -127,7 +127,7 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | `citadel_allow_duplicate_heroes` | 1 | `LobbyService` |
 | `citadel_hero_demo_unlock_flex_slots` | 1 (missing after engine 6712; never opened slots alone — `Lobby/FlexSlots` does) | `LobbyService` |
 | `citadel_voice_all_talk` | 1 | `LobbyService` |
-| `citadel_check_walk_on_skyclip` | 0 (new in 6757, cheat, replicated; on drops players off the watch spots) | `LobbyService` |
+| `citadel_check_walk_on_skyclip` | 0 (new in 6757, cheat, replicated; on drops players off the watch spots) | `LobbyService`; Crystal Crackers `CrystalCrackers/Pit/PitRoundPlugin.cs` (`pit_watch` is on the sky clip too) |
 | `citadel_allow_purchasing_anywhere` | 0 | `GameLoop/ShopAccess.cs` |
 | `citadel_allow_pausing` | 0 when open, 1 in private mode or after `/pause_allow on` (devonly, replicated) | `Lobby/PauseRule.cs` `ConVars`, set by `PauseGuard.Apply` |
 | `citadel_allow_pause_in_match` | 0 when open, 1 in private mode or after `/pause_allow on` | same |
@@ -223,9 +223,20 @@ current names with `/midboss_status` on a spawned boss. Its health numbers
 (`m_iStartingHealth`, `m_iHealthGainPerMinute`); `/midboss_spawn` shows the
 spawned max to compare.
 
+Mid-boss crystal (Crystal Crackers pit round): the taker gets
+`citadel_item_pickup_rejuv/modifier_citadel_rebirth_credit` (the vanilla
+rebirth; `MidBossRule.RebirthModifier`, read by `MidBossService.HasRebirth`
+to keep a reborn fighter in the round and to name the crystal team) and
+`ability_item_pickup_effects/rejuv_effects` (`RejuvEffectsModifier`);
+`MidBossService.ClearRejuv` removes both at round end. Players punch the
+crystal (`citadel_item_pickup_rejuv/modifier_item_punchable_rejuv`, seen
+only). If a reborn fighter is sent up as out, or `Pit crystal taken` stops
+appearing with `Source=credit`, take a crystal with DevTools loaded and
+read `modifiers-*.log` for the new names.
+
 ### Events and hooks
 
-`player_spawn` (Lobby, Random, Mirror, Stats), `player_death` (Lobby, Stats, stream camera), `player_respawned` (Random, Mirror), `player_hero_changed` (Lobby); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnAddModifier` (DevTools `ModifierProbe`, `AddModifierEvent.ModifierVData.Name`; diagnostics only), mid-boss watchers in `Modules/MidBoss/MidBossPlugin.cs` (`OnEntitySpawned`, `OnEntityDeleted`, `OnTakeDamage` damage scale, `entity_killed` `EntityKilledEvent`, `midboss_respawn_pending` `MidbossRespawnPendingEvent`, `midboss_respawned` untyped), `OnLoad`, `OnStartupServer` (also each map reload: `AutoRestartService.OnMapStart`, `AdminSeat.ResetForMap`).
+`player_spawn` (Lobby, Random, Mirror, Stats), `player_death` (Lobby, Stats, stream camera), `player_respawned` (Random, Mirror), `player_hero_changed` (Lobby); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnAddModifier` (DevTools `ModifierProbe`, `AddModifierEvent.ModifierVData.Name`; diagnostics only), mid-boss watchers in `Modules/MidBoss/MidBossPlugin.cs` (`OnEntitySpawned`, `OnEntityDeleted`, `OnTakeDamage` damage scale, `entity_killed` `EntityKilledEvent`, `midboss_respawn_pending` `MidbossRespawnPendingEvent`, `midboss_respawned` untyped), `OnLoad`, `OnStartupServer` (also each map reload: `AutoRestartService.OnMapStart`, `AdminSeat.ResetForMap`). Crystal Crackers pit round (`CrystalCrackers/Pit/PitRoundPlugin.cs`): `player_death` (`UseridController`, `UseridPawn`), `player_spawn`, `OnModifyCurrency` (soul block while a round runs), `OnClientDisconnect`, `OnStartupServer` (`PitRoundService.ResetForMap`), and the MidBoss `BossKilled` / `CrystalTaken` callbacks.
 
 Map reload: `Server.ChangeLevel(Server.MapName)`, `Server.IsChangingLevel`, `IsMapChangeReconnect` on the connect events, `GlobalVars.CurTime` (uptime after a hot reload) in `Lobby/AutoRestartService`. Check with `/restart_status` after an update; `/restart_now` on an empty server should bring every connected client back.
 
@@ -234,7 +245,7 @@ Map reload: `Server.ChangeLevel(Server.MapName)`, `Server.IsChangingLevel`, `IsM
 - `LobbyService.LobbyHero` (`Heroes.Atlas` / Abrams) is the lobby placeholder and admin roam hero (Skyrunner stopped spawning after engine 6712).
 - `hero-builds.json` (38 heroes, 161 items, 154 abilities, per-build sell priorities), banned items in `Modules/Loadout/LoadoutPlanner.cs`.
 - Item slots: universal (any item in any slot), 9 open by default (one flex slot already open), 12 with every flex slot (`LoadoutPlanner.DefaultSlots`); each enemy Walker opens one in a real match, which `Modules/Loadout/ItemSlots` mirrors by soul value (`scripts/walker-souls.py`).
-- `EAbilitySlot.Signature1..4`, `ECurrencyType.EGold` / `EAbilityPoints` / `EAbilityUnlocks`, `ECurrencySource.ECheats` / `EStartingAmount` / `EItemSale` (the sources `GameLoop/SoulRule` lets through for gold; for ability points and unlocks only `ECheats` passes in any match), `ImbueResult.Success`.
+- `EAbilitySlot.Signature1..4`, `ECurrencyType.EGold` / `EAbilityPoints` / `EAbilityUnlocks`, `ECurrencySource.ECheats` / `EStartingAmount` / `EItemSale` (the sources `Modules/Loadout/SoulRule` lets through for gold; for ability points and unlocks only `ECheats` passes in any match), `ImbueResult.Success`.
 - Level table: 36 soul thresholds, unlock rows and 32 points in `Modules/Loadout/Progression.cs`, from the wiki's [Data:SoulUnlockData.json](https://deadlock.wiki/index.php?title=Data:SoulUnlockData.json&action=raw) (+600 each). Upgrade tier costs 1 / 2 / 5 in `LoadoutPlanner.UpgradeCosts`. An economy patch that moves boons or points needs both updated (`ProgressionTests` pins the current values).
 - Teams: Amber 2, Sapphire 3, spectator 1.
 - Observer: `ObserverMode_t.InEye` (player view) and `Roaming` (free cam); no client commands: `spec_player` / `spec_mode` are `clientcmd_can_execute`, not `server_can_execute`, and the client refuses them from the server, so parks only move a viewer already in fly cam (C). Never `IsValidObserverTarget` (rejects team 3).
@@ -244,6 +255,7 @@ Map reload: `Server.ChangeLevel(Server.MapName)`, `Server.IsChangingLevel`, `IsM
 - Anchors: `Locations/RiftRouletteLocations.cs`. Watch spots on the skybox floor at z 1536.0625.
 - Rift positions: `Rift/RiftSide.cs` (Green (7612, 0, 444), Yellow (-7560, 0, 424)).
 - Per-slot offsets: `Round/Data/spots.json`; board offsets in `Round/WatchLayout.cs`, `Boards/BoardLayout.cs`.
+- Crystal Crackers: `CrystalCrackers/Pit/PitLocations.cs` (`pit_watch` (0, 0, 1536.06), pit ends `pit_sapphire` (60, 500, -768) / `pit_amber` (-60, -500, -768), lanes `lane_sapphire` / `lane_amber` (0, ±2000, 384)) and `Pit/Data/spots.json`. A map change to the pit: rerun `scripts/check-spots.py --mode crystal`.
 
 ---
 

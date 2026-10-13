@@ -64,7 +64,7 @@ the same build banner 3 s in. Both modes write each round's fighters into
   each round (no banner when the round starts); `/match_mode` shows a mode
   banner. No debug-style banners or chat lines.
 - Souls: while a match runs every earned soul gain (kills, assists, orbs,
-  passive and team income) is blocked (`SoulRule`, applied by
+  passive and team income) is blocked (`Modules/Loadout/SoulRule`, applied by
   `GameLoopPlugin.OnModifyCurrency`). Power comes only from the round's
   build; bounties grew with the game clock and made one team snowball.
 - Kills, deaths and assists count from match start (`Stats/`) and show on
@@ -80,7 +80,6 @@ the same build banner 3 s in. Both modes write each round's fighters into
 | `AutoStartRule.cs` | Start / end / nothing decision from player count (pure, unit tested) |
 | `AutoStartService.cs` | Counts participants (no bots, no seated admin), starts or ends the match, waiting chat line, on/off flag |
 | `ShopAccess.cs` | Owns `citadel_allow_purchasing_anywhere`; `Disable` from startup and `/lobby_setup` |
-| `SoulRule.cs` | Which soul gains are blocked while a match runs (pure, unit tested) |
 | `MatchProbe.cs` | Snapshot lines to `probe-*.log` at match start and 1 s after each move in / up |
 | `GameLoopPlugin.cs` | `OnLoad` auto-start check; `OnGameFrame` / `OnClientConCommand` for `Round/WatchGuard`; `OnModifyCurrency` soul block; `/match_start`, `/match_end`, `/match_auto`, `/match_status`, `/match_intermission`, `/match_mode`, `/match_format`, `/match_config`, `/score` |
 

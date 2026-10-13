@@ -22,6 +22,12 @@ public static class MidBossService
   private static (int Kills, int Amber, int Sapphire)? _counts;
   private static bool _firstScaledHitLogged;
 
+  // Team number of the killer (0 when not a team); raised once per boss death.
+  public static event Action<int>? BossKilled;
+
+  // Team number whose rejuv count rose; raised on every rise (the count steps several times per crystal).
+  public static event Action<int>? CrystalTaken;
+
   public static float DamageScale { get; private set; } = MidBossRule.DefaultScale;
   public static int HitCount { get; private set; }
   public static float DamageBefore { get; private set; }
@@ -101,6 +107,8 @@ public static class MidBossService
       BublockLog.Master.Info(player.ToPlayerRef(), line, values);
     else
       BublockLog.Master.Info(line, values);
+
+    Raise(BossKilled, attacker?.TeamNum ?? 0, "BossKilled");
   }
 
   public static void ObserveRespawnPending(float spawnTime) =>
@@ -118,11 +126,62 @@ public static class MidBossService
     var now = (GameRules.MidbossKillCount, GameRules.AmberRejuvCount, GameRules.SapphireRejuvCount);
 
     if (_counts is { } before && before != now)
+    {
       BublockLog.Master.Info(
         "Mid-boss counts changed Kills={Kills} AmberRejuv={AmberRejuv} SapphireRejuv={SapphireRejuv}",
         now.Item1, now.Item2, now.Item3);
 
+      var team = MidBossRule.CrystalTeam((before.Amber, before.Sapphire), (now.Item2, now.Item3));
+
+      if (team != 0)
+        Raise(CrystalTaken, team, "CrystalTaken");
+    }
+
     _counts = now;
+  }
+
+  // Strips the crystal's rebirth credit and buff from one pawn; returns how many were removed.
+  public static int ClearRejuv(CBaseEntity pawn)
+  {
+    var removed = 0;
+
+    if (pawn.RemoveModifier(MidBossRule.RebirthModifier))
+      removed++;
+
+    if (pawn.RemoveModifier(MidBossRule.RejuvEffectsModifier))
+      removed++;
+
+    return removed;
+  }
+
+  public static bool HasRebirth(CBaseEntity pawn) =>
+    pawn.ModifierProp?.HasModifier(MidBossRule.RebirthModifier) == true;
+
+  // No death and no crystal; never throws.
+  public static int RemoveBosses()
+  {
+    var removed = 0;
+
+    foreach (var boss in LiveBosses())
+    {
+      boss.Remove();
+      removed++;
+    }
+
+    return removed;
+  }
+
+  public static int RemoveCrystals()
+  {
+    var removed = 0;
+
+    foreach (var crystal in LiveCrystals())
+    {
+      crystal.Remove();
+      removed++;
+    }
+
+    return removed;
   }
 
   public static bool IsBoss(CBaseEntity entity) =>
@@ -239,13 +298,7 @@ public static class MidBossService
   public static ReadyResult Ready(int souls, int? fighters, ExecutionMode mode)
   {
     var log = Log.WithMode(mode);
-    var replaced = 0;
-
-    foreach (var old in LiveBosses())
-    {
-      old.Remove();
-      replaced++;
-    }
+    var replaced = RemoveBosses();
 
     var counted = fighters ?? CountFighters();
     var minute = MidBossRule.MinuteForSouls(souls);
@@ -369,6 +422,24 @@ public static class MidBossService
     }
 
     return lines;
+  }
+
+  private static void Raise(Action<int>? handlers, int team, string name)
+  {
+    if (handlers == null)
+      return;
+
+    foreach (var handler in handlers.GetInvocationList().Cast<Action<int>>())
+    {
+      try
+      {
+        handler(team);
+      }
+      catch (Exception error)
+      {
+        Log.Error(error, "Mid-boss {Event} handler failed Team={Team}", name, team);
+      }
+    }
   }
 
   private static bool WriteMaxHealth(CBaseEntity boss, int maxHealth)

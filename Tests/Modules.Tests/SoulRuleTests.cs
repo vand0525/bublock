@@ -1,7 +1,7 @@
+using Bublock.Modules.Loadout;
 using DeadworksManaged.Api;
-using RiftRoulette.GameLoop;
 
-namespace Bublock.Tests.RiftRoulette;
+namespace Bublock.Tests.Modules;
 
 public class SoulRuleTests
 {

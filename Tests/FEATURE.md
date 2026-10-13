@@ -21,9 +21,17 @@ server. Never deployed to the server.
   committed data, sell priorities, baseline value), the `PlayerQueue` join queue, the random hero draw (`HeroDraw`), the spectate choice
   (keep, killer, any, park) and straight-down angle, and join access
   (`AccessRule` verdicts and Steam ID parsing, `AccessList` JSON and the
-  forced-private check), and the mid-boss rule (`MidBossRule`: health
-  percent, damage scale, schedule parsing, name matches). Service ops that touch entities or players are
+  forced-private check), the mid-boss rule (`MidBossRule`: health
+  percent, damage scale, schedule parsing, name matches, souls to health,
+  fighter scale, crystal team), and which currency gains are blocked
+  (`Modules/Loadout/SoulRule`). Service ops that touch entities or players are
   not tested here.
+- `CrystalCrackers.Tests/` — xUnit tests for pure Crystal Crackers pieces,
+  linked as files (`CrystalCrackers/Pit/PitRoundRule.cs`, `PitSpots.cs`
+  with its embedded `spots.json`, `PitLocations.cs`): round phases, the
+  pit team, the winner decision, the respawn decision (out, kept in,
+  left alone), timing ranges, the pit spot table. Imports
+  `Shared.projitems` and `Movement.projitems`.
 - `RiftRoulette.Tests/` — xUnit tests for pure Rift Roulette pieces, included
   directly as linked files (`RiftRoulette/Round/RoundHeroes.cs`,
   `RiftRoulette/Lobby/RiftRouletteTeams.cs`,
@@ -32,7 +40,7 @@ server. Never deployed to the server.
   `RiftRoulette/Round/RoundLocations.cs`, `WatchSpotRule.cs`, `WatchLayout.cs`,
   `WatchGuardRule.cs`,
   `RiftRoulette/GameLoop/MatchState.cs`,
-  `MatchConfig.cs`, `AutoStartRule.cs`, `SoulRule.cs`, `RiftRoulette/RandomMode/BenchRule.cs`,
+  `MatchConfig.cs`, `AutoStartRule.cs`, `RiftRoulette/RandomMode/BenchRule.cs`,
   `RiftRoulette/Lobby/TeamBalance.cs`, `AdminSeatRule.cs`, `StreamFraming.cs`, `RiftRoulette/Boards/EmptySignLayout.cs`, `EmptySignSettings.cs` (with `Modules/WorldText` imported), `RiftRoulette/Stats/StatsLedger.cs`, `DamageLedger.cs`,
   `StatsBoardText.cs`, `RiftRoulette/Balance/BalanceTracker.cs`,
   `BalancePicker.cs`, `RiftRoulette/Betting/BetBook.cs`, `BetBoardText.cs`, `MarkBook.cs`) rather than referencing the plugin DLL: round
@@ -40,7 +48,7 @@ server. Never deployed to the server.
   decision, each side's team starts (each team on its own half) and watch
   spot, which side the watch spot is above, the yellow board layout and
   watch view angles, the below-the-watch-spot line, match scoring, match
-  config parsing, which currency gains are blocked, the match auto-start decision, the admin
+  config parsing, the match auto-start decision, the admin
   seat rules, the stream camera's fixed spots and park rule,
   who sits out (bench rotation) and the fighting teams,
   team placement, kill / death / assist counting and
@@ -49,7 +57,7 @@ server. Never deployed to the server.
   `Movement.projitems` because the locations are Movement types, and
   `Queue.projitems` for the bench rotation's `PlayerQueue`.
 
-All three test projects reference `Google.Protobuf` because Shared
+All test projects reference `Google.Protobuf` because Shared
 (`PlayerChat`) and Movement send net messages.
 
 ## How to run

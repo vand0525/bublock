@@ -18,6 +18,10 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Pit/Data/spots.json" LogicalName="CrystalCrackers.Pit.spots.json" />
+  </ItemGroup>
+
   <Import Project="..\Shared\Shared.projitems" />
   <Import Project="..\Modules\WorldText\WorldText.projitems" />
   <Import Project="..\Modules\WorldText\WorldTextCommands.projitems" />
