@@ -685,3 +685,10 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Verified fact (rays through `reference/maps/dl_midtown/world.bin.gz`):** pit floor z -768, about x -300 to 300 and y -600 to 600, ringed by a step at -640; the boss stands at z -759 in the middle. A raised block sits at (-50..50, ±400). The flat team ends are y ±450 to ±600, with a ramp up one side of each; the pit is rotationally symmetric (180° around the origin). The back wall at the ends is near y ±628, so 13 spots per end fit only about 65-80 apart.
 - **Used as:** `CrystalCrackers/Pit/PitLocations` (`pit_sapphire` (60, 500, -768), `pit_amber` (-60, -500, -768)) and `Pit/Data/spots.json`, checked by `scripts/check-spots.py --mode crystal`.
 - **Link / path:** `scripts/check-spots.py`, `CrystalCrackers/Pit/PitSpots.md`
+
+### 2026-10-13 — Deadman Danny is `hero_deadpack` (`Heroes.Deadpack` = 78)
+
+- **Why hard / useful:** the hero's in-game name matches nothing in the code; on release day the Deadlock API had no builds and no abilities for him, and Baba was still marked `in_development`.
+- **Verified fact:** class name `hero_deadpack`, API id 78, `Heroes.Deadpack` = 78 in Deadworks v0.6.0 (`lib/`). Signature abilities from the game's `heroes.vdata`: `ability_deadpack_chargeblast` (Strix Salvo), `ability_deadpack_rocketeer` (Chimera Mk1, jetpack), `ability_deadpack_flamethrower` (Jettison Fuel), `ability_deadpack_ultimate` (Close The Deal). None use charges (`fetch-charges.py` lists none).
+- **Used as:** `FORCE_HEROES` in `scripts/fetch-builds.py` and three hand-made starter builds under `hero_deadpack` in `Modules/Loadout/Data/custom-builds.json`; replace them with published builds once the API indexes some.
+- **Link / path:** `scripts/fetch-builds.py.md`

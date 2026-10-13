@@ -1,7 +1,7 @@
 {
-  "fetchedAt": "2026-10-11T19:15:33Z",
+  "fetchedAt": "2026-10-13T21:14:34Z",
   "source": "https://github.com/SteamTracking/GameTracking-Deadlock/blob/master/game/citadel/pak01_dir/scripts/abilities.vdata",
-  "commit": "2d87734ca566",
+  "commit": "0c38f9d31c49",
   "abilities": {
     "ability_baba_bubbling_brew": {
       "base": 1,
