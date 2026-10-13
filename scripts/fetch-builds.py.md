@@ -19,11 +19,10 @@ retries on HTTP 429).
 
 1. `GET /v1/assets/heroes`: keeps heroes not `disabled` that are
    `player_selectable` and not `in_development`, or are in `FORCE_HEROES`
-   (`hero_ratking`, `hero_baba`: the API's assets still mark them
-   unplayable or in development after their patch). Deadman Danny
-   (`hero_deadpack`) is left out until Deadworks can spawn him; his
-   hand-made builds wait in `custom-builds.json` (unused while the hero is
-   not kept).
+   (`hero_ratking`, `hero_baba`, `hero_deadpack` (Deadman Danny): the
+   API's assets still mark them unplayable or in development after their
+   patch). Hand-made builds in `custom-builds.json` for a hero the script
+   does not keep are ignored.
 2. `GET /v1/assets/items`: shopable `upgrade` items (ID to `class_name`,
    `component_items`) and `ability` class names (for ability order and imbue
    targets). `EXTRA_ABILITIES` (Rat King's four signatures, from the game's
