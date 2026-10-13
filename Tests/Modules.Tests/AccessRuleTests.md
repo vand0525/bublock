@@ -1,6 +1,6 @@
 # AccessRuleTests
 
-Unit tests for `RiftRoulette/Lobby/AccessRule`.
+Unit tests for `Modules/Access/AccessRule`.
 
 - A ban wins over the whitelist and admin status.
 - Open mode lets in anyone who is not banned; private mode lets in only

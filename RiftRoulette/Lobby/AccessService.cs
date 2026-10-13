@@ -1,4 +1,4 @@
-using System.Text.Json;
+using Bublock.Modules.Access;
 using Bublock.Shared;
 using DeadworksManaged.Api;
 using ITimer = DeadworksManaged.Api.ITimer;
@@ -7,59 +7,11 @@ namespace RiftRoulette.Lobby;
 
 public static class AccessService
 {
-  public const string FileName = "access.json";
-
   private static readonly Logger Log = BublockLog.For("Access");
 
-  private static readonly object Gate = new();
+  public static string FilePath => AccessStore.FilePath;
 
-  private static AccessList _current = new();
-
-  private static DateTime? _loadedWriteTime;
-
-  public static string FilePath =>
-    Path.Combine(Path.GetDirectoryName(LogPaths.ResolveRoot())!, FileName);
-
-  public static AccessList Load()
-  {
-    lock (Gate)
-    {
-      var path = FilePath;
-
-      try
-      {
-        if (!File.Exists(path))
-        {
-          if (_loadedWriteTime != null)
-            Log.Info("Access file missing, server is open with empty lists Path={Path}", path);
-
-          _current = new AccessList();
-          _loadedWriteTime = null;
-          return _current;
-        }
-
-        var writeTime = File.GetLastWriteTimeUtc(path);
-
-        if (writeTime == _loadedWriteTime)
-          return _current;
-
-        _current = AccessList.Parse(File.ReadAllText(path));
-        _loadedWriteTime = writeTime;
-
-        Log.Info(
-          "Access file loaded Private={Private} Banned={Banned} Allowed={Allowed}",
-          _current.Private,
-          _current.Banned.Count,
-          _current.Allowed.Count);
-      }
-      catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
-      {
-        Log.Error(exception, "Access file unreadable, keeping the last good lists Path={Path}", path);
-      }
-
-      return _current;
-    }
-  }
+  public static AccessList Load() => AccessStore.Load();
 
   public static bool AllowConnect(ulong steamId, string name)
   {
@@ -85,54 +37,19 @@ public static class AccessService
   public static AccessVerdict Check(CCitadelPlayerController player) =>
     Load().Check(player.PlayerSteamId, AdminAuth.IsAuthorized(player.PlayerSteamId));
 
-  public static string Ban(ulong steamId, ExecutionMode mode = ExecutionMode.Clean) =>
-    Change(list => list.Banned.Add(steamId), mode, "Banned", steamId, $"{steamId} is banned.", $"{steamId} was already banned.");
+  public static string Ban(ulong steamId, ExecutionMode mode = ExecutionMode.Clean) => AccessStore.Ban(steamId, mode);
 
-  public static string Unban(ulong steamId, ExecutionMode mode = ExecutionMode.Clean) =>
-    Change(list => list.Banned.Remove(steamId), mode, "Unbanned", steamId, $"{steamId} is no longer banned.", $"{steamId} was not banned.");
+  public static string Unban(ulong steamId, ExecutionMode mode = ExecutionMode.Clean) => AccessStore.Unban(steamId, mode);
 
-  public static string Allow(ulong steamId, ExecutionMode mode = ExecutionMode.Clean) =>
-    Change(list => list.Allowed.Add(steamId), mode, "Whitelisted", steamId, $"{steamId} is whitelisted.", $"{steamId} was already whitelisted.");
+  public static string Allow(ulong steamId, ExecutionMode mode = ExecutionMode.Clean) => AccessStore.Allow(steamId, mode);
 
-  public static string Disallow(ulong steamId, ExecutionMode mode = ExecutionMode.Clean) =>
-    Change(list => list.Allowed.Remove(steamId), mode, "Removed from whitelist", steamId, $"{steamId} is off the whitelist.", $"{steamId} was not whitelisted.");
+  public static string Disallow(ulong steamId, ExecutionMode mode = ExecutionMode.Clean) => AccessStore.Disallow(steamId, mode);
 
-  public static string SetPrivate(bool privateMode, ExecutionMode mode = ExecutionMode.Clean)
-  {
-    var name = privateMode ? "private" : "open";
+  public static string SetPrivate(bool privateMode, ExecutionMode mode = ExecutionMode.Clean) =>
+    AccessStore.SetPrivate(privateMode, mode);
 
-    return Change(
-      list =>
-      {
-        var changed = list.Private != privateMode;
-        list.Private = privateMode;
-        return changed;
-      },
-      mode,
-      "Access mode set",
-      name,
-      $"Server is {name}.",
-      $"Server was already {name}.");
-  }
-
-  public static string SetStatueModifier(string? name, ExecutionMode mode = ExecutionMode.Clean)
-  {
-    var modifier = string.IsNullOrWhiteSpace(name) ? null : name.Trim();
-    var shown = modifier ?? "none";
-
-    return Change(
-      list =>
-      {
-        var changed = list.StatueModifier != modifier;
-        list.StatueModifier = modifier;
-        return changed;
-      },
-      mode,
-      "Statue modifier set",
-      shown,
-      $"Statue modifier is {shown}.",
-      $"Statue modifier was already {shown}.");
-  }
+  public static string SetStatueModifier(string? name, ExecutionMode mode = ExecutionMode.Clean) =>
+    AccessStore.SetStatueModifier(name, mode);
 
   // Banned players still in the game become statues and are kicked after LiveBanKickSeconds.
   public static IReadOnlyList<string> PetrifyBanned(ITimer timer, ExecutionMode mode = ExecutionMode.Clean)
@@ -174,83 +91,10 @@ public static class AccessService
     return kicked;
   }
 
-  public static IReadOnlyList<string> Describe()
-  {
-    var list = Load();
-
-    return
-    [
-      $"Mode={(list.Private ? "private" : "open")} | StatueModifier={list.StatueModifier ?? "none"} | File={FilePath}",
-      $"Banned ({list.Banned.Count}): {Join(list.Banned)}",
-      $"Allowed ({list.Allowed.Count}): {Join(list.Allowed)}"
-    ];
-  }
+  public static IReadOnlyList<string> Describe() => AccessStore.Describe();
 
   public static IReadOnlyList<string> DescribeBanned() =>
-    DescribeIds("Banned", Load().Banned, steamId => $" | {BanStatueService.Describe(steamId)}");
+    AccessStore.DescribeIds("Banned", Load().Banned, steamId => $" | {BanStatueService.Describe(steamId)}");
 
-  public static IReadOnlyList<string> DescribeAllowed() => DescribeIds("Allowed", Load().Allowed, _ => "");
-
-  private static string Change(
-    Func<AccessList, bool> change,
-    ExecutionMode mode,
-    string action,
-    object subject,
-    string changedReply,
-    string unchangedReply)
-  {
-    lock (Gate)
-    {
-      var list = Load();
-
-      if (!change(list))
-        return unchangedReply;
-
-      Save(list);
-
-      Log.WithMode(mode).Info("{Action} Subject={Subject}", action, subject);
-      BublockLog.Master.Info("Access changed {Action} Subject={Subject}", action, subject);
-      return changedReply;
-    }
-  }
-
-  private static void Save(AccessList list)
-  {
-    var path = FilePath;
-    var temp = path + ".tmp";
-
-    try
-    {
-      Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-      File.WriteAllText(temp, list.ToJson());
-      File.Move(temp, path, overwrite: true);
-
-      _current = list;
-      _loadedWriteTime = File.GetLastWriteTimeUtc(path);
-    }
-    catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-    {
-      Log.Error(exception, "Access file write failed Path={Path}", path);
-      _loadedWriteTime = null;
-      throw new CommandException($"Could not write {path}: {exception.Message}");
-    }
-  }
-
-  private static IReadOnlyList<string> DescribeIds(string title, IReadOnlyCollection<ulong> ids, Func<ulong, string> suffix)
-  {
-    var connected = Players.GetAll()
-      .Where(player => !player.IsBot)
-      .GroupBy(player => player.PlayerSteamId)
-      .ToDictionary(group => group.Key, group => group.First().PlayerName);
-
-    var lines = new List<string> { $"{title} ({ids.Count})" };
-
-    foreach (var steamId in ids)
-      lines.Add((connected.TryGetValue(steamId, out var name) ? $"{steamId} ({name}, connected)" : steamId.ToString()) + suffix(steamId));
-
-    return lines;
-  }
-
-  private static string Join(IReadOnlyCollection<ulong> ids) =>
-    ids.Count == 0 ? "none" : string.Join(", ", ids);
+  public static IReadOnlyList<string> DescribeAllowed() => AccessStore.DescribeIds("Allowed", Load().Allowed);
 }

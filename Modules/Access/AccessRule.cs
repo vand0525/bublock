@@ -1,4 +1,4 @@
-namespace RiftRoulette.Lobby;
+namespace Bublock.Modules.Access;
 
 public enum AccessVerdict
 {

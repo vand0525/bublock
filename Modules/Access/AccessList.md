@@ -1,8 +1,9 @@
 # AccessList
 
 In-memory form of `bublock/access.json`: open/private mode, the banned and
-allowed Steam64 ID sets, and the statue modifier name. Pure; unit tested
-(`Tests/RiftRoulette.Tests/AccessListTests`).
+allowed Steam64 ID sets, and the statue modifier name (namespace
+`Bublock.Modules.Access`). Pure; unit tested
+(`Tests/Modules.Tests/AccessListTests`).
 
 ## File shape
 
@@ -23,8 +24,8 @@ allowed Steam64 ID sets, and the statue modifier name. Pure; unit tested
 |---|---|
 | `Private` | true = only allowed IDs and admins may join |
 | `Banned` / `Allowed` | Sorted Steam64 ID sets |
-| `StatueModifier` | Modifier `BanStatueService` adds to banned players (null = restraint only) |
-| `Check(steamId, isAdmin)` | `AccessRule.Check` against the sets and mode |
+| `StatueModifier` | Modifier Rift Roulette's `BanStatueService` adds to banned players (null = restraint only); kept in the file by every mode |
+| `Check(steamId, isAdmin, forcePrivate = false)` | `AccessRule.Check` against the sets; private when `Private` or `forcePrivate` (a mode that is always private, Crystal Crackers, without writing the file) |
 | `ToJson()` | Indented JSON (camelCase keys, sorted IDs, trailing newline) |
 | `Parse(json)` | Reads the file; throws `JsonException` on bad JSON or `null` |
 

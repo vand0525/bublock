@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace RiftRoulette.Lobby;
+namespace Bublock.Modules.Access;
 
 public sealed class AccessList
 {
@@ -23,8 +23,8 @@ public sealed class AccessList
 
   public string? StatueModifier { get; set; }
 
-  public AccessVerdict Check(ulong steamId, bool isAdmin) =>
-    AccessRule.Check(Banned.Contains(steamId), Private, Allowed.Contains(steamId), isAdmin);
+  public AccessVerdict Check(ulong steamId, bool isAdmin, bool forcePrivate = false) =>
+    AccessRule.Check(Banned.Contains(steamId), Private || forcePrivate, Allowed.Contains(steamId), isAdmin);
 
   public string ToJson() =>
     JsonSerializer.Serialize(new AccessFile(Private, [.. Banned], [.. Allowed], StatueModifier), Options) + "\n";

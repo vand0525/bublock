@@ -1,6 +1,6 @@
-using RiftRoulette.Lobby;
+using Bublock.Modules.Access;
 
-namespace Bublock.Tests.RiftRoulette;
+namespace Bublock.Tests.Modules;
 
 public class AccessRuleTests
 {

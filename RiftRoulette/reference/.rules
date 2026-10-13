@@ -30,7 +30,8 @@ deadworks/                 # Cursor workspace root
       Queue/               # reusable player join queue (no commands)
       Spectate/            # spectator camera: follow a player, park a free camera (no commands)
       RandomHeroes/        # random hero draw, HeroDraw (no commands)
-    RiftRoulette/            # game mode DLL
+      Access/              # access.json: bans, allowed list, open / private (no commands)
+    RiftRoulette/            # game mode DLL (parked while Crystal Crackers is in development)
       Session/             # session lifecycle lines in the master log
       Lobby/ Rift/         # game-specific plugin classes
       Boards/              # welcome / hint / note boards, empty-server sign, redraw of every board (dw_board_*)
@@ -41,7 +42,7 @@ deadworks/                 # Cursor workspace root
       Balance/             # auto-balance swaps between rounds
       Mirror/              # mirror mode: everyone the same hero + build, admin pins
       SelfTest/            # patch-day self-test of every game dependency (dw_selftest_*)
-    CrystalCrackers/       # second game mode DLL (skeleton, never deployed with RiftRoulette)
+    CrystalCrackers/       # second game mode DLL (in development, always private; the deployed mode for now)
     DevTools/              # discovery / diagnostics
     CleanSlate/            # map cleanup helpers (mode-agnostic)
     Tests/                 # local xUnit tests (never deployed)
@@ -73,10 +74,16 @@ deadworks/                 # Cursor workspace root
 - `Modules/` MUST NOT depend on Rift Roulette. Game-specific constants and
   logic live under `RiftRoulette/`.
 - Game modes are separate DLLs sharing the modules as source
-  (`RiftRoulette.dll`; `CrystalCrackers.dll`, a skeleton, see
+  (`RiftRoulette.dll`; `CrystalCrackers.dll`, see
   `reference/crystal-crackers.md`). Only one mode DLL is ever on the
-  server: both register the module commands. `deploy.sh` uploads Rift
-  Roulette only. CleanSlate never knows the mode: it removes what no mode
+  server: both register the module and access commands. While Crystal
+  Crackers is in development `deploy.sh` uploads it (`PLUGINS`) and parks
+  Rift Roulette (`PARKED_PLUGINS`: backed up, removed from `plugins/`,
+  logs kept); going back is swapping the two names. `rollback.sh` removes
+  the other mode DLL when it restores one. No mode switch feature yet.
+  Crystal Crackers is always private (`AccessGate`, `forcePrivate`): only
+  admins and the `allowed` list join, and it never writes the file's mode.
+  CleanSlate never knows the mode: it removes what no mode
   wants (lane guardians, Walkers `npc_boss_tier2`, barracks bosses, shops,
   urn) and keeps the vanilla mid-boss scheduler off. The mid-boss is not a
   map entity (an `info_neutral_trooper_camp`, subclass
@@ -208,9 +215,11 @@ Assume the git repo is rooted at `Bublock/`.
   (chat only). An unused mark ends at round end; refunded on no result,
   a target who didn't fight, or match end.
 - Join access lives in `bublock/access.json` on the server (banned /
-  allowed Steam64 IDs, open or private). `Lobby/AccessService` checks it
-  in `OnClientConnect` before the admin seat rule; a ban wins over
-  everything. The file never grants admin (that stays `AdminAuth`).
+  allowed Steam64 IDs, open or private), read and written only through
+  `Modules/Access/AccessStore` (shared by both mode DLLs).
+  `Lobby/AccessService` checks it in `OnClientConnect` before the admin
+  seat rule; a ban wins over everything. The file never grants admin (that
+  stays `AdminAuth`).
 - Banned players are never kicked on the spot: `Lobby/BanStatueService`
   turns them to stone up top (out of the game, restrained, the
   `statueModifier` from `access.json`) and kicks them 30 s after a live
@@ -551,7 +560,8 @@ Names follow SourceMod / CounterStrikeSharp conventions. Target command set:
 - Every admin command checks `AdminAuth`. A null caller (server console) is
   trusted.
 - Command names must not collide across Bublock DLLs (they register
-  independently).
+  independently). Mode DLLs are the exception: they share names (module
+  and access commands) because they are never on the server together.
 - Module commands never take game-specific arguments (teams are team
   numbers, not `sapphire`/`amber`).
 

@@ -12,7 +12,11 @@ if [[ ! -f "$ROOT/scripts/server.env" ]]; then
 fi
 source "$ROOT/scripts/server.env"
 REMOTE_DIR="/server/game/bin/win64/managed/plugins"
-PLUGINS=(RiftRoulette DevTools CleanSlate)
+# Only one mode DLL on the server: Crystal Crackers while it is in development, Rift Roulette parked.
+# To go back, swap CrystalCrackers and RiftRoulette between PLUGINS and PARKED_PLUGINS.
+PLUGINS=(CrystalCrackers DevTools CleanSlate)
+# Mode DLLs taken off the server (backed up, removed from plugins/); their logs are kept.
+PARKED_PLUGINS=(RiftRoulette)
 # Old DLL names still on the server after a rename; deleted so two copies never load.
 RETIRED_PLUGINS=(RiftRumble)
 REMOTE_LOG_DIR="/server/game/bin/win64/bublock/logs"
@@ -73,7 +77,7 @@ fi
 
 if [[ "$BACKUP" == true ]]; then
   echo "Backing up server plugins to $BACKUP_DIR ..."
-  for plugin in "${PLUGINS[@]}" "${RETIRED_PLUGINS[@]}"; do
+  for plugin in "${PLUGINS[@]}" "${PARKED_PLUGINS[@]}" "${RETIRED_PLUGINS[@]}"; do
     if sftp_run "cls -1 '$REMOTE_DIR/$plugin.dll'" >/dev/null 2>&1; then
       sftp_run "get '$REMOTE_DIR/$plugin.dll' -o '$BACKUP_DIR/$plugin.dll'"
       echo "  backed up $plugin.dll"
@@ -105,6 +109,13 @@ if [[ "$PUSH_ACCESS" == true ]]; then
   cp "$BACKUP_DIR/access.pushed.json" "$LOCAL_ACCESS"
   echo "  uploaded access.json (server's previous copy: $BACKUP_DIR/access.json)"
 fi
+
+for plugin in "${PARKED_PLUGINS[@]}"; do
+  if sftp_run "cls -1 '$REMOTE_DIR/$plugin.dll'" >/dev/null 2>&1; then
+    sftp_run "rm '$REMOTE_DIR/$plugin.dll'"
+    echo "  parked $plugin.dll (removed from plugins/, logs kept)"
+  fi
+done
 
 RETIRED_REMOVED=false
 for plugin in "${RETIRED_PLUGINS[@]}"; do

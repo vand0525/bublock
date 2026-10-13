@@ -1,6 +1,9 @@
 # Crystal Crackers (mode note)
 
-Status: skeleton DLL only (`Bublock/CrystalCrackers/`). No gameplay code.
+Status: in development (`Bublock/CrystalCrackers/`), the mode DLL
+`deploy.sh` uploads for now (Rift Roulette parked). No gameplay code yet;
+the server is always private (`AccessGate`: admins and the `allowed` list
+only).
 This file records the mode as requested, how it fits next to Rift
 Roulette, what is reusable today, and what must be found in game before
 building. Same role as `endless-mode.md`.
@@ -29,9 +32,17 @@ building. Same role as `endless-mode.md`.
 - **One mode DLL on the server at a time.** Deadworks loads every
   `plugins/*.dll`, each with its own copy of module statics, and both mode
   DLLs register the module commands (`loadout_*`, `mv_*`, `restrain`,
-  `hud_*`, `wt_*`). `scripts/deploy.sh` uploads Rift Roulette; switching
-  modes means changing its plugin list and removing the other mode DLL
-  from the server (a later stage).
+  `hud_*`, `wt_*`) and the access commands. During development
+  `scripts/deploy.sh` uploads Crystal Crackers (`PLUGINS`) and parks Rift
+  Roulette (`PARKED_PLUGINS`: backed up, removed from `plugins/`, logs
+  kept). Going back is swapping the two names; `rollback.sh` removes the
+  other mode DLL when it restores one. A real mode switch comes later.
+- **Always private.** `AccessPlugin` / `AccessGate` check the shared
+  `bublock/access.json` (`Modules/Access`) with `forcePrivate: true`: only
+  `AdminAuth` admins and the `allowed` list join, a ban is refused, and
+  players without access are kicked 2 s after every load. The file's
+  `private` value is never written, so Rift Roulette comes back in its old
+  mode. Hiding the server from the browser is done on the host.
 - **CleanSlate stays mode-agnostic.** It keeps the vanilla mid-boss
   scheduler off (`citadel_midboss_initial_spawn_time_override 999999`) and
   removes troopers, lane guardians, Walkers (`npc_boss_tier2`, the six lane
@@ -57,6 +68,7 @@ building. Same role as `endless-mode.md`.
 | Bench rotation on an odd count | `Modules/Queue` `PlayerQueue` |
 | Stream camera follow | `Modules/Spectate` |
 | Logging, admin auth, chat | `Shared` |
+| Bans, allowed list, private gate | `Modules/Access` (`AccessStore`, `AccessList.Check`) |
 
 Still inside Rift Roulette (copy or extract in a later stage): the lobby
 (connect / disconnect, `Participants`, admin seat, team balance with
@@ -119,7 +131,7 @@ Discoveries and the self-test (`SelfTest/GameDependencies`,
 
 1. Boss probe (above), as DevTools discovery commands.
 2. Lobby and match loop for the Crystal Crackers DLL (copy or extract from
-   Rift Roulette), deploy switch for one mode DLL at a time.
+   Rift Roulette), then a real mode switch (today it is a deploy.sh edit).
 3. Pit round driver: release into the pit, round end on boss kill or time.
 4. Boss control per round: health, damage scale by headcount.
 5. Scoring: kills, boss kill, crystals, reduced points for revived kills.

@@ -102,6 +102,7 @@ they call each other with typed C# (no command/convar messaging):
 | `Modules/Restraint/` (module) | `RestraintPlugin` | silence / no items, shooting or melee until released; no damage taken while restrained |
 | `Modules/Queue/` (module) | — (data) | reusable player queue |
 | `Modules/RandomHeroes/` (module) | — (data) | random hero draw (`HeroDraw`) |
+| `Modules/Access/` (module) | — (data) | `access.json` read / write and the join verdict (`AccessStore`, `AccessList`); `Lobby/AccessService` and `AccessPlugin` wrap it |
 | `Stats/` | `StatsPlugin` | match kills / deaths / assists, stats boards |
 | `Balance/` | `BalancePlugin` | auto-balance trigger and swaps |
 | `Betting/` | `BettingPlugin` | round betting with kill souls, betting board (Random mode) |

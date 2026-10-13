@@ -1,3 +1,4 @@
+using Bublock.Modules.Access;
 using Bublock.Modules.Hud;
 using Bublock.Modules.Loadout;
 using Bublock.Modules.Restraint;

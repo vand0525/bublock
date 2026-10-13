@@ -1,7 +1,7 @@
 # AccessRule
 
-Pure join-access rule for bans and private mode. Unit tested
-(`Tests/RiftRoulette.Tests/AccessRuleTests`).
+Pure join-access rule for bans and private mode (namespace
+`Bublock.Modules.Access`). Unit tested (`Tests/Modules.Tests/AccessRuleTests`).
 
 ## Operations
 

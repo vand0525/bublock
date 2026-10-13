@@ -20,10 +20,12 @@ file first; the deploy refuses to start when it is not valid JSON.
 
 ## Steps
 
-1. Runs `update.sh` (Release build of `Bublock.sln`) and checks that
-   `RiftRoulette.dll`, `DevTools.dll`, `CleanSlate.dll` exist under each
-   project's `bin/Release/net10.0/`.
-2. Backup: for each of the three names and each retired name
+1. Runs `update.sh` (Release build of `Bublock.sln`) and checks that each
+   `PLUGINS` DLL exists under its project's `bin/Release/net10.0/`.
+   During Crystal Crackers development `PLUGINS` is `CrystalCrackers`,
+   `DevTools`, `CleanSlate`, and `PARKED_PLUGINS` is `RiftRoulette` (only
+   one mode DLL may be on the server; to go back, swap the two names).
+2. Backup: for each `PLUGINS`, `PARKED_PLUGINS` and retired name
    (`RETIRED_PLUGINS`, today `RiftRumble`), if it exists in
    `/server/game/bin/win64/managed/plugins/`, downloads it to
    `deadworks/server-backups/<UTC stamp>/` (e.g. `20260927T011500Z`). A
@@ -40,9 +42,11 @@ file first; the deploy refuses to start when it is not valid JSON.
    copy. If the server's copy was not saved to `<stamp>/access.json`, it
    stops before uploading anything (the local edit is restored). The server
    re-reads the file when its write time changes, so no reload is needed.
-4. Retired DLLs: deletes each `RETIRED_PLUGINS` DLL still in the plugins
-   folder, before uploading. A renamed plugin otherwise keeps loading under
-   its old name and every command registers twice.
+4. Parked and retired DLLs: deletes each `PARKED_PLUGINS` and
+   `RETIRED_PLUGINS` DLL still in the plugins folder, before uploading
+   (deleting a DLL unloads it). Otherwise two mode DLLs, or a renamed
+   plugin under its old name, would load together and every shared command
+   would register twice. Parked DLLs keep their server log folder.
 5. Upload: `put` each Bublock DLL over the same name in the plugins folder,
    appending its SHA-256 to `<stamp>/uploaded.sha256`.
 6. Retired logs: if a retired DLL was deleted, waits 5 s for it to unload,
@@ -52,8 +56,8 @@ file first; the deploy refuses to start when it is not valid JSON.
    command.
 
 Steps 4 and 6 do nothing once the old files are gone. `RETIRED_PLUGINS`
-must stay non-empty (macOS bash 3.2 with `set -u` rejects an empty array);
-delete the loop instead of emptying it.
+and `PARKED_PLUGINS` must stay non-empty (macOS bash 3.2 with `set -u`
+rejects an empty array); delete the loop instead of emptying it.
 
 ## Side effects
 

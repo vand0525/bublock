@@ -1,0 +1,13 @@
+<Project>
+
+  <PropertyGroup>
+    <HasSharedItems>true</HasSharedItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AccessRule.cs" Link="Modules/Access/AccessRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AccessList.cs" Link="Modules/Access/AccessList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AccessStore.cs" Link="Modules/Access/AccessStore.cs" />
+  </ItemGroup>
+
+</Project>

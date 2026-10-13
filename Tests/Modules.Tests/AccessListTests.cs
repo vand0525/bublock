@@ -1,7 +1,7 @@
 using System.Text.Json;
-using RiftRoulette.Lobby;
+using Bublock.Modules.Access;
 
-namespace Bublock.Tests.RiftRoulette;
+namespace Bublock.Tests.Modules;
 
 public class AccessListTests
 {
@@ -75,5 +75,19 @@ public class AccessListTests
     Assert.Equal(AccessVerdict.Allowed, list.Check(2, isAdmin: false));
     Assert.Equal(AccessVerdict.Private, list.Check(3, isAdmin: false));
     Assert.Equal(AccessVerdict.Allowed, list.Check(3, isAdmin: true));
+  }
+
+  [Fact]
+  public void Check_with_force_private_ignores_an_open_file()
+  {
+    var list = new AccessList { Private = false };
+    list.Banned.Add(1);
+    list.Allowed.Add(2);
+
+    Assert.Equal(AccessVerdict.Banned, list.Check(1, isAdmin: true, forcePrivate: true));
+    Assert.Equal(AccessVerdict.Allowed, list.Check(2, isAdmin: false, forcePrivate: true));
+    Assert.Equal(AccessVerdict.Private, list.Check(3, isAdmin: false, forcePrivate: true));
+    Assert.Equal(AccessVerdict.Allowed, list.Check(3, isAdmin: true, forcePrivate: true));
+    Assert.False(list.Private);
   }
 }

@@ -352,7 +352,8 @@ then until restart. Private mode refuses anyone neither whitelisted nor an
 `AdminAuth` admin. Refusals and statue visits are Warnings in
 `access-*.log` (copied to master) with name and Steam ID. Steam ID
 arguments must be real Steam64 IDs (17 digits, starting 7656119); slot
-numbers are refused.
+numbers are refused. The file itself is read and written by the shared
+`Modules/Access/AccessStore`; `AccessService` adds the statues and kicks.
 
 #### /player_ban <slot>
 
@@ -1020,3 +1021,71 @@ caller, so there is no Clean/Debug split. DevTools also logs each game modifier 
 - **Mode:** Debug (startup and hot reload run the same ops Clean)
 - **Side effects:** sets `citadel_trooper_spawn_enabled 0`, `citadel_npc_spawn_enabled 0`, `citadel_active_lane 0`, `citadel_midboss_initial_spawn_time_override 999999`, and the urn off: `citadel_crate_spawn_enabled 0`, `citadel_crate_disable_early_spawn 1`, `citadel_crate_spawn_initial_delay 999999`, `citadel_crate_respawn_interval 999999`; immediately removes every `npc_trooper_boss`, `npc_boss_tier2`, `npc_barrack_boss`, `citadel_item_powerup_spawner`, `citadel_herotest_orbspawner`, `citadel_shop_prop_dynamic` (shop kiosks) and sends `Disable` to every `trigger_item_shop` / `trigger_item_shop_safe_zone` (shop buy zones); `cleanup` summary with counts per classname; master line `Map cleanup re-run Removed=[...] Disabled=[...]`; no banner; replies `[CleanSlate] Convars applied, N entities removed, M disabled`
 - **Notes:** use it, for example, after a map change without a restart. Never removes `info_super_trooper_spawn` or the urn spawn points (`item_crate_spawn`); buy zones are disabled, not removed. Does not touch buying (`citadel_allow_purchasing_anywhere` belongs to RiftRoulette)
+
+### Crystal Crackers access (`AccessPlugin`, CrystalCrackers.dll)
+
+Admin (`AdminCommand.Authorize` with the `Access` log; server console
+trusted). Debug mode; `[Access]` replies. Same `bublock/access.json` as
+Rift Roulette (through `Modules/Access/AccessStore`), but Crystal Crackers
+is always private: only `AdminAuth` admins and the `allowed` list may join,
+whatever the file's `private` value says, and the file's mode is never
+written. Banned IDs are refused (no statue, no strikes). Players without
+access are kicked 2 s after every load. Same names as Rift Roulette's
+access commands; the two DLLs are never on the server together. Steam ID
+arguments must be real Steam64 IDs.
+
+#### /access_mode
+
+- **Invocation:** chat `/access_mode` | console `dw_access_mode`
+- **Who:** admin
+- **Calls:** `AccessStore.Describe`
+- **Mode:** read-only
+- **Side effects:** replies that Crystal Crackers is always private, then the file's mode, statue modifier, path and both lists. Any argument (`open`, `private`) is refused: `Crystal Crackers is always private; the mode can't be changed here.`
+
+#### /ban_add <steamid>
+
+- **Invocation:** chat `/ban_add <steamid>` | console `dw_ban_add <steamid>`
+- **Who:** admin
+- **Calls:** `AccessStore.Ban`, `AccessGate.KickWithoutAccess`
+- **Mode:** Debug
+- **Side effects:** adds the ID to `banned`, saves the file (master `Access changed`); if connected they are kicked at once (`kickid`); reply lists anyone kicked
+
+#### /ban_remove <steamid>
+
+- **Invocation:** chat `/ban_remove <steamid>` | console `dw_ban_remove <steamid>`
+- **Who:** admin
+- **Calls:** `AccessStore.Unban`
+- **Mode:** Debug
+- **Side effects:** removes the ID from `banned` and saves the file; they still need the allowed list (or admin) to join
+
+#### /ban_list
+
+- **Invocation:** chat `/ban_list` | console `dw_ban_list`
+- **Who:** admin
+- **Calls:** `AccessStore.DescribeIds`
+- **Mode:** read-only
+- **Side effects:** count, then one ID per line (with the name when connected)
+
+#### /allow_add <steamid>
+
+- **Invocation:** chat `/allow_add <steamid>` | console `dw_allow_add <steamid>`
+- **Who:** admin
+- **Calls:** `AccessStore.Allow`
+- **Mode:** Debug
+- **Side effects:** adds the ID to `allowed` and saves the file; they can join on their next connection
+
+#### /allow_remove <steamid>
+
+- **Invocation:** chat `/allow_remove <steamid>` | console `dw_allow_remove <steamid>`
+- **Who:** admin
+- **Calls:** `AccessStore.Disallow`, `AccessGate.KickWithoutAccess`
+- **Mode:** Debug
+- **Side effects:** removes the ID from `allowed` and saves the file; if connected and not an admin they are kicked at once
+
+#### /allow_list
+
+- **Invocation:** chat `/allow_list` | console `dw_allow_list`
+- **Who:** admin
+- **Calls:** `AccessStore.DescribeIds`
+- **Mode:** read-only
+- **Side effects:** count, then one ID per line (with the name when connected)

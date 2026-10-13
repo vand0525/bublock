@@ -35,21 +35,29 @@ fi
 LFTP_PASSWORD="$(security find-generic-password -a "$DW_USER" -s 'deadworks-sftp' -w)"
 export LFTP_PASSWORD
 
-# Restoring a DLL under its pre-rename name must remove the renamed copy so both never load.
-renamed_to() {
+if [[ -f "$BACKUP_DIR/RiftRoulette.dll" && -f "$BACKUP_DIR/CrystalCrackers.dll" ]]; then
+  echo "error: $STAMP holds both mode DLLs; only one may be on the server. Remove one from $BACKUP_DIR first." >&2
+  exit 1
+fi
+
+# Restoring a DLL must remove the copy it conflicts with so both never load:
+# its renamed copy, or the other mode DLL.
+conflicts_with() {
   case "$1" in
     RiftRumble.dll) echo "RiftRoulette.dll" ;;
+    RiftRoulette.dll) echo "CrystalCrackers.dll" ;;
+    CrystalCrackers.dll) echo "RiftRoulette.dll" ;;
   esac
 }
 
 echo "Restoring $STAMP to $REMOTE_DIR ..."
 for dll in "${DLLS[@]}"; do
   name="$(basename "$dll")"
-  new_name="$(renamed_to "$name")"
-  if [[ -n "$new_name" ]]; then
+  other="$(conflicts_with "$name")"
+  if [[ -n "$other" ]]; then
     lftp --env-password -u "$DW_USER" "sftp://$DW_HOST:$DW_PORT" \
-      -e "rm '$REMOTE_DIR/$new_name'; bye" >/dev/null 2>&1 || true
-    echo "  removed $new_name (restoring its old name $name)"
+      -e "rm '$REMOTE_DIR/$other'; bye" >/dev/null 2>&1 || true
+    echo "  removed $other (it can't load alongside $name)"
   fi
 done
 

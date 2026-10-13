@@ -121,9 +121,7 @@ startup, hot reload, every join and every intermission;
 | `StreamCamRule.cs` | Pure park rule: park, repark or stay (tested; not called while automatic parking is off) |
 | `StreamFraming.cs` | Fixed camera spot (position and angle) per rift side (tested; shown by `spec_status`, not parked at) |
 | `HeroLock.cs` | Reusable hero lock (applied / pending / enforcement kills, `Enforce`) |
-| `AccessRule.cs` | Pure access rule: ban, private, whitelist, admin; Steam64 ID check (tested) |
-| `AccessList.cs` | `access.json` model: mode + banned / allowed sets + statue modifier, JSON parse and write (tested) |
-| `AccessService.cs` | Access file load / save, connect gate, list changes, statue banned players, kick private-mode outsiders |
+| `AccessService.cs` | Connect gate, statue banned players, kick private-mode outsiders; the file, rule and model are `Modules/Access` (`AccessStore`, `AccessRule`, `AccessList`) |
 | `AccessPlugin.cs` | Admin access commands (`/player_ban`, `/ban_*`, `/ban_modifier`, `/allow_*`, `/access_mode`) |
 | `BanJoinRule.cs` | Pure rejoin rule: statue visit or refuse; strikes lock out 10 min, 30 min, then until restart (tested) |
 | `OrphanObserverRule.cs` | Pure disconnect sweep rule: only the leaver's `observer` pawns are removed, never another slot's (tested) |
@@ -170,6 +168,7 @@ reload flag. Otherwise reads and drops round heroes in `Round/RoundHeroes`.
 ## Dependencies
 
 - `Modules/Spectate` (stream camera calls).
+- `Modules/Access` (`access.json`: `AccessStore`, `AccessList`, `AccessRule`).
 - `Round/WatchSpot` (send players up; camera spot and roam side),
   `Modules/Restraint` (`Forget` / `Release`; the camera follows only
   unrestrained players), `RandomMode/RandomModeService` and
