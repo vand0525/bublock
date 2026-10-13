@@ -21,7 +21,9 @@ It compiles in the same reusable pieces Rift Roulette uses, as source:
 `Shared`, and `Modules/WorldText`, `Movement`, `Hud`, `Loadout`,
 `Restraint` (each with its commands), `Queue`, `Spectate`, `RandomHeroes`
 and `Access`. Restrained players already take no damage here
-(`RestraintPlugin.OnTakeDamage`).
+(`RestraintPlugin.OnTakeDamage`). `Modules/MidBoss` (with its commands)
+adds the `/midboss_*` probe commands and logs the boss and crystal
+(`midboss-*.log`).
 
 ## Files
 
@@ -45,7 +47,7 @@ None of its own; `AccessStore` caches `access.json` per load.
   `OnClientConnect` gate; load kick pass.
 - Admin commands: access lists (`AccessPlugin`), plus the imported module
   commands (`/wt_*`, `/mv_*`, `/hud_*`, `/loadout_*`, `/restrain*`,
-  `/status_*`).
+  `/status_*`, `/midboss_*`).
 
 ## Not here yet
 

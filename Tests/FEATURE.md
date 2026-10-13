@@ -11,7 +11,7 @@ server. Never deployed to the server.
   `Shared.projitems`). Tests run against temp folders with a fake clock.
 - `Modules.Tests/` — xUnit tests for the pure helpers in `Bublock/Modules`
   (imports `Shared.projitems`, `WorldText.projitems`,
-  `Movement.projitems`, `Hud.projitems`, `Queue.projitems`, `RandomHeroes.projitems`, `Spectate.projitems`, `Access.projitems`, and `Loadout.projitems`, which
+  `Movement.projitems`, `Hud.projitems`, `Queue.projitems`, `RandomHeroes.projitems`, `Spectate.projitems`, `Access.projitems`, `MidBoss.projitems`, and `Loadout.projitems`, which
   also embeds `hero-builds.json` in the test assembly; references
   `Google.Protobuf` because `MovementService` sends a camera message):
   WorldText placement math and text formatting, the Movement
@@ -21,7 +21,8 @@ server. Never deployed to the server.
   committed data, sell priorities, baseline value), the `PlayerQueue` join queue, the random hero draw (`HeroDraw`), the spectate choice
   (keep, killer, any, park) and straight-down angle, and join access
   (`AccessRule` verdicts and Steam ID parsing, `AccessList` JSON and the
-  forced-private check). Service ops that touch entities or players are
+  forced-private check), and the mid-boss rule (`MidBossRule`: health
+  percent, damage scale, schedule parsing, name matches). Service ops that touch entities or players are
   not tested here.
 - `RiftRoulette.Tests/` — xUnit tests for pure Rift Roulette pieces, included
   directly as linked files (`RiftRoulette/Round/RoundHeroes.cs`,

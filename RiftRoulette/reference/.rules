@@ -31,6 +31,7 @@ deadworks/                 # Cursor workspace root
       Spectate/            # spectator camera: follow a player, park a free camera (no commands)
       RandomHeroes/        # random hero draw, HeroDraw (no commands)
       Access/              # access.json: bans, allowed list, open / private (no commands)
+      MidBoss/             # mid-boss npc_super_neutral: spawn, health, damage scale, crystal watch (dw_midboss_*)
     RiftRoulette/            # game mode DLL (parked while Crystal Crackers is in development)
       Session/             # session lifecycle lines in the master log
       Lobby/ Rift/         # game-specific plugin classes
@@ -89,7 +90,11 @@ deadworks/                 # Cursor workspace root
   map entity (an `info_neutral_trooper_camp`, subclass
   `neutral_camp_midboss`, spawns it); a mode that wants one spawns it
   itself. Anything one mode keeps and another removes belongs to the mode
-  DLL, never a mode flag in CleanSlate.
+  DLL, never a mode flag in CleanSlate. The mid-boss is `npc_super_neutral`
+  (crystal `citadel_item_pickup_rejuv`); `Modules/MidBoss` (Crystal
+  Crackers only, discovery commands for now) tracks it by entity handle.
+  Never spawn it from a lifecycle path until `/midboss_spawn` has been
+  proven not to crash the server.
 
 ---
 

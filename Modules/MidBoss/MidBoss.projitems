@@ -1,0 +1,12 @@
+<Project>
+
+  <PropertyGroup>
+    <HasSharedItems>true</HasSharedItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)MidBossRule.cs" Link="Modules/MidBoss/MidBossRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MidBossService.cs" Link="Modules/MidBoss/MidBossService.cs" />
+  </ItemGroup>
+
+</Project>

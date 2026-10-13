@@ -318,6 +318,16 @@ Game-agnostic: no Rift Roulette names in arguments (teams are team numbers).
 | `/restrain_list` | — | Restraint | `RestraintService.Describe` | Restrained players and their active modifiers | new |
 | `/status_add <slot> <modifier> [seconds]` | — | Restraint | `RestraintService.AddModifier` | Test any game modifier by name | new |
 | `/status_remove <slot> <modifier>` | — | Restraint | `pawn.RemoveModifier` | Remove a game modifier by name | new |
+| `/midboss_status` | — | MidBoss (Crystal Crackers only) | `MidBossService.Describe` | Bosses, health, modifiers, spawn convars, damage scale, crystals | new |
+| `/midboss_spawn [here \| x y z]` | — | MidBoss | `MidBossService.Spawn` | Create a mid-boss (camp spot by default) | new |
+| `/midboss_schedule <seconds\|off>` | — | MidBoss | `MidBossService.Schedule` | Let the camp's scheduler spawn one (`off` parks it) | new |
+| `/midboss_health <hp>` | — | MidBoss | `MidBossService.SetHealth` | Set every boss's health | new |
+| `/midboss_maxhealth <hp>` | — | MidBoss | `MidBossService.SetMaxHealth` | Set every boss's max health | new |
+| `/midboss_percent <pct>` | — | MidBoss | `MidBossService.SetPercent` | Health to a percent of max | new |
+| `/midboss_damage_scale <k>` | — | MidBoss | `MidBossService.SetDamageScale` | Multiply damage dealt to the boss (0.1–10) | new |
+| `/midboss_modifier_remove <name>` | — | MidBoss | `MidBossService.RemoveModifier` | Remove a modifier from every boss | new |
+| `/midboss_kill` | — | MidBoss | `MidBossService.Kill` | Kill every boss, credited to the caller | new |
+| `/midboss_remove` | — | MidBoss | `MidBossService.Remove` | Remove every boss without a death | new |
 
 ### 4.4 Admin commands — tool plugins
 

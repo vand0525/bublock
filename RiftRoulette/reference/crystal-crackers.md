@@ -51,8 +51,8 @@ building. Same role as `endless-mode.md`.
   spawns it at runtime from an `info_neutral_trooper_camp` (subclass
   `neutral_camp_midboss`) at about (0, 0, -768). Crystal Crackers will
   spawn and retune its own boss each round, after CleanSlate's passes
-  (2, 10, 30 s after load). If the probe shows the spawned boss uses a
-  classname on CleanSlate's removal list, revisit then.
+  (2, 10, 30 s after load). The boss is `npc_super_neutral`, which is not
+  on CleanSlate's removal list.
 - Restrained players take no damage in any DLL that imports Restraint's
   commands (`RestraintPlugin.OnTakeDamage`).
 
@@ -69,6 +69,7 @@ building. Same role as `endless-mode.md`.
 | Stream camera follow | `Modules/Spectate` |
 | Logging, admin auth, chat | `Shared` |
 | Bans, allowed list, private gate | `Modules/Access` (`AccessStore`, `AccessList.Check`) |
+| Mid-boss spawn, health, damage scale, kill / crystal watch | `Modules/MidBoss` (`MidBossService`, `/midboss_*`; discovery stage) |
 
 Still inside Rift Roulette (copy or extract in a later stage): the lobby
 (connect / disconnect, `Participants`, admin seat, team balance with
@@ -98,38 +99,56 @@ Each round sets the boss again, so a long lobby cannot leave an
 unkillable boss: health just above the scream, and a damage scale for this
 round's headcount (6v6 = 1.0).
 
-## Unknowns (probe in game before building)
+## What is known about the boss (game data, 2026-10-13)
 
-None of these is in the checked-in convar list or schema notes:
+Details and sources: `resources.md` ("The mid-boss is `npc_super_neutral`").
 
-- **Scream percent.** No convar or field for the health where the boss
-  screams.
-- **Player-count damage.** No convar for boss damage by fighter count.
-  `OnTakeDamage` sees hits on any entity; whether a hit's damage can be
-  scaled there (rather than only stopped) is unverified.
-- **Crystal pickup.** No event or entity name known for the crystals or for
-  picking one up, or for the revive it grants.
-- **Health on a boss.** `CBaseEntity.Health` has a setter and `MaxHealth`
-  is read-only; neither has been tried on a boss.
-- **The mid-boss classname.** Unknown. The map only has its spawner
-  (`info_neutral_trooper_camp`, subclass `neutral_camp_midboss`); the boss
-  entity it creates has never been seen. It is not `npc_boss_tier2` (those
-  are the Walkers) or `npc_boss_tier3` (the Patrons).
-- **Spawning one.** `CreateByDesignerName` exists; spawning a boss with it
-  is untested. Another route is letting the scheduler spawn it once
-  (`citadel_midboss_initial_spawn_time_override` set low) and adopting it.
+- **Classname.** `npc_super_neutral` (C++ `CNPC_MidBoss`). Not
+  `npc_mid_boss`, `npc_boss_tier2` (Walkers) or `npc_boss_tier3` (Patrons).
+- **Health.** 13,000 + 195 per minute alive, 15 health/s regen. Health is
+  the plain `CBaseEntity` health (`Health` setter, `m_iMaxHealth` through a
+  schema write). A fresh boss each round resets the growth.
+- **Resistance.** 35 + 5 per **game** minute. This is what would make it
+  unkillable in a long lobby; counter it by removing the modifier, hitting
+  with `IgnoreResistances`, or scaling damage up.
+- **Scream.** At 50% health; no field or convar, probably hard-coded.
+  Setting health to 51% puts it just above.
+- **Pit.** Only players inside `trigger_midboss_shield` can damage it.
+- **Crystal.** `citadel_item_pickup_rejuv` (`m_bPickedUp`), dropped by game
+  code on death; `GameRules.AmberRejuvCount` / `SapphireRejuvCount` count
+  pickups. No game event for a pickup or a boss kill (use `entity_killed`).
+- **Spawning.** Two routes: the camp's scheduler
+  (`citadel_midboss_initial_spawn_time_override`), which CleanSlate parks
+  and `citadel_npc_spawn_enabled 0` may block, or
+  `CreateByDesignerName("npc_super_neutral")` with keyvalues (untested;
+  community notes report crashes for bosses created without keyvalues).
 
-Probe: take `dw_ent_snapshot`, lower
-`citadel_midboss_initial_spawn_time_override` so the game spawns its own
-mid-boss, then `dw_ent_diff` to learn its classname. Then write `Health`
-and watch whether a scream, a kill and a crystal entity show up, and try
-`CreateByDesignerName` with that classname in the pit. Record every finding in `resources.md`
-Discoveries and the self-test (`SelfTest/GameDependencies`,
-`patch-day.md` section 5) in the same change that starts depending on it.
+## Still unknown (the `/midboss_*` probe answers these)
+
+`Modules/MidBoss` (`/midboss_*` admin commands, `midboss-*.log`) tries each
+on the private dev server:
+
+1. `/midboss_status`: nothing tracked, convar values.
+2. `/midboss_schedule 1`: does the scheduler spawn one with
+   `citadel_npc_spawn_enabled 0`? (`/midboss_schedule off` parks it again.)
+3. `/midboss_spawn`: does a created boss spawn and fight, or crash the
+   server (rollback stamp ready)? Does it keep the pit gating?
+4. `/midboss_percent 51`, `/midboss_maxhealth`: do health writes stick,
+   and does the scream follow?
+5. `/midboss_damage_scale 3`, then shoot it: does a written
+   `Info.Damage` change the hit (status shows damage before / after and
+   the health)?
+6. `/midboss_status` modifier list, then `/midboss_modifier_remove <name>`
+   on the resistance modifier.
+7. `/midboss_kill`: does the crystal drop for the killer's team (master
+   `Mid-boss killed`, `Crystal spawned`), and is the pickup logged
+   (`Crystal removed PickedUp=`, counts changed)?
+
+Record each answer in `resources.md` Discoveries.
 
 ## Proposed build order
 
-1. Boss probe (above), as DevTools discovery commands.
+1. Boss probe (above) with `Modules/MidBoss`.
 2. Lobby and match loop for the Crystal Crackers DLL (copy or extract from
    Rift Roulette), then a real mode switch (today it is a deploy.sh edit).
 3. Pit round driver: release into the pit, round end on boss kill or time.

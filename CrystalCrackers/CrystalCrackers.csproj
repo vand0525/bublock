@@ -33,5 +33,7 @@
   <Import Project="..\Modules\Spectate\Spectate.projitems" />
   <Import Project="..\Modules\RandomHeroes\RandomHeroes.projitems" />
   <Import Project="..\Modules\Access\Access.projitems" />
+  <Import Project="..\Modules\MidBoss\MidBoss.projitems" />
+  <Import Project="..\Modules\MidBoss\MidBossCommands.projitems" />
 
 </Project>

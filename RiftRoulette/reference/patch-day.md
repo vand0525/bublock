@@ -136,7 +136,8 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | `citadel_trooper_spawn_enabled` | 0 | `CleanSlate/CleanSlateService.cs` |
 | `citadel_npc_spawn_enabled` | 0 | same |
 | `citadel_active_lane` | 0 | same |
-| `citadel_midboss_initial_spawn_time_override` | 999999 | same |
+| `citadel_midboss_initial_spawn_time_override` | 999999; `/midboss_schedule` sets it (Crystal Crackers probe) | same; `Modules/MidBoss/MidBossService.cs` `Schedule` |
+| `citadel_midboss_spawn_interval_override` | read only (status) | `Modules/MidBoss/MidBossService.cs` `Describe` |
 | `citadel_crate_spawn_enabled` | 0 | same |
 | `citadel_crate_disable_early_spawn` | 1 (may not exist) | same |
 | `citadel_crate_spawn_initial_delay` | 999999 | same |
@@ -158,6 +159,8 @@ One row per feature: what it does, the game dependencies it rests on, and the fa
 | `trigger_item_shop`, `trigger_item_shop_safe_zone` | disabled | same |
 | `info_super_trooper_spawn`, `item_crate_spawn` | never remove | same (comment) |
 | `observer` | spectator pawn designer name (seated admin) | `Modules/Spectate/SpectateService.cs` `ObserverDesignerName` |
+| `npc_super_neutral` (C++ `CNPC_MidBoss`) | mid-boss: tracked, created, tuned (Crystal Crackers) | `Modules/MidBoss/MidBossRule.cs` `BossName` / `BossClass` |
+| `citadel_item_pickup_rejuv` | mid-boss crystal, logged | `Modules/MidBoss/MidBossRule.cs` `CrystalName` |
 
 Map dump counts (build 6698): `info_koth_spawn_location` 2, `info_super_trooper_spawn` 12, `item_crate_spawn` 6, `trigger_item_shop` 9, `trigger_item_shop_safe_zone` 2, `citadel_shop_prop_dynamic` 8, `npc_boss_tier2` 6, `npc_barrack_boss` 12, `citadel_item_powerup_spawner` 2.
 
@@ -175,6 +178,9 @@ Map dump counts (build 6698): `info_koth_spawn_location` 2, `info_super_trooper_
 | `CBasePlayerPawn.m_hController` | entity handle (uint), an observer pawn's owner controller | `Lobby/LobbyService.cs` (`PawnController`, the leaver's observer sweep) |
 | `CCitadelBaseAbility.m_iRemainingCharges` | int, an ability's charges left (written to fill charges at round start) | `Round/ChargeFill.cs` (`RemainingCharges`), read by `Round/AbilityCharges.cs` |
 | `CGameRules.m_bGamePaused`, `CCitadelGameRules.m_bServerPaused` | bool (API `GameRules.GamePaused` / `ServerPaused`) | `Lobby/PauseGuard.cs` |
+| `CBaseEntity.m_iMaxHealth` | int, written on the mid-boss (`/midboss_maxhealth`); a missing field is reported, not written | `Modules/MidBoss/MidBossService.cs` `MaxHealthField` |
+| `CCitadelItemPickupRejuv.m_bPickedUp` (or `CCitadelItemPickup.m_bPickedUp`) | bool, crystal taken; `unknown` when neither resolves | `Modules/MidBoss/MidBossService.cs` `PickedUpFields` |
+| `CCitadelGameRules.m_iMidbossKillCount`, `m_iAmberRejuvCount`, `m_iSapphireRejuvCount`, `m_tNextMidBossSpawnTime` | API `GameRules.*` (read only) | `Modules/MidBoss/MidBossService.cs` `WatchCounts`, `Describe` |
 
 ### Net messages
 
@@ -210,7 +216,7 @@ invisibility item and reading `modifiers-*.log`.
 
 ### Events and hooks
 
-`player_spawn` (Lobby, Random, Mirror, Stats), `player_death` (Lobby, Stats, stream camera), `player_respawned` (Random, Mirror), `player_hero_changed` (Lobby); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnAddModifier` (DevTools `ModifierProbe`, `AddModifierEvent.ModifierVData.Name`; diagnostics only), `OnLoad`, `OnStartupServer` (also each map reload: `AutoRestartService.OnMapStart`, `AdminSeat.ResetForMap`).
+`player_spawn` (Lobby, Random, Mirror, Stats), `player_death` (Lobby, Stats, stream camera), `player_respawned` (Random, Mirror), `player_hero_changed` (Lobby); `OnClientConnect`, `OnClientFullConnect`, `OnClientDisconnect`, `OnClientConCommand`, `OnGameFrame`, `OnModifyCurrency` (GameLoop soul block, counted as `modify_currency`), `OnTakeDamage` (GameLoop up-top damage block, `TakeDamageEvent.Entity`, counted as `take_damage`), `OnAddModifier` (DevTools `ModifierProbe`, `AddModifierEvent.ModifierVData.Name`; diagnostics only), mid-boss watchers in `Modules/MidBoss/MidBossPlugin.cs` (`OnEntitySpawned`, `OnEntityDeleted`, `OnTakeDamage` damage scale, `entity_killed` `EntityKilledEvent`, `midboss_respawn_pending` `MidbossRespawnPendingEvent`, `midboss_respawned` untyped), `OnLoad`, `OnStartupServer` (also each map reload: `AutoRestartService.OnMapStart`, `AdminSeat.ResetForMap`).
 
 Map reload: `Server.ChangeLevel(Server.MapName)`, `Server.IsChangingLevel`, `IsMapChangeReconnect` on the connect events, `GlobalVars.CurTime` (uptime after a hot reload) in `Lobby/AutoRestartService`. Check with `/restart_status` after an update; `/restart_now` on an empty server should bring every connected client back.
 
@@ -237,3 +243,10 @@ Map reload: `Server.ChangeLevel(Server.MapName)`, `Server.IsChangingLevel`, `IsM
 A new game dependency (convar, entity name, schema field, modifier, event)
 must be added to `SelfTest/GameDependencies.cs`, to section 5 here, and, if
 it is data (hero, item), to `patch-check.py`'s inputs.
+
+Exception until Crystal Crackers has a self-test: `Modules/MidBoss` is only
+in `CrystalCrackers.dll`, so Rift Roulette's self-test can't check it. Its
+dependencies are listed in section 5, and `/midboss_status` is the check:
+it shows `missing` for an absent convar, `/midboss_maxhealth` reports a
+missing `m_iMaxHealth`, and a crystal's `picked up=unknown` means the
+`m_bPickedUp` field moved.

@@ -1089,3 +1089,95 @@ arguments must be real Steam64 IDs.
 - **Calls:** `AccessStore.DescribeIds`
 - **Mode:** read-only
 - **Side effects:** count, then one ID per line (with the name when connected)
+
+### MidBoss (`MidBossPlugin`, `Modules/MidBoss`, in CrystalCrackers.dll)
+
+Discovery commands for the mid-boss (`npc_super_neutral`) and its crystal
+(`citadel_item_pickup_rejuv`). Admin (`AdminCommand.Authorize` with the
+`MidBoss` log; server console trusted). Debug mode; `[MidBoss]` replies in
+the caller's console. Details in `midboss-*.log`; spawns, kills, crystal
+drops / removals and kill or crystal count changes also in master. Every
+command that changes a boss errors with `No mid-boss is tracked` when
+none is.
+
+#### /midboss_status
+
+- **Invocation:** chat `/midboss_status` | console `dw_midboss_status`
+- **Who:** admin
+- **Calls:** `MidBossService.Describe`
+- **Mode:** read-only
+- **Side effects:** none. Lists each boss (index, health / max, effective max, team, position, modifier names), the game clock, next spawn time, kill and crystal counts, `citadel_midboss_initial_spawn_time_override`, `citadel_midboss_spawn_interval_override`, `citadel_npc_spawn_enabled` (`missing` if a convar is gone), the damage scale with hits and damage before / after, and each crystal (team, picked up, position)
+
+#### /midboss_spawn [here | x y z]
+
+- **Invocation:** chat `/midboss_spawn`, `/midboss_spawn here`, `/midboss_spawn <x> <y> <z>` | console `dw_midboss_spawn ...`
+- **Who:** admin
+- **Calls:** `MidBossService.Spawn`
+- **Mode:** Debug
+- **Side effects:** creates `npc_super_neutral` with keyvalues (`subclass_name`, `origin`, `angles` 0, `teamnumber` 4) at the camp spot (0, 0, -768), at the caller's hero, or at the point; tracks it; replies with its state, and again 1 s later
+- **Notes:** untested; may crash the server (keep the deploy's rollback stamp ready). `here` needs the caller's hero
+
+#### /midboss_schedule <seconds|off>
+
+- **Invocation:** chat `/midboss_schedule 1`, `/midboss_schedule off` | console `dw_midboss_schedule <seconds|off>`
+- **Who:** admin
+- **Calls:** `MidBossRule.TryParseSchedule`, `MidBossService.Schedule`
+- **Mode:** Debug
+- **Side effects:** sets `citadel_midboss_initial_spawn_time_override` (game seconds; `off` = 999999, CleanSlate's parked value) so the map's camp spawns its own boss; replies with `citadel_npc_spawn_enabled` and the game clock. Never changes `citadel_npc_spawn_enabled`
+- **Notes:** CleanSlate puts 999999 back on every load and `/cleanup_run`
+
+#### /midboss_health <hp>
+
+- **Invocation:** chat `/midboss_health <hp>` | console `dw_midboss_health <hp>`
+- **Who:** admin
+- **Calls:** `MidBossService.SetHealth`
+- **Mode:** Debug
+- **Side effects:** writes `Health` on every tracked boss (1 to 1,000,000); one status line per boss
+
+#### /midboss_maxhealth <hp>
+
+- **Invocation:** chat `/midboss_maxhealth <hp>` | console `dw_midboss_maxhealth <hp>`
+- **Who:** admin
+- **Calls:** `MidBossService.SetMaxHealth`
+- **Mode:** Debug
+- **Side effects:** writes `CBaseEntity.m_iMaxHealth` on every tracked boss (1 to 1,000,000; reports a missing field instead of writing)
+
+#### /midboss_percent <pct>
+
+- **Invocation:** chat `/midboss_percent 51` | console `dw_midboss_percent <pct>`
+- **Who:** admin
+- **Calls:** `MidBossService.SetPercent` (`MidBossRule.HealthAtPercent`)
+- **Mode:** Debug
+- **Side effects:** sets every boss's health to that percent of its effective max (`GetMaxHealth()`), never below 1. Percent must be above 0 and at most 100. 51 is just above the 50% scream
+
+#### /midboss_damage_scale <k>
+
+- **Invocation:** chat `/midboss_damage_scale 3` | console `dw_midboss_damage_scale <k>`
+- **Who:** admin
+- **Calls:** `MidBossService.SetDamageScale`; applied by `MidBossPlugin.OnTakeDamage` (`ScaleHit`)
+- **Mode:** Debug
+- **Side effects:** every later hit on a boss has its damage multiplied (clamped 0.1–10; 1 = off); resets the hit counters; the first hit after each change is logged with damage before / after, flags and health. Lasts until changed or the DLL reloads
+
+#### /midboss_modifier_remove <name>
+
+- **Invocation:** chat `/midboss_modifier_remove <name>` | console `dw_midboss_modifier_remove <name>`
+- **Who:** admin
+- **Calls:** `MidBossService.RemoveModifier`
+- **Mode:** Debug
+- **Side effects:** removes the named modifier from every boss; replies removed / not found per boss. Names come from `/midboss_status`
+
+#### /midboss_kill
+
+- **Invocation:** chat `/midboss_kill` | console `dw_midboss_kill`
+- **Who:** admin
+- **Calls:** `MidBossService.Kill`
+- **Mode:** Debug
+- **Side effects:** deals health + 1 exact damage with `ForceDeath` to every boss (no resistances, no damage scale), credited to the caller's hero (the boss itself from the console), so the game's death, kill credit and crystal drop run
+
+#### /midboss_remove
+
+- **Invocation:** chat `/midboss_remove` | console `dw_midboss_remove`
+- **Who:** admin
+- **Calls:** `MidBossService.Remove`
+- **Mode:** Debug
+- **Side effects:** removes every boss at the end of the frame with no death (no kill credit, no crystal)
