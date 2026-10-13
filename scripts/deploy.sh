@@ -12,11 +12,11 @@ if [[ ! -f "$ROOT/scripts/server.env" ]]; then
 fi
 source "$ROOT/scripts/server.env"
 REMOTE_DIR="/server/game/bin/win64/managed/plugins"
-# Only one mode DLL on the server: Crystal Crackers while it is in development, Rift Roulette parked.
-# To go back, swap CrystalCrackers and RiftRoulette between PLUGINS and PARKED_PLUGINS.
-PLUGINS=(CrystalCrackers DevTools CleanSlate)
+# Only one mode DLL on the server: Rift Roulette live, Crystal Crackers parked while it is in development.
+# To switch, swap CrystalCrackers and RiftRoulette between PLUGINS and PARKED_PLUGINS.
+PLUGINS=(RiftRoulette DevTools CleanSlate)
 # Mode DLLs taken off the server (backed up, removed from plugins/); their logs are kept.
-PARKED_PLUGINS=(RiftRoulette)
+PARKED_PLUGINS=(CrystalCrackers)
 # Old DLL names still on the server after a rename; deleted so two copies never load.
 RETIRED_PLUGINS=(RiftRumble)
 REMOTE_LOG_DIR="/server/game/bin/win64/bublock/logs"

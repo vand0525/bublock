@@ -1,7 +1,7 @@
 # Crystal Crackers (mode note)
 
-Status: in development (`Bublock/CrystalCrackers/`), the mode DLL
-`deploy.sh` uploads for now (Rift Roulette parked). The first playable
+Status: in development (`Bublock/CrystalCrackers/`), parked: `deploy.sh`
+uploads Rift Roulette. The first playable
 round is admin-driven (`/pit_start`, `CrystalCrackers/Pit/`); no lobby or
 match loop yet. The server is always private (`AccessGate`: admins and
 the `allowed` list only).
@@ -33,10 +33,10 @@ building. Same role as `endless-mode.md`.
 - **One mode DLL on the server at a time.** Deadworks loads every
   `plugins/*.dll`, each with its own copy of module statics, and both mode
   DLLs register the module commands (`loadout_*`, `mv_*`, `restrain`,
-  `hud_*`, `wt_*`) and the access commands. During development
-  `scripts/deploy.sh` uploads Crystal Crackers (`PLUGINS`) and parks Rift
-  Roulette (`PARKED_PLUGINS`: backed up, removed from `plugins/`, logs
-  kept). Going back is swapping the two names; `rollback.sh` removes the
+  `hud_*`, `wt_*`) and the access commands. `scripts/deploy.sh`
+  uploads Rift Roulette (`PLUGINS`) and parks Crystal Crackers
+  (`PARKED_PLUGINS`: backed up, removed from `plugins/`, logs kept).
+  Testing Crystal Crackers on the server is swapping the two names; `rollback.sh` removes the
   other mode DLL when it restores one. A real mode switch comes later.
 - **Always private.** `AccessPlugin` / `AccessGate` check the shared
   `bublock/access.json` (`Modules/Access`) with `forcePrivate: true`: only

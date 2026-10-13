@@ -22,9 +22,9 @@ file first; the deploy refuses to start when it is not valid JSON.
 
 1. Runs `update.sh` (Release build of `Bublock.sln`) and checks that each
    `PLUGINS` DLL exists under its project's `bin/Release/net10.0/`.
-   During Crystal Crackers development `PLUGINS` is `CrystalCrackers`,
-   `DevTools`, `CleanSlate`, and `PARKED_PLUGINS` is `RiftRoulette` (only
-   one mode DLL may be on the server; to go back, swap the two names).
+   `PLUGINS` is `RiftRoulette`, `DevTools`, `CleanSlate`, and
+   `PARKED_PLUGINS` is `CrystalCrackers` (only one mode DLL may be on the
+   server; to test Crystal Crackers on the server, swap the two names).
 2. Backup: for each `PLUGINS`, `PARKED_PLUGINS` and retired name
    (`RETIRED_PLUGINS`, today `RiftRumble`), if it exists in
    `/server/game/bin/win64/managed/plugins/`, downloads it to
