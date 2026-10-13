@@ -645,3 +645,28 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Not known (probe with `/midboss_*`):** whether `CreateByDesignerName` + keyvalues spawns a working boss (or crashes), whether the scheduler spawns one with `citadel_npc_spawn_enabled 0`, whether a written `Info.Damage` changes the hit, whether a boss without its camp keeps the pit gating, where the 50% roar comes from (no field; probably hard-coded), and the resistance modifier's real name.
 - **Used as:** `Modules/MidBoss` (`MidBossRule`, `MidBossService`, `/midboss_*`), imported by Crystal Crackers.
 - **Link / path:** `Bublock/Modules/MidBoss/FEATURE.md`, `reference/crystal-crackers.md`
+
+### 2026-10-13 — Mid-boss probe results: direct spawn works, resistance is a pre-hook threshold
+
+- **Why hard / useful:** settles how a mode can own the mid-boss: which spawn route works, what health writes do, and why damage scaling alone can't make it killable.
+- **Verified fact (in game, `/midboss_*`, full record in `reference/probes/2026-10-13-midboss.md`):**
+  - `CreateByDesignerName("npc_super_neutral")` + `Spawn(CEntityKeyValues)` (`subclass_name`, `origin`, `angles`, `teamnumber` 4) at (0, 0, -768) spawns a full mid-boss with no crash: class `CNPC_MidBoss`, team 4, settles at z -759, fires the game's `midboss_respawned` event, keeps the pit rule, gives kill credit and drops the crystal.
+  - The scheduler route did nothing: `citadel_midboss_initial_spawn_time_override 1` with `citadel_npc_spawn_enabled 0` at game clock 899 s; `NextMidBossSpawnTime` stayed 0.
+  - Starting health is 13,000 + 195 × **game** minutes at spawn (16,120 at 959 s, 17,485 at 1,406 s), not time alive. Regen about 15 health/s.
+  - `Health` writes hold. Writing `CBaseEntity.m_iMaxHealth` changes max and `GetMaxHealth()`, but doesn't clamp current health, and a new boss gets the vdata max again.
+  - Modifier names carry the subclass prefix: `npc_super_neutral/midboss_intrinsic`, `npc_super_neutral/midboss_modifier_damage_resistance`. `RemoveModifier(name)` removes the resistance and the in-game resistance bar disappears.
+  - With the resistance on, pit hits reach `OnTakeDamage` with `Info.Damage` already 0, so scaling does nothing. With it removed, hits arrive with real damage and writing `Info.Damage` changes the hit (×5: 390 → 1,950, boss killed). Hits from outside the pit arrive with `NotInMidbossPit` and 0 damage.
+  - No scream when health is written below 50% or when a boss already below half is shot.
+  - On death: `entity_killed` (attacker the killer's hero, `damagebits` 33554432), the crystal `citadel_item_pickup_rejuv` spawns the same frame at (0, 0, -252), team 4, falls to the floor, and the boss entity is deleted 1.4 s later. The killer's team count (`AmberRejuvCount`) went 1, 2, 3 over 6 s, the crystal was removed with `m_bPickedUp` true, and the count returned to 0 about 180 s later.
+  - `TakeDamage` with `ForceDeath` and health + 1 (attacker the admin's hero, resistance on) did not kill or hurt the boss.
+- **Not known:** whether the scheduler is blocked by `citadel_npc_spawn_enabled 0` or by the clock being past the initial spawn; what makes it scream (likely damage crossing 50%); what the three count steps are; why the forced kill failed (pit rule or resistance).
+- **Used as:** Crystal Crackers spawns its boss directly, removes the resistance modifier and writes max then health each spawn (`/midboss_ready`); `/midboss_kill` was dropped (`reference/crystal-crackers.md`).
+- **Link / path:** `reference/probes/2026-10-13-midboss.md`, `logs/CrystalCrackers/midboss-20261013.log`
+
+### 2026-10-13 — Real-match souls to game minute (mid-boss sizing)
+
+- **Why hard / useful:** gives a boss health "as in a real match at this many souls" without guessing a game minute.
+- **Verified fact (deadlock-api, 1,000 ranked matches, median badge 56, median length 34.4 min):** the median game minute at which the lobby's average net worth per player reaches a soul value is close to linear past 15,000 souls (about 0.7 min per 1,000): 5,000 at 7.5, 10,000 at 12.6, 20,000 at 21.1, 30,000 at 28.4, 40,000 at 35.4, 45,000 at 38.9; p25–p75 within about ±1 min. Real mid-boss kills: 1st at median minute 23.9 (lobby 23,665 souls, killing team 24,898), 2nd 31.5 (34,497), 3rd 38.6 (44,337). A boss's max is fixed at spawn (16,120 at minute 16 stayed 16,120 at minute 17).
+- **API notes:** `/v1/matches/metadata` returns `mid_boss` (`team_killed`, `team_claimed`, `destroyed_time_s`) only with `include_mid_boss=true`; `include_objectives` does not include it. Player `stats` snapshots carry `net_worth` every 180 s.
+- **Used as:** `MidBossRule.MinuteBySouls` and `HealthForSouls` (`/midboss_ready`).
+- **Link / path:** `scripts/midboss-health.py`, `Modules/MidBoss/MidBossRule.md`

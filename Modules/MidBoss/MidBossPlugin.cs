@@ -129,12 +129,37 @@ public class MidBossPlugin : DeadworksPluginBase
     Reply(caller, MidBossService.RemoveModifier(name.Trim(), ExecutionMode.Debug));
   }
 
-  [Command("midboss_kill", Description = "Kill every mid-boss, credited to your hero (drops the crystal)")]
-  public void CmdKill(CCitadelPlayerController? caller)
+  [Command("midboss_ready", Description = "Replace the mid-boss with a killable one sized for the souls per player: midboss_ready <souls> [fighters]")]
+  public void CmdReady(CCitadelPlayerController? caller, int souls, int fighters = 0)
   {
-    AdminCommand.Authorize(caller, CommandsLog, "midboss_kill");
+    AdminCommand.Authorize(caller, CommandsLog, "midboss_ready");
 
-    Reply(caller, MidBossService.Kill(caller?.GetHeroPawn(), ExecutionMode.Debug));
+    if (!MidBossRule.IsValidSouls(souls))
+      throw new CommandException($"Souls must be 0-{MidBossRule.MaxSouls:N0}.");
+
+    if (fighters < 0)
+      throw new CommandException("Fighters must be 1 or more (leave it out to count players on a team).");
+
+    var ready = MidBossService.Ready(souls, fighters > 0 ? fighters : null, ExecutionMode.Debug);
+    var who = ready.FightersCounted ? "counted" : "given";
+
+    AdminCommand.Reply(
+      caller,
+      $"[MidBoss] Ready #{ready.Boss.EntityIndex}: {ready.Souls:N0} souls per player = minute {ready.Minute:0.#} of a real match" +
+      (ready.Replaced > 0 ? $" (replaced {ready.Replaced})" : ""));
+    AdminCommand.Reply(
+      caller,
+      $"[MidBoss] Max {ready.MaxHealth:N0}{(ready.MaxWritten ? "" : " (max field missing, not written)")}, " +
+      $"health {ready.Health:N0} ({MidBossRule.ReadyPercent:0}%), resistance {ready.Resistance}, " +
+      $"damage x{ready.Scale:0.##} for {ready.Fighters} fighters ({who})");
+
+    Timer.Once(1.Seconds(), () =>
+    {
+      var report = MidBossService.Recheck(ready, ExecutionMode.Debug);
+
+      if (caller == null || caller.IsValid)
+        AdminCommand.Reply(caller, $"[MidBoss] 1 s later: {report}");
+    });
   }
 
   [Command("midboss_remove", Description = "Remove every mid-boss without a death (no crystal)")]

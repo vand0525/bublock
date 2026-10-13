@@ -22,6 +22,29 @@ public static class MidBossRule
 
   public const int MaxHealthLimit = 1_000_000;
 
+  public const string ResistanceModifier = "npc_super_neutral/midboss_modifier_damage_resistance";
+
+  // npc_units.vdata npc_super_neutral: a boss spawned at game minute m gets 13,000 + 195 * m (m rounded).
+  public const int StartingHealth = 13000;
+  public const int HealthPerMinute = 195;
+
+  // Just above the 50% scream.
+  public const float ReadyPercent = 51f;
+
+  // 6v6 hits at 1x; fewer fighters hit proportionally harder.
+  public const int BaselineFighters = 12;
+
+  public const int MaxSouls = 1_000_000;
+
+  // Median game minute at which a real ranked lobby's average net worth per player reaches the souls
+  // (scripts/midboss-health.py, 1,000 matches, 2026-10-13). Copy a new run in by hand.
+  public static readonly (int Souls, float Minute)[] MinuteBySouls =
+  [
+    (0, 0f), (2500, 4.1f), (5000, 7.5f), (7500, 10.2f), (10000, 12.6f), (12500, 14.8f), (15000, 17.0f),
+    (17500, 19.1f), (20000, 21.1f), (22500, 23.0f), (25000, 24.9f), (27500, 26.7f), (30000, 28.4f),
+    (32500, 30.2f), (35000, 31.9f), (37500, 33.7f), (40000, 35.4f), (42500, 37.1f), (45000, 38.9f)
+  ];
+
   public static readonly Vector3 CampSpot = new(0f, 0f, -768f);
 
   public static bool IsBoss(string designerName, string className) =>
@@ -34,7 +57,7 @@ public static class MidBossRule
 
   public static float ScaleDamage(float damage, float scale) => damage * ClampScale(scale);
 
-  // Never 0: a boss at 0 health is dead, and killing is /midboss_kill's job.
+  // Never 0: a boss at 0 health is dead; killing is the players' job.
   public static int HealthAtPercent(int maxHealth, float percent)
   {
     var clamped = float.IsFinite(percent) ? Math.Clamp(percent, 0f, 100f) : 100f;
@@ -43,6 +66,36 @@ public static class MidBossRule
   }
 
   public static bool IsValidHealth(int health) => health >= 1 && health <= MaxHealthLimit;
+
+  public static bool IsValidSouls(int souls) => souls >= 0 && souls <= MaxSouls;
+
+  // Linear between table points; past the last point the last segment's slope continues.
+  public static float MinuteForSouls(int souls)
+  {
+    var table = MinuteBySouls;
+
+    if (souls <= table[0].Souls)
+      return table[0].Minute;
+
+    for (var i = 1; i < table.Length; i++)
+    {
+      if (souls <= table[i].Souls)
+        return Lerp(table[i - 1], table[i], souls);
+    }
+
+    return Lerp(table[^2], table[^1], souls);
+  }
+
+  public static int HealthAtMinute(float minute)
+  {
+    var whole = Math.Round(Math.Max(minute, 0f), MidpointRounding.AwayFromZero);
+    return (int)Math.Min(StartingHealth + HealthPerMinute * whole, MaxHealthLimit);
+  }
+
+  public static int HealthForSouls(int souls) => HealthAtMinute(MinuteForSouls(souls));
+
+  public static float ScaleForFighters(int fighters) =>
+    ClampScale((float)BaselineFighters / Math.Max(fighters, 1));
 
   // "off" parks the scheduler; otherwise whole seconds of game time, 0 or more.
   public static bool TryParseSchedule(string text, out int seconds)
@@ -59,4 +112,7 @@ public static class MidBossRule
       && seconds >= 0
       && seconds <= ParkedSpawnSeconds;
   }
+
+  private static float Lerp((int Souls, float Minute) from, (int Souls, float Minute) to, int souls) =>
+    from.Minute + (to.Minute - from.Minute) * (souls - from.Souls) / (to.Souls - from.Souls);
 }

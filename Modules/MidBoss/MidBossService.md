@@ -32,22 +32,32 @@ spawns, kills, crystal drops / removals and count changes also go to master.
 | `Schedule(seconds, mode)` | Sets `citadel_midboss_initial_spawn_time_override` (999999 = parked); never touches `citadel_npc_spawn_enabled` | reply |
 | `SetHealth(hp)` / `SetMaxHealth(hp)` / `SetPercent(pct)` | Writes `Health`, `m_iMaxHealth`, or `Health` = pct of `GetMaxHealth()` on every tracked boss | one line per boss |
 | `RemoveModifier(name)` | `RemoveModifier(name)` on every boss | one line per boss |
-| `Kill(attacker)` | `TakeDamage` for health + 1 with `ForceDeath` (no resistances, no `OnTakeDamage`); attacker is the caller's hero or the boss | one line per boss |
+| `Ready(souls, fighters?, mode)` | Removes every tracked boss (no death, no crystal), spawns one at `CampSpot`, removes `ResistanceModifier`, writes `m_iMaxHealth` = `HealthForSouls(souls)`, then `Health` = 51% of it, and sets the damage scale to `ScaleForFighters` (fighters given, else `CountFighters`). Master line `Mid-boss ready` | `ReadyResult` |
+| `Recheck(ready, mode)` | 1 s after `Ready` (the plugin's timer): if the resistance is back it is removed again; if the max moved, max and health are written again (warning line). Never throws | report line |
+| `CountFighters()` | Non-bot players on team 2 or 3 (a roaming admin on a team counts; spectators don't) | count |
 | `Remove()` | `Remove()` every boss (no death, no crystal) | one line per boss |
 | `Describe()` | Bosses (health, max, effective max, team, position, modifier names), game clock, next spawn, kill and crystal counts, the three convars, damage scale and hit totals, crystals | lines |
 | `Report(entity)` | One status line for a boss |
 
-Every op that changes a boss throws `CommandException` when none is tracked.
+Every op that changes the tracked bosses (except `Ready`, which spawns
+one) throws `CommandException` when none is tracked.
+
+`ReadyResult`: the boss, souls, minute, max health, health, fighters and
+whether they were counted, the applied scale, `removed` / `not found` for
+the resistance, whether the max field was written, and how many old bosses
+were replaced.
 
 ## Dangerous constraints
 
-- `Spawn` is untested in game. Community notes report a native crash for a
-  boss created without keyvalues, and the 2026-09-29 Rem creeps upload was
-  rolled back after a crash. Keep the rollback stamp ready.
+- `Spawn` (keyvalues `subclass_name`, `origin`, `angles`, `teamnumber`) was
+  proven in game on 2026-10-13 (no crash). A boss created without
+  keyvalues is reported to crash; keep them.
 - The engine owns `CEntityKeyValues` after `Spawn`; never dispose them.
 - A spawned boss may not report `npc_super_neutral` as its designer name;
   it is tracked by handle at creation for that reason.
-- Whether `Info.Damage` written in `OnTakeDamage` changes the hit is
-  unverified; `DamageBefore` / `DamageAfter` plus the boss's health show it.
+- With `ResistanceModifier` on, pit hits reach `OnTakeDamage` already at 0,
+  so `ScaleHit` changes nothing; `Ready` removes it first.
+- Writing `m_iMaxHealth` doesn't clamp `Health`; write the max first, then
+  the health. A new boss always gets the vdata max again.
 - `Schedule` fights CleanSlate: CleanSlate puts 999999 back on every load
   and `/cleanup_run`.

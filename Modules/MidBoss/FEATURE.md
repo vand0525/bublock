@@ -15,9 +15,20 @@ No round logic, no automatic spawns.
   `neutral_camp_midboss`) at about (0, 0, -768); CleanSlate parks that
   scheduler (`citadel_midboss_initial_spawn_time_override 999999`) and sets
   `citadel_npc_spawn_enabled 0`.
-- 13,000 health + 195 per minute alive, 15 health/s regen; damage
-  resistance 35 + 5 per game minute; roars at 50%.
+- A boss spawned at game minute m has 13,000 + 195 × m health (fixed at
+  spawn), 15 health/s regen, and a damage-resistance modifier (threshold
+  35 + 5 per game minute) that zeroes hits before `OnTakeDamage`; roars at
+  50% (not from written health).
 - Only players inside `trigger_midboss_shield` can damage it.
+- In-game probe record: `RiftRoulette/reference/probes/2026-10-13-midboss.md`.
+
+## Killable boss (`/midboss_ready`)
+
+One command puts a fresh boss in the state a mode wants: spawned at the
+camp, resistance removed, max health from real-match data for the
+average souls per player (`MidBossRule.HealthForSouls`), health at 51%,
+and damage scaled by fighter count (12 = 1×). The boss is never killed
+by code; players kill it.
 
 ## Public operations
 
@@ -26,7 +37,8 @@ No round logic, no automatic spawns.
 | `MidBossService.Rescan / ObserveSpawned / ObserveDeleted / ObserveKilled / WatchCounts` | `MidBossService.md` |
 | `MidBossService.ScaleHit / SetDamageScale` | `MidBossService.md` |
 | `MidBossService.Spawn / Schedule` | `MidBossService.md` |
-| `MidBossService.SetHealth / SetMaxHealth / SetPercent / RemoveModifier / Kill / Remove` | `MidBossService.md` |
+| `MidBossService.SetHealth / SetMaxHealth / SetPercent / RemoveModifier / Remove` | `MidBossService.md` |
+| `MidBossService.Ready / Recheck / CountFighters` | `MidBossService.md` |
 | `MidBossService.Describe / Report` | `MidBossService.md` |
 | `MidBossRule` constants and math | `MidBossRule.md` |
 
@@ -39,8 +51,8 @@ and its hit totals, and the last seen kill / crystal counts.
 
 | File | Role |
 |---|---|
-| `MidBossRule.cs` | Names, convars, camp spot, scale and health math (unit tested) |
-| `MidBossService.cs` | Tracking, spawn routes, health, damage scale, kill / remove, status |
+| `MidBossRule.cs` | Names, convars, camp spot, scale and health math, souls-to-minute table (unit tested) |
+| `MidBossService.cs` | Tracking, spawn routes, health, damage scale, ready, remove, status |
 | `MidBossPlugin.cs` | Watcher hooks and `/midboss_*` admin commands |
 | `MidBoss.projitems` | Rule + service (no commands) |
 | `MidBossCommands.projitems` | Plugin class |

@@ -119,7 +119,7 @@ public static class MidBossService
 
     if (_counts is { } before && before != now)
       BublockLog.Master.Info(
-        "Mid-boss counts changed Kills={Kills} AmberRejuv={Amber} SapphireRejuv={Sapphire}",
+        "Mid-boss counts changed Kills={Kills} AmberRejuv={AmberRejuv} SapphireRejuv={SapphireRejuv}",
         now.Item1, now.Item2, now.Item3);
 
     _counts = now;
@@ -222,15 +222,7 @@ public static class MidBossService
 
   public static IReadOnlyList<string> SetMaxHealth(int maxHealth, ExecutionMode mode) =>
     ForEachBoss(mode, "Max health set", boss =>
-    {
-      var field = MaxHealthField;
-
-      if (field.GetAddress(boss.Handle) == boss.Handle)
-        return "max health field missing (CBaseEntity.m_iMaxHealth)";
-
-      field.Set(boss.Handle, maxHealth);
-      return Report(boss);
-    });
+      WriteMaxHealth(boss, maxHealth) ? Report(boss) : "max health field missing (CBaseEntity.m_iMaxHealth)");
 
   public static IReadOnlyList<string> SetPercent(float percent, ExecutionMode mode) =>
     ForEachBoss(mode, "Health percent set", boss =>
@@ -243,15 +235,76 @@ public static class MidBossService
     ForEachBoss(mode, "Modifier remove", boss =>
       $"#{boss.EntityIndex} {name}: {(boss.RemoveModifier(name) ? "removed" : "not found")}");
 
-  // Exact damage with ForceDeath, no resistances, and no OnTakeDamage call.
-  public static IReadOnlyList<string> Kill(CBaseEntity? attacker, ExecutionMode mode) =>
-    ForEachBoss(mode, "Kill", boss =>
+  // A fresh boss at the camp spot, sized for the souls and fighters (see MidBossRule).
+  public static ReadyResult Ready(int souls, int? fighters, ExecutionMode mode)
+  {
+    var log = Log.WithMode(mode);
+    var replaced = 0;
+
+    foreach (var old in LiveBosses())
     {
-      using var info = new CTakeDamageInfo(Math.Max(boss.Health, 1) + 1f, attacker ?? boss, attacker ?? boss);
-      info.DamageFlags |= TakeDamageFlags.ForceDeath;
-      boss.TakeDamage(info);
-      return Report(boss);
-    });
+      old.Remove();
+      replaced++;
+    }
+
+    var counted = fighters ?? CountFighters();
+    var minute = MidBossRule.MinuteForSouls(souls);
+    var maxHealth = MidBossRule.HealthForSouls(souls);
+    var health = MidBossRule.HealthAtPercent(maxHealth, MidBossRule.ReadyPercent);
+
+    var boss = Spawn(MidBossRule.CampSpot, mode);
+    var resistance = boss.RemoveModifier(MidBossRule.ResistanceModifier) ? "removed" : "not found";
+    var maxWritten = WriteMaxHealth(boss, maxHealth);
+    boss.Health = health;
+    var scale = SetDamageScale(MidBossRule.ScaleForFighters(counted), mode);
+
+    var result = new ReadyResult(
+      boss, souls, minute, maxHealth, health, counted, fighters == null, scale, resistance, maxWritten, replaced);
+
+    BublockLog.Master.Info(
+      "Mid-boss ready Index={Index} Souls={Souls} Minute={Minute} MaxHealth={MaxHealth} Health={Health} Fighters={Fighters} Counted={Counted} Scale={Scale} Resistance={Resistance} MaxWritten={MaxWritten} Replaced={Replaced}",
+      boss.EntityIndex, souls, minute, maxHealth, health, counted, fighters == null, scale, resistance, maxWritten, replaced);
+    log.Info("Mid-boss ready Report={Report}", Report(boss));
+
+    return result;
+  }
+
+  // The game may tune a boss after Spawn returns; puts the resistance and max back to the Ready values.
+  public static string Recheck(ReadyResult ready, ExecutionMode mode)
+  {
+    var boss = ready.Boss;
+
+    if (!boss.IsValid)
+      return "gone (no longer valid)";
+
+    var notes = new List<string>();
+
+    if (boss.ModifierProp?.HasModifier(MidBossRule.ResistanceModifier) == true)
+    {
+      boss.RemoveModifier(MidBossRule.ResistanceModifier);
+      notes.Add("resistance came back, removed again");
+    }
+
+    if (boss.GetMaxHealth() != ready.MaxHealth)
+    {
+      notes.Add($"max was {boss.GetMaxHealth()}, written again");
+      WriteMaxHealth(boss, ready.MaxHealth);
+      boss.Health = ready.Health;
+    }
+
+    var report = $"{Report(boss)}; {(notes.Count == 0 ? "resistance off, max held" : string.Join("; ", notes))}";
+
+    if (notes.Count == 0)
+      Log.WithMode(mode).Info("Mid-boss ready recheck Report={Report}", report);
+    else
+      Log.Warn("Mid-boss ready recheck changed it back Report={Report}", report);
+
+    return report;
+  }
+
+  // Non-bot players on a playing team (2 or 3); spectators (team 1) are left out.
+  public static int CountFighters() =>
+    Players.GetAll().Count(player => !player.IsBot && player.TeamNum is 2 or 3);
 
   public static IReadOnlyList<string> Remove(ExecutionMode mode) =>
     ForEachBoss(mode, "Remove", boss =>
@@ -318,6 +371,17 @@ public static class MidBossService
     return lines;
   }
 
+  private static bool WriteMaxHealth(CBaseEntity boss, int maxHealth)
+  {
+    var field = MaxHealthField;
+
+    if (field.GetAddress(boss.Handle) == boss.Handle)
+      return false;
+
+    field.Set(boss.Handle, maxHealth);
+    return true;
+  }
+
   private static IReadOnlyList<CBaseEntity> Resolve(HashSet<uint> handles)
   {
     var live = new List<CBaseEntity>();
@@ -360,3 +424,16 @@ public static class MidBossService
 
   private static string Format(Vector3 position) => $"({position.X:0}, {position.Y:0}, {position.Z:0})";
 }
+
+public sealed record ReadyResult(
+  CBaseEntity Boss,
+  int Souls,
+  float Minute,
+  int MaxHealth,
+  int Health,
+  int Fighters,
+  bool FightersCounted,
+  float Scale,
+  string Resistance,
+  bool MaxWritten,
+  int Replaced);

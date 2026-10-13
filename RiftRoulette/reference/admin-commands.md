@@ -1166,13 +1166,13 @@ none is.
 - **Mode:** Debug
 - **Side effects:** removes the named modifier from every boss; replies removed / not found per boss. Names come from `/midboss_status`
 
-#### /midboss_kill
+#### /midboss_ready <souls> [fighters]
 
-- **Invocation:** chat `/midboss_kill` | console `dw_midboss_kill`
+- **Invocation:** chat `/midboss_ready 20000` or `/midboss_ready 20000 4` | console `dw_midboss_ready <souls> [fighters]`
 - **Who:** admin
-- **Calls:** `MidBossService.Kill`
+- **Calls:** `MidBossService.Ready`, then `MidBossService.Recheck` 1 s later
 - **Mode:** Debug
-- **Side effects:** deals health + 1 exact damage with `ForceDeath` to every boss (no resistances, no damage scale), credited to the caller's hero (the boss itself from the console), so the game's death, kill credit and crystal drop run
+- **Side effects:** removes every boss (no death, no crystal) and spawns a fresh one at the camp spot; removes its damage-resistance modifier; writes max health = what the game gives a boss spawned when a real ranked lobby averages `<souls>` per player (`MidBossRule.HealthForSouls`: 20,000 souls is minute 21, 17,095), then health = 51% of it; sets the damage scale to 12 / fighters (clamped 0.1–10). Fighters left out (or 0) are counted: non-bot players on team 2 or 3. Replies the minute, max, health, resistance result and scale; 1 s later replies the boss again (and puts the resistance / max back if the game changed them). Souls 0–1,000,000. Never kills the boss; players do. Master line `Mid-boss ready`
 
 #### /midboss_remove
 

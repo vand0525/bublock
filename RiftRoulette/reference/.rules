@@ -31,7 +31,7 @@ deadworks/                 # Cursor workspace root
       Spectate/            # spectator camera: follow a player, park a free camera (no commands)
       RandomHeroes/        # random hero draw, HeroDraw (no commands)
       Access/              # access.json: bans, allowed list, open / private (no commands)
-      MidBoss/             # mid-boss npc_super_neutral: spawn, health, damage scale, crystal watch (dw_midboss_*)
+      MidBoss/             # mid-boss npc_super_neutral: spawn, killable boss by souls / fighters, crystal watch (dw_midboss_*)
     RiftRoulette/            # game mode DLL (parked while Crystal Crackers is in development)
       Session/             # session lifecycle lines in the master log
       Lobby/ Rift/         # game-specific plugin classes
@@ -57,6 +57,7 @@ deadworks/                 # Cursor workspace root
     scripts/fetch-builds.py # refresh Modules/Loadout/Data/hero-builds.json (offline)
     scripts/fetch-charges.py # refresh RiftRoulette/Round/Data/ability-charges.json (offline)
     scripts/walker-souls.py # print loadout item-limit breakpoints from real matches (offline)
+    scripts/midboss-health.py # print the mid-boss souls-to-minute table from real matches (offline)
     scripts/check-spots.py # check the per-slot spots against the map mesh (offline)
     scripts/patch-baseline.sh # save a known-good snapshot before a game patch
     scripts/patch-check.py # diff game data / API vs that snapshot (offline)
@@ -93,8 +94,10 @@ deadworks/                 # Cursor workspace root
   DLL, never a mode flag in CleanSlate. The mid-boss is `npc_super_neutral`
   (crystal `citadel_item_pickup_rejuv`); `Modules/MidBoss` (Crystal
   Crackers only, discovery commands for now) tracks it by entity handle.
-  Never spawn it from a lifecycle path until `/midboss_spawn` has been
-  proven not to crash the server.
+  The direct spawn (`CreateByDesignerName` + keyvalues) was proven in game
+  on 2026-10-13. A mode makes the boss killable (`MidBossService.Ready`:
+  resistance modifier removed, max from real-match souls, 51% health,
+  damage scaled 12 / fighters) and never kills it by code; players do.
 
 ---
 

@@ -21,7 +21,7 @@ Tools:
 4. **`scripts/update.sh`**: compile errors here are API renames or removals. Fix them with the decompiled API (`~/.dotnet/tools/ilspycmd lib/DeadworksManaged.Api.dll > /tmp/dwapi.cs`).
 5. **`scripts/test.sh`**.
 6. **`python3 scripts/patch-check.py`** (needs network). Every `HIT` line names the code to fix; section 4 says how.
-7. **Refresh data if the check says so**: `python3 scripts/fetch-builds.py` (items, heroes), `python3 scripts/fetch-charges.py` (ability charges, every patch; then `test.sh`, whose `ChargeTableTests` expectations may need the new numbers), map dump + `scripts/check-spots.py` (geometry), `reference/cvarlist.md` (convars). After economy or objective changes (soul income, Walker health or bounty, slot unlocks), `python3 scripts/walker-souls.py` and update `Modules/Loadout/ItemSlots` when a breakpoint moved about 1,000 souls or more.
+7. **Refresh data if the check says so**: `python3 scripts/fetch-builds.py` (items, heroes), `python3 scripts/fetch-charges.py` (ability charges, every patch; then `test.sh`, whose `ChargeTableTests` expectations may need the new numbers), map dump + `scripts/check-spots.py` (geometry), `reference/cvarlist.md` (convars). After economy or objective changes (soul income, Walker health or bounty, slot unlocks), `python3 scripts/walker-souls.py` and update `Modules/Loadout/ItemSlots` when a breakpoint moved about 1,000 souls or more. After economy or mid-boss changes, `python3 scripts/midboss-health.py` and update `MidBossRule.MinuteBySouls` (and `StartingHealth` / `HealthPerMinute` if the vdata moved).
 8. **Upload** with `scripts/deploy.sh --confirm` (with approval).
 9. **`dw_selftest_run`**, then compare with the baseline log. Every new FAIL / WARN maps to a row in section 4.
 10. **`dw_selftest_live <slot>`** on yourself, then the smoke list (section 3).
@@ -178,7 +178,7 @@ Map dump counts (build 6698): `info_koth_spawn_location` 2, `info_super_trooper_
 | `CBasePlayerPawn.m_hController` | entity handle (uint), an observer pawn's owner controller | `Lobby/LobbyService.cs` (`PawnController`, the leaver's observer sweep) |
 | `CCitadelBaseAbility.m_iRemainingCharges` | int, an ability's charges left (written to fill charges at round start) | `Round/ChargeFill.cs` (`RemainingCharges`), read by `Round/AbilityCharges.cs` |
 | `CGameRules.m_bGamePaused`, `CCitadelGameRules.m_bServerPaused` | bool (API `GameRules.GamePaused` / `ServerPaused`) | `Lobby/PauseGuard.cs` |
-| `CBaseEntity.m_iMaxHealth` | int, written on the mid-boss (`/midboss_maxhealth`); a missing field is reported, not written | `Modules/MidBoss/MidBossService.cs` `MaxHealthField` |
+| `CBaseEntity.m_iMaxHealth` | int, written on the mid-boss (`/midboss_maxhealth`, `/midboss_ready`); a missing field is reported, not written | `Modules/MidBoss/MidBossService.cs` `MaxHealthField` |
 | `CCitadelItemPickupRejuv.m_bPickedUp` (or `CCitadelItemPickup.m_bPickedUp`) | bool, crystal taken; `unknown` when neither resolves | `Modules/MidBoss/MidBossService.cs` `PickedUpFields` |
 | `CCitadelGameRules.m_iMidbossKillCount`, `m_iAmberRejuvCount`, `m_iSapphireRejuvCount`, `m_tNextMidBossSpawnTime` | API `GameRules.*` (read only) | `Modules/MidBoss/MidBossService.cs` `WatchCounts`, `Describe` |
 
@@ -213,6 +213,15 @@ Device, seen in DevTools `modifiers-*.log`), added by `Lobby/AdminSeat.cs`
 Checked by `dw_selftest_live` (Roam row). If it fails, Warning `Roaming
 admin cloak refused` in `lobby-*.log`; find the new name by using an
 invisibility item and reading `modifiers-*.log`.
+
+Mid-boss resistance: `npc_super_neutral/midboss_modifier_damage_resistance`
+(`Modules/MidBoss/MidBossRule.cs` `ResistanceModifier`), removed by
+`/midboss_ready`. If its reply says `resistance not found`, read the
+current names with `/midboss_status` on a spawned boss. Its health numbers
+(13,000 + 195 per game minute, `MidBossRule.StartingHealth` /
+`HealthPerMinute`) come from `npc_units.vdata` `npc_super_neutral`
+(`m_iStartingHealth`, `m_iHealthGainPerMinute`); `/midboss_spawn` shows the
+spawned max to compare.
 
 ### Events and hooks
 

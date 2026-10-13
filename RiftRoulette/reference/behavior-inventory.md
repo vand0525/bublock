@@ -326,7 +326,7 @@ Game-agnostic: no Rift Roulette names in arguments (teams are team numbers).
 | `/midboss_percent <pct>` | — | MidBoss | `MidBossService.SetPercent` | Health to a percent of max | new |
 | `/midboss_damage_scale <k>` | — | MidBoss | `MidBossService.SetDamageScale` | Multiply damage dealt to the boss (0.1–10) | new |
 | `/midboss_modifier_remove <name>` | — | MidBoss | `MidBossService.RemoveModifier` | Remove a modifier from every boss | new |
-| `/midboss_kill` | — | MidBoss | `MidBossService.Kill` | Kill every boss, credited to the caller | new |
+| `/midboss_ready <souls> [fighters]` | — | MidBoss | `MidBossService.Ready` | Fresh killable boss: no resistance, max from real-match souls, 51% health, damage scaled by fighters | new |
 | `/midboss_remove` | — | MidBoss | `MidBossService.Remove` | Remove every boss without a death | new |
 
 ### 4.4 Admin commands — tool plugins

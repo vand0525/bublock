@@ -28,7 +28,7 @@ in Debug mode and replies `[MidBoss]` lines to the caller's console.
 | `/midboss_percent <pct>` | `SetPercent` (above 0, at most 100) |
 | `/midboss_damage_scale <k>` | `SetDamageScale` (clamped 0.1–10) |
 | `/midboss_modifier_remove <name>` | `RemoveModifier` |
-| `/midboss_kill` | `Kill` with the caller's hero pawn as attacker (the boss itself from the console) |
+| `/midboss_ready <souls> [fighters]` | `Ready` (souls 0–1,000,000; fighters 1 or more, left out or 0 to count), two reply lines, then `Recheck` 1 s later (reply skipped if the caller left) |
 | `/midboss_remove` | `Remove` |
 
 Bad input and "no mid-boss tracked" throw `CommandException`.

@@ -93,4 +93,63 @@ public class MidBossRuleTests
   [InlineData(1_000_001, false)]
   public void IsValidHealth_is_one_to_a_million(int health, bool expected) =>
     Assert.Equal(expected, MidBossRule.IsValidHealth(health));
+
+  [Theory]
+  [InlineData(0, true)]
+  [InlineData(1_000_000, true)]
+  [InlineData(-1, false)]
+  [InlineData(1_000_001, false)]
+  public void IsValidSouls_is_zero_to_a_million(int souls, bool expected) =>
+    Assert.Equal(expected, MidBossRule.IsValidSouls(souls));
+
+  [Fact]
+  public void MinuteBySouls_rises_with_souls()
+  {
+    var table = MidBossRule.MinuteBySouls;
+
+    Assert.Equal((0, 0f), table[0]);
+
+    for (var i = 1; i < table.Length; i++)
+    {
+      Assert.True(table[i].Souls > table[i - 1].Souls);
+      Assert.True(table[i].Minute > table[i - 1].Minute);
+    }
+  }
+
+  [Theory]
+  [InlineData(-500, 0f)]
+  [InlineData(0, 0f)]
+  [InlineData(20000, 21.1f)]
+  [InlineData(21250, 22.05f)]
+  [InlineData(45000, 38.9f)]
+  [InlineData(47500, 40.7f)]
+  public void MinuteForSouls_interpolates_and_extends_the_last_slope(int souls, float expected) =>
+    Assert.Equal(expected, MidBossRule.MinuteForSouls(souls), 2);
+
+  [Theory]
+  [InlineData(0f, 13000)]
+  [InlineData(-3f, 13000)]
+  [InlineData(15.98f, 16120)]
+  [InlineData(23.43f, 17485)]
+  [InlineData(100000f, 1_000_000)]
+  public void HealthAtMinute_matches_the_game_and_rounds_the_minute(float minute, int expected) =>
+    Assert.Equal(expected, MidBossRule.HealthAtMinute(minute));
+
+  [Theory]
+  [InlineData(0, 13000)]
+  [InlineData(20000, 17095)]
+  [InlineData(45000, 20605)]
+  public void HealthForSouls_is_the_boss_spawned_at_that_minute(int souls, int expected) =>
+    Assert.Equal(expected, MidBossRule.HealthForSouls(souls));
+
+  [Theory]
+  [InlineData(12, 1f)]
+  [InlineData(6, 2f)]
+  [InlineData(2, 6f)]
+  [InlineData(24, 0.5f)]
+  [InlineData(1, 10f)]
+  [InlineData(0, 10f)]
+  [InlineData(500, 0.1f)]
+  public void ScaleForFighters_is_twelve_over_fighters_clamped(int fighters, float expected) =>
+    Assert.Equal(expected, MidBossRule.ScaleForFighters(fighters), 3);
 }
