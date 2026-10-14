@@ -458,7 +458,7 @@ map start and hot reload, and move with the watch spot.
 
 While no players are on (seated admins and ban statues don't count), two
 boards stand in front of the spectator camera's start spot under mid
-(`RIFT ROULETTE` / `Join with connect 66.94.102.245:27015` by default).
+(`RIFT ROULETTE` / `Join with connect 162.250.125.66:11074` by default).
 These commands adjust it. Every change is range checked, saved to
 `bublock/emptysign.json` on the server (survives uploads, map changes and
 restarts) and redrawn at once if the sign is up. Spectators have no chat,

@@ -9,7 +9,7 @@ same hero and build.
 
 Join from the Deadlock console:
 
-- **Bublocks Rift Roulette**: `connect 66.94.102.245:27015`
+- **Bublocks Rift Roulette**: `connect 162.250.125.66:11074`
 
 ## Commands
 

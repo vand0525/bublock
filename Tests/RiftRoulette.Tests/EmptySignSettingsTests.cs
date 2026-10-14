@@ -20,7 +20,7 @@ public class EmptySignSettingsTests
     Assert.Equal(new SignColor(0, 190, 0), settings.TitleColor);
     Assert.Equal(new SignColor(0, 190, 0), settings.JoinColor);
     Assert.Equal("RIFT ROULETTE", settings.TitleText);
-    Assert.Equal("Join with connect 66.94.102.245:27015", settings.JoinText);
+    Assert.Equal("Join with connect 162.250.125.66:11074", settings.JoinText);
     Assert.Null(settings.Problem());
   }
 

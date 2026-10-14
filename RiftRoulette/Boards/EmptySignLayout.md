@@ -10,7 +10,7 @@ Pure math, no game calls; unit tested
 
 | Name | Value |
 |---|---|
-| `JoinAddress` | `66.94.102.245:27015` (the public address in `README.md`; used by the default join text) |
+| `JoinAddress` | `162.250.125.66:11074` (the public address in `README.md`; used by the default join text) |
 | `CameraPosition` / `CameraAngle` | (0, 0, 0) / (-0.59375, 179.3125, 0): where a spectator's camera starts on an empty server (under mid, looking level along -x), captured with `getpos_exact` |
 | `FontSize` | 64 px |
 | `CharWidth` | 0.66: estimated text width per character as a share of the font size, from the welcome board (`WatchLayout.WelcomeHalfWidth`) |

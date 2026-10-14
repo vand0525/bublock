@@ -5,7 +5,7 @@ namespace RiftRoulette.Boards;
 
 public static class EmptySignLayout
 {
-  public const string JoinAddress = "66.94.102.245:27015";
+  public const string JoinAddress = "162.250.125.66:11074";
 
   // Where a spectator's camera starts on an empty server, captured with getpos_exact.
   public static readonly Vector3 CameraPosition = Vector3.Zero;

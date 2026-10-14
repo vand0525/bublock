@@ -2,7 +2,7 @@
 
 The empty-server sign: while nobody plays, two world-text boards in front
 of the spectator camera's start spot (by default `RIFT ROULETTE` and `Join
-with connect 66.94.102.245:27015`). Layout in `EmptySignLayout`, look in
+with connect 162.250.125.66:11074`). Layout in `EmptySignLayout`, look in
 `EmptySignSettings`, saved by `EmptySignStore`. Static service.
 
 ## State

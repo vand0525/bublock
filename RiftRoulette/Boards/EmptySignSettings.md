@@ -21,7 +21,7 @@ and text. Immutable records, no game calls; unit tested
 | `TitleScale` / `JoinScale` (`titleScale` / `joinScale`) | 1.2 / 0.45 | World units per pixel (64 px font: about 77 / 29 units tall) |
 | `Gap` (`gap`) | 8 | Units between the middle and each line |
 | `TitleColor` / `JoinColor` (`titleColor` / `joinColor`) | 0 190 0 / 0 190 0 | Solid green: the area under mid is bright beige, where white washed out and dark navy read worse |
-| `TitleText` / `JoinText` (`titleText` / `joinText`) | `RIFT ROULETTE` / `Join with connect 66.94.102.245:27015` | The two lines (`DefaultTitle` / `DefaultJoin`) |
+| `TitleText` / `JoinText` (`titleText` / `joinText`) | `RIFT ROULETTE` / `Join with connect 162.250.125.66:11074` | The two lines (`DefaultTitle` / `DefaultJoin`) |
 
 ## Operations
 

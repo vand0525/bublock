@@ -3,7 +3,7 @@
 The world-text boards around the watch spot: the RIFT ROULETTE welcome
 sign, the `/about` hint and the admin note under it, plus the placement
 used by the stats and betting boards. Also the empty-server sign
-(`RIFT ROULETTE` / `Join with connect 66.94.102.245:27015`) in front of the
+(`RIFT ROULETTE` / `Join with connect 162.250.125.66:11074`) in front of the
 spectator camera's start spot under mid, up only while nobody plays.
 
 ## Files
