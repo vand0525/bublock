@@ -24,6 +24,13 @@ public static class AutoRestartService
 
   private static DateTime? _lastReloadAt;
 
+  private static DateTime? _lastCheckAt;
+
+  private static DateTime? _wokeAt;
+
+  public static double SinceWakeSeconds =>
+    _wokeAt is { } woke ? (DateTime.UtcNow - woke).TotalSeconds : double.MaxValue;
+
   // After a hot reload the map start is unknown: fall back to the engine clock (GlobalVars.CurTime).
   // A reload we asked for also counts as a start, in case OnStartupServer does not run on changelevel.
   public static double UptimeSeconds
@@ -85,6 +92,7 @@ public static class AutoRestartService
 
   public static void Check(ExecutionMode mode = ExecutionMode.Clean)
   {
+    NoteWake(mode);
     MarkStuck(mode);
 
     var reason = AutoRestartRule.Reason(
@@ -92,7 +100,8 @@ public static class AutoRestartService
       Participants.Humans().Count,
       StuckJoins,
       Pending.Count,
-      UptimeSeconds);
+      UptimeSeconds,
+      SinceWakeSeconds);
 
     if (reason != null)
       Restart(reason, mode);
@@ -134,10 +143,28 @@ public static class AutoRestartService
     var hours = UptimeSeconds / 3600;
     yield return $"Auto restart {(Enabled ? "on" : "off")}. Map {Server.MapName} up {hours:0.0} h (reload at {AutoRestartRule.MaxUptimeSeconds / 3600:0} h, or after a stuck join; only with nobody playing).";
     yield return $"Stuck joins since map start: {StuckJoins}. Joins in progress: {Pending.Count}.";
+
+    if (_wokeAt != null)
+      yield return $"Last woke from hibernation {SinceWakeSeconds / 60:0} min ago (no uptime reload within {AutoRestartRule.WakeHoldSeconds / 60:0} min of a wake).";
     yield return MapRefreshService.Describe();
 
     foreach (var (slot, join) in Pending.OrderBy(pair => pair.Key))
       yield return $"  slot {slot}: {join.Name} connecting for {(DateTime.UtcNow - join.Since).TotalSeconds:0} s{(join.Stuck ? " (stuck)" : "")}";
+  }
+
+  private static void NoteWake(ExecutionMode mode)
+  {
+    var now = DateTime.UtcNow;
+    var last = _lastCheckAt;
+    _lastCheckAt = now;
+
+    if (last is not { } previous || !AutoRestartRule.IsWake((now - previous).TotalSeconds))
+      return;
+
+    _wokeAt = now;
+    Log.WithMode(mode).Info(
+      "Server woke from hibernation, uptime reload held GapMinutes={GapMinutes} HoldMinutes={HoldMinutes} UptimeMinutes={UptimeMinutes}",
+      Math.Round((now - previous).TotalMinutes), AutoRestartRule.WakeHoldSeconds / 60, Math.Round(UptimeSeconds / 60));
   }
 
   private static void MarkStuck(ExecutionMode mode)

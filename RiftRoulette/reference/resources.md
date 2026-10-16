@@ -694,3 +694,11 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **API a few hours later:** Danny's ability IDs are in `/v1/assets/items` (`ability_deadpack_rocketeer` 1904698842, `_flamethrower` 374042410, `_chargeblast` 2603013853, `_ultimate` 1026127931) and published builds exist, but only 853350 has ranked match data (21 matches) and every build has 0 favorites, so the favorites fallback order is arbitrary (it picked a 15-item build).
 - **Used as:** `FORCE_HEROES` in `scripts/fetch-builds.py`; `custom-builds.json` pins 853350, 880645 and 882708 (the hand-made starter builds are gone, in git history). Unpin once `hero-build-stats/78` ranks three builds.
 - **Link / path:** `scripts/fetch-builds.py.md`
+
+### 2026-10-14 — An empty server hibernates; the first joiner's connect wakes it
+
+- **Why hard / useful:** plugin timers look like they run every N seconds, but an empty Deadlock server stops ticking, so a periodic check can run hours late, in the very frame someone connects.
+- **Verified fact (`/server/game/citadel/console.log`):** with nobody on, the engine logs `Server is hibernating` and no timer fires (DevTools' 5-minute string table dump and `AutoRestartService.Check` both went silent from 05:33 to 15:39 UTC). A client connect logs `Server waking up from hibernation` in the same second as `ConnectClient`; the overdue timer then ran before `OnClientConnect` recorded the join, saw 10 h up and nobody playing, and `changelevel` dropped the joiner with `NETWORK_DISCONNECT_CREATE_SERVER_FAILED`. After a map load with nobody connected the server hibernates again within about 2 s. The engine console log (`console.log`, hundreds of MB, flooded with `CTextConsoleWin::GetLine: !GetNumberOfConsoleInputEvents` about 64 times a second) is the only record of connects that never reach the plugins; fetch its tail with `lftp get -c` onto a local file truncated to (size − N).
+- **Used as:** `AutoRestartRule.IsWake` / `WakeHoldSeconds` (no uptime reload within 10 min of a wake).
+- **Link / path:** `RiftRoulette/Lobby/AutoRestartRule.md`
+

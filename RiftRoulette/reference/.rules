@@ -306,7 +306,10 @@ Assume the git repo is rooted at `Bublock/`.
   (players in keep playing). Every 60 s, with no participants, it reloads
   the map (`Server.ChangeLevel(Server.MapName)`, never `quit`) after a
   stuck join (connected, never full-connected: left, or 3 min) or 3 h up;
-  never within 10 min of a map start. Clients reconnect by themselves
+  never within 10 min of a map start, and no uptime reload within 10 min
+  of a hibernation wake (an empty server only wakes when someone
+  connects, before the plugin sees the join; `AutoRestartRule.IsWake`:
+  3 min or more between 60 s checks). Clients reconnect by themselves
   (`IsMapChangeReconnect`). Map starts (`OnStartupServer`) must reset
   per-map state: plugin statics survive a map change, pawns do not
   (`AdminSeat.ResetForMap`).

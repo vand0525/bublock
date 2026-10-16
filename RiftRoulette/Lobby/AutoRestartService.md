@@ -16,6 +16,8 @@ admins included), unlike a process restart.
 - Map start time (`OnMapStart`) and last reload asked for (`Restart`).
   `UptimeSeconds` counts from the later of the two; after a hot reload
   (both unknown) it uses `GlobalVars.CurTime`.
+- Last check time and last wake (`SinceWakeSeconds`, `double.MaxValue`
+  before any wake). Kept across map changes.
 
 ## Operations
 
@@ -25,10 +27,10 @@ admins included), unlike a process restart.
 | `OnFullConnect(slot, player)` | Removes the slot from `Pending`, Information `Join completed Seconds=` |
 | `OnDisconnect(slot, mapChange)` | A pending slot is removed. Unless it is a map-change disconnect: `StuckJoins++` (once per join) and Warning `Join never completed, client left ... Seconds= StuckJoins=` (copied to master) |
 | `OnMapStart()` | From `LobbyPlugin.OnStartupServer`: Information `Map started, join watch reset`, clears `Pending` and `StuckJoins`, records the map start, then `MapRefreshService.OnMapStart()` (join budget counter reset) |
-| `Check(mode)` | Every `CheckSeconds` (60 s, `LobbyPlugin` timer). Marks pending joins older than 3 min as stuck (Warning `Join stuck, client still connecting`, `StuckJoins++`), then `AutoRestartRule.Reason(Enabled, Participants.Humans().Count, StuckJoins, Pending.Count, UptimeSeconds)`; a reason calls `Restart` |
+| `Check(mode)` | Every `CheckSeconds` (60 s, `LobbyPlugin` timer). First notes a wake: a gap of 3 min or more since the last check (`AutoRestartRule.IsWake`; timers stop while the server hibernates) records the wake time, Information `Server woke from hibernation, uptime reload held GapMinutes= HoldMinutes= UptimeMinutes=`. Then marks pending joins older than 3 min as stuck (Warning `Join stuck, client still connecting`, `StuckJoins++`), then `AutoRestartRule.Reason(Enabled, Participants.Humans().Count, StuckJoins, Pending.Count, UptimeSeconds, SinceWakeSeconds)`; a reason calls `Restart` |
 | `Restart(reason, mode)` | Refuses while `Server.IsChangingLevel` or with no map name (Warning). Otherwise Warning `Reloading the map Reason= Map= UptimeMinutes= StuckJoins= Pending=` (master too), records the reload time, zeroes `StuckJoins`, `Server.ChangeLevel(map)`. Returns reply text |
 | `SetEnabled(enabled, mode)` | Sets `Enabled` (until the next load), Information and a master line |
-| `Describe()` | On / off, map, uptime, stuck and in-progress joins, the join budget line (`MapRefreshService.Describe`), one line per pending join |
+| `Describe()` | On / off, map, uptime, stuck and in-progress joins, the last wake (when there was one), the join budget line (`MapRefreshService.Describe`), one line per pending join |
 
 ## Side effects
 
@@ -41,7 +43,9 @@ admins included), unlike a process restart.
 ## Invariants
 
 - `Check` never reloads with a participant connected (seated admins and
-  statues don't count), and never twice within 10 minutes. The join budget
+  statues don't count), never twice within 10 minutes, and never for
+  uptime within 10 minutes of a hibernation wake (the waking join is not
+  in `Pending` yet). The join budget
   refresh (`MapRefreshService`) and `/restart_now` call `Restart` directly
   and do reload with players (the match is ended first by the refresh).
 - Logs go to `restart-YYYYMMDD.log`.

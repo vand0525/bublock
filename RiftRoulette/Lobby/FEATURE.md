@@ -129,7 +129,7 @@ startup, hot reload, every join and every intermission;
 | `PauseRule.cs` | Pure pause rules: pause commands, pause convars, unpause and chat throttles (tested) |
 | `PauseGuard.cs` | Pause service: convars, blocking pause requests, automatic unpause, `/pause_allow` state |
 | `FlexSlots.cs` | Opens every flex slot on both team entities (`m_nFlexSlotsUnlocked = 15`), `Describe` |
-| `AutoRestartRule.cs` | Pure map reload rule: stuck join or 3 h up, only with nobody playing, not within 10 min of a map start (tested) |
+| `AutoRestartRule.cs` | Pure map reload rule: stuck join or 3 h up, only with nobody playing, not within 10 min of a map start, no uptime reload within 10 min of a hibernation wake (tested) |
 | `AutoRestartService.cs` | Join watch (connect to full connect), stuck joins, the 60 s check and `Server.ChangeLevel` map reload |
 | `MapRefreshRule.cs` | Pure join budget rule: due at 160 fighter-rounds, rounds left (tested) |
 | `MapRefreshService.cs` | Join budget: counts fighter-rounds, at the budget warns in chat, ends the match at a round end and reloads the map |

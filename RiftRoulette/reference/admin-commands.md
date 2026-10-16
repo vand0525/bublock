@@ -275,7 +275,7 @@ stuck join is logged in `restart-*.log`.
 - **Who:** admin
 - **Calls:** `AutoRestartService.Describe`
 - **Mode:** Debug; read-only
-- **Side effects:** auto on / off, map name and uptime, stuck joins since the map started, the join budget line (`MapRefreshService.Describe`: fighter-rounds / budget, rounds left at the last team size, reload pending), joins in progress (one line each: slot, name, seconds connecting, stuck)
+- **Side effects:** auto on / off, map name and uptime, stuck joins since the map started, the last hibernation wake (minutes ago; no uptime reload within 10 min of it), the join budget line (`MapRefreshService.Describe`: fighter-rounds / budget, rounds left at the last team size, reload pending), joins in progress (one line each: slot, name, seconds connecting, stuck)
 
 #### /restart_now
 
