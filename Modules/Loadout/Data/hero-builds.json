@@ -26268,6 +26268,546 @@
    ]
   },
   {
+   "id": 86,
+   "className": "hero_artist",
+   "name": "Violet",
+   "builds": [
+    {
+     "buildId": 832995,
+     "version": 3,
+     "name": "TRUE VIOLET BUILD",
+     "rank": "custom",
+     "matches": 0,
+     "wins": 0,
+     "favorites": 0,
+     "items": [
+      "upgrade_medic_bullets",
+      "upgrade_improved_spirit",
+      "upgrade_extra_charge",
+      "upgrade_grit",
+      "upgrade_high_velocity_mag",
+      "upgrade_spirit_bubble",
+      "upgrade_rapid_recharge",
+      "upgrade_counterspell",
+      "upgrade_reduce_debuff_duration",
+      "upgrade_improved_bullet_armor",
+      "upgrade_superior_stamina",
+      "upgrade_soaring_spirit",
+      "upgrade_pristine_emblem",
+      "upgrade_magic_storm",
+      "upgrade_health_stealing_magic",
+      "upgrade_cooldown_reduction",
+      "upgrade_boundless_spirit",
+      "upgrade_tech_range",
+      "upgrade_spellslinger_headshots",
+      "upgrade_target_stun",
+      "upgrade_targeted_silence",
+      "upgrade_containment",
+      "upgrade_tech_overflow",
+      "upgrade_banshee_slugs",
+      "upgrade_spirit_burn",
+      "upgrade_escalating_exposure",
+      "upgrade_deflecting_armor",
+      "upgrade_siphon_bullets"
+     ],
+     "categories": [
+      {
+       "name": "buy if poke",
+       "optional": false,
+       "items": [
+        "upgrade_medic_bullets"
+       ]
+      },
+      {
+       "name": "/early",
+       "optional": false,
+       "items": [
+        "upgrade_improved_spirit",
+        "upgrade_extra_charge",
+        "upgrade_grit",
+        "upgrade_high_velocity_mag",
+        "upgrade_spirit_bubble",
+        "upgrade_rapid_recharge"
+       ]
+      },
+      {
+       "name": "BUY A GREEN ATLEAST 3200+",
+       "optional": false,
+       "items": [
+        "upgrade_counterspell",
+        "upgrade_reduce_debuff_duration",
+        "upgrade_improved_bullet_armor",
+        "upgrade_superior_stamina"
+       ]
+      },
+      {
+       "name": "/mid",
+       "optional": false,
+       "items": [
+        "upgrade_soaring_spirit",
+        "upgrade_pristine_emblem",
+        "upgrade_magic_storm",
+        "upgrade_health_stealing_magic",
+        "upgrade_cooldown_reduction",
+        "upgrade_boundless_spirit",
+        "upgrade_tech_range",
+        "upgrade_spellslinger_headshots"
+       ]
+      },
+      {
+       "name": "counters",
+       "optional": false,
+       "items": [
+        "upgrade_target_stun",
+        "upgrade_targeted_silence",
+        "upgrade_containment"
+       ]
+      },
+      {
+       "name": "/late",
+       "optional": false,
+       "items": [
+        "upgrade_tech_overflow",
+        "upgrade_banshee_slugs",
+        "upgrade_spirit_burn",
+        "upgrade_escalating_exposure",
+        "upgrade_deflecting_armor",
+        "upgrade_siphon_bullets"
+       ]
+      }
+     ],
+     "imbues": {},
+     "sellPriority": {},
+     "abilities": [
+      {
+       "ability": "ability_artist_homingbrush",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_artist_homingbrush",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_rollingprojectile",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_artist_tether",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_artist_bamboogrove",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_artist_homingbrush",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_rollingprojectile",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_bamboogrove",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_homingbrush",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_tether",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_bamboogrove",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_rollingprojectile",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_rollingprojectile",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_bamboogrove",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_tether",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_tether",
+       "kind": "upgrade"
+      }
+     ]
+    },
+    {
+     "buildId": 880597,
+     "version": 7,
+     "name": "NA #1 ARTIST - SHMUCK",
+     "rank": "custom",
+     "matches": 0,
+     "wins": 0,
+     "favorites": 0,
+     "items": [
+      "upgrade_extra_charge",
+      "upgrade_improved_spirit",
+      "upgrade_high_velocity_mag",
+      "upgrade_pristine_emblem",
+      "upgrade_soaring_spirit",
+      "upgrade_magic_vulnerability",
+      "upgrade_magic_tempo",
+      "upgrade_healbane",
+      "upgrade_spirit_bubble",
+      "upgrade_endurance",
+      "upgrade_grit",
+      "upgrade_rapid_recharge",
+      "upgrade_health_stealing_magic",
+      "upgrade_magic_shield",
+      "upgrade_tech_overflow",
+      "upgrade_magic_shock",
+      "upgrade_cooldown_reduction",
+      "upgrade_improved_bullet_armor",
+      "upgrade_tech_purge",
+      "upgrade_counterspell",
+      "upgrade_reduce_debuff_duration",
+      "upgrade_metal_skin",
+      "upgrade_auto_cleanse",
+      "upgrade_deflecting_armor",
+      "upgrade_spellbreaker",
+      "upgrade_tech_range",
+      "upgrade_escalating_exposure",
+      "upgrade_absorbing_armor",
+      "upgrade_boundless_spirit",
+      "upgrade_enchanted_holsters",
+      "upgrade_transcendent_cooldown",
+      "upgrade_spirit_burn",
+      "upgrade_infuser",
+      "upgrade_ability_refresher"
+     ],
+     "categories": [
+      {
+       "name": "#Citadel_HeroBuilds_EarlyGame",
+       "optional": false,
+       "items": [
+        "upgrade_extra_charge",
+        "upgrade_improved_spirit",
+        "upgrade_high_velocity_mag",
+        "upgrade_pristine_emblem",
+        "upgrade_soaring_spirit",
+        "upgrade_magic_vulnerability",
+        "upgrade_magic_tempo",
+        "upgrade_healbane",
+        "upgrade_spirit_bubble"
+       ]
+      },
+      {
+       "name": "Lane OPTIONAL",
+       "optional": true,
+       "items": [
+        "upgrade_endurance",
+        "upgrade_grit"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_MidGame",
+       "optional": false,
+       "items": [
+        "upgrade_rapid_recharge",
+        "upgrade_health_stealing_magic",
+        "upgrade_magic_shield",
+        "upgrade_tech_overflow",
+        "upgrade_magic_shock",
+        "upgrade_cooldown_reduction"
+       ]
+      },
+      {
+       "name": "COUNTERS",
+       "optional": false,
+       "items": [
+        "upgrade_improved_bullet_armor",
+        "upgrade_tech_purge",
+        "upgrade_counterspell",
+        "upgrade_reduce_debuff_duration",
+        "upgrade_metal_skin",
+        "upgrade_auto_cleanse",
+        "upgrade_deflecting_armor",
+        "upgrade_spellbreaker"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_LateGame",
+       "optional": false,
+       "items": [
+        "upgrade_tech_range",
+        "upgrade_escalating_exposure",
+        "upgrade_absorbing_armor",
+        "upgrade_boundless_spirit",
+        "upgrade_enchanted_holsters",
+        "upgrade_transcendent_cooldown",
+        "upgrade_spirit_burn",
+        "upgrade_infuser",
+        "upgrade_ability_refresher"
+       ]
+      }
+     ],
+     "imbues": {
+      "upgrade_magic_tempo": "ability_artist_tether"
+     },
+     "sellPriority": {},
+     "abilities": [
+      {
+       "ability": "ability_artist_homingbrush",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_artist_tether",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_artist_rollingprojectile",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_artist_bamboogrove",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_artist_homingbrush",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_tether",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_tether",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_bamboogrove",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_bamboogrove",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_tether",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_homingbrush",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_homingbrush",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_rollingprojectile",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_rollingprojectile",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_rollingprojectile",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_bamboogrove",
+       "kind": "upgrade"
+      }
+     ]
+    },
+    {
+     "buildId": 894210,
+     "version": 4,
+     "name": "FULL SPIRIT Violet build",
+     "rank": "custom",
+     "matches": 0,
+     "wins": 0,
+     "favorites": 0,
+     "items": [
+      "upgrade_endurance",
+      "upgrade_high_velocity_mag",
+      "upgrade_mystic_regeneration",
+      "upgrade_extra_charge",
+      "upgrade_improved_spirit",
+      "upgrade_magic_reach",
+      "upgrade_arcane_extension",
+      "upgrade_resonant_healing",
+      "upgrade_healing_booster",
+      "upgrade_pristine_emblem",
+      "upgrade_tech_defense_shredders",
+      "upgrade_blitz_bullets",
+      "upgrade_magic_shield",
+      "upgrade_soaring_spirit",
+      "upgrade_magic_shock",
+      "upgrade_imbued_duration_extender",
+      "upgrade_magic_vulnerability",
+      "upgrade_cooldown_reduction",
+      "upgrade_rapid_recharge",
+      "upgrade_spirit_bubble",
+      "upgrade_health_stealing_magic",
+      "upgrade_vex_barrier",
+      "upgrade_cardio_calibrator",
+      "upgrade_boundless_spirit",
+      "upgrade_escalating_exposure",
+      "upgrade_diviners_kevlar",
+      "upgrade_tech_overflow",
+      "upgrade_spirit_burn",
+      "upgrade_reduce_debuff_duration",
+      "upgrade_counterspell"
+     ],
+     "categories": [
+      {
+       "name": "#Citadel_HeroBuilds_EarlyGame",
+       "optional": false,
+       "items": [
+        "upgrade_endurance",
+        "upgrade_high_velocity_mag",
+        "upgrade_mystic_regeneration",
+        "upgrade_extra_charge",
+        "upgrade_improved_spirit",
+        "upgrade_magic_reach",
+        "upgrade_arcane_extension",
+        "upgrade_resonant_healing",
+        "upgrade_healing_booster"
+       ]
+      },
+      {
+       "name": "4.8k orang",
+       "optional": true,
+       "items": [
+        "upgrade_pristine_emblem",
+        "upgrade_tech_defense_shredders",
+        "upgrade_blitz_bullets"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_MidGame",
+       "optional": false,
+       "items": [
+        "upgrade_magic_shield",
+        "upgrade_soaring_spirit",
+        "upgrade_magic_shock",
+        "upgrade_imbued_duration_extender",
+        "upgrade_magic_vulnerability",
+        "upgrade_cooldown_reduction",
+        "upgrade_rapid_recharge"
+       ]
+      },
+      {
+       "name": "1.6k greens",
+       "optional": true,
+       "items": [
+        "upgrade_spirit_bubble",
+        "upgrade_health_stealing_magic",
+        "upgrade_vex_barrier",
+        "upgrade_cardio_calibrator"
+       ]
+      },
+      {
+       "name": "#Citadel_HeroBuilds_LateGame",
+       "optional": false,
+       "items": [
+        "upgrade_boundless_spirit",
+        "upgrade_escalating_exposure",
+        "upgrade_diviners_kevlar",
+        "upgrade_tech_overflow",
+        "upgrade_spirit_burn"
+       ]
+      },
+      {
+       "name": "Dispel and counterspell",
+       "optional": true,
+       "items": [
+        "upgrade_reduce_debuff_duration",
+        "upgrade_counterspell"
+       ]
+      }
+     ],
+     "imbues": {
+      "upgrade_magic_reach": "ability_artist_tether"
+     },
+     "sellPriority": {},
+     "abilities": [
+      {
+       "ability": "ability_artist_homingbrush",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_artist_tether",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_artist_rollingprojectile",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_artist_bamboogrove",
+       "kind": "unlock"
+      },
+      {
+       "ability": "ability_artist_homingbrush",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_tether",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_tether",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_bamboogrove",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_rollingprojectile",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_rollingprojectile",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_bamboogrove",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_tether",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_homingbrush",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_homingbrush",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_bamboogrove",
+       "kind": "upgrade"
+      },
+      {
+       "ability": "ability_artist_rollingprojectile",
+       "kind": "upgrade"
+      }
+     ]
+    }
+   ]
+  },
+  {
    "id": 88,
    "className": "hero_baba",
    "name": "Baba",

@@ -1,8 +1,26 @@
 {
-  "fetchedAt": "2026-10-13T21:14:34Z",
+  "fetchedAt": "2026-10-17T00:18:41Z",
   "source": "https://github.com/SteamTracking/GameTracking-Deadlock/blob/master/game/citadel/pak01_dir/scripts/abilities.vdata",
-  "commit": "0c38f9d31c49",
+  "commit": "9b616d3093a7",
   "abilities": {
+    "ability_artist_homingbrush": {
+      "base": 2,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
+    "ability_artist_pullbrush": {
+      "base": 1,
+      "tiers": [
+        0,
+        0,
+        0
+      ],
+      "conditional": false
+    },
     "ability_baba_bubbling_brew": {
       "base": 1,
       "tiers": [

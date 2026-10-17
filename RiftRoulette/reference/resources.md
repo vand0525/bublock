@@ -702,3 +702,10 @@ in the same change. Detailed verified narrative from earlier sessions lives in
 - **Used as:** `AutoRestartRule.IsWake` / `WakeHoldSeconds` (no uptime reload within 10 min of a wake).
 - **Link / path:** `RiftRoulette/Lobby/AutoRestartRule.md`
 
+### 2026-10-16 — Violet is `hero_artist` (`Heroes.Artist` = 86)
+
+- **Why hard / useful:** release-day name vs class name; API still marks her `in_development`.
+- **Verified fact:** class name `hero_artist`, API id 86, `Heroes.Artist` = 86 (server Deadworks managed API, hash `7392488d…`; local `lib/` updated from the server). Signature abilities from the game's `heroes.vdata`: `ability_artist_homingbrush` (2 charges), `ability_artist_rollingprojectile`, `ability_artist_tether`, `ability_artist_bamboogrove`. `fetch-charges.py` also lists `ability_artist_pullbrush` (1 charge; not her current S2 name). Shipped in game build 6790; the server was still on 6785 when she was added to the pool.
+- **Used as:** `FORCE_HEROES` in `scripts/fetch-builds.py`; `custom-builds.json` pins 832995 ("TRUE VIOLET BUILD", 32 ranked matches), 880597 ("NA #1 ARTIST - SHMUCK"), 894210 ("FULL SPIRIT Violet build"). Homing brush charges come from `ability-charges.json`.
+- **Link / path:** `scripts/fetch-builds.py.md`
+
